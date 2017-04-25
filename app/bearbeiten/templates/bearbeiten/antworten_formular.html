@@ -1,0 +1,91 @@
+<div id="antwortensbtns" class="form-inline">
+	<button id="antwortensave" class="btn btn-success disabled" title="Antworten speichern!"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Antworten Speichern</button>
+</div>
+<h2>{{ Informant }} - {{ Aufgabe }}</h2>
+<p><b>Aufgabe:</b> ID: <b>{{ Aufgabe.id_Aufgabe }}</b> -  Aufgabenset: <b>{{ Aufgabe.von_ASet }}</b> -  Variante: <b>{{ Aufgabe.Variante }}</b> -  Dialekt: <b>{{ Aufgabe.ist_dialekt|yesno:'Ja,Nein' }}</b> - Beschreibung: <b>{{ Aufgabe.Beschreibung_Aufgabe }}</b></p>
+{% if test %}<div class="alert alert-info alert-dismissible" style="margin-bottom:15px;"><button type="button" class="close" data-dismiss="alert" aria-label="Schließen"><span aria-hidden="true">&times;</span></button>{{ test|safe }}</div>{% endif %}
+{% if error %}<div class="alert alert-danger alert-dismissible" style="margin-bottom:15px;"><button type="button" class="close" data-dismiss="alert" aria-label="Schließen"><span aria-hidden="true">&times;</span></button>{{ error }}</div>{% endif %}
+{% for value in Antworten %}
+	<div class="{% if value.model.id_Antwort %}antwort{% else %}antwortenvorlage{% endif %}">
+		<input type="hidden" name="id_Antwort" value="{{ value.model.id_Antwort|default:0|stringformat:"i" }}">
+		<input type="hidden" name="von_Inf" value="{{ Informant.pk|stringformat:"i" }}">
+		<input type="hidden" name="zu_Aufgabe" value="{{ Aufgabe.pk|stringformat:"i" }}">
+		<div class="form-inline smir10">
+			<div class="form-group"><div class="form-control-static" style="position:relative;"><b title="pk: {{ value.model.id_Antwort|default:0 }}"><input type="hidden" name="reihung" value="{{ value.model.Reihung|default:0 }}"><span class="areihung">{{ value.model.Reihung|default:0 }}</span>. Antwort:</b><button class="antwortreihunghoch"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></button><button class="antwortreihungrunter"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button></div></div>
+			<div class="checkbox"><label><input name="ist_bfl" type="checkbox"{% if value.model.ist_bfl %} checked{% endif %}> beeinflusst</label></div>
+			<div class="form-group"><label>start:</label><input type="text" class="form-control" name="start_Antwort" value="{{ value.model.start_Antwort|default:'' }}" placeholder="00:00:00.000000" size="13"></div>
+			<div class="form-group"><label>stop:</label><input type="text" class="form-control" name="stop_Antwort" value="{{ value.model.stop_Antwort|default:'' }}" placeholder="00:00:00.000000" size="13"></div>
+			<div class="form-group"><label>komm.:</label><input type="text" class="form-control" name="Kommentar" value="{{ value.model.Kommentar|default:'' }}" placeholder="Kommentar" size="80"></div>
+			<button title="Antwort löschen!" class="form-control pull-right btn btn-danger delantwort" tabindex="-1"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+		</div>
+		<hr>
+		<div class="row">
+			<div class="col-sm-8 form-horizontal ist_bfl_lf">
+				<input type="hidden" name="ist_Satz_pk" value="{{ value.model.ist_Satz.pk|stringformat:"i"|default:0 }}">
+				<div class="form-group">
+					<label class="col-sm-3 control-label">standard</label>
+					<div class="col-sm-9"><input type="text" class="form-control" name="ist_Satz_Standardorth" value="{{ value.model.ist_Satz.Standardorth|default:'' }}"></div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">transkript</label>
+					<div class="col-sm-9"><input type="text" class="form-control" name="ist_Satz_Transkript" value="{{ value.model.ist_Satz.Transkript|default:'' }}"></div>
+				</div>
+			</div>
+			<div class="col-sm-4 form ist_bfl_rf">
+				<textarea class="form-control" rows="2" placeholder="Nachfrage" name="bfl_durch_S">{{ value.model.bfl_durch_S|default:'' }}</textarea>
+			</div>
+		</div>
+		<div class="form-horizontal">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">1. Kategorie</label>
+				<div class="col-sm-10"><div class="form-control-static reihung-tags">
+					{% for tvalue in value.ptags %}<button class="ant-tag" data-popup="ptags" data-id_Tag="{{ tvalue.id_Tag.pk|stringformat:"i" }}" data-pk="{{ tvalue.pk|stringformat:"i" }}">{{ tvalue.id_Tag }}</button>{% endfor %}
+					{% if Tags %}
+						<button class="ant-ntag" data-popup="ptags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+						<button class="ant-ctag" data-popup="ptags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
+					{% endif %}
+				</div></div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">2. Kategorie</label>
+				<div class="col-sm-10"><div class="form-control-static reihung-tags">
+					{% for tvalue in value.stags %}<button class="ant-tag" data-popup="stags" data-id_Tag="{{ tvalue.id_Tag.pk|stringformat:"i" }}" data-pk="{{ tvalue.pk|stringformat:"i" }}">{{ tvalue.id_Tag }}</button>{% endfor %}
+					{% if Tags %}
+						<button class="ant-ntag" data-popup="stags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+						<button class="ant-ctag" data-popup="stags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
+					{% endif %}
+				</div></div>
+			</div>
+		</div>
+	</div>
+{% endfor %}
+<div class="text-center"><button id="addantwort"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Antwort</button></div>
+<div id="ptags" class="tags">
+<button class="ptagsbtn ptagsd0 ptagsleft tagscontrol" title="Aktuellen Tag löschen" tabindex="-1"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+<button class="ptagsbtn ptagsd0 ptagsdel tagscontrol" data-pk="0" title="Aktuellen Tag löschen" tabindex="-1"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+<button class="ptagsbtn ptagsd0 ptagsright tagscontrol" title="Aktuellen Tag löschen" tabindex="-1"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+<br class="tagscontrol">
+{% for tvalue in Tags %}
+	{%with acount=0 %}
+		{%include "bearbeiten/start_formular_tags.html" %}
+	{%endwith%}
+{% endfor %}
+</div>
+<div id="stags" class="tags">
+<button class="ptagsbtn ptagsd0 ptagsleft tagscontrol" data-pk="0" title="Aktuellen Tag nach links verschieben" tabindex="-1"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+<button class="ptagsbtn ptagsd0 ptagsdel tagscontrol" data-pk="0" title="Aktuellen Tag löschen" tabindex="-1"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+<button class="ptagsbtn ptagsd0 ptagsright tagscontrol" data-pk="0" title="Aktuellen Tag nach rechts verschieben" tabindex="-1"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+<br class="tagscontrol">
+{% for tvalue in Tags %}
+	{%with acount=0 %}
+		{%include "bearbeiten/start_formular_tags_sec.html" %}
+	{%endwith%}
+{% endfor %}
+</div>
+<div id="pretags" class="tags">
+{% for pTag in PresetTags %}
+	<button class="pretagsbtn ptagsd0" data-pks="{% for tvalue in pTag.id_Tags.all %}{% if not forloop.first %};{% endif %}{{ tvalue.pk }},{{ tvalue }}{% endfor %}" title="{% for tvalue in pTag.id_Tags.all %}{% if not forloop.first %}, {% endif %}{{ tvalue }}{% endfor %}">
+		{% for tvalue in pTag.id_Tags.all %}{% if not forloop.first %}, {% endif %}{{ tvalue }}{% endfor %}
+	</button><br>
+{% endfor %}
+</div>

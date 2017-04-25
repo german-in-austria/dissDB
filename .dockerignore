@@ -1,0 +1,6 @@
+.env
+app/*.sqlite3
+app/*/migrations/*.pyc
+app/*/migrations/__pycache__/*.pyc
+app/*/migrations/*.py
+!app/*/migrations/__init__.py

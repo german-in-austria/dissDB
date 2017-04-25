@@ -1,0 +1,45 @@
+{% load staticfiles %}<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DissDB{% block title %}{% endblock %}</title>
+	<link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <link href="{% static "main/css/bootstrap.css" %}" rel="stylesheet">
+    <link href="{% static "main/css/style.css" %}" rel="stylesheet">
+	{% block sitecss %}{% endblock %}
+  </head>
+  <body>
+{% spaceless %}
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#nbcol" aria-expanded="false"><span class="sr-only">Navigation ein-/ausblenden</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
+	  <a class="navbar-brand" href="{% url 'startseite:start' %}">DissDB</a>
+    </div>
+    <div class="collapse navbar-collapse" id="nbcol">
+      <ul class="nav navbar-nav navbar-right">
+		<li><a href="{% url 'startseite:start' %}">Startseite</a></li>
+		{% if user.is_authenticated %}
+			<li><a href="{% url 'bearbeiten:start' %}">Bearbeiten</a></li>
+			<li class="dropdown"><a href="#" class="dropdown-toggle text-uppercase" data-toggle="dropdown" role="button" aria-expanded="false">{{ user.username }} <span class="caret"></span></a>
+				<ul class="dropdown-menu" role="menu">
+					{% if user.is_superuser %}<li><a href="{% url 'admin:index' %}" target="_blank">Admin</a></li>{% endif %}
+					<li><a href="{% url 'dissdb_logout' %}">Abmelden</a></li>
+				</ul>
+			</li>
+		{% endif %}
+		</ul>
+    </div>
+  </div>
+</nav>
+{% endspaceless %}
+	<div class="container">{% block inhalt %}{% endblock %}</div>
+    <script src="{% static "main/js/jquery.min.js" %}"></script>
+    <script src="{% static "main/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "main/js/mousetrap.min.js" %}"></script>
+    <script src="{% static "main/js/scripts.js" %}"></script>
+	{% block sitejs %}{% endblock %}
+  </body>
+</html>

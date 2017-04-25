@@ -94,4 +94,4 @@ app/**/migrations/*.py
 
 # Sonstiges
 /*.bat
-/*.sqlite3
+app/*.sqlite3
