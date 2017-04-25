@@ -15,6 +15,21 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+#################################################################################################################
+# Umgebungsvariablen:																							#
+#################################################################################################################
+# DISSDB_DEBUG = "False"									(Default: "True")									#
+# DISSDB_STATIC_ROOT = "/var/www/example.com/static/"		(Default: None)										#
+# DISSDB_STATIC_URL = "/static/"							(Default: "/static/")								#
+# Datenbank:																									#
+# DISSDB_DB="django.db.backends.postgresql"					(Default: "django.db.backends.sqlite3")				#
+# DISSDB_DB_NAME="PersonenDB"								(Default: os.path.join(BASE_DIR, 'db.sqlite3'))		#
+# DISSDB_DB_USER="user"										(Default: None)										#
+# DISSDB_DB_PASSWORD="passwort"								(Default: None)										#
+# DISSDB_DB_HOST="postgresql://localhost"					(Default: None)										#
+# DISSDB_DB_PORT="5433"										(Default: None)										#
+#################################################################################################################
+
 LOGIN_URL = 'dissdb_login'
 LOGOUT_URL = 'dissdb_logout'
 LOGIN_REDIRECT_URL = 'startseite:start'
@@ -27,7 +42,10 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 SECRET_KEY = 'ggm0_dycvizp#h$ap@czcy2t!al(0@j(%j@)*v00%w+of_whul'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if 'DISSDB_DEBUG' in os.environ and (os.environ['DISSDB_DEBUG'] == 'False' or os.environ['DISSDB_DEBUG'] == False):
+	DEBUG = False
+else:
+	DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -84,36 +102,52 @@ WSGI_APPLICATION = 'DissDB.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+	'default': {
+		'ENGINE': 'django.db.backends.sqlite3',
 		'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+	}
 }
+
+# Umgebungsvariablen:
+if 'DISSDB_DB' in os.environ and os.environ['DISSDB_DB']:
+	DATABASES['default']['ENGINE'] = os.environ['DISSDB_DB']
+	if 'DISSDB_DB_NAME' in os.environ:
+		DATABASES['default']['DBNAME'] = os.environ['DISSDB_DB_NAME']
+		DATABASES['default']['NAME'] = os.environ['DISSDB_DB_NAME']
+	if 'DISSDB_DB_USER' in os.environ:
+		DATABASES['default']['USER'] = os.environ['DISSDB_DB_USER']
+	if 'DISSDB_DB_PASSWORD' in os.environ:
+		DATABASES['default']['PASSWORD'] = os.environ['DISSDB_DB_PASSWORD']
+	if 'DISSDB_DB_HOST' in os.environ:
+		DATABASES['default']['HOST'] = os.environ['DISSDB_DB_HOST']
+	if 'DISSDB_DB_PORT' in os.environ:
+		DATABASES['default']['PORT'] = os.environ['DISSDB_DB_PORT']
+
+print(DATABASES)
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGE_CODE = 'de-DE'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = False
-
 USE_THOUSAND_SEPARATOR = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
-
+if 'DISSDB_STATIC_ROOT' in os.environ and os.environ['DISSDB_STATIC_ROOT']:
+	STATIC_ROOT = os.environ['DISSDB_STATIC_ROOT']
+if 'DISSDB_STATIC_URL' in os.environ and os.environ['DISSDB_STATIC_URL']:
+	STATIC_URL = os.environ['DISSDB_STATIC_URL']
+else:
+	STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
 	os.path.join(BASE_DIR, 'DissDB', 'static'),
-	'D:\Python\HCB\django\privat\lmb\DissDB\Dateien',
+	os.path.join(BASE_DIR, 'Dateien'),
 )
