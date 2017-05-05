@@ -22,10 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # DISSDB_STATIC_ROOT = "/var/www/example.com/static/"		(Default: None)										#
 # DISSDB_STATIC_URL = "/static/"							(Default: "/static/")								#
 # django-private-storage:																						#
-# DIOEDB_PRIVATE_STORAGE_ROOT = '/'							(Default: '/')										#
-# DIOEDB_PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_authenticated'						#
-# DIOEDB_PRIVATE_STORAGE_SERVER = 'nginx'					(Default: 'django')									#
-# DIOEDB_PRIVATE_STORAGE_INTERNAL_URL = '/private-x-accel-redirect/'											#
+# DISSDB_PRIVATE_STORAGE_ROOT = '/'							(Default: '/')										#
+# DISSDB_PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_authenticated'						#
+# DISSDB_PRIVATE_STORAGE_SERVER = 'nginx'					(Default: 'django')									#
+# DISSDB_PRIVATE_STORAGE_INTERNAL_URL = '/private-x-accel-redirect/'											#
 # Datenbank:																									#
 # DISSDB_DB="django.db.backends.postgresql"					(Default: "django.db.backends.sqlite3")				#
 # DISSDB_DB_NAME="PersonenDB"								(Default: os.path.join(BASE_DIR, 'db.sqlite3'))		#
@@ -135,14 +135,14 @@ PRIVATE_STORAGE_ROOT = '/'
 PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_authenticated'
 PRIVATE_STORAGE_SERVER = 'django'
 PRIVATE_STORAGE_INTERNAL_URL = '/private-x-accel-redirect/'
-if 'DIOEDB_PRIVATE_STORAGE_ROOT' in os.environ:
-	PRIVATE_STORAGE_ROOT = os.environ['DIOEDB_PRIVATE_STORAGE_ROOT']
-if 'DIOEDB_PRIVATE_STORAGE_AUTH_FUNCTION' in os.environ:
-	PRIVATE_STORAGE_AUTH_FUNCTION = os.environ['DIOEDB_PRIVATE_STORAGE_AUTH_FUNCTION']
-if 'DIOEDB_PRIVATE_STORAGE_SERVER' in os.environ:
-	PRIVATE_STORAGE_SERVER = os.environ['DIOEDB_PRIVATE_STORAGE_SERVER']
-if 'DIOEDB_PRIVATE_STORAGE_INTERNAL_URL' in os.environ:
-	PRIVATE_STORAGE_INTERNAL_URL = os.environ['DIOEDB_PRIVATE_STORAGE_INTERNAL_URL']
+if 'DISSDB_PRIVATE_STORAGE_ROOT' in os.environ:
+	PRIVATE_STORAGE_ROOT = os.environ['DISSDB_PRIVATE_STORAGE_ROOT']
+if 'DISSDB_PRIVATE_STORAGE_AUTH_FUNCTION' in os.environ:
+	PRIVATE_STORAGE_AUTH_FUNCTION = os.environ['DISSDB_PRIVATE_STORAGE_AUTH_FUNCTION']
+if 'DISSDB_PRIVATE_STORAGE_SERVER' in os.environ:
+	PRIVATE_STORAGE_SERVER = os.environ['DISSDB_PRIVATE_STORAGE_SERVER']
+if 'DISSDB_PRIVATE_STORAGE_INTERNAL_URL' in os.environ:
+	PRIVATE_STORAGE_INTERNAL_URL = os.environ['DISSDB_PRIVATE_STORAGE_INTERNAL_URL']
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
