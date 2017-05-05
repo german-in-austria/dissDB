@@ -5,10 +5,10 @@ class Antworten(models.Model):
 	von_Inf				= models.ForeignKey('Informanten'									, on_delete=models.CASCADE		, verbose_name="von Informanten")
 	zu_Aufgabe			= models.ForeignKey('Aufgaben',				blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="zu Aufgabe")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
-	ist_am				= models.ForeignKey('Antwortmöglichkeiten',	blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Ist Antwortmöglichkeit")
-	ist_gewählt			= models.BooleanField(default=False																	, verbose_name="Ist gewählt")
+	ist_am				= models.ForeignKey('Antwortmoeglichkeiten',	blank=True, null=True	, on_delete=models.SET_NULL	, verbose_name="Ist Antwortmöglichkeit")
+	ist_gewaehlt		= models.BooleanField(default=False																	, verbose_name="Ist gewählt")
 	ist_nat				= models.BooleanField(default=False																	, verbose_name="Ist NAT")
-	ist_Satz			= models.ForeignKey('Sätze',				blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Ist Satz")
+	ist_Satz			= models.ForeignKey('Saetze',				blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Ist Satz")
 	ist_bfl				= models.BooleanField(default=False																	, verbose_name="Ist BFL")
 	bfl_durch_S			= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="BFL durch S")
 	start_Antwort		= models.DurationField(																				  verbose_name="Start Antwort")
@@ -22,21 +22,21 @@ class Antworten(models.Model):
 		verbose_name_plural = "Antworten"
 		ordering = ('Reihung',)
 
-class Antwortmöglichkeiten(models.Model):
+class Antwortmoeglichkeiten(models.Model):
 	id_am				= models.AutoField(primary_key=True																	, verbose_name="ID Antwortmöglichkeit")
 	zu_Aufgabe			= models.ForeignKey('Aufgaben'										, on_delete=models.CASCADE		, verbose_name="zu_Aufgabe")
-	Kürzel				= models.CharField(max_length=45																	, verbose_name="Kürzel")
+	Kuerzel				= models.CharField(max_length=45																	, verbose_name="Kürzel")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
 	frei				= models.BooleanField(default=False																	, verbose_name="Frei")
 	def __str__(self):
-		return "{}, {}".format(self.Kürzel,self.zu_Aufgabe)
+		return "{}, {}".format(self.Kuerzel,self.zu_Aufgabe)
 	class Meta:
-		db_table = "Antwortmöglichkeiten"
+		db_table = "Antwortmoeglichkeiten"
 		verbose_name = "Antwortmöglichkeit"
 		verbose_name_plural = "Antwortmöglichkeiten"
 		ordering = ('Reihung',)
 
-class Sätze(models.Model):
+class Saetze(models.Model):
 	id_Satz				= models.AutoField(primary_key=True																	, verbose_name="ID von Satz")
 	Transkript			= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Transkript")
 	Standardorth		= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Standardorth")
@@ -44,7 +44,7 @@ class Sätze(models.Model):
 	def __str__(self):
 		return "{}, {} ({})".format(self.Transkript,self.Standardorth,self.Kommentar)
 	class Meta:
-		db_table = "Sätze"
+		db_table = "Saetze"
 		verbose_name = "Satz"
 		verbose_name_plural = "Sätze"
 		ordering = ('Transkript',)
@@ -52,7 +52,7 @@ class Sätze(models.Model):
 class AntwortenTags(models.Model):
 	id_Antwort			= models.ForeignKey('Antworten'										, on_delete=models.CASCADE		, verbose_name="ID zu Antwort")
 	id_Tag				= models.ForeignKey('Tags'											, on_delete=models.CASCADE		, verbose_name="ID zu Tag")
-	primär				= models.BooleanField(default=False																	, verbose_name="Primär")
+	primaer				= models.BooleanField(default=False																	, verbose_name="Primär")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
 	def __str__(self):
 		return "{}<->{}".format(self.id_Antwort,self.id_Tag)
@@ -67,7 +67,7 @@ class Tags(models.Model):
 	Tag					= models.CharField(max_length=45																	, verbose_name="Tag")
 	Tag_lang			= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Tag lang")
 	zu_Tag				= models.ForeignKey('self',					blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Zu Tag")
-	zu_Phänomen			= models.ForeignKey('Phänomene',			blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Zu Phänomen")
+	zu_Phaenomen		= models.ForeignKey('Phaenomene',			blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Zu Phänomen")
 	Kommentar			= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Kommentar")
 	AReihung			= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
 	def __str__(self):
@@ -78,24 +78,24 @@ class Tags(models.Model):
 		verbose_name_plural = "Tags"
 		ordering = ('AReihung',)
 
-class Phänomene(models.Model):
-	id_Phänomen			= models.AutoField(primary_key=True																	, verbose_name="ID von Phänomen")
-	Bez_Phänomen		= models.CharField(max_length=255																	, verbose_name="Bezeichnung Phänomen")
-	Beschr_Phänomen		= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Beschreibung Phänomen")
-	zu_PhänBer			= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Zu Phänomenen Ber")
+class Phaenomene(models.Model):
+	id_Phaenomen		= models.AutoField(primary_key=True																	, verbose_name="ID von Phänomen")
+	Bez_Phaenomen		= models.CharField(max_length=255																	, verbose_name="Bezeichnung Phänomen")
+	Beschr_Phaenomen	= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Beschreibung Phänomen")
+	zu_PhaenBer			= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Zu Phänomenen Ber")
 	Kommentar			= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Kommentar")
 	def __str__(self):
-		return "{}".format(self.Bez_Phänomen)
+		return "{}".format(self.Bez_Phaenomen)
 	class Meta:
-		db_table = "Phänomene"
+		db_table = "Phaenomene"
 		verbose_name = "Phänomen"
 		verbose_name_plural = "Phänomene"
-		ordering = ('Bez_Phänomen',)
+		ordering = ('Bez_Phaenomen',)
 
 class Informanten(models.Model):
 	id_Person			= models.AutoField(primary_key=True																	, verbose_name="ID von Informant")
-	Kürzel				= models.CharField(max_length=45,			blank=True, null=True									, verbose_name="Kürzel")
-	Kürzel_anonym		= models.CharField(max_length=45,			blank=True, null=True									, verbose_name="Kürzel Anonym")
+	Kuerzel				= models.CharField(max_length=45,			blank=True, null=True									, verbose_name="Kürzel")
+	Kuerzel_anonym		= models.CharField(max_length=45,			blank=True, null=True									, verbose_name="Kürzel Anonym")
 	Name				= models.CharField(max_length=45,			blank=True, null=True									, verbose_name="Name")
 	Vorname				= models.CharField(max_length=45,			blank=True, null=True									, verbose_name="Vorname")
 	weiblich			= models.BooleanField(default=False,		blank=False 											, verbose_name="weiblich?")
@@ -109,7 +109,7 @@ class Informanten(models.Model):
 
 
 	def __str__(self):
-		return "{} ({})".format(self.Kürzel,self.id_Person)
+		return "{} ({})".format(self.Kuerzel,self.id_Person)
 	class Meta:
 		db_table = "Informanten"
 		verbose_name = "Informant"
@@ -195,20 +195,20 @@ class Aufgaben(models.Model):
 
 class Aufgabensets(models.Model):
 	id_Aufgabe			= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenset")
-	Kürzel				= models.CharField(max_length=45																	, verbose_name="Kürzel")
+	Kuerzel				= models.CharField(max_length=45																	, verbose_name="Kürzel")
 	Name_Aset			= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Name Aufgabenset")
 	Fokus				= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Fokus")
-	zu_Phänomen			= models.ForeignKey('Phänomene',			blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Zu Phänomen")
+	zu_Phaenomen		= models.ForeignKey('Phaenomene',			blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Zu Phänomen")
 	Art_ASet			= models.IntegerField(						blank=True, null=True									, verbose_name="Art Aufgabenset")
 	zusammengestellt_als= models.ForeignKey('Aufgabenzusammenstellungen',blank=True, null=True	, on_delete=models.SET_NULL	, verbose_name="Zusammengestellt als")
 	Kommentar			= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Kommentar")
 	def __str__(self):
-		return "{} ({})".format(self.Kürzel,self.Art_ASet)
+		return "{} ({})".format(self.Kuerzel,self.Art_ASet)
 	class Meta:
 		db_table = "Aufgabensets"
 		verbose_name = "Aufgabenset"
 		verbose_name_plural = "Aufgabensets"
-		ordering = ('Kürzel',)
+		ordering = ('Kuerzel',)
 
 class Aufgabenzusammenstellungen(models.Model):
 	id_AZus				= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenzusammenstellung")

@@ -49,7 +49,7 @@ def start(request,ipk=0,apk=0):
 							else:									# Erstellen
 								aSaveAntwort = dbmodels.Antworten()
 								sTyp = ' erstellt!<br>'
-							aSaveAntwort.ist_gewählt = False
+							aSaveAntwort.ist_gewaehlt = False
 							aSaveAntwort.ist_nat = False
 							aSaveAntwort.von_Inf = dbmodels.Informanten.objects.get(pk=int(aAntwort['von_Inf']))
 							aSaveAntwort.zu_Aufgabe = dbmodels.Aufgaben.objects.get(pk=int(aAntwort['zu_Aufgabe']))
@@ -60,10 +60,10 @@ def start(request,ipk=0,apk=0):
 							aSaveAntwort.stop_Antwort = datetime.timedelta(microseconds=int(float(aAntwort['stop_Antwort'] if aAntwort['stop_Antwort'] else 0)*1000000))
 							aSaveAntwort.Kommentar = aAntwort['Kommentar']
 							if int(aAntwort['ist_Satz_pk']) > 0:	# Satz bearbeiten
-								asSatz = dbmodels.Sätze.objects.get(id_Satz=aAntwort['ist_Satz_pk'])
+								asSatz = dbmodels.Saetze.objects.get(id_Satz=aAntwort['ist_Satz_pk'])
 								ssTyp = ' gespeichert!<br>'
 							else:									# Satz erstellen
-								asSatz = dbmodels.Sätze()
+								asSatz = dbmodels.Saetze()
 								ssTyp = ' erstellt!<br>'
 							asSatz.Transkript = aAntwort['ist_Satz_Transkript']
 							asSatz.Standardorth = aAntwort['ist_Satz_Standardorth']
@@ -85,7 +85,7 @@ def start(request,ipk=0,apk=0):
 										stTyp = ' erstellt!<br>'
 									asAntwortenTag.id_Antwort = aSaveAntwort
 									asAntwortenTag.id_Tag =  dbmodels.Tags.objects.get(pk=int(asTag['id_tag']))
-									asAntwortenTag.primär = (asTag['popup'] == 'ptags')
+									asAntwortenTag.primaer = (asTag['popup'] == 'ptags')
 									asAntwortenTag.Reihung =  int(asTag['reihung'])
 									asAntwortenTag.save()
 									test+= 'AntwortenTag "'+str(asAntwortenTag)+'" (PK: '+str(asAntwortenTag.pk)+')'+stTyp
@@ -98,8 +98,8 @@ def start(request,ipk=0,apk=0):
 		eAntwort.zu_Aufgabe = Aufgabe
 		Antworten = []
 		for val in dbmodels.Antworten.objects.filter(von_Inf=ipk,zu_Aufgabe=apk).order_by('Reihung'):
-			ptags=dbmodels.AntwortenTags.objects.filter(primär=True,id_Antwort=val.pk).order_by('Reihung')
-			stags=dbmodels.AntwortenTags.objects.filter(primär=False,id_Antwort=val.pk).order_by('Reihung')
+			ptags=dbmodels.AntwortenTags.objects.filter(primaer=True,id_Antwort=val.pk).order_by('Reihung')
+			stags=dbmodels.AntwortenTags.objects.filter(primaer=False,id_Antwort=val.pk).order_by('Reihung')
 			Antworten.append({'model':val, 'ptags':ptags, 'stags':stags})
 		Antworten.append(eAntwort)
 		Tags = getTagList(dbmodels.Tags,None)
