@@ -1,4 +1,6 @@
-## DISS DB
+# Diss DB
+
+## Getting Started
 
 ### 1. Start a PostgreSQL container
 like this:
