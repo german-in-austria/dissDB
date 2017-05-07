@@ -44,7 +44,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ggm0_dycvizp#h$ap@czcy2t!al(0@j(%j@)*v00%w+of_whul'
+SECRET_KEY = "ggm0_dycvizp#h$ap@czcy2t!al(0@j(%j@)*v00%w+of_whul" #os.environ['DISSDB_SECRET_KEY']
+# SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if 'DISSDB_DEBUG' in os.environ and (os.environ['DISSDB_DEBUG'] == 'False' or os.environ['DISSDB_DEBUG'] == False):
