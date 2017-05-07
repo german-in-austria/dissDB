@@ -1,5 +1,5 @@
 (function($){jQuery(document).ready(function($){
-	var basedir = '/static/Dateien/'
+	var basedir = '/private-media/'
 	var audio = new Audio('');
 	var audioisnewset = 1
 	var unsavedAntworten = 0
