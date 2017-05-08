@@ -10,3 +10,13 @@ class PresetTags(models.Model):
 		verbose_name = "Preset Tags"
 		verbose_name_plural = "Presets Tags"
 		ordering = ('Reihung',)
+
+class PresetTagsZuAufgabe(models.Model):
+	id_PresetTags		= models.ForeignKey('PresetTags'									, on_delete=models.CASCADE		, verbose_name="ID zu PresetTags")
+	id_Aufgabe			= models.ForeignKey('Datenbank.Aufgaben'							, on_delete=models.CASCADE		, verbose_name="ID Aufgaben")
+	def __str__(self):
+		return "{} <- {}".format(self.id_Aufgabe,self.id_PresetTags)
+	class Meta:
+		verbose_name = "Preset Tags"
+		verbose_name_plural = "Presets Tags"
+		ordering = ('id_Aufgabe',)

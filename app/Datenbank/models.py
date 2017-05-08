@@ -52,24 +52,49 @@ class Saetze(models.Model):
 class AntwortenTags(models.Model):
 	id_Antwort			= models.ForeignKey('Antworten'										, on_delete=models.CASCADE		, verbose_name="ID zu Antwort")
 	id_Tag				= models.ForeignKey('Tags'											, on_delete=models.CASCADE		, verbose_name="ID zu Tag")
+	id_TagEbene			= models.ForeignKey('TagEbene',				blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="ID zu Tag Ebene")
 	primaer				= models.BooleanField(default=False																	, verbose_name="Primär")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
 	def __str__(self):
-		return "{}<->{}".format(self.id_Antwort,self.id_Tag)
+		return "{} <-> {}".format(self.id_Antwort,self.id_Tag)
 	class Meta:
 		db_table = "AntwortenTags"
 		verbose_name = "Antworten Tag"
 		verbose_name_plural = "Antworten Tags"
 		ordering = ('Reihung',)
 
+class TagEbene(models.Model):
+	Name				= models.CharField(max_length=255																	, verbose_name="Name")
+	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
+	def __str__(self):
+		return "{}".format(self.Name)
+	class Meta:
+		db_table = "TagEbene"
+		verbose_name = "Tag Ebene"
+		verbose_name_plural = "Tag Ebenen"
+		ordering = ('Reihung',)
+
+class TagEbeneZuTag(models.Model):
+	id_TagEbene			= models.ForeignKey('TagEbene'										, on_delete=models.CASCADE		, verbose_name="ID zu Tag Ebene")
+	id_Tag				= models.ForeignKey('Tags'											, on_delete=models.CASCADE		, verbose_name="ID zu Tag")
+	def __str__(self):
+		return "{} <- {}".format(self.id_TagEbene,self.id_Tag)
+	class Meta:
+		db_table = "TagEbeneZuTag"
+		verbose_name = "Tag Ebene zu Tag"
+		verbose_name_plural = "Tag Ebenen zu Tags"
+		ordering = ('id_TagEbene',)
+
 class Tags(models.Model):
 	id_tag				= models.AutoField(primary_key=True																	, verbose_name="ID von Tag")
 	Tag					= models.CharField(max_length=255																	, verbose_name="Tag")
 	Tag_lang			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Tag lang")
+	# zu_Tag löschen!
 	zu_Tag				= models.ForeignKey('self',					blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Zu Tag")
 	zu_Phaenomen		= models.ForeignKey('Phaenomene',			blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Zu Phänomen")
 	Kommentar			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Kommentar")
 	AReihung			= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
+	Generation			= models.IntegerField(						blank=True, null=True									, verbose_name="Generation")
 	def __str__(self):
 		return "{}".format(self.Tag)
 	class Meta:
@@ -77,6 +102,17 @@ class Tags(models.Model):
 		verbose_name = "Tag"
 		verbose_name_plural = "Tags"
 		ordering = ('AReihung',)
+
+class TagFamilie(models.Model):
+	id_ParentTag		= models.ForeignKey('Tags', related_name='id_ParentTag'				, on_delete=models.CASCADE		, verbose_name="Parent ID zu Tag")
+	id_ChildTag			= models.ForeignKey('Tags', related_name='id_ChildTag'				, on_delete=models.CASCADE		, verbose_name="Child ID zu Tag")
+	def __str__(self):
+		return "{} <- {}".format(self.id_ParentTag,self.id_ChildTag)
+	class Meta:
+		db_table = "TagFamilie"
+		verbose_name = "Tag Familie"
+		verbose_name_plural = "Tag Familien"
+		ordering = ('id_ParentTag',)
 
 class Phaenomene(models.Model):
 	id_Phaenomen		= models.AutoField(primary_key=True																	, verbose_name="ID von Phänomen")
