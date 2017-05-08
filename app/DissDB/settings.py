@@ -19,6 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Umgebungsvariablen:																							#
 #################################################################################################################
 # DISSDB_DEBUG = "False"									(Default: "True")									#
+# DISSDB_SECRET_KEY = "ggm0_dycvizp#h$ap@czcy2t!al(0@j(%j@)*v00%w+of_whul"										#
 # DISSDB_STATIC_ROOT = "/var/www/example.com/static/"		(Default: None)										#
 # DISSDB_STATIC_URL = "/static/"							(Default: "/static/")								#
 # django-private-storage:																						#
@@ -44,8 +45,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "ggm0_dycvizp#h$ap@czcy2t!al(0@j(%j@)*v00%w+of_whul" #os.environ['DISSDB_SECRET_KEY']
-# SECRET_KEY = ''
+SECRET_KEY = "ggm0_dycvizp#h$ap@czcy2t!al(0@j(%j@)*v00%w+of_whul"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if 'DISSDB_DEBUG' in os.environ and (os.environ['DISSDB_DEBUG'] == 'False' or os.environ['DISSDB_DEBUG'] == False):
@@ -116,6 +116,9 @@ DATABASES = {
 }
 
 # Umgebungsvariablen:
+if 'DISSDB_SECRET_KEY' in os.environ:
+	SECRET_KEY = os.environ['DISSDB_SECRET_KEY']
+
 if 'DISSDB_DB' in os.environ and os.environ['DISSDB_DB']:
 	DATABASES['default']['ENGINE'] = os.environ['DISSDB_DB']
 	if 'DISSDB_DB_NAME' in os.environ:
@@ -159,12 +162,12 @@ USE_THOUSAND_SEPARATOR = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
+STATIC_URL = '/static/'
+
 if 'DISSDB_STATIC_ROOT' in os.environ and os.environ['DISSDB_STATIC_ROOT']:
 	STATIC_ROOT = os.environ['DISSDB_STATIC_ROOT']
 if 'DISSDB_STATIC_URL' in os.environ and os.environ['DISSDB_STATIC_URL']:
 	STATIC_URL = os.environ['DISSDB_STATIC_URL']
-else:
-	STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
 	os.path.join(BASE_DIR, 'DissDB', 'static'),
