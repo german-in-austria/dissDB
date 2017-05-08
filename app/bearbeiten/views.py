@@ -120,7 +120,14 @@ def start(request,ipk=0,apk=0):
 		if aAufgabenset == int(request.POST.get('laufgabenset')):
 			aAufgabe = int(request.POST.get('aaufgabe'))
 			Informanten = [{'model':val,'count':dbmodels.Antworten.objects.filter(von_Inf=val,zu_Aufgabe=aAufgabe).count} for val in dbmodels.Informanten.objects.all()]
-		Aufgaben = [{'model':val,'aProz':(100/InformantenCount*len(dbmodels.Antworten.objects.filter(zu_Aufgabe=val.pk).values('zu_Aufgabe').annotate(total=Count('von_Inf'))))} for val in dbmodels.Aufgaben.objects.filter(von_ASet=aAufgabenset)]
+		Aufgaben = []
+		for val in dbmodels.Aufgaben.objects.filter(von_ASet=aAufgabenset):
+			try:
+				aproz = (100/InformantenCount*dbmodels.Antworten.objects.filter(zu_Aufgabe=val.pk).values('zu_Aufgabe').annotate(total=Count('von_Inf'))[0]['total'])
+			except:
+				aproz = 0
+			print(aproz)
+			Aufgaben.append({'model':val, 'aProz': aproz})
 
 	# Ausgabe der Seite
 	return render_to_response('bearbeiten/start.html',

@@ -8,7 +8,7 @@
 	<br>
 	<ul>
 	{% for value in Aufgabensets %}
-		<li>{{ value.model }} - {{ value.porz|floatformat:1 }} %
+		<li>{{ value.model }} - {{ value.proz|floatformat:1 }} %
 			<ul>
 			{% for avalue in value.childs %}
 				<li>{{ avalue.model }} - {{ avalue.proz|floatformat:1 }} %
@@ -18,5 +18,5 @@
 		</li>
 	{% endfor %}
 	</ul>
-	
+
 {% endblock %}
