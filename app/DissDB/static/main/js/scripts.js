@@ -399,7 +399,7 @@
 		$('#eiaufgsave').addClass('disabled')
 		setAudioMarks()
 	}
-	audio.addEventListener("timeupdate", function() {
+	setInterval(function () {
 		$('.pb-akttime').html(secondsToDuration(audio.currentTime))
 		if(audioisnewset==0) {
 			$('#inferhebungprogress .progress-bar').css('width',(100/audio.duration*audio.currentTime)+'%')
@@ -413,7 +413,7 @@
 				$('#aufgabenprogress .progress-bar').css('width','100%')
 			}
 		}
-	}, false);
+	}, 50);
 
 	audio.addEventListener("durationchange", function() {
 		$('#inferhebungprogress .pb-endtime').html(secondsToDuration(audio.duration))
