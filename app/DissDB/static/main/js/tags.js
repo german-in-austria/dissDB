@@ -94,7 +94,7 @@ function resetReihungTags() {
 function getTagsObject(athis) {
 	var tags = []
 	athis.find('.ant-tag').each(function() {
-		tags.push({'reihung':$(this).data('reihung') , 'popup':$(this).data('popup') , 'id_tag':$(this).data('id_tag') , 'pk':$(this).data('pk') })
+		tags.push({'reihung':$(this).data('reihung') , 'id_tag':$(this).data('id_tag') , 'pk':$(this).data('pk'), 'id_TagEbene':$(this).parents('.tag-line').find('select.tagebene').val() })
 	})
 	return tags
 }

@@ -320,7 +320,7 @@ ul.lmfa-dl {
 .ant-tag.delit {
 	display:none;
 }
-#ptags, #stags, #pretags {
+#xtags, #pretags {
   display: none;
 }
 .tags {

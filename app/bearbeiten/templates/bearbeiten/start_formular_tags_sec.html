@@ -1,6 +1,0 @@
-<button class="ptagsbtn ptagsd{{ acount }}" data-pk="{{ tvalue.model.pk|stringformat:"i" }}" title="{{ tvalue.model.zu_Phänomen }} - {{ tvalue.model.Kommentar|default:'kein Kommentar' }}">{{ tvalue.model }}</button><br>
-{%for ch in tvalue.child %}
-	{%with tvalue=ch acount=acount|add:1 template_name="bearbeiten/start_formular_tags_sec.html" %}
-		{%include template_name%}
-	{%endwith%}
-{%endfor%}

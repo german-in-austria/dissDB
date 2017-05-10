@@ -53,6 +53,7 @@ class AntwortenTags(models.Model):
 	id_Antwort			= models.ForeignKey('Antworten'										, on_delete=models.CASCADE		, verbose_name="ID zu Antwort")
 	id_Tag				= models.ForeignKey('Tags'											, on_delete=models.CASCADE		, verbose_name="ID zu Tag")
 	id_TagEbene			= models.ForeignKey('TagEbene',				blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="ID zu Tag Ebene")
+	# primaer löschen!
 	primaer				= models.BooleanField(default=False																	, verbose_name="Primär")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
 	def __str__(self):

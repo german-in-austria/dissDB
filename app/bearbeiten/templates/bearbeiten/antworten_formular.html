@@ -35,32 +35,39 @@
 				<textarea class="form-control" rows="2" placeholder="Nachfrage" name="bfl_durch_S">{{ value.model.bfl_durch_S|default:'' }}</textarea>
 			</div>
 		</div>
-		<div class="form-horizontal">
-			<div class="form-group">
-				<label class="col-sm-2 control-label">1. Kategorie</label>
+		<div class="form-horizontal tag-forms">
+			{% for tvalue in value.xtags %}
+				<div class="form-group tag-line">
+					<label class="col-sm-2 control-label">
+						<select class="tagebene w100">
+							<option value="0">Keine Kategorie (Löschen)</option>
+							{% for kvalue in TagEbenen %}<option value="{{ kvalue.pk|stringformat:"i" }}"{% if tvalue.ebene.0.pk == kvalue.pk %} selected{% endif %}>{{ kvalue }}</option>{% endfor %}
+						</select>
+					</label>
+					<div class="col-sm-10"><div class="form-control-static reihung-tags">
+						{% for tvalue in tvalue.tags %}<button class="ant-tag" data-popup="xtags" data-id_Tag="{{ tvalue.id_Tag.pk|stringformat:"i" }}" data-pk="{{ tvalue.pk|stringformat:"i" }}">{{ tvalue.id_Tag }}</button>{% endfor %}
+						<button class="ant-ntag" data-popup="xtags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+						<button class="ant-ctag" data-popup="xtags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
+					</div></div>
+				</div>
+			{% endfor %}
+			<div class="form-group tag-line tag-vorlage hidden">
+				<label class="col-sm-2 control-label">
+					<select class="tagebene w100">
+						<option value="0">Keine Kategorie (Löschen)</option>
+						{% for kvalue in TagEbenen %}<option value="{{ kvalue.pk|stringformat:"i" }}">{{ kvalue }}</option>{% endfor %}
+					</select>
+				</label>
 				<div class="col-sm-10"><div class="form-control-static reihung-tags">
-					{% for tvalue in value.ptags %}<button class="ant-tag" data-popup="ptags" data-id_Tag="{{ tvalue.id_Tag.pk|stringformat:"i" }}" data-pk="{{ tvalue.pk|stringformat:"i" }}">{{ tvalue.id_Tag }}</button>{% endfor %}
-					{% if Tags %}
-						<button class="ant-ntag" data-popup="ptags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-						<button class="ant-ctag" data-popup="ptags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
-					{% endif %}
-				</div></div>
-			</div>
-			<div class="form-group">
-				<label class="col-sm-2 control-label">2. Kategorie</label>
-				<div class="col-sm-10"><div class="form-control-static reihung-tags">
-					{% for tvalue in value.stags %}<button class="ant-tag" data-popup="stags" data-id_Tag="{{ tvalue.id_Tag.pk|stringformat:"i" }}" data-pk="{{ tvalue.pk|stringformat:"i" }}">{{ tvalue.id_Tag }}</button>{% endfor %}
-					{% if Tags %}
-						<button class="ant-ntag" data-popup="stags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-						<button class="ant-ctag" data-popup="stags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
-					{% endif %}
+					<button class="ant-ntag" data-popup="xtags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+					<button class="ant-ctag" data-popup="xtags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
 				</div></div>
 			</div>
 		</div>
 	</div>
 {% endfor %}
 <div class="text-center"><button id="addantwort"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Antwort</button></div>
-<div id="ptags" class="tags">
+<div id="xtags" class="tags">
 <button class="ptagsbtn ptagsd0 ptagsleft tagscontrol" title="Aktuellen Tag löschen" tabindex="-1"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
 <button class="ptagsbtn ptagsd0 ptagsdel tagscontrol" data-pk="0" title="Aktuellen Tag löschen" tabindex="-1"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
 <button class="ptagsbtn ptagsd0 ptagsright tagscontrol" title="Aktuellen Tag löschen" tabindex="-1"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
@@ -68,17 +75,6 @@
 {% for tvalue in Tags %}
 	{%with acount=0 %}
 		{%include "bearbeiten/start_formular_tags.html" %}
-	{%endwith%}
-{% endfor %}
-</div>
-<div id="stags" class="tags">
-<button class="ptagsbtn ptagsd0 ptagsleft tagscontrol" data-pk="0" title="Aktuellen Tag nach links verschieben" tabindex="-1"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
-<button class="ptagsbtn ptagsd0 ptagsdel tagscontrol" data-pk="0" title="Aktuellen Tag löschen" tabindex="-1"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
-<button class="ptagsbtn ptagsd0 ptagsright tagscontrol" data-pk="0" title="Aktuellen Tag nach rechts verschieben" tabindex="-1"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
-<br class="tagscontrol">
-{% for tvalue in Tags %}
-	{%with acount=0 %}
-		{%include "bearbeiten/start_formular_tags_sec.html" %}
 	{%endwith%}
 {% endfor %}
 </div>
