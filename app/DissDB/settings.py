@@ -22,6 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # DISSDB_SECRET_KEY = "ggm0_dycvizp#h$ap@czcy2t!al(0@j(%j@)*v00%w+of_whul"										#
 # DISSDB_STATIC_ROOT = "/var/www/example.com/static/"		(Default: None)										#
 # DISSDB_STATIC_URL = "/static/"							(Default: "/static/")								#
+# DISSDB_AUDIO_URL = "/private-media/"						(Default: "/private-media/")						#
 # django-private-storage:																						#
 # DISSDB_PRIVATE_STORAGE_ROOT = '/'							(Default: '/')										#
 # DISSDB_PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_authenticated'						#
@@ -55,6 +56,7 @@ else:
 
 ALLOWED_HOSTS = []
 
+ALLOWED_SETTINGS_IN_TEMPLATES = ("AUDIO_URL",)
 
 # Application definition
 
@@ -163,11 +165,14 @@ USE_THOUSAND_SEPARATOR = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+AUDIO_URL = '/private-media/'
 
 if 'DISSDB_STATIC_ROOT' in os.environ and os.environ['DISSDB_STATIC_ROOT']:
 	STATIC_ROOT = os.environ['DISSDB_STATIC_ROOT']
 if 'DISSDB_STATIC_URL' in os.environ and os.environ['DISSDB_STATIC_URL']:
 	STATIC_URL = os.environ['DISSDB_STATIC_URL']
+if 'DISSDB_AUDIO_URL' in os.environ and os.environ['DISSDB_AUDIO_URL']:
+	AUDIO_URL = os.environ['DISSDB_AUDIO_URL']
 
 STATICFILES_DIRS = (
 	os.path.join(BASE_DIR, 'DissDB', 'static'),

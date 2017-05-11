@@ -1,5 +1,4 @@
 /* Variablen */
-var audiodir = '/private-media/'
 var audio = new Audio('');
 var audioisnewset = 1
 var audiomarks = []
