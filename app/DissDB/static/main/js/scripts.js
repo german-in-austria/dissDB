@@ -8,6 +8,7 @@
 	resetReihungTags()
 	resetReihungAntworten()
 	setAudioPlayer()
+	tagEbenenOptionUpdateAll()
 
 	/* Tastenkürzel */
 	Mousetrap.bind('ctrl+space', function(e) { $('#audio-play-pause').click(); return false; })
@@ -33,7 +34,7 @@
 		$('#antwortensave').removeClass('disabled')
 		resetReihungAntworten()
 	})
-	$(document).on('change','.antwort input,.antwort textarea',function(e){
+	$(document).on('change','.antwort input,.antwort textarea,select.tagebene',function(e){
 		unsavedAntworten = 1
 		$('#antwortensave').removeClass('disabled')
 	})
@@ -79,36 +80,41 @@
 		})
 	})
 	$(document).on('click','#antwortensave:not(.disabled)',function(e){
-		var sAntworten = []
-		$('.antwort').each(function() {
-			var sAntwort = {}
-			if($(this).hasClass('delit')) {
-				sAntwort['delit'] = 1
-			}
-			$(this).find('input,textarea').each(function() {
-				if($(this).attr('type')=='checkbox') {
-					sAntwort[$(this).attr('name')]=$(this).is(':checked')
-				} else {
-					if($(this).attr('name') == 'start_Antwort' || $(this).attr('name') == 'stop_Antwort') {
-						sAntwort[$(this).attr('name')]=durationToSeconds($(this).val())
-					} else {
-						sAntwort[$(this).attr('name')]=$(this).val()
-					}
+		var saveit = 1
+		if(!checkEbenen()) { saveit=0; };
+		if(saveit==1) {
+			var sAntworten = []
+			$('.antwort').each(function() {
+				var sAntwort = {}
+				if($(this).hasClass('delit')) {
+					sAntwort['delit'] = 1
 				}
+				$(this).find('input,textarea').each(function() {
+					if($(this).attr('type')=='checkbox') {
+						sAntwort[$(this).attr('name')]=$(this).is(':checked')
+					} else {
+						if($(this).attr('name') == 'start_Antwort' || $(this).attr('name') == 'stop_Antwort') {
+							sAntwort[$(this).attr('name')]=durationToSeconds($(this).val())
+						} else {
+							sAntwort[$(this).attr('name')]=$(this).val()
+						}
+					}
+				})
+				sAntwort['tags'] = getTagsObject($(this))
+				sAntworten.push(sAntwort)
 			})
-			sAntwort['tags'] = getTagsObject($(this))
-			sAntworten.push(sAntwort)
-		})
-		$.post('/bearbeiten/'+$('input[name="von_Inf"]').first().val()+'/'+$('input[name="zu_Aufgabe"]').first().val()+'/',{ csrfmiddlewaretoken: csrf , save: 'Aufgaben' , aufgaben: JSON.stringify(sAntworten) }, function(d) {
-			unsavedAntworten=0
-			$('#aufgabencontent').html(d)
-			addAntwort()
-			resetBeeinflussung()
-			InformantenAntwortenUpdate()
-		}).fail(function(d) {
-			alert( "error" )
-			console.log(d)
-		})
+			$.post('/bearbeiten/'+$('input[name="von_Inf"]').first().val()+'/'+$('input[name="zu_Aufgabe"]').first().val()+'/',{ csrfmiddlewaretoken: csrf , save: 'Aufgaben' , aufgaben: JSON.stringify(sAntworten) }, function(d) {
+				unsavedAntworten=0
+				$('#aufgabencontent').html(d)
+				addAntwort()
+				resetBeeinflussung()
+				InformantenAntwortenUpdate()
+				tagEbenenOptionUpdateAll()
+			}).fail(function(d) {
+				alert( "error" )
+				console.log(d)
+			})
+		}
 	})
 	$(document).on('click','.lmfabc',function(e){
 		e.preventDefault()
@@ -121,6 +127,7 @@
 				$('.mcon').html(d)
 				addAntwort()
 				resetBeeinflussung()
+				tagEbenenOptionUpdateAll()
 				setAudioPlayer()
 			}).fail(function(d) {
 				alert( "error" )
@@ -158,6 +165,8 @@
 	$(document).on('click','.edittag .ptagsbtn:not(.ptagsleft,.ptagsright)',tagAendernLoeschenClick)
 	$(document).on('click','.newtag .ptagsbtn',tagHinzufuegenClick)
 	$(document).on('click','.pretags .pretagsbtn',tagPresetHinzufuegenClick)
+	$(document).on('click','.add-tag-line',addTagLineClick)
+	$(document).on('change','select.tagebene',tagEbeneChange)
 	/* Audio */
 	$(document).on('click','#aufgabenprogress, #inferhebungprogress',progressClick)
 	$(document).on('click','#audio-play-pause',playPauseClick)

@@ -40,7 +40,7 @@
 				<div class="form-group tag-line">
 					<label class="col-sm-2 control-label">
 						<select class="tagebene w100">
-							<option value="0">Keine Kategorie (Löschen)</option>
+							<option value="0">Ebene auswählen (Löschen)</option>
 							{% for kvalue in TagEbenen %}<option value="{{ kvalue.pk|stringformat:"i" }}"{% if tvalue.ebene.0.pk == kvalue.pk %} selected{% endif %}>{{ kvalue }}</option>{% endfor %}
 						</select>
 					</label>
@@ -51,17 +51,22 @@
 					</div></div>
 				</div>
 			{% endfor %}
-			<div class="form-group tag-line tag-vorlage hidden">
-				<label class="col-sm-2 control-label">
-					<select class="tagebene w100">
-						<option value="0">Keine Kategorie (Löschen)</option>
-						{% for kvalue in TagEbenen %}<option value="{{ kvalue.pk|stringformat:"i" }}">{{ kvalue }}</option>{% endfor %}
-					</select>
-				</label>
-				<div class="col-sm-10"><div class="form-control-static reihung-tags">
-					<button class="ant-ntag" data-popup="xtags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-					<button class="ant-ctag" data-popup="xtags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
-				</div></div>
+			<div class="form-group add-tag-line-line">
+				<div class="col-sm-2"><button class="add-tag-line"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Tag-Ebene hinzufügen</button></div>
+			</div>
+			<div class="tag-vorlage hidden">
+				<div class="form-group tag-line" style="background-color:#fdd;">
+					<label class="col-sm-2 control-label">
+						<select class="tagebene w100">
+							<option value="0">Ebene auswählen (Löschen)</option>
+							{% for kvalue in TagEbenen %}<option value="{{ kvalue.pk|stringformat:"i" }}">{{ kvalue }}</option>{% endfor %}
+						</select>
+					</label>
+					<div class="col-sm-10"><div class="form-control-static reihung-tags">
+						<button class="ant-ntag" data-popup="xtags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+						<button class="ant-ctag" data-popup="xtags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
+					</div></div>
+				</div>
 			</div>
 		</div>
 	</div>

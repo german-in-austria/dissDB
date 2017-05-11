@@ -80,6 +80,13 @@ function tagPresetHinzufuegenClick(e){
 	unsavedAntworten = 1
 	$('#antwortensave').removeClass('disabled')
 }
+function addTagLineClick(e){
+	$(this).parents('.add-tag-line-line').before($(this).parents('.tag-forms').find('div.tag-vorlage').html())
+}
+function tagEbeneChange(e){
+	tagEbeneColor(this)
+	tagEbenenOptionUpdateCluster(this)
+}
 
 /* Funktionen */
 function resetReihungTags() {
@@ -97,4 +104,46 @@ function getTagsObject(athis) {
 		tags.push({'reihung':$(this).data('reihung') , 'id_tag':$(this).data('id_tag') , 'pk':$(this).data('pk'), 'id_TagEbene':$(this).parents('.tag-line').find('select.tagebene').val() })
 	})
 	return tags
+}
+function checkEbenen(){
+	var isok = true
+	$('.tag-forms>.tag-line select.tagebene').each(function() {
+		if($(this).val()==0) {
+			if ($(this).parents('.tag-line').find('.ant-tag').length>0) {
+				if(!confirm('Sollen alle Tags der Ebenen ohne Auswahl gelöscht werden?')) {
+					isok = false
+				}
+				return false
+			}
+		}
+	})
+	return isok
+}
+function tagEbeneColor(athis) {
+	if($(athis).val()==0) {
+		$(athis).parents('.tag-line').css('background-color','#fcc')
+	} else {
+		$(athis).parents('.tag-line').css('background-color','transparent')
+	}
+}
+function tagEbenenOptionUpdateAll() {
+	$('.tag-forms select.tagebene').each(function(){
+		tagEbenenOptionUpdate(this)
+	})
+}
+function tagEbenenOptionUpdateCluster(athis) {
+	$(athis).parents('.tag-forms').find('select.tagebene').each(function(){
+		tagEbenenOptionUpdate(this)
+	})
+}
+function tagEbenenOptionUpdate(athis) {
+	var notThis = $(athis).parents('.tag-forms').find('select.tagebene').not($(athis))
+	$(athis).find('option').removeAttr('disabled').each(function(){
+		var asVal = $(this).val()
+		if(asVal != 0) {
+			if(notThis.filter(function(){return this.value==asVal}).length>0) {
+				$(this).attr('disabled','disabled')
+			}
+		}
+	})
 }

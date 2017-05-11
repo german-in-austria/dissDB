@@ -73,9 +73,10 @@ def start(request,ipk=0,apk=0):
 							aSaveAntwort.save()
 							for asTag in aAntwort['tags']:
 								if int(asTag['id_tag'])==0 or int(asTag['id_TagEbene'])==0:
-									aDelAntwortenTag = dbmodels.AntwortenTags.objects.get(pk=int(asTag['pk']))
-									test+= 'AntwortenTag "'+str(aDelAntwortenTag)+'" (PK: '+str(aDelAntwortenTag.pk)+') gelöscht!<br>'
-									aDelAntwortenTag.delete()
+									if int(asTag['pk']) > 0:
+										aDelAntwortenTag = dbmodels.AntwortenTags.objects.get(pk=int(asTag['pk']))
+										test+= 'AntwortenTag "'+str(aDelAntwortenTag)+'" (PK: '+str(aDelAntwortenTag.pk)+') gelöscht!<br>'
+										aDelAntwortenTag.delete()
 								else:
 									if int(asTag['pk']) > 0:		# Tag bearbeiten
 										asAntwortenTag = dbmodels.AntwortenTags.objects.get(pk=int(asTag['pk']))
@@ -130,7 +131,6 @@ def start(request,ipk=0,apk=0):
 				aproz = (100/InformantenCount*dbmodels.Antworten.objects.filter(zu_Aufgabe=val.pk).values('zu_Aufgabe').annotate(total=Count('von_Inf'))[0]['total'])
 			except:
 				aproz = 0
-			print(aproz)
 			Aufgaben.append({'model':val, 'aProz': aproz})
 
 	# Ausgabe der Seite

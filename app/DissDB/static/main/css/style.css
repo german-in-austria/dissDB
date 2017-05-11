@@ -302,6 +302,9 @@ ul.lmfa-dl {
 .antwort.delit {
 	display:none;
 }
+select.tagebene {
+  text-align-last: right;
+}
 .ant-tag, .ant-ntag, .ant-ctag {
   display: inline-block;
   background: #fff;
@@ -390,7 +393,7 @@ ul.lmfa-dl {
 .newtag .tagscontrol {
 	display:none;
 }
-#addantwort {
+#addantwort, .add-tag-line {
   display: inline-block;
   background: #fff;
   border: 1px solid #ccc;
@@ -400,6 +403,9 @@ ul.lmfa-dl {
   border-radius: 11px;
   text-decoration: none;
   color: #333;
+}
+.add-tag-line {
+	float:right;
 }
 #antwortensbtns {
   position: absolute;
