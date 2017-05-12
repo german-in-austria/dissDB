@@ -24,5 +24,23 @@ def start(request):
 		allproz+= aproz
 		allprozdg+= 1
 
-	return render_to_response('startseite/start.html',
+	return render_to_response('Startseite/start.html',
 		RequestContext(request, {'Aufgabensets':Aufgabensets,'allproz':(allproz/allprozdg) if allproz>0 else 0}),)
+
+def sysStatusView(request):
+	txtausgabe = HttpResponse(json.dumps(sysstatus(request)))
+	txtausgabe['Content-Type'] = 'text/plain'
+	return txtausgabe
+
+# Funktionen #
+def sysstatus(request):		# Systemstatus ermitteln
+	sysstatus = {}
+	sysstatus['sys'] = 'OK'
+	try:
+		sys_ws = sys_wartungssperre.objects.order_by('zeit').filter(erledigt=False).filter(zeit__lte=datetime.datetime.now() + datetime.timedelta(minutes=30))[0]
+		if sys_ws.zeit <= datetime.datetime.now() and not request.user.is_superuser:
+			sysstatus['sperre']=True
+		sysstatus['wartung'] = {'zeit':str(sys_ws.zeit),'restzeit':int((sys_ws.zeit-datetime.datetime.now()).total_seconds()/60),'titel':sys_ws.titel,'text':sys_ws.text,'stitel':sys_ws.stitel,'stext':sys_ws.stext}
+	except:
+		pass
+	return sysstatus

@@ -45,7 +45,7 @@
 						</select>
 					</label>
 					<div class="col-sm-10"><div class="form-control-static reihung-tags">
-						{% for tvalue in tvalue.tags %}<button class="ant-tag" data-popup="xtags" data-id_Tag="{{ tvalue.id_Tag.pk|stringformat:"i" }}" data-pk="{{ tvalue.pk|stringformat:"i" }}">{{ tvalue.id_Tag }}</button>{% endfor %}
+						{% for tvalue in tvalue.tags %}<button class="ant-tag" data-popup="xtags" data-id_Tag="{{ tvalue.id_Tag.pk|stringformat:"i" }}" data-pk="{{ tvalue.pk|stringformat:"i" }}">{{ tvalue.id_Tag.Tag }}</button>{% endfor %}
 						<button class="ant-ntag" data-popup="xtags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
 						<button class="ant-ctag" data-popup="xtags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
 					</div></div>
@@ -86,7 +86,7 @@
 <div id="pretags" class="tags">
 {% for pTag in PresetTags %}
 	<button class="pretagsbtn ptagsd0" data-pks="{% for tvalue in pTag.id_Tags.all %}{% if not forloop.first %};{% endif %}{{ tvalue.pk }},{{ tvalue }}{% endfor %}" title="{% for tvalue in pTag.id_Tags.all %}{% if not forloop.first %}, {% endif %}{{ tvalue }}{% endfor %}">
-		{% for tvalue in pTag.id_Tags.all %}{% if not forloop.first %}, {% endif %}{{ tvalue }}{% endfor %}
+		{% for tvalue in pTag.id_Tags.all %}{% if not forloop.first %}, {% endif %}{{ tvalue.Tag }}{% endfor %}
 	</button><br>
 {% endfor %}
 </div>

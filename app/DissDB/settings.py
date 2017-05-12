@@ -39,7 +39,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 LOGIN_URL = 'dissdb_login'
 LOGOUT_URL = 'dissdb_logout'
-LOGIN_REDIRECT_URL = 'startseite:start'
+LOGIN_REDIRECT_URL = 'Startseite:start'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # Quick-start development settings - unsuitable for production
@@ -71,7 +71,7 @@ INSTALLED_APPS = (
 	'private_storage',
     'sortedm2m',
 	'Datenbank',
-	'startseite',
+	'Startseite',
 	'bearbeiten',
 	'tags',
 )
@@ -92,7 +92,7 @@ ROOT_URLCONF = 'DissDB.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'DissDB', 'templates'),os.path.join(BASE_DIR, 'startseite', 'templates'),os.path.join(BASE_DIR, 'bearbeiten', 'templates'),os.path.join(BASE_DIR, 'tags', 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'DissDB', 'templates'),os.path.join(BASE_DIR, 'Startseite', 'templates'),os.path.join(BASE_DIR, 'bearbeiten', 'templates'),os.path.join(BASE_DIR, 'tags', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
