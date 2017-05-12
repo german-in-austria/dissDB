@@ -73,6 +73,7 @@ INSTALLED_APPS = (
 	'Datenbank',
 	'startseite',
 	'bearbeiten',
+	'tags',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -91,7 +92,7 @@ ROOT_URLCONF = 'DissDB.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'DissDB', 'templates'),os.path.join(BASE_DIR, 'startseite', 'templates'),os.path.join(BASE_DIR, 'bearbeiten', 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'DissDB', 'templates'),os.path.join(BASE_DIR, 'startseite', 'templates'),os.path.join(BASE_DIR, 'bearbeiten', 'templates'),os.path.join(BASE_DIR, 'tags', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -177,5 +178,6 @@ if 'DISSDB_AUDIO_URL' in os.environ and os.environ['DISSDB_AUDIO_URL']:
 STATICFILES_DIRS = (
 	os.path.join(BASE_DIR, 'DissDB', 'static'),
 	os.path.join(BASE_DIR, 'bearbeiten', 'static'),
+	os.path.join(BASE_DIR, 'tags', 'static'),
 	os.path.join(BASE_DIR, 'Dateien'),
 )

@@ -1,0 +1,15 @@
+{% extends 'main/basis.html' %}
+{% load staticfiles %}
+{% load dissTags %}
+{% load crispy_forms_tags %}
+{% block title %} - bearbeiten{% endblock %}
+{% block ueberschrift %} - bearbeiten{% endblock %}
+{% block inhalt %}
+xxx
+{% endblock %}
+{% block sitejs %}
+<script>
+	var csrf='{{ csrf_token }}';
+</script>
+<script src="{% static "tags/js/scripts.js" %}"></script>
+{% endblock %}
