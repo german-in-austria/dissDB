@@ -1,10 +1,10 @@
 {% extends 'main/basis.html' %}
 {% load staticfiles %}
+{% load dissTags %}
 {% load crispy_forms_tags %}
 {% block title %} - bearbeiten{% endblock %}
 {% block ueberschrift %} - bearbeiten{% endblock %}
 {% block inhalt %}
-
 <div class="row h100">
 	<div class="col-md-2 h100 mh200px vscroller lmfa">
 		<form id="selaufgabe" method="post">{% csrf_token %}
@@ -33,8 +33,14 @@
 <style>
 	html,body,body>.container { height:100%; }
 </style>
-
+{% endblock %}
+{% block sitejs %}
 <script>
 	var csrf='{{ csrf_token }}';
+	var audiodir = '{% settings_value "AUDIO_URL" %}';
 </script>
+<script src="{% static "bearbeiten/js/audioplayer.js" %}"></script>
+<script src="{% static "bearbeiten/js/tags.js" %}"></script>
+<script src="{% static "bearbeiten/js/formular.js" %}"></script>
+<script src="{% static "bearbeiten/js/scripts.js" %}"></script>
 {% endblock %}

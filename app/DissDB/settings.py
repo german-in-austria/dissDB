@@ -176,5 +176,6 @@ if 'DISSDB_AUDIO_URL' in os.environ and os.environ['DISSDB_AUDIO_URL']:
 
 STATICFILES_DIRS = (
 	os.path.join(BASE_DIR, 'DissDB', 'static'),
+	os.path.join(BASE_DIR, 'bearbeiten', 'static'),
 	os.path.join(BASE_DIR, 'Dateien'),
 )

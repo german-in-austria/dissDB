@@ -457,6 +457,7 @@ select.tagebene {
   top: -1px;
   text-shadow: -1px -1px 1px #fff,1px -1px 1px #fff,1px 1px 1px #fff,-1px 1px 1px #fff,0px 0px 1px #fff;
   z-index:1000;
+  cursor: default;
 }
 .pb-starttime {
   left: 8px;

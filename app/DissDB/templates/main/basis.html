@@ -1,4 +1,4 @@
-{% load staticfiles %}{% load dissTags %}<!DOCTYPE html>
+{% load staticfiles %}<!DOCTYPE html>
 <html lang="de">
   <head>
     <meta charset="utf-8">
@@ -36,14 +36,9 @@
 </nav>
 {% endspaceless %}
 	<div class="container">{% block inhalt %}{% endblock %}</div>
-  <script type="text/javascript">
-    var audiodir = '{% settings_value "AUDIO_URL" %}';
-  </script>
   <script src="{% static "main/js/jquery.min.js" %}"></script>
   <script src="{% static "main/js/bootstrap.min.js" %}"></script>
   <script src="{% static "main/js/mousetrap.min.js" %}"></script>
-  <script src="{% static "main/js/audioplayer.js" %}"></script>
-  <script src="{% static "main/js/tags.js" %}"></script>
   <script src="{% static "main/js/scripts.js" %}"></script>
 	{% block sitejs %}{% endblock %}
   </body>
