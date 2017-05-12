@@ -24,6 +24,7 @@
 		{% if user.is_authenticated %}
 			<li><a href="{% url 'bearbeiten:start' %}">Bearbeiten</a></li>
       <li><a href="{% url 'tags:start' %}">Tags</a></li>
+      <li><a href="{% url 'DB:start' %}">Datenbank</a></li>
 			<li class="dropdown"><a href="#" class="dropdown-toggle text-uppercase" data-toggle="dropdown" role="button" aria-expanded="false">{{ user.username }} <span class="caret"></span></a>
 				<ul class="dropdown-menu" role="menu">
 					{% if user.is_superuser %}<li><a href="{% url 'admin:index' %}" target="_blank">Admin</a></li>{% endif %}
@@ -40,6 +41,7 @@
   <script src="{% static "main/js/jquery.min.js" %}"></script>
   <script src="{% static "main/js/bootstrap.min.js" %}"></script>
   <script src="{% static "main/js/mousetrap.min.js" %}"></script>
+  <script src="{% static "main/js/funktionen.js" %}"></script>
   <script src="{% static "main/js/scripts.js" %}"></script>
 	{% block sitejs %}{% endblock %}
   </body>
