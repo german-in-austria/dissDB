@@ -95,9 +95,9 @@ class Tags(models.Model):
 	zu_Phaenomen		= models.ForeignKey('Phaenomene',			blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Zu Phänomen")
 	Kommentar			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Kommentar")
 	AReihung			= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
-	Generation			= models.IntegerField(						blank=True, null=True									, verbose_name="Generation")
+	Generation			= models.IntegerField(choices=[(i, i) for i in range(0, 10)], blank=True, null=True					, verbose_name="Generation")
 	def __str__(self):
-		return "{}".format(self.Tag)
+		return "{} ({}, {})".format(self.Tag,self.Generation,self.zu_Phaenomen)
 	class Meta:
 		db_table = "Tags"
 		verbose_name = "Tag"
@@ -122,7 +122,7 @@ class Phaenomene(models.Model):
 	zu_PhänBer			= models.IntegerField(						blank=True, null=True									, verbose_name="Zu Phänomenen Ber")
 	Kommentar			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Kommentar")
 	def __str__(self):
-		return "{}".format(self.Bez_Phaenomen)
+		return "{} ({})".format(self.Bez_Phaenomen,self.zu_PhänBer)
 	class Meta:
 		db_table = "Phaenomene"
 		verbose_name = "Phänomen"
