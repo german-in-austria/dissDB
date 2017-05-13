@@ -1,7 +1,7 @@
 from django.db import models
 
 class Antworten(models.Model):
-	id_Antwort			= models.AutoField(primary_key=True																	, verbose_name="ID von Antwort")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Antwort")
 	von_Inf				= models.ForeignKey('Informanten'									, on_delete=models.CASCADE		, verbose_name="von Informanten")
 	zu_Aufgabe			= models.ForeignKey('Aufgaben',				blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="zu Aufgabe")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
@@ -23,7 +23,7 @@ class Antworten(models.Model):
 		ordering = ('Reihung',)
 
 class Antwortmoeglichkeiten(models.Model):
-	id_am				= models.AutoField(primary_key=True																	, verbose_name="ID Antwortmöglichkeit")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID Antwortmöglichkeit")
 	zu_Aufgabe			= models.ForeignKey('Aufgaben'										, on_delete=models.CASCADE		, verbose_name="zu_Aufgabe")
 	Kuerzel				= models.CharField(max_length=255																	, verbose_name="Kürzel")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
@@ -37,7 +37,7 @@ class Antwortmoeglichkeiten(models.Model):
 		ordering = ('Reihung',)
 
 class Saetze(models.Model):
-	id_Satz				= models.AutoField(primary_key=True																	, verbose_name="ID von Satz")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Satz")
 	Transkript			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Transkript")
 	Standardorth		= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Standardorth")
 	Kommentar			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Kommentar")
@@ -87,7 +87,7 @@ class TagEbeneZuTag(models.Model):
 		ordering = ('id_TagEbene',)
 
 class Tags(models.Model):
-	id_tag				= models.AutoField(primary_key=True																	, verbose_name="ID von Tag")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Tag")
 	Tag					= models.CharField(max_length=255																	, verbose_name="Tag")
 	Tag_lang			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Tag lang")
 	# zu_Tag löschen!
@@ -116,7 +116,7 @@ class TagFamilie(models.Model):
 		ordering = ('id_ParentTag',)
 
 class Phaenomene(models.Model):
-	id_Phaenomen		= models.AutoField(primary_key=True																	, verbose_name="ID von Phänomen")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Phänomen")
 	Bez_Phaenomen		= models.CharField(max_length=511																	, verbose_name="Bezeichnung Phänomen")
 	Beschr_Phaenomen	= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Beschreibung Phänomen")
 	zu_PhänBer			= models.IntegerField(						blank=True, null=True									, verbose_name="Zu Phänomenen Ber")
@@ -130,7 +130,7 @@ class Phaenomene(models.Model):
 		ordering = ('Bez_Phaenomen',)
 
 class Phaenomenbereich(models.Model):
-	id_Phaenomenbereich			= models.AutoField(primary_key=True																	, verbose_name="ID von Phänomenbereich")
+	id							= models.AutoField(primary_key=True																	, verbose_name="ID von Phänomenbereich")
 	Bez_Phaenomenbereich		= models.CharField(max_length=511																	, verbose_name="Bezeichnung Phänomenbereich")
 	def __str__(self):
 		return "{}".format(self.Bez_Phänomen)
@@ -141,7 +141,7 @@ class Phaenomenbereich(models.Model):
 		ordering = ('Bez_Phaenomenbereich',)
 
 class Informanten(models.Model):
-	id_Person			= models.AutoField(primary_key=True																	, verbose_name="ID von Informant")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Informant")
 	Kuerzel				= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Kürzel")
 	Kuerzel_anonym		= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Kürzel Anonym")
 	Name				= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="Name")
@@ -157,15 +157,15 @@ class Informanten(models.Model):
 
 
 	def __str__(self):
-		return "{} ({})".format(self.Kuerzel,self.id_Person)
+		return "{} ({})".format(self.Kuerzel,self.id)
 	class Meta:
 		db_table = "Informanten"
 		verbose_name = "Informant"
 		verbose_name_plural = "Informanten"
-		ordering = ('id_Person',)
+		ordering = ('id',)
 
 class InfErhebung(models.Model):
-	id_InfErh			= models.AutoField(primary_key=True																	, verbose_name="ID von InfErhebung")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von InfErhebung")
 	ID_Erh				= models.ForeignKey('Erhebungen'									, on_delete=models.CASCADE		, verbose_name="ID Erhebung")
 	ID_Inf				= models.ForeignKey('Informanten'									, on_delete=models.CASCADE		, verbose_name="ID Informant")
 	Datum				= models.DateField(																					  verbose_name="Datum")
@@ -200,7 +200,7 @@ class ErhInfAufgaben(models.Model):
 		ordering = ('Reihung',)
 
 class Erhebungen(models.Model):
-	id_Erhebung			= models.AutoField(primary_key=True																	, verbose_name="ID von Erhebung")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Erhebung")
 	Art_Erhebung		= models.IntegerField(						blank=True, null=True									, verbose_name="Art der Erhebung")
 	Bezeichnung_Erhebung= models.CharField(max_length=511																	, verbose_name="Bezeichnung der Erhebung")
 	Zeitraum			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Zeitraum")
@@ -214,7 +214,7 @@ class Erhebungen(models.Model):
 		ordering = ('Bezeichnung_Erhebung',)
 
 class Erhebung_mit_Aufgaben(models.Model):
-	id_ErhA				= models.AutoField(primary_key=True																	, verbose_name="ID von Erhebung_mit_Aufgaben")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Erhebung_mit_Aufgaben")
 	id_Erh				= models.ForeignKey('Erhebungen'									, on_delete=models.CASCADE		, verbose_name="von Erhebungen")
 	id_Aufgabe			= models.ForeignKey('Aufgaben',				blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="zu Aufgabe")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
@@ -228,7 +228,7 @@ class Erhebung_mit_Aufgaben(models.Model):
 		ordering = ('Reihung',)
 
 class Aufgaben(models.Model):
-	id_Aufgabe			= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabe")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabe")
 	von_ASet			= models.ForeignKey('Aufgabensets'									, on_delete=models.CASCADE		, verbose_name="von Aufgabensets")
 	Variante			= models.IntegerField(																				  verbose_name="Variante")
 	ist_dialekt			= models.BooleanField(default=False																	, verbose_name="Ist Dialekt")
@@ -242,7 +242,7 @@ class Aufgaben(models.Model):
 		ordering = ('von_ASet',)
 
 class Aufgabensets(models.Model):
-	id_Aufgabe			= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenset")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenset")
 	Kuerzel				= models.CharField(max_length=255																	, verbose_name="Kürzel")
 	Name_Aset			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Name Aufgabenset")
 	Fokus				= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Fokus")
@@ -259,7 +259,7 @@ class Aufgabensets(models.Model):
 		ordering = ('Kuerzel',)
 
 class Aufgabenzusammenstellungen(models.Model):
-	id_AZus				= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenzusammenstellung")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenzusammenstellung")
 	Bezeichnung_AZus	= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Bezeichnung")
 	Kommentar			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Kommentar")
 	AZusCol				= models.CharField(max_length=255,			blank=True, null=True									, verbose_name="AZus Col")
@@ -272,7 +272,7 @@ class Aufgabenzusammenstellungen(models.Model):
 		ordering = ('Bezeichnung_AZus',)
 
 class AZusBeinhaltetMedien(models.Model):
-	id_AZusMed			= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenzusammenstellung")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenzusammenstellung")
 	id_AZus				= models.ForeignKey('Aufgabenzusammenstellungen'					, on_delete=models.CASCADE		, verbose_name="von AZus")
 	id_Mediatyp			= models.ForeignKey('Mediatypen'									, on_delete=models.CASCADE		, verbose_name="von Mediatyp")
 	Reihung				= models.CharField(max_length=255,																	  verbose_name="Reihung")
@@ -285,7 +285,7 @@ class AZusBeinhaltetMedien(models.Model):
 		ordering = ('Reihung',)
 
 class Aufgabenfiles(models.Model):
-	id_Afiles			= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenfile")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Aufgabenfile")
 	id_Aufgabe			= models.ForeignKey('Aufgaben'										, on_delete=models.CASCADE		, verbose_name="von Aufgaben")
 	id_Mediatyp			= models.ForeignKey('Mediatypen'									, on_delete=models.CASCADE		, verbose_name="von Mediatyp")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
@@ -301,7 +301,7 @@ class Aufgabenfiles(models.Model):
 		ordering = ('Reihung',)
 
 class Mediatypen(models.Model):
-	id_Mediatyp			= models.AutoField(primary_key=True																	, verbose_name="ID von Mediatyp")
+	id					= models.AutoField(primary_key=True																	, verbose_name="ID von Mediatyp")
 	Bezeichnung			= models.CharField(max_length=255																	, verbose_name="Bezeichnung")
 	Filetypes			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Filetypes")
 	def __str__(self):

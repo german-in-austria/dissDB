@@ -34,7 +34,7 @@ def start(request,ipk=0,apk=0):
 			elif request.POST.get('save') == 'Aufgaben':
 				for aAntwort in json.loads(request.POST.get('aufgaben')):
 					if 'delit' in aAntwort:		# Löschen
-						aDelAntwort = dbmodels.Antworten.objects.get(id_Antwort=aAntwort['id_Antwort'])
+						aDelAntwort = dbmodels.Antworten.objects.get(pk=aAntwort['id_Antwort'])
 						test+=str(aDelAntwort)+' Löschen!<br>'
 						if aDelAntwort.ist_Satz:
 							aDelAntwort.ist_Satz.delete()
@@ -44,7 +44,7 @@ def start(request,ipk=0,apk=0):
 					else:						# Speichern/Erstellen
 						if aAntwort['Kommentar'] or aAntwort['ist_Satz_Standardorth'] or aAntwort['ist_bfl'] or aAntwort['bfl_durch_S'] or aAntwort['ist_Satz_Transkript'] or aAntwort['start_Antwort'] or aAntwort['stop_Antwort'] or aAntwort['tags']:
 							if int(aAntwort['id_Antwort']) > 0:		# Speichern
-								aSaveAntwort = dbmodels.Antworten.objects.get(id_Antwort=aAntwort['id_Antwort'])
+								aSaveAntwort = dbmodels.Antworten.objects.get(pk=aAntwort['id_Antwort'])
 								sTyp = ' gespeichert!<br>'
 							else:									# Erstellen
 								aSaveAntwort = dbmodels.Antworten()
@@ -60,7 +60,7 @@ def start(request,ipk=0,apk=0):
 							aSaveAntwort.stop_Antwort = datetime.timedelta(microseconds=int(float(aAntwort['stop_Antwort'] if aAntwort['stop_Antwort'] else 0)*1000000))
 							aSaveAntwort.Kommentar = aAntwort['Kommentar']
 							if int(aAntwort['ist_Satz_pk']) > 0:	# Satz bearbeiten
-								asSatz = dbmodels.Saetze.objects.get(id_Satz=aAntwort['ist_Satz_pk'])
+								asSatz = dbmodels.Saetze.objects.get(pk=aAntwort['ist_Satz_pk'])
 								ssTyp = ' gespeichert!<br>'
 							else:									# Satz erstellen
 								asSatz = dbmodels.Saetze()
