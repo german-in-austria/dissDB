@@ -9,9 +9,15 @@ import json
 
 def getTagList(Tags,TagPK):
 	TagData = []
-	for value in Tags.objects.filter(zu_Tag=TagPK):
-		child = getTagList(Tags,value.pk)
-		TagData.append({'model':value,'child':child})
+	if TagPK == None:
+		#pprint.pprint(dir(Tags))
+		for value in Tags.objects.filter(id_ChildTag=None):
+			child=getTagList(Tags,value.pk)
+			TagData.append({'model':value,'child':child})
+	else:
+		for value in Tags.objects.filter(id_ChildTag__id_ParentTag=TagPK):
+			child=getTagList(Tags,value.pk)
+			TagData.append({'model':value,'child':child})
 	return TagData
 
 def start(request,ipk=0,apk=0):

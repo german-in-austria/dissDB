@@ -35,7 +35,7 @@ def tagsedit(request):
 
 	aufgabenform = [
 		{'titel':'Tag','titel_plural':'Tags','app':'Datenbank','tabelle':'Tags','id':'tags','optionen':['einzeln','elementFrameless'],
-		 'felder':['+id','Tag','Tag_lang','zu_Phaenomen','Kommentar','Generation','AReihung'],
+		 'felder':['+id','Tag','Tag_lang','zu_Phaenomen','Kommentar','Generation','AReihung','+zu_Tag'],
  		 'sub':[
 	 		{'titel':'Tag Familie - Parent','titel_plural':'Tag Familie - Parents','app':'Datenbank','tabelle':'TagFamilie','id':'tagfamilieparents','optionen':['liste','elementeclosed'],
  		 	 'felder':['+id','|id_ChildTag=parent:id','id_ParentTag'],
