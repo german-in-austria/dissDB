@@ -23,7 +23,12 @@
 		<li><a href="{% url 'Startseite:start' %}">Startseite</a></li>
 		{% if user.is_authenticated %}
 			<li><a href="{% url 'bearbeiten:start' %}">Bearbeiten</a></li>
-      <li><a href="{% url 'tags:start' %}">Tags</a></li>
+      <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Tags <span class="caret"></span></a>
+				<ul class="dropdown-menu" role="menu">
+          <li><a href="{% url 'tags:tagsedit' %}">Tageditor</a></li>
+          <li><a href="{% url 'tags:start' %}">Tag Übersicht</a></li>
+        </ul>
+			</li>
       <li><a href="{% url 'DB:start' %}">Datenbank</a></li>
 			<li class="dropdown"><a href="#" class="dropdown-toggle text-uppercase" data-toggle="dropdown" role="button" aria-expanded="false">{{ user.username }} <span class="caret"></span></a>
 				<ul class="dropdown-menu" role="menu">

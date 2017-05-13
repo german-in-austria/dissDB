@@ -37,10 +37,20 @@ def tagsedit(request):
 		{'titel':'Tag','titel_plural':'Tags','app':'Datenbank','tabelle':'Tags','id':'tags','optionen':['einzeln','elementFrameless'],
 		 'felder':['+id','Tag','Tag_lang','zu_Phaenomen','Kommentar','Generation','AReihung'],
  		 'sub':[
-	 		{'titel':'Tag Ebene zu Tag','titel_plural':'Tag Ebenen zu Tag','app':'Datenbank','tabelle':'TagEbeneZuTag','id':'tagebenezutag','optionen':['liste'],
- 		 	 'felder':['+id','|id_Tag=parent:id','id_TagEbene']
-		 	}
-		 ]
+	 		{'titel':'Tag Familie - Parent','titel_plural':'Tag Familie - Parents','app':'Datenbank','tabelle':'TagFamilie','id':'tagfamilieparents','optionen':['liste','elementeclosed'],
+ 		 	 'felder':['+id','|id_ChildTag=parent:id','id_ParentTag'],
+			 'elementtitel':'{% load dioeTags %} - <span data-formtitel="id_ParentTag">{% getFeldVal aData.felder \'id_ParentTag\' %}</span>',
+		 	},
+	 		{'titel':'Tag Familie - Child','titel_plural':'Tag Familie - Childs','app':'Datenbank','tabelle':'TagFamilie','id':'tagfamiliechilds','optionen':['liste','elementeclosed'],
+ 		 	 'felder':['+id','|id_ParentTag=parent:id','id_ChildTag'],
+			 'elementtitel':'{% load dioeTags %} - <span data-formtitel="id_ChildTag">{% getFeldVal aData.felder \'id_ChildTag\' %}</span>',
+		 	},
+	 		{'titel':'Tag Ebene zu Tag','titel_plural':'Tag Ebenen zu Tag','app':'Datenbank','tabelle':'TagEbeneZuTag','id':'tagebenezutag','optionen':['liste','elementeclosed'],
+ 		 	 'felder':['+id','|id_Tag=parent:id','id_TagEbene'],
+			 'elementtitel':'{% load dioeTags %} - <span data-formtitel="id_TagEbene">{% getFeldVal aData.felder \'id_TagEbene\' %}</span>',
+		 	},
+		 ],
+		 'suboption':['tab']
 		}
 	]
 	return formularView(app_name,tabelle_name,permName,primaerId,aktueberschrift,asurl,aufgabenform,request,info,error)
