@@ -147,3 +147,7 @@ function tagEbenenOptionUpdate(athis) {
 		}
 	})
 }
+function familienHinzufuegenKnopfUpdate() {
+	$('button.ant-ftag').remove()
+	$('.r-tag-familie-pchilds').append('<button class="ant-ftag"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>')
+}

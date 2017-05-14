@@ -326,7 +326,7 @@ ul.lmfa-dl {
 select.tagebene {
   text-align-last: right;
 }
-.ant-tag, .ant-ntag, .ant-ctag {
+.ant-ntag, .ant-ctag {
   display: inline-block;
   background: #fff;
   border: 1px solid #ccc;
@@ -362,13 +362,49 @@ select.tagebene {
   overflow-y: scroll;
   max-height: 300px;
 }
-.reihung-tags .r-tag-familie {
+.r-tag-familie {
   display: inline-block;
-	border: 1px solid #00f;
-	padding: 1px;
 }
-.reihung-tags .r-tag-familie.r-tag-familie-pchilds:after {
-  content: "+";
+.r-tag-familie:not([data-pk="0"])>button {
+  border: none;
+  background: none;
+  border-right: 1px solid rgba(0,0,0,0.2);
+  border-radius: 11px;
+  margin: -1px 0px;
+  padding: 2px 6px;
+}
+.r-tag-familie:not([data-pk="0"])>button.ant-ftag {
+  margin-left: -3px;
+  margin-right: -1px;
+}
+.r-tag-familie .r-tag-familie-pchilds {
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 11px;
+  background: #fff;
+}
+.r-tag-familie-pchilds .r-tag-familie-pchilds .r-tag-familie-pchilds {
+  border-left: 1px dashed rgba(0,0,0,0.2);
+  border-radius: 2px 11px 11px 2px;
+}
+.r-tag-familie-pchilds .r-tag-familie-pchilds .r-tag-familie-pchilds:not([data-pk="0"])>button {
+	border-bottom-left-radius: 0px;
+  border-top-left-radius: 0px;
+}
+.r-tag-familie[data-pk="0"]>.r-tag-familie:not(.r-tag-familie-pchilds)>button.ant-tag, .r-tag-familie[data-pk="0"]>button.ant-ftag {
+	background: #fff;
+  border: 1px solid #ccc;
+  padding: 2px 8px;
+  margin-right: 2px;
+  border-radius: 11px;
+  text-decoration: none;
+  color: #333;
+}
+.r-tag-familie[data-pk="0"]>button.ant-ftag {
+	padding: 2px 5px;
+  border-radius: 14px;
+}
+button.ant-tag.addhover {
+  background: #eef;
 }
 .seltags .tag-familie {
   margin-left: 0px;

@@ -42,6 +42,7 @@ var unsavedEIAufgabe = 0;
 				resetBeeinflussung()
 				tagEbenenOptionUpdateAll()
 				setAudioPlayer()
+				familienHinzufuegenKnopfUpdate()
 			}).fail(function(d) {
 				alert( "error" )
 				console.log(d)
@@ -72,6 +73,8 @@ var unsavedEIAufgabe = 0;
 	$(document).on('click','.pretags .pretagsbtn',tagPresetHinzufuegenClick)
 	$(document).on('click','.add-tag-line',addTagLineClick)
 	$(document).on('change','select.tagebene',tagEbeneChange)
+	$(document).on('mouseenter','button.ant-ftag',function(){$(this).siblings('button.ant-tag').addClass('addhover')})
+	$(document).on('mouseleave','button.ant-ftag',function(){$(this).siblings('button.ant-tag').removeClass('addhover')})
 	/* Audio */
 	$(document).on('click','#aufgabenprogress, #inferhebungprogress',progressClick)
 	$(document).on('click','#audio-play-pause',playPauseClick)
