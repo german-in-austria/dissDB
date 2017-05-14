@@ -6,42 +6,14 @@ function closeTagSelect(e) {	/* Tag Select Fenster schließen wenn ausserhalb ge
 function openNewTagSelectClick(e){
 	var apos = $(this).position()
 	$(this).after('<div class="tags seltags newtag" style="left:'+apos.left+'px;">'+$('#xtags').html()+'</div>')
-	var avEbene = $(this).parents('.tag-line').find('select.tagebene').val()
-	if($(this).parent().data('generation')=="None") {
-		var avGeneration = 0
-	} else {
-		var avGeneration = $(this).parent().data('generation')+1
-	}
-	var avPk = $(this).parent().data('pk')
-	$('.tags.seltags .tag-familie').each(function(){
-		if(avPk>0) {
-			if($(this).parents('.tag-familie').length>0) {
-				if($(this).data('pk')==avPk) {
-					$(this).addClass('show-familie').parents('.tag-familie').removeClass('hidden-familie')
-				} else {
-					$(this).addClass('hidden-familie')
-				}
-			} else {
-				if($(this).data('pk')==avPk) {
-					$(this).addClass('show-familie')
-				} else {
-					$(this).addClass('hidden-familie')
-				}
-			}
-		}
-		if($(this).data('ebenen')) {
-			if($(this).data('ebenen').split(",").indexOf(avEbene)<0) {
-				$(this).addClass('hidden-ebene')
-			}
-		}
-		if($(this).data('generation')!=avGeneration && $(this).data('generation')!="None") {
-			if($(this).data('generation')<avGeneration) {
-				$(this).addClass('hidden-parent').children('button.ptagsbtn').attr('disabled','disabled')
-			} else {
-				$(this).addClass('hidden-child')
-			}
-		}
-	})
+	filterSeltags(this,1)
+	$(this).blur()
+}
+function openChangeTagSelectClick(e){
+	var apos = $(this).position()
+	$(this).after('<div class="tags seltags edittag" style="left:'+apos.left+'px;" data-reihung="'+$(this).data('reihung')+'">'+$('#xtags').html()+'</div>')
+	$('.seltags').find('.ptagsbtn[data-pk="' + $(this).data('id_tag') + '"]').addClass('active')
+	filterSeltags(this,0)
 	$(this).blur()
 }
 function moveTagLeftRightClick(e){
@@ -67,24 +39,24 @@ function openTagPresetSelectClick(e){
 	$(this).after('<div class="tags seltags pretags" style="left:'+apos.left+'px;">'+$('#pretags').html()+'</div>')
 	$(this).blur()
 }
-function openChangeTagSelectClick(e){
-	var apos = $(this).position()
-	$(this).after('<div class="tags seltags edittag" style="left:'+apos.left+'px;" data-reihung="'+$(this).data('reihung')+'">'+$('#'+$(this).data('popup')).html()+'</div>')
-	$('.seltags').find('.ptagsbtn[data-pk="' + $(this).data('id_tag') + '"]').addClass('active')
-	$(this).blur()
-}
 function tagAendernLoeschenClick(e){
 	var aselobj = $(this).parents('.seltags')
 	var othis=this
-	if($(othis).data('pk')!=0 || ($(othis).data('pk')==0&&confirm('Soll dieser "AntwortenTag" tatsächlich gelöscht werden?'))) {
+	if($(othis).data('pk')!=0 || ($(othis).data('pk')==0 && confirm('Soll dieser "AntwortenTag" tatsächlich gelöscht werden?'))) {
 		$(this).parents('.reihung-tags').find('.ant-tag').each(function(){
 			if($(this).data('reihung') == aselobj.data('reihung')) {
-				$(this).data('id_tag',$(othis).data('pk')).html($(othis).html())
-				if($(othis).data('pk')==0) {
-					if($(this).data('pk')==0) {
-						$(this).remove()
+				if($(othis).data('pk')==0 || ($(this).siblings('.r-tag-familie:visible').length==0 || confirm('Sollen die "Children" tatsächlich gelöscht werden?'))) {
+					//$(this).data('id_tag',$(othis).data('pk')).html($(othis).html())
+					orgPk = $(this).data('pk')
+					if($(othis).data('pk')==0) {
+						if($(this).data('pk')==0) {
+							$(this).parent().remove()
+						} else {
+							$(this).data('id_tag',0).parent().hide().find('.ant-tag').data('id_tag',0).addClass('delit')
+						}
 					} else {
-						$(this).addClass('delit')
+						$(this).siblings('.r-tag-familie').hide().find('.ant-tag').attr('data-id_tag',0).addClass('delit')
+						$(this).parent().replaceWith('<div class="'+$(othis).parent().data('classes')+'" data-generation="'+$(othis).parent().data('generation')+'" data-pk="'+$(othis).parent().data('pk')+'"><button class="ant-tag" data-id_tag="'+$(othis).data('pk')+'" data-pk="'+orgPk+'">'+$(othis).html()+'</button>'+$('<div></div>').append($(this).siblings('.r-tag-familie')).html()+'</div>')
 					}
 				}
 			}
@@ -92,24 +64,25 @@ function tagAendernLoeschenClick(e){
 	}
 	aselobj.remove()
 	resetReihungTags()
+	familienHinzufuegenKnopfUpdate()
 	unsavedAntworten = 1
 	$('#antwortensave').removeClass('disabled')
 }
 function tagHinzufuegenClick(e){
 	var aselobj = $(this).parents('.seltags')
-	$(this).parents('.reihung-tags').find('.ant-ntag').before('<button class="ant-tag" data-popup="'+$(this).parents('.reihung-tags').find('.ant-ntag').data('popup')+'" data-id_tag="'+$(this).data('pk')+'" data-pk="0">'+$(this).html()+'</button>')
+	$(this).parents('.tags.seltags').siblings('.ant-ftag').before('<div class="'+$(this).parent().data('classes')+'" data-generation="'+$(this).parent().data('generation')+'" data-pk="'+$(this).parent().data('pk')+'"><button class="ant-tag" data-id_tag="'+$(this).data('pk')+'" data-pk="0">'+$(this).html()+'</button></div>')
 	aselobj.remove()
 	resetReihungTags()
+	familienHinzufuegenKnopfUpdate()
 	unsavedAntworten = 1
 	$('#antwortensave').removeClass('disabled')
 }
 function tagPresetHinzufuegenClick(e){
 	var aselobj = $(this).parents('.seltags')
-	var apopup = $(this).parents('.reihung-tags').find('.ant-ntag').data('popup')
 	var athis = $(this)
 	$.each($(this).data('pks').split(';'),function(i,e){
 		var adata = e.split(',',2)
-		athis.parents('.reihung-tags').find('.ant-ntag').before('<button class="ant-tag" data-popup="'+apopup+'" data-id_tag="'+adata[0]+'" data-pk="0">'+adata[1]+'</button>')
+		athis.parents('.reihung-tags').find('.ant-ntag').before('<button class="ant-tag" data-id_tag="'+adata[0]+'" data-pk="0">'+adata[1]+'</button>')
 	})
 	aselobj.remove()
 	resetReihungTags()
@@ -186,4 +159,47 @@ function tagEbenenOptionUpdate(athis) {
 function familienHinzufuegenKnopfUpdate() {
 	$('button.ant-ftag').remove()
 	$('.r-tag-familie-pchilds').append('<button class="ant-ftag"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>')
+}
+function filterSeltags(athis,addtag) {
+	if(addtag==0) {
+		athis = $(athis).parent().siblings('.ant-ftag')
+	} else {
+		athis = $(athis)
+	}
+	var avEbene = athis.parents('.tag-line').find('select.tagebene').val()
+	if(athis.parent().data('generation')=="None") {
+		var avGeneration = 0
+	} else {
+		var avGeneration = athis.parent().data('generation')+1
+	}
+	var avPk = athis.parent().data('pk')
+	$('.tags.seltags .tag-familie').each(function(){
+		if(avPk>0) {
+			if($(this).parents('.tag-familie').length>0) {
+				if($(this).data('pk')==avPk) {
+					$(this).addClass('show-familie').parents('.tag-familie').removeClass('hidden-familie')
+				} else {
+					$(this).addClass('hidden-familie')
+				}
+			} else {
+				if($(this).data('pk')==avPk) {
+					$(this).addClass('show-familie')
+				} else {
+					$(this).addClass('hidden-familie')
+				}
+			}
+		}
+		if($(this).data('ebenen')) {
+			if($(this).data('ebenen').split(",").indexOf(avEbene)<0) {
+				$(this).addClass('hidden-ebene')
+			}
+		}
+		if($(this).data('generation')!=avGeneration && $(this).data('generation')!="None") {
+			if($(this).data('generation')<avGeneration) {
+				$(this).addClass('hidden-parent').children('button.ptagsbtn').attr('disabled','disabled')
+			} else {
+				$(this).addClass('hidden-child')
+			}
+		}
+	})
 }

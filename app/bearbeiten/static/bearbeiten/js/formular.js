@@ -61,6 +61,7 @@ function antwortenSpeichernClick(e){
       resetBeeinflussung()
       informantenAntwortenUpdate()
       tagEbenenOptionUpdateAll()
+      familienHinzufuegenKnopfUpdate()
     }).fail(function(d) {
       alert( "error" )
       console.log(d)

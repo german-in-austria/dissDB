@@ -53,7 +53,7 @@
 									{% endfor %}
 								{% endwith %}
 								<div class="r-tag-familie{% if tvalue.pChilds %} r-tag-familie-pchilds{% endif %}" data-generation="{{ tvalue.aTag.id_Tag.Generation|stringformat:"i"|default:'None' }}" data-pk="{{ tvalue.aTag.id_Tag.pk|stringformat:"i" }}">
-									<button class="ant-tag" data-popup="xtags" data-id_Tag="{{ tvalue.aTag.id_Tag.pk|stringformat:"i" }}" data-pk="{{ tvalue.aTag.pk|stringformat:"i" }}">{{ tvalue.aTag.id_Tag.Tag }}</button>
+									<button class="ant-tag" data-id_Tag="{{ tvalue.aTag.id_Tag.pk|stringformat:"i" }}" data-pk="{{ tvalue.aTag.pk|stringformat:"i" }}">{{ tvalue.aTag.id_Tag.Tag }}</button>
 								{% if forloop.last %}
 									{% with ''|rjust:tvalue.aGen as range %}
 										{% for _ in range %}
@@ -64,7 +64,7 @@
 							{% endfor %}
 							</div>
 						</div>
-						<button class="ant-ctag" data-popup="xtags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
+						<!--<button class="ant-ctag"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>-->
 					</div></div>
 				</div>
 			{% endfor %}
@@ -81,7 +81,7 @@
 					</label>
 					<div class="col-sm-10"><div class="form-control-static reihung-tags">
 						<div class="r-tag-familie r-tag-familie-pchilds" data-generation="None" data-pk="0"></div>
-						<button class="ant-ctag" data-popup="xtags"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
+						<!--<button class="ant-ctag"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>-->
 					</div></div>
 				</div>
 			</div>
