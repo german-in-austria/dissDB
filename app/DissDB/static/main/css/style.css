@@ -473,6 +473,20 @@ button.ant-tag.addhover {
 .newtag .tagscontrol {
 	display:none;
 }
+.tag-familie.hidden-child {
+  display: none;
+}
+.tag-familie.hidden-parent>button.ptagsbtn {
+	background:#888;
+}
+.tag-familie.hidden-ebene {
+	display:none;
+}
+:not(.show-familie) > .hidden-familie:not([data-generation="None"]) {
+	display:none;
+}
+
+
 #addantwort, .add-tag-line {
   display: inline-block;
   background: #fff;

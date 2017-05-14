@@ -65,7 +65,7 @@ var unsavedEIAufgabe = 0;
 	/* Tags */
 	$(document).mouseup(closeTagSelect)
 	$(document).on('click','.antwort .ptagsleft, .antwort .ptagsright',moveTagLeftRightClick)
-	$(document).on('click','.ant-ntag',openNewTagSelectClick)
+	$(document).on('click','.ant-ftag',openNewTagSelectClick)
 	$(document).on('click','.ant-ctag',openTagPresetSelectClick)
 	$(document).on('click','.ant-tag',openChangeTagSelectClick)
 	$(document).on('click','.edittag .ptagsbtn:not(.ptagsleft,.ptagsright)',tagAendernLoeschenClick)

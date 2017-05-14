@@ -5,7 +5,43 @@ function closeTagSelect(e) {	/* Tag Select Fenster schließen wenn ausserhalb ge
 }
 function openNewTagSelectClick(e){
 	var apos = $(this).position()
-	$(this).after('<div class="tags seltags newtag" style="left:'+apos.left+'px;">'+$('#'+$(this).data('popup')).html()+'</div>')
+	$(this).after('<div class="tags seltags newtag" style="left:'+apos.left+'px;">'+$('#xtags').html()+'</div>')
+	var avEbene = $(this).parents('.tag-line').find('select.tagebene').val()
+	if($(this).parent().data('generation')=="None") {
+		var avGeneration = 0
+	} else {
+		var avGeneration = $(this).parent().data('generation')+1
+	}
+	var avPk = $(this).parent().data('pk')
+	$('.tags.seltags .tag-familie').each(function(){
+		if(avPk>0) {
+			if($(this).parents('.tag-familie').length>0) {
+				if($(this).data('pk')==avPk) {
+					$(this).addClass('show-familie').parents('.tag-familie').removeClass('hidden-familie')
+				} else {
+					$(this).addClass('hidden-familie')
+				}
+			} else {
+				if($(this).data('pk')==avPk) {
+					$(this).addClass('show-familie')
+				} else {
+					$(this).addClass('hidden-familie')
+				}
+			}
+		}
+		if($(this).data('ebenen')) {
+			if($(this).data('ebenen').split(",").indexOf(avEbene)<0) {
+				$(this).addClass('hidden-ebene')
+			}
+		}
+		if($(this).data('generation')!=avGeneration && $(this).data('generation')!="None") {
+			if($(this).data('generation')<avGeneration) {
+				$(this).addClass('hidden-parent').children('button.ptagsbtn').attr('disabled','disabled')
+			} else {
+				$(this).addClass('hidden-child')
+			}
+		}
+	})
 	$(this).blur()
 }
 function moveTagLeftRightClick(e){
