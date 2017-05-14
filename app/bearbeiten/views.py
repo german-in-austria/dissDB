@@ -19,6 +19,25 @@ def getTagList(Tags,TagPK):
 			TagData.append({'model':value,'child':child})
 	return TagData
 
+def getTagFamilie(Tags):
+	afam = []
+	aGen = 0
+	oTags = []
+	for value in Tags:
+		pClose = 0
+		try:
+			while not value.id_Tag.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
+				aGen-=1
+				pClose+=1
+				del afam[-1]
+		except:
+			pass
+		#print(''.rjust(aGen,'-')+'|'+str(value.id_Tag.Tag)+' ('+str(value.id_Tag.pk)+' | '+str([val.pk for val in afam])+' | '+str(aGen)+' | '+str(pClose)+')')
+		oTags.append({'aTag':value,'aGen':aGen,'pClose':pClose, 'pChilds':value.id_Tag.id_ParentTag.all().count()})
+		afam.append(value.id_Tag)
+		aGen+=1
+	return oTags
+
 def start(request,ipk=0,apk=0):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
@@ -103,19 +122,19 @@ def start(request,ipk=0,apk=0):
 		eAntwort.von_Inf = Informant
 		eAntwort.zu_Aufgabe = Aufgabe
 		TagEbenen = dbmodels.TagEbene.objects.all()
-		Tags = getTagList(dbmodels.Tags,None)
+		TagsList = getTagList(dbmodels.Tags,None)
 		Antworten = []
 		for val in dbmodels.Antworten.objects.filter(von_Inf=ipk,zu_Aufgabe=apk).order_by('Reihung'):
 			ptags=dbmodels.AntwortenTags.objects.filter(primaer=True,id_Antwort=val.pk).order_by('Reihung')
 			stags=dbmodels.AntwortenTags.objects.filter(primaer=False,id_Antwort=val.pk).order_by('Reihung')
 			xtags = []
 			for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=val.pk).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
-				xtags.append({'ebene':dbmodels.TagEbene.objects.filter(pk=xval['id_TagEbene']), 'tags':dbmodels.AntwortenTags.objects.filter(id_Antwort=val.pk, id_TagEbene=xval['id_TagEbene']).order_by('Reihung')})
+				xtags.append({'ebene':dbmodels.TagEbene.objects.filter(pk=xval['id_TagEbene']), 'tags':getTagFamilie(dbmodels.AntwortenTags.objects.filter(id_Antwort=val.pk, id_TagEbene=xval['id_TagEbene']).order_by('Reihung'))})
 			Antworten.append({'model':val, 'ptags':ptags, 'stags':stags, 'xtags':xtags})
 		Antworten.append(eAntwort)
 		ErhInfAufgaben = dbmodels.ErhInfAufgaben.objects.filter(id_Aufgabe=apk,id_InfErh__ID_Inf__pk=ipk)
 		return render_to_response(aFormular,
-			RequestContext(request, {'Informant':Informant,'Aufgabe':Aufgabe,'Antworten':Antworten, 'TagEbenen':TagEbenen ,'Tags':Tags,'ErhInfAufgaben':ErhInfAufgaben,'PresetTags':PresetTags.objects.all(),'test':test,'error':error}),)
+			RequestContext(request, {'Informant':Informant,'Aufgabe':Aufgabe,'Antworten':Antworten, 'TagEbenen':TagEbenen ,'TagsList':TagsList,'ErhInfAufgaben':ErhInfAufgaben,'PresetTags':PresetTags.objects.all(),'test':test,'error':error}),)
 	InformantenCount=dbmodels.Informanten.objects.all().count()
 	aAufgabenset = 0 ; Aufgabensets = [{'model':val,'Acount':dbmodels.Aufgaben.objects.filter(von_ASet = val.pk).count()} for val in dbmodels.Aufgabensets.objects.all()]
 	aAufgabe = 0		; Aufgaben = None

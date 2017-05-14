@@ -362,6 +362,14 @@ select.tagebene {
   overflow-y: scroll;
   max-height: 300px;
 }
+.reihung-tags .r-tag-familie {
+  display: inline-block;
+	border: 1px solid #00f;
+	padding: 1px;
+}
+.reihung-tags .r-tag-familie.r-tag-familie-pchilds:after {
+  content: "+";
+}
 .seltags .tag-familie {
   margin-left: 0px;
   background: transparent;
@@ -386,8 +394,7 @@ select.tagebene {
   border-radius: 3px 11px 11px 3px;
   text-decoration: none;
   color: #333;
-  margin-left:0px;
-  margin-bottom:2px;
+  margin:1px;
 	max-width: 300px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -532,11 +539,10 @@ select.tagebene {
   max-width: 100%;
 }
 
-
 .progress-bar {
-    -webkit-transition: width 0.3s linear;
-    -o-transition: width 0.3s linear;
-    transition: width 0.3s linear;
+    -webkit-transition: none;
+    -o-transition: none;
+    transition: none;
 }
 
 .gly-spin {
