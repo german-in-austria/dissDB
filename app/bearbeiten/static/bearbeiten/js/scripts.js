@@ -1,8 +1,8 @@
-(function($){jQuery(document).ready(function($){
-	/* Variablen */
-	var unsavedAntworten = 0
-	var unsavedEIAufgabe = 0
+/* Variablen */
+var unsavedAntworten = 0;
+var unsavedEIAufgabe = 0;
 
+(function($){jQuery(document).ready(function($){
 	/* Inits */
 	resetBeeinflussung()
 	resetReihungTags()

@@ -1,7 +1,7 @@
-(function($){jQuery(document).ready(function($){
-	/* Variablen */
-	var unsavedTags = 0
+/* Variablen */
+var unsavedTags = 0;
 
+(function($){jQuery(document).ready(function($){
 	/* Inits */
 
 	/* Tastenkürzel */

@@ -362,6 +362,22 @@ select.tagebene {
   overflow-y: scroll;
   max-height: 300px;
 }
+.seltags .tag-familie {
+  margin-left: 0px;
+  background: transparent;
+}
+.seltags .tag-familie>.tag-familie {
+  margin-left: 10px;
+}
+.seltags .tag-familie:hover {
+  background: rgba(0,0,0,0.1);
+}
+.seltags .tag-familie:hover>.ptagsbtn {
+  background: #ddf;
+}
+.seltags .tag-familie>.ptagsbtn:hover {
+  background: #dfd;
+}
 .ptagsbtn, .pretagsbtn {
   background: #fff;
   border: 1px solid #ccc;
@@ -370,7 +386,7 @@ select.tagebene {
   border-radius: 3px 11px 11px 3px;
   text-decoration: none;
   color: #333;
-  margin-left:50px;
+  margin-left:0px;
   margin-bottom:2px;
 	max-width: 300px;
 	white-space: nowrap;

@@ -10,7 +10,6 @@ import json
 def getTagList(Tags,TagPK):
 	TagData = []
 	if TagPK == None:
-		#pprint.pprint(dir(Tags))
 		for value in Tags.objects.filter(id_ChildTag=None):
 			child=getTagList(Tags,value.pk)
 			TagData.append({'model':value,'child':child})
