@@ -98,7 +98,7 @@ class Tags(models.Model):
 		db_table = "Tags"
 		verbose_name = "Tag"
 		verbose_name_plural = "Tags"
-		ordering = ('Tag','AReihung')
+		ordering = ('AReihung','Tag')
 
 class TagFamilie(models.Model):
 	id_ParentTag		= models.ForeignKey('Tags', related_name='id_ParentTag'				, on_delete=models.CASCADE		, verbose_name="Parent ID zu Tag")
