@@ -17,6 +17,6 @@ class PresetTagsZuAufgabe(models.Model):
 	def __str__(self):
 		return "{} <- {}".format(self.id_Aufgabe,self.id_PresetTags)
 	class Meta:
-		verbose_name = "Preset Tags"
-		verbose_name_plural = "Presets Tags"
+		verbose_name = "Preset Tags zu Aufgabe"
+		verbose_name_plural = "Presets Tags zu Aufgaben"
 		ordering = ('id_Aufgabe',)
