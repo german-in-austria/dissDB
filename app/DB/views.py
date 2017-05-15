@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
 from DB.forms import GetModelForm
 from DB.funktionenDB import kategorienListe, felderAuslesen, verbundeneElemente, httpOutput
+from django.conf import settings
 import json
 
 # Startseite - Übersicht über alle verfügbaren Tabellen
@@ -20,7 +21,7 @@ def start(request):
 
 	# Liste der verfuegbaren Tabellen:
 	tabellen = collections.OrderedDict()
-	applist = ['Datenbank']
+	applist = settings.DIOEDB_APPLIST
 	for aapp in applist:
 		if request.user.has_perm(aapp+'.edit'):
 			tabellen[aapp] = []
