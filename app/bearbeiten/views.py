@@ -19,6 +19,7 @@ def getTagList(Tags,TagPK):
 			TagData.append({'model':value,'child':child})
 	return TagData
 
+# getTagFamilie für AntwortenTags
 def getTagFamilie(Tags):
 	afam = []
 	aGen = 0
@@ -35,6 +36,25 @@ def getTagFamilie(Tags):
 		#print(''.rjust(aGen,'-')+'|'+str(value.id_Tag.Tag)+' ('+str(value.id_Tag.pk)+' | '+str([val.pk for val in afam])+' | '+str(aGen)+' | '+str(pClose)+')')
 		oTags.append({'aTag':value,'aGen':aGen,'pClose':pClose, 'pChilds':value.id_Tag.id_ParentTag.all().count()})
 		afam.append(value.id_Tag)
+		aGen+=1
+	return oTags
+# getTagFamilie für PresetTags
+def getTagFamiliePT(Tags):
+	afam = []
+	aGen = 0
+	oTags = []
+	for value in Tags:
+		pClose = 0
+		try:
+			while not value.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
+				aGen-=1
+				pClose+=1
+				del afam[-1]
+		except:
+			pass
+		#print(''.rjust(aGen,'-')+'|'+str(value.Tag)+' ('+str(value.pk)+' | '+str([val.pk for val in afam])+' | '+str(aGen)+' | '+str(pClose)+')')
+		oTags.append({'aTag':value,'aGen':aGen,'pClose':pClose, 'pChilds':value.id_ParentTag.all().count()})
+		afam.append(value)
 		aGen+=1
 	return oTags
 
@@ -133,8 +153,11 @@ def start(request,ipk=0,apk=0):
 			Antworten.append({'model':val, 'ptags':ptags, 'stags':stags, 'xtags':xtags})
 		Antworten.append(eAntwort)
 		ErhInfAufgaben = dbmodels.ErhInfAufgaben.objects.filter(id_Aufgabe=apk,id_InfErh__ID_Inf__pk=ipk)
+		aPresetTags = []
+		for val in PresetTags.objects.all():
+			aPresetTags.append({'model':val,'tagfamilie':getTagFamiliePT(val.id_Tags.all())})
 		return render_to_response(aFormular,
-			RequestContext(request, {'Informant':Informant,'Aufgabe':Aufgabe,'Antworten':Antworten, 'TagEbenen':TagEbenen ,'TagsList':TagsList,'ErhInfAufgaben':ErhInfAufgaben,'PresetTags':PresetTags.objects.all(),'test':test,'error':error}),)
+			RequestContext(request, {'Informant':Informant,'Aufgabe':Aufgabe,'Antworten':Antworten, 'TagEbenen':TagEbenen ,'TagsList':TagsList,'ErhInfAufgaben':ErhInfAufgaben,'PresetTags':aPresetTags,'test':test,'error':error}),)
 	InformantenCount=dbmodels.Informanten.objects.all().count()
 	aAufgabenset = 0 ; Aufgabensets = [{'model':val,'Acount':dbmodels.Aufgaben.objects.filter(von_ASet = val.pk).count()} for val in dbmodels.Aufgabensets.objects.all()]
 	aAufgabe = 0		; Aufgaben = None

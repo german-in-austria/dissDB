@@ -79,13 +79,10 @@ function tagHinzufuegenClick(e){
 }
 function tagPresetHinzufuegenClick(e){
 	var aselobj = $(this).parents('.seltags')
-	var athis = $(this)
-	$.each($(this).data('pks').split(';'),function(i,e){
-		var adata = e.split(',',2)
-		athis.parents('.reihung-tags').find('.ant-ntag').before('<button class="ant-tag" data-id_tag="'+adata[0]+'" data-pk="0">'+adata[1]+'</button>')
-	})
+	aselobj.siblings('.r-tag-familie').append(JSON.parse('"'+$(this).data('html')+'"'))
 	aselobj.remove()
 	resetReihungTags()
+	familienHinzufuegenKnopfUpdate()
 	unsavedAntworten = 1
 	$('#antwortensave').removeClass('disabled')
 }
