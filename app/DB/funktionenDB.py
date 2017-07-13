@@ -18,17 +18,45 @@ def httpOutput(aoutput):
 # Liste der Einträge erstellen #
 def kategorienListe(amodel,suche='',inhalt='',mitInhalt=0,arequest=[]):
 	ausgabe = collections.OrderedDict()
+	# Für Spezielle Kategorien Listen
+	if hasattr(amodel,'kategorienListeFX'):
+		return amodel.kategorienListeFX(amodel,suche,inhalt,mitInhalt,arequest,ausgabe)
+	# Für DateTimeField
+	if str(amodel._meta.get_field(amodel._meta.ordering[0]).get_internal_type()) == 'DateTimeField':
+		if not inhalt:
+			aElement = amodel.objects.all()
+			ausgabe['all']={'count':aElement.count(),'title':'Alle','enthaelt':1}
+			if mitInhalt>0:
+				ausgabe['all']['active'] = render_to_response('DB/lmfadl.html',
+					RequestContext(arequest, {'lmfadl':kategorienListe(amodel,inhalt='all'),'openpk':mitInhalt,'scrollto':mitInhalt}),).content
+			for aMonatsDaten in amodel.objects.extra({'month':connection.ops.date_trunc_sql('month', amodel._meta.ordering[0])}).values('month').annotate(Count('pk')).order_by('-month'):
+				if isinstance(aMonatsDaten['month'], str):
+					(aJahr,aMonat,nix) = aMonatsDaten['month'].split('-',2)
+				else:
+					aMonat = aMonatsDaten['month'].strftime("%m")
+					aJahr = aMonatsDaten['month'].strftime("%Y")
+				abc = 'date'+aJahr+'-'+aMonat
+				ausgabe[abc]={'count':aMonatsDaten['pk__count'],'title':aJahr+' - '+Monate[int(aMonat)-1]}
+			return ausgabe
+		else:
+			aElement = amodel.objects.all()
+			if inhalt[:4] == 'date':
+				(aJahr,aMonat) = inhalt[4:].split('-',1)
+				aElement = amodel.objects.filter(**{amodel._meta.ordering[0]+'__year':aJahr,amodel._meta.ordering[0]+'__month':aMonat})
+			return [{'model':aM} for aM in aElement]
+	# Nicht alphabetisch
 	if str(amodel._meta.get_field(amodel._meta.ordering[0]).get_internal_type()) != 'CharField':
 		if not inhalt:
 			aElement = amodel.objects.all()
 			abc = amodel._meta.get_field(amodel._meta.ordering[0]).get_internal_type()
-			ausgabe[abc]={'count':aElement.count()}
+			ausgabe[abc]={'count':aElement.count(),'enthaelt':1,'suchein':1}
 			if mitInhalt>0:
 				ausgabe[abc]['active'] = render_to_response('DB/lmfadl.html',
 					RequestContext(arequest, {'lmfadl':kategorienListe(amodel,inhalt=abc),'openpk':mitInhalt,'scrollto':mitInhalt}),).content
 			return ausgabe
 		else:
-			return amodel.objects.all()
+			return [{'model':aM} for aM in amodel.objects.all()]
+	# Alphabetisch
 	kategorien = collections.OrderedDict() ; kategorien['Andere'] = '^a-zäöüÄÖÜ' ; kategorien['istartswith'] = 'abcdefghijklmnopqrstuvwxyz' ; kategorien['ä'] = 'äÄ' ; kategorien['ö'] = 'öÖ' ; kategorien['ü'] = 'üÜ'
 	if not inhalt: # Liste fuer Kategrien ausgeben
 		for key,value in kategorien.items():
@@ -50,8 +78,8 @@ def kategorienListe(amodel,suche='',inhalt='',mitInhalt=0,arequest=[]):
 						ausgabe[key]['active'] = render_to_response('DB/lmfadl.html',
 							RequestContext(arequest, {'lmfadl':kategorienListe(amodel,inhalt=key),'openpk':mitInhalt,'scrollto':mitInhalt}),).content
 	else: # Inhalte fuer Kategorie ausgeben
-		if inhalt in kategorien : ausgabe = amodel.objects.filter(**{amodel._meta.ordering[0]+'__iregex':'^(['+kategorien[inhalt]+'].+)'})
-		else : ausgabe = amodel.objects.filter(**{amodel._meta.ordering[0]+'__istartswith':inhalt})
+		if inhalt in kategorien: ausgabe = [{'model':aM} for aM in amodel.objects.filter(**{amodel._meta.ordering[0]+'__iregex':'^(['+kategorien[inhalt]+'].+)'})]
+		else : ausgabe = [{'model':aM} for aM in amodel.objects.filter(**{amodel._meta.ordering[0]+'__istartswith':inhalt})]
 	return ausgabe
 
 # Feld auslesen #
