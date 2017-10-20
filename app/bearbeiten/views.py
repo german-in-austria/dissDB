@@ -7,57 +7,6 @@ from django.db.models import Count
 import datetime
 import json
 
-def getTagList(Tags,TagPK):
-	TagData = []
-	if TagPK == None:
-		for value in Tags.objects.filter(id_ChildTag=None):
-			child=getTagList(Tags,value.pk)
-			TagData.append({'model':value,'child':child})
-	else:
-		for value in Tags.objects.filter(id_ChildTag__id_ParentTag=TagPK):
-			child=getTagList(Tags,value.pk)
-			TagData.append({'model':value,'child':child})
-	return TagData
-
-# getTagFamilie für AntwortenTags
-def getTagFamilie(Tags):
-	afam = []
-	aGen = 0
-	oTags = []
-	for value in Tags:
-		pClose = 0
-		try:
-			while not value.id_Tag.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
-				aGen-=1
-				pClose+=1
-				del afam[-1]
-		except:
-			pass
-		#print(''.rjust(aGen,'-')+'|'+str(value.id_Tag.Tag)+' ('+str(value.id_Tag.pk)+' | '+str([val.pk for val in afam])+' | '+str(aGen)+' | '+str(pClose)+')')
-		oTags.append({'aTag':value,'aGen':aGen,'pClose':pClose, 'pChilds':value.id_Tag.id_ParentTag.all().count()})
-		afam.append(value.id_Tag)
-		aGen+=1
-	return oTags
-# getTagFamilie für PresetTags
-def getTagFamiliePT(Tags):
-	afam = []
-	aGen = 0
-	oTags = []
-	for value in Tags:
-		pClose = 0
-		try:
-			while not value.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
-				aGen-=1
-				pClose+=1
-				del afam[-1]
-		except:
-			pass
-		#print(''.rjust(aGen,'-')+'|'+str(value.Tag)+' ('+str(value.pk)+' | '+str([val.pk for val in afam])+' | '+str(aGen)+' | '+str(pClose)+')')
-		oTags.append({'aTag':value,'aGen':aGen,'pClose':pClose, 'pChilds':value.id_ParentTag.all().count()})
-		afam.append(value)
-		aGen+=1
-	return oTags
-
 def start(request,ipk=0,apk=0):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
@@ -183,3 +132,57 @@ def start(request,ipk=0,apk=0):
 	# Ausgabe der Seite
 	return render_to_response('bearbeiten/start.html',
 		RequestContext(request, {'aAufgabenset':aAufgabenset,'Aufgabensets':Aufgabensets,'aAufgabe':aAufgabe,'Aufgaben':Aufgaben,'Informanten':Informanten,'test':test}),)
+
+### Funktionen: ###
+
+# getTagFamilie für AntwortenTags
+def getTagFamilie(Tags):
+	afam = []
+	aGen = 0
+	oTags = []
+	for value in Tags:
+		pClose = 0
+		try:
+			while not value.id_Tag.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
+				aGen-=1
+				pClose+=1
+				del afam[-1]
+		except:
+			pass
+		#print(''.rjust(aGen,'-')+'|'+str(value.id_Tag.Tag)+' ('+str(value.id_Tag.pk)+' | '+str([val.pk for val in afam])+' | '+str(aGen)+' | '+str(pClose)+')')
+		oTags.append({'aTag':value,'aGen':aGen,'pClose':pClose, 'pChilds':value.id_Tag.id_ParentTag.all().count()})
+		afam.append(value.id_Tag)
+		aGen+=1
+	return oTags
+
+# getTagFamilie für PresetTags
+def getTagFamiliePT(Tags):
+	afam = []
+	aGen = 0
+	oTags = []
+	for value in Tags:
+		pClose = 0
+		try:
+			while not value.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
+				aGen-=1
+				pClose+=1
+				del afam[-1]
+		except:
+			pass
+		#print(''.rjust(aGen,'-')+'|'+str(value.Tag)+' ('+str(value.pk)+' | '+str([val.pk for val in afam])+' | '+str(aGen)+' | '+str(pClose)+')')
+		oTags.append({'aTag':value,'aGen':aGen,'pClose':pClose, 'pChilds':value.id_ParentTag.all().count()})
+		afam.append(value)
+		aGen+=1
+	return oTags
+
+def getTagList(Tags,TagPK):
+	TagData = []
+	if TagPK == None:
+		for value in Tags.objects.filter(id_ChildTag=None):
+			child=getTagList(Tags,value.pk)
+			TagData.append({'model':value,'child':child})
+	else:
+		for value in Tags.objects.filter(id_ChildTag__id_ParentTag=TagPK):
+			child=getTagList(Tags,value.pk)
+			TagData.append({'model':value,'child':child})
+	return TagData

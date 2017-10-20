@@ -10,9 +10,9 @@ import json
 import pprint
 
 # Schneller HttpOutput
-def httpOutput(aoutput):
+def httpOutput(aoutput,mimetype='text/plain'):
 	txtausgabe = HttpResponse(aoutput)
-	txtausgabe['Content-Type'] = 'text/plain'
+	txtausgabe['Content-Type'] = mimetype
 	return txtausgabe
 
 # Liste der Einträge erstellen #
