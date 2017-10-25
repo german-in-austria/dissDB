@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
 from django.template import RequestContext, loader
 import Datenbank.models as dbmodels
 from .models import PresetTags
-from django.db.models import Count
+from django.db.models import Count, Q
 import datetime
 import json
 
@@ -103,8 +103,8 @@ def start(request,ipk=0,apk=0):
 		Antworten.append(eAntwort)
 		ErhInfAufgaben = dbmodels.ErhInfAufgaben.objects.filter(id_Aufgabe=apk,id_InfErh__ID_Inf__pk=ipk)
 		aPresetTags = []
-		for val in PresetTags.objects.all():
-			aPresetTags.append({'model':val,'tagfamilie':getTagFamiliePT(val.id_Tags.all())})
+		for val in PresetTags.objects.filter(Q(presettagszuaufgabe__id_Aufgabe__pk=apk) | Q(presettagszuaufgabe=None)):
+			aPresetTags.append({'model':val,'tagfamilie':getTagFamiliePT(val.id_Tags.all()),'test':test})
 		return render_to_response(aFormular,
 			RequestContext(request, {'Informant':Informant,'Aufgabe':Aufgabe,'Antworten':Antworten, 'TagEbenen':TagEbenen ,'TagsList':TagsList,'ErhInfAufgaben':ErhInfAufgaben,'PresetTags':aPresetTags,'test':test,'error':error}),)
 	InformantenCount=dbmodels.Informanten.objects.all().count()

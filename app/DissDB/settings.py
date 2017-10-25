@@ -58,7 +58,7 @@ ALLOWED_HOSTS = []
 
 ALLOWED_SETTINGS_IN_TEMPLATES = ("AUDIO_URL",)
 
-DIOEDB_APPLIST = ['Datenbank']
+DIOEDB_APPLIST = ['Datenbank','bearbeiten']
 
 # Application definition
 
