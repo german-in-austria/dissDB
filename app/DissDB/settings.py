@@ -72,6 +72,7 @@ INSTALLED_APPS = (
 	'crispy_forms',
 	'private_storage',
     'sortedm2m',
+	'django_spaghetti',
 	'Datenbank',
 	'Startseite',
 	'bearbeiten',
@@ -110,6 +111,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'DissDB.wsgi.application'
 
+SPAGHETTI_SAUCE = {
+  'apps':['Datenbank','bearbeiten'],
+  'show_fields':False,
+  'show_proxy':True,
+}
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
