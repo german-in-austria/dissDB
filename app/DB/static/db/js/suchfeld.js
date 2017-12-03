@@ -69,19 +69,21 @@
 					var aabc = 'Andere'
 					if(/^[a-zA-Zaeoeueaeoeue]*$/.test(aVal.charAt(0))) { aabc = aVal.charAt(0); }
 					var sEli = sElement.find('.lmfabc[data-lmfabc="'+aabc+'"]')
-					sEli.parent().addClass('found open')
-					if (sEli.siblings('.lmfa-dl').length<1) {
-						getLmfadl(sEli)
-					} else {
-						var aregexp = new RegExp('^'+aVal.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')+'.*', 'i')
-						sEli.siblings('.lmfa-dl').find('.lmfabcl').each(function() {
-							if($(this).text().match(aregexp)) {
-								$(this).parent().addClass('found')
-							} else {
-								$(this).parent().removeClass('found')
-							}
-						})
-						sEli.find('span').html(sEli.siblings('.lmfa-dl').find('li.found').length.toLocaleString())
+					if(sEli.length > 0) {
+						sEli.parent().addClass('found open')
+						if (sEli.siblings('.lmfa-dl').length<1) {
+							getLmfadl(sEli)
+						} else {
+							var aregexp = new RegExp('^'+aVal.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')+'.*', 'i')
+							sEli.siblings('.lmfa-dl').find('.lmfabcl').each(function() {
+								if($(this).text().match(aregexp)) {
+									$(this).parent().addClass('found')
+								} else {
+									$(this).parent().removeClass('found')
+								}
+							})
+							sEli.find('span').html(sEli.siblings('.lmfa-dl').find('li.found').length.toLocaleString())
+						}
 					}
 				}
 			} else {	/* Suche zuruecksetzen */
