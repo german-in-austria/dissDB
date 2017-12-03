@@ -31,19 +31,33 @@
 
   var container = document.getElementById('visualization');
   var options = {
+		"configure": {
+	    enabled: false,
+		},
+		"interaction": {
+			navigationButtons:true,
+		},
     "edges": {
       "smooth": {
         "type": "cubicBezier",
         "roundness": 0.55
-      }
+      },
     },
-
     "layout": {
-        hierarchical: {
-            sortMethod: 'hubsize',
-            direction:'LR'
-        }
+      hierarchical: {
+				// enabled: false,
+        sortMethod: 'hubsize',
+				// sortMethod: 'directed',
+        direction:'UD',
+				levelSeparation: 80,
+      },
+			randomSeed: 999,
     },
+		"physics": {
+	    hierarchicalRepulsion: {
+	      nodeDistance: 180,
+	    },
+		},
 
   };
 
