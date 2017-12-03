@@ -77,7 +77,7 @@
           {% elif aFeld.type == "AutoField" %}
             <p class="form-control-static">
               {% firstof aFeld.value_extras.pk|stringformat:"i" aFeld.value '0' %}
-              {% if editmode %}<input type="hidden" id="{{ afid }}" class="form-savedata" name="{{ aFeld.name }}" value="{% firstof aFeld.value_extras.pk|stringformat:"i" aFeld.value '0' %}"{% if aFeld.process %} data-process="{{ aFeld.process }}"{% endif %}>{% endif %}
+              {% if editmode %}<input type="hidden" id="{{ afid }}" class="form-savedata" name="{{ aFeld.name }}" value="{% firstof aFeld.value_extras.pk|stringformat:"i" aFeld.value|stringformat:"i" '0' %}"{% if aFeld.process %} data-process="{{ aFeld.process }}"{% endif %}>{% endif %}
             </p>
           {% elif aFeld.type == "ForeignKey" or aFeld.type == "OneToOneField" %}
             <p class="form-control-static form-foreignkey clearfix{% if editmode and aFeld.selectlist %} form-foreignkey-select{% endif %}">
@@ -85,7 +85,7 @@
                 <select class="form-control select foreignkeyselect selw3btn2 form-savedata" id="{{ afid }}" name="{{ aFeld.name }}">
                   <option value="None">---------</option>
                   {% for seloption in aFeld.selectlist.list %}
-                    <option value="{{ seloption.pk }}"{% if seloption.pk == aFeld.value_extras.pk %} selected="selected"{% endif %}>{{ seloption }}</option>
+                    <option value="{{ seloption.pk|stringformat:"i" }}"{% if seloption.pk == aFeld.value_extras.pk %} selected="selected"{% endif %}>{{ seloption }}</option>
                   {% endfor %}
                 </select>
               {% else %}
