@@ -20,7 +20,7 @@
 	function setSearchfields() {										/* Suchfelder hinzufuegen */
 		$('.lmfa').each(function() {
 			if($(this).find('.lmfasff').length<1) {
-				$(this).prepend('<div class="lmfasff"><div class="iwdbtn"><input type="text" size="20" class="lmfasf" placeholder="Suchen ..."><button class="idbtn" title="Eingabe loeschen!"><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button></div><button class="lmfasfx lmfasfe">Enthaelt</button><button class="lmfasfx lmfasfa">Alle<span class="hidden-md"> Kategorien</span></button></div>')
+				$(this).prepend('<div class="lmfasff"><div class="iwdbtn"><input type="text" size="20" class="lmfasf" placeholder="Suchen ..."><button class="idbtn" title="Eingabe loeschen!"><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button></div><button class="lmfasfx lmfasfe active">Enthaelt</button><button class="lmfasfx lmfasfa active">Alle<span class="hidden-md"> Kategorien</span></button></div>')
 			}
 		})
 	}
