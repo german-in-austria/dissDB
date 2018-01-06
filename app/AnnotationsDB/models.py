@@ -19,7 +19,7 @@ class token(models.Model):
 	ortho				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Ortho")
 	ID_Inf				= models.ForeignKey('Datenbank.Informanten'	, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="ID Informant")
 	fragment_of			= models.ForeignKey('token', related_name='rn_token_fragment_of', blank=True, null=True	, on_delete=models.SET_NULL	, verbose_name="Fragment von")
-	token_reihung		= models.IntegerField(						  null=True												verbose_name="Token Reihung")
+	token_reihung		= models.IntegerField(						  null=True												, verbose_name="Token Reihung")
 	event_id			= models.ForeignKey('event', related_name='rn_token_event_id', blank=True, null=True	, on_delete=models.SET_NULL	, verbose_name="Event ID")
 	start_timepoint		= models.DurationField(																				  verbose_name="Start Zeitpunkt")
 	end_timepoint		= models.DurationField(																				  verbose_name="End Zeitpunkt")
