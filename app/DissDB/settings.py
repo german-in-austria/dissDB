@@ -49,7 +49,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 SECRET_KEY = "ggm0_dycvizp#h$ap@czcy2t!al(0@j(%j@)*v00%w+of_whul"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if 'DISSDB_DEBUG' in os.environ and (os.environ['DISSDB_DEBUG'] == 'False' or os.environ['DISSDB_DEBUG'] == False):
+if 'DISSDB_DEBUG' in os.environ and (os.environ['DISSDB_DEBUG'] == 'False' or not os.environ['DISSDB_DEBUG']):
 	DEBUG = False
 else:
 	DEBUG = True
@@ -58,63 +58,71 @@ ALLOWED_HOSTS = []
 
 ALLOWED_SETTINGS_IN_TEMPLATES = ("AUDIO_URL",)
 
-DIOEDB_APPLIST = ['Datenbank','bearbeiten']
+DIOEDB_APPLIST = ['Datenbank', 'bearbeiten', 'AnnotationsDB']
 
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
 	'crispy_forms',
 	'private_storage',
-    'sortedm2m',
+	'sortedm2m',
 	'django_spaghetti',
 	'Datenbank',
 	'Startseite',
 	'bearbeiten',
 	'tags',
 	'DB',
+	'AnnotationsDB',
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django.middleware.security.SecurityMiddleware',
 )
 
 ROOT_URLCONF = 'DissDB.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'DissDB', 'templates'),os.path.join(BASE_DIR, 'Startseite', 'templates'),os.path.join(BASE_DIR, 'bearbeiten', 'templates'),os.path.join(BASE_DIR, 'tags', 'templates'),os.path.join(BASE_DIR, 'DB', 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
+	{
+		'BACKEND': 'django.template.backends.django.DjangoTemplates',
+		'DIRS': [
+			os.path.join(BASE_DIR, 'DissDB', 'templates'),
+			os.path.join(BASE_DIR, 'Startseite', 'templates'),
+			os.path.join(BASE_DIR, 'bearbeiten', 'templates'),
+			os.path.join(BASE_DIR, 'AnnotationsDB', 'templates'),
+			os.path.join(BASE_DIR, 'tags', 'templates'),
+			os.path.join(BASE_DIR, 'DB', 'templates'),
+		],
+		'APP_DIRS': True,
+		'OPTIONS': {
+			'context_processors': [
+				'django.template.context_processors.debug',
+				'django.template.context_processors.request',
+				'django.contrib.auth.context_processors.auth',
+				'django.contrib.messages.context_processors.messages',
+			],
+		},
+	},
 ]
 
 WSGI_APPLICATION = 'DissDB.wsgi.application'
 
 SPAGHETTI_SAUCE = {
-  'apps':['Datenbank','bearbeiten'],
-  'show_fields':False,
-  'show_proxy':True,
+	'apps': ['Datenbank', 'bearbeiten', 'AnnotationsDB'],
+	'show_fields': False,
+	'show_proxy': True,
 }
 
 # Database
@@ -189,4 +197,5 @@ STATICFILES_DIRS = (
 	os.path.join(BASE_DIR, 'bearbeiten', 'static'),
 	os.path.join(BASE_DIR, 'DB', 'static'),
 	os.path.join(BASE_DIR, 'tags', 'static'),
+	os.path.join(BASE_DIR, 'AnnotationsDB', 'static'),
 )
