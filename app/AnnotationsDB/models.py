@@ -50,7 +50,7 @@ class transcript(models.Model):
 	name				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Name")
 	update_time			= models.DateTimeField(																				  verbose_name="Update Zeit")
 	def __str__(self):
-		return "{} ({})".format(self.Name,self.update_date)
+		return "{} ({})".format(self.name,self.update_date)
 	class Meta:
 		db_table = "transcript"
 		verbose_name = "Transcript"
