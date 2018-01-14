@@ -27,7 +27,7 @@ class token(models.Model):
 	likely_error		= models.BooleanField(default=False																	, verbose_name="Eventueller Fehler")
 	sentence_id			= models.ForeignKey('Datenbank.Saetze'		, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Sentence ID")
 	sequence_in_sentence= models.IntegerField(						  null=True												, verbose_name="sequence_in_sentence")
-	text_in_ortho		= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Text in Ortho")
+	text_in_ortho		= models.TextField(							  blank=True, null=True									, verbose_name="Text in Ortho")
 	def __str__(self):
 		return "{}".format(self.text)
 	class Meta:
