@@ -21,3 +21,6 @@ run these commands from inside the container:
 
 #### Environment Variables
 All the Environment Variables can be found in the [default.env](default.env) file.
+
+### Backup DB
+python3.5 manage.py dumpdata --exclude auth.permission --exclude contenttypes --exclude admin > /home/docker/persistent/private-media/dissdbback_Jahr-Monat-Tag.json
