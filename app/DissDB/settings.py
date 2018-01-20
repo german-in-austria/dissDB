@@ -153,7 +153,7 @@ if 'DISSDB_DB' in os.environ and os.environ['DISSDB_DB']:
 	if 'DISSDB_DB_PORT' in os.environ:
 		DATABASES['default']['PORT'] = os.environ['DISSDB_DB_PORT']
 
-print(DATABASES)
+# print(DATABASES)
 
 PRIVATE_STORAGE_ROOT = '/'
 PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_authenticated'

@@ -1,0 +1,38 @@
+{% extends 'main/basis.html' %}
+{% load staticfiles %}
+{% load dioeTags %}
+{% load crispy_forms_tags %}
+{% block title %} - bearbeiten{% endblock %}
+{% block ueberschrift %} - bearbeiten{% endblock %}
+{% block inhalt %}
+<div class="row h100">
+	<div class="col-md-2 h100 mh200px vscroller lmfa">
+		<form id="selaufgabe" method="post">{% csrf_token %}
+		<input type="hidden" name="laufgabenset" value="{{ aAufgabenset }}">
+		<select name="aaufgabenset" size="1" class="form-control mit10 mib10">
+			<option value="0">xxx</option>
+			{% for value in Aufgabensets %}<option value="{{ value.model.pk|stringformat:"i" }}"{% if aAufgabenset == value.model.pk %} selected{% endif %}>{{ value.model }} - {{ value.Acount }} Aufgaben</option>{% endfor %}
+		</select>
+		</form>
+		{% if aAufgabe %}
+		<ul class="lmfa-l">
+		{% for value in Informanten %}{% spaceless %}
+			<li><a href="{% url 'bearbeiten:start' ipk=value.model.pk apk=aAufgabe %}" class="lmfabc" data-pk="{{ value.model.pk|stringformat:'i' }}" title="PK: {{ value.model.pk|stringformat:'i' }}" target="targetframe">{{ value.model }} <span>{{ value.count }}</span></a></li>
+			{% endspaceless %}
+		{% endfor %}
+		</ul>
+		{% endif %}
+	</div>
+	{{ test }}
+	<div class="col-md-10 h100 mh600px" style="border-right:1px solid #eee;padding:0px;padding-bottom:150px;"><div class="h100 mcon vscroller">{% if test %}<div class="alert alert-info">{{ test }}</div><br>{% endif %}</div></div>
+</div>
+<style>
+	html,body,body>.container { height:100%; }
+</style>
+{% endblock %}
+{% block sitejs %}
+<script>
+	var csrf='{{ csrf_token }}';
+	var audiodir = '{% settings_value "AUDIO_URL" %}';
+</script>
+{% endblock %}

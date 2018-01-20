@@ -26,7 +26,7 @@ class token(models.Model):
 	transcript_id		= models.ForeignKey('transcript'			, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Transcript ID")
 	likely_error		= models.BooleanField(default=False																	, verbose_name="Eventueller Fehler")
 	sentence_id			= models.ForeignKey('Datenbank.Saetze'		, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Sentence ID")
-	sequence_in_sentence= models.IntegerField(						  null=True												, verbose_name="sequence_in_sentence")
+	sequence_in_sentence = models.IntegerField(						  null=True												, verbose_name="sequence_in_sentence")
 	text_in_ortho		= models.TextField(							  blank=True, null=True									, verbose_name="Text in Ortho")
 	def __str__(self):
 		return "{}".format(self.text)
@@ -34,7 +34,7 @@ class token(models.Model):
 		db_table = "token"
 		verbose_name = "Token"
 		verbose_name_plural = "Tokens"
-		ordering = ('sentence_id','token_reihung',)
+		ordering = ('sentence_id', 'token_reihung',)
 
 class token_type(models.Model):
 	token_type_name		= models.CharField(max_length=511																	, verbose_name="Token Typ Name")
@@ -50,7 +50,7 @@ class transcript(models.Model):
 	name				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Name")
 	update_time			= models.DateTimeField(																				  verbose_name="Update Zeit")
 	def __str__(self):
-		return "{} ({})".format(self.name,self.update_time)
+		return "{} ({})".format(self.name, self.update_time)
 	class Meta:
 		db_table = "transcript"
 		verbose_name = "Transcript"
