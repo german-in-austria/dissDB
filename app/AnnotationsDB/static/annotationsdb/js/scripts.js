@@ -1,4 +1,4 @@
-/* global jQuery */
+/* global jQuery alert csrf */
 /* Variablen */
 
 (function ($) {
@@ -12,8 +12,16 @@
 
 		/* Formular */
 		$(document).on('change', '#seltranskript select', function () { $('#seltranskript').submit(); });
-		$(document).on('click', '.lmfabc', function(e){
+		$(document).on('click', '.lmfabc', function (e) {
 			e.preventDefault();
+			$('.lmfabc').removeClass('open');
+			$(this).addClass('open');
+			$.post($(this).attr('href'), { csrfmiddlewaretoken: csrf }, function (d) {
+				$('.mcon').html(d);
+			}).fail(function (d) {
+				alert('error');
+				console.log(d);
+			});
 		});
 	});
 })(jQuery);
