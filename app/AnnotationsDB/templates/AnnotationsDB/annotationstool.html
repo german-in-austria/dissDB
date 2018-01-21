@@ -1,15 +1,8 @@
-<div class="annotationszeile">
-	{% for aInf in aDataSet %}
-		<div class="informant clearfix">
-			<div class="inftitel">{{ aInf.model }}</div>
-			{% for aEvent in aInf.event %}
-				<div class="event">
-					<div class="eventtime">{{ aEvent.model.start_time }}</div>
-					{% for aToken in aEvent.token %}
-						<div class="token">{% if not aToken.fragment_of %}&nbsp;{% endif %}{{ aToken.text }}</div>
-					{% endfor %}
-				</div>
-			{% endfor %}
-		</div>
-	{% endfor %}
-</div>
+<script>
+	var aTokenTypes = '{{ aTokenTypes }}';
+	var aSaetze = '{{ aSaetze }}';
+	var aEvents = '{{ aEvents }}';
+	var aInformanten = '{{ aInformanten }}';
+	var aTokens = '{{ aTokens }}';
+	$('.mcon').html('aTokenTypes = ' + aTokenTypes + '<hr>aSaetze = ' + aSaetze + '<hr>aEvents = ' + aEvents + '<hr>aInformanten = ' + aInformanten + '<hr>aTokens = ' + aTokens + '<hr>');
+</script>
