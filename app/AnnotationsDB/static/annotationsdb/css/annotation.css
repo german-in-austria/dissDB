@@ -1,18 +1,62 @@
 .annotationszeile {
+	border: 1px solid #eee;
+	margin-top: 40px;
+	min-width: 100%;
+	white-space: nowrap;
 	width: fit-content;
 }
 
+.infstitel {
+	display: inline-block;
+}
+.inftitel {
+	background: #eee;
+	border: 1px solid #ddd;
+	height: 41px;
+	margin: 5px 0 5px 5px;
+	padding: 10px 20px;
+}
+
+.event {
+	display: inline-block;
+	position: relative;
+}
+.event>.infe {
+	background: #fff;
+	border: 0 solid #ddd;
+	border-bottom-width: 1px;
+	border-top-width: 1px;
+	height: 41px;
+	margin: 5px 0 5px 0;
+	padding: 10px 0px;
+}
+.event:hover>.infe {
+	background: #eef;
+}
+.event.fc>.infe {
+	padding-left: 10px;
+}
+.event:last-child>.infe {
+	border-right-width: 1px;
+	padding-right: 10px;
+}
+
+.token, .notoken {
+	display: inline-block;
+}
+.token:hover {
+	background:#efe;
+}
+.notoken {
+	width: 0px;
+}
+
+/*
 .informant {
 	border: 1px solid #eee;
 	margin: 10px;
 	white-space: nowrap;
 	width: fit-content;
-}
-
-.inftitel {
-	background: #eee;
-	display: inline-block;
-	padding: 10px 20px;
 }
 
 .event {
@@ -42,4 +86,4 @@
 }
 .token:hover {
 	background:#ccc
-}
+} */

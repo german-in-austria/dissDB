@@ -11,7 +11,7 @@ class event(models.Model):
 		db_table = "event"
 		verbose_name = "Event"
 		verbose_name_plural = "Events"
-		ordering = ('layer',)
+		ordering = ('start_time',)
 
 class token(models.Model):
 	text				= models.CharField(max_length=511																	, verbose_name="Das aktuelle Token")

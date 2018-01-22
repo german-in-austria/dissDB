@@ -37,5 +37,6 @@ Update: {{ value.model.update_time|date:'d.m.Y - H:i' }} Uhr" target="targetfram
 	var csrf='{{ csrf_token }}';
 	var audiodir = '{% settings_value "AUDIO_URL" %}';
 </script>
+<script src="{% static "annotationsdb/js/annotationstool.js" %}"></script>
 <script src="{% static "annotationsdb/js/scripts.js" %}"></script>
 {% endblock %}

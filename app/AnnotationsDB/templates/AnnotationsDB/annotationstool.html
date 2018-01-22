@@ -1,8 +1,11 @@
 <script>
-	var aTokenTypes = '{{ aTokenTypes }}';
-	var aSaetze = '{{ aSaetze }}';
-	var aEvents = '{{ aEvents }}';
-	var aInformanten = '{{ aInformanten }}';
-	var aTokens = '{{ aTokens }}';
-	$('.mcon').html('aTokenTypes = ' + aTokenTypes + '<hr>aSaetze = ' + aSaetze + '<hr>aEvents = ' + aEvents + '<hr>aInformanten = ' + aInformanten + '<hr>aTokens = ' + aTokens + '<hr>');
+	(function ($) {
+		$('.mcon').newAnnotationForm({
+			'aTokenTypes': JSON.parse('{{ aTokenTypes|safe }}'),
+			'aSaetze': JSON.parse('{{ aSaetze|safe }}'),
+			'aEvents': JSON.parse('{{ aEvents|safe }}'),
+			'aInformanten': JSON.parse('{{ aInformanten|safe }}'),
+			'aTokens': JSON.parse('{{ aTokens|safe }}')
+		});
+	})(jQuery);
 </script>
