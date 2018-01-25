@@ -39,8 +39,8 @@
 	var csrf='{{ csrf_token }}';
 	var audiodir = '{% settings_value "AUDIO_URL" %}';
 </script>
-<script src="{% static "bearbeiten/js/audioplayer.js" %}"></script>
-<script src="{% static "bearbeiten/js/tags.js" %}"></script>
-<script src="{% static "bearbeiten/js/formular.js" %}"></script>
-<script src="{% static "bearbeiten/js/scripts.js" %}"></script>
+<script src="{% static "bearbeiten/js/audioplayer.js" %}?{% settings_value "CACH_RANDOM" %}"></script>
+<script src="{% static "bearbeiten/js/tags.js" %}?{% settings_value "CACH_RANDOM" %}"></script>
+<script src="{% static "bearbeiten/js/formular.js" %}?{% settings_value "CACH_RANDOM" %}"></script>
+<script src="{% static "bearbeiten/js/scripts.js" %}?{% settings_value "CACH_RANDOM" %}"></script>
 {% endblock %}

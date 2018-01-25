@@ -68,6 +68,6 @@ def render(context,value):
 # settings value
 @register.simple_tag
 def settings_value(name):
-    if name in getattr(settings, 'ALLOWED_SETTINGS_IN_TEMPLATES', ''):
-        return getattr(settings, name, '')
-    return ''
+	if name in getattr(settings, 'ALLOWED_SETTINGS_IN_TEMPLATES', ''):
+		return getattr(settings, name, '')
+	return ''
