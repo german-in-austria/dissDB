@@ -8,12 +8,12 @@ function searchbypk (nameKey, myArray) {
 	}
 }
 
-$.fn.newAnnotationForm = function (data) {
+function newAnnotationForm (data) {
 	var t0 = performance.now();
 	console.log(data);
-	$(this).html('<div id="annotationstool"></div><div id="annotationstoolvorlage"></div>');
+	$('.mcon').html('<div id="annotationstool"></div><div id="annotationstoolvorlage"></div>');
 
-	var maxInfWidth = 0;
+	var infWidth = 0;
 	var aCont = '<div class="annotationszeile"><div class="infstitel">';
 	var aeCont = '<div class="event">';
 	$.each(data['aInformanten'], function (k, v) {
@@ -30,18 +30,26 @@ $.fn.newAnnotationForm = function (data) {
 	});
 	$('#annotationstoolvorlage').append(aCont + '</div></div>');
 	$('#annotationstoolvorlage').append(aeCont + '</div>');
-	$('.inftitel').each(function () {
-		if (maxInfWidth < $(this).width()) {
-			maxInfWidth = $(this).width();
+	$('#annotationstoolvorlage .inftitel').each(function () {
+		if (infWidth < $(this).width()) {
+			infWidth = $(this).width();
 		};
-	}).width(maxInfWidth);
+	}).width(infWidth);
+	var azWidth = $('#annotationstoolvorlage .annotationszeile').width();
 	$('#annotationstoolvorlage').css('display', 'none');
 
-	var aline = 1;
+	var aline = 0;
 	var aeventpline = 1;
-	$('#annotationstoolvorlage>.annotationszeile').clone().addClass('az' + aline).appendTo('#annotationstool');
+	var nline = true;
+	var aWidth = 0;
 	$.each(data['aEvents'], function (k, v) {
-		if (k < 100) {
+		if (k < 10) {
+			if (nline) {
+				nline = false;
+				aline += 1;
+				$('#annotationstoolvorlage>.annotationszeile').clone().addClass('az' + aline).appendTo('#annotationstool');
+				aWidth = infWidth;
+			};
 			var ac = 'eid' + v['pk'];
 			if (aeventpline === 1) {
 				ac += ' fc';
@@ -49,7 +57,7 @@ $.fn.newAnnotationForm = function (data) {
 			$('#annotationstoolvorlage>.event').clone().addClass(ac).appendTo('#annotationstool>.annotationszeile.az' + aline);
 			$.each(v['tid'], function (k2, v2) {
 				var aToken = data['aTokens'][v2];
-				$('#annotationstool>.annotationszeile.az' + aline + ' .event.eid' + v['pk'] + '>.infe.infid' + aToken['i']).append('<div class="token">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>');
+				$('#annotationstool>.annotationszeile.az' + aline + ' .event.eid' + v['pk'] + '>.infe.infid' + aToken['i']).append('<div class="token" data-id="' + v2 + '">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>');
 			});
 			aeventpline += 1;
 			// console.log($('#annotationstool>.annotationszeile.az' + aline + ' .event.eid' + v['pk']).width());

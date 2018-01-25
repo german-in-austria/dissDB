@@ -4,6 +4,7 @@ from django.db.models import Count
 import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import json
+from DB.funktionenDB import httpOutput
 
 
 def start(request, ipk=0, tpk=0):
@@ -51,14 +52,7 @@ def start(request, ipk=0, tpk=0):
 			if aToken.likely_error:
 				aTokenset['le'] = 1
 			aTokens[aToken.pk] = aTokenset
-		aTokenTypes	 = json.dumps(aTokenTypes, separators=(',', ':'))
-		aSaetze		 = json.dumps(aSaetze, separators=(',', ':'))
-		aEvents		 = json.dumps(aEvents, separators=(',', ':'))
-		aInformanten = json.dumps(aInformanten, separators=(',', ':'))
-		aTokens		 = json.dumps(aTokens, separators=(',', ':'))
-		return render_to_response(
-			'AnnotationsDB/annotationstool.html',
-			RequestContext(request, {'aTokenTypes': aTokenTypes, 'aSaetze': aSaetze, 'aEvents': aEvents, 'aInformanten': aInformanten, 'aTokens': aTokens, 'test': test}),)
+		return httpOutput(json.dumps({'aTokenTypes': aTokenTypes, 'aSaetze': aSaetze, 'aEvents': aEvents, 'aInformanten': aInformanten, 'aTokens': aTokens}))
 
 	if 'ainformant' in request.POST:
 		ipk = int(request.POST.get('ainformant'))

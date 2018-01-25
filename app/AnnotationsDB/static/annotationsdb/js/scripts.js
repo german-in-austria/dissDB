@@ -1,4 +1,4 @@
-/* global jQuery alert csrf */
+/* global jQuery alert csrf newAnnotationForm */
 /* Variablen */
 
 (function ($) {
@@ -17,7 +17,7 @@
 			$('.lmfabc').removeClass('open');
 			$(this).addClass('open');
 			$.post($(this).attr('href'), { csrfmiddlewaretoken: csrf }, function (d) {
-				$('.mcon').html(d);
+				newAnnotationForm(JSON.parse(d));
 			}).fail(function (d) {
 				alert('error');
 				console.log(d);
