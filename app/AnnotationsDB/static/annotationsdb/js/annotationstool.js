@@ -44,12 +44,14 @@ function newAnnotationForm (data) {
 	var aEventK = 0;
 	var v = {};
 	var aZeileObj;
+	var lZeileObj;
 	addNewLine();
 	renderTokens();
 	function addNewLine () {
 		aline += 1;
-		aZeileObj = $('#annotationstoolvorlage>.annotationszeile').clone().addClass('az' + aline).appendTo('#annotationstool');
 		aeventpline = 1;
+		lZeileObj = aZeileObj;
+		aZeileObj = $('#annotationstoolvorlage>.annotationszeile').clone().addClass('az' + aline).appendTo('#annotationstool');
 	}
 	function renderTokens () {
 		if (aEventK < data['aEvents'].length) {
@@ -66,13 +68,25 @@ function newAnnotationForm (data) {
 					ac += ' fc';
 				};
 				var aEventObj = $('#annotationstoolvorlage>.event').clone().addClass(ac).appendTo(aZeileObj);
+				aEventObj.append('<div class="eventzeit" title="' + ('Zeit: ' + v['s'] + ' - ' + v['e']) + String.fromCharCode(10) + 'Layer: ' + v['l'] + String.fromCharCode(10) + 'ID: ' + v['pk'] + '">' + v['s'] + '</div>');
 				$.each(v['tid'], function (k2, v2) {
 					var aToken = data['aTokens'][v2];
 					aEventObj.find('.infe.infid' + aToken['i']).append('<div class="token" data-id="' + v2 + '">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>');
 				});
 				aeventpline += 1;
 				if ($(aZeileObj).width() > azWidth) {
-					addNewLine();
+					if (aeventpline > 2) {
+						addNewLine();
+						aZeileObj.append(aEventObj.addClass('fc'));
+						aeventpline += 1;
+					} else {
+						addNewLine();
+					}
+					$.each(data['aInformanten'], function (k, v) {
+						if (lZeileObj.find('.infid' + k + '>.token').length === 0) {
+							lZeileObj.find('.infid' + k).addClass('leererinf');
+						};
+					});
 				};
 			};
 			aEventK = mk + 1;

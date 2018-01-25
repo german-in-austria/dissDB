@@ -13,8 +13,13 @@
 	border: 1px solid #eee;
 	margin-top: 40px;
 	min-width: 100%;
+	padding-right: 5px;
 	white-space: nowrap;
 	width: fit-content;
+}
+
+.leererinf {
+	display: none;
 }
 
 .infstitel {
@@ -40,7 +45,7 @@
 	border-top-width: 1px;
 	height: 41px;
 	margin: 5px 0 5px 0;
-	padding: 10px 0px;
+	padding: 5px 0;
 }
 .event:hover>.infe {
 	background: #eef;
@@ -52,9 +57,26 @@
 	border-right-width: 1px;
 	padding-right: 10px;
 }
+.eventzeit {
+	position: absolute;
+	bottom: calc( 100% + 1px );
+	left: 0px;
+	background: #fff;
+	padding: 0px 5px 3px;
+	border-left: 1px solid #ccc;
+	font-size: 10px;
+}
+.event:hover .eventzeit {
+	background: #eef;
+	font-size: 14px;
+	font-weight: bold;
+	z-index: 1000;
+	min-width: 100%;
+}
 
 .token, .notoken {
 	display: inline-block;
+	padding: 5px 0px;
 }
 .token:hover {
 	background:#efe;
