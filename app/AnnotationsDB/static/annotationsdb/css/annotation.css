@@ -1,3 +1,14 @@
+#atloading {
+	position: absolute;
+	left: 22px;
+	top: 6px;
+	font-weight: bold;
+	font-size: 20px;
+	z-index: 1000;
+	background: #fee;
+	padding: 5px 20px;
+}
+
 .annotationszeile {
 	border: 1px solid #eee;
 	margin-top: 40px;

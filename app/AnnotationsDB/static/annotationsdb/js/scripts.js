@@ -1,4 +1,4 @@
-/* global jQuery alert csrf newAnnotationForm */
+/* global jQuery alert csrf newAnnotationForm rTTimer */
 /* Variablen */
 
 (function ($) {
@@ -14,6 +14,7 @@
 		$(document).on('change', '#seltranskript select', function () { $('#seltranskript').submit(); });
 		$(document).on('click', '.lmfabc', function (e) {
 			e.preventDefault();
+			clearTimeout(rTTimer);
 			$('.lmfabc').removeClass('open');
 			$(this).addClass('open');
 			$.post($(this).attr('href'), { csrfmiddlewaretoken: csrf }, function (d) {
