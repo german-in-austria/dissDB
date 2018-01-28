@@ -16,20 +16,13 @@ function newAnnotationForm (data) {
 	var t0 = performance.now();
 	console.log(aData);
 	$('.mcon').html('<div id="atloading">Daten werden verarbeitet ... <span>0</span> %</div><div id="annotationstool"></div><div id="annotationstoolvorlage"></div>');
+	// Vorlage für Zeilen erstellen
 	var infWidth = 0;
 	var aCont = '<div class="annotationszeile"><div class="infstitel">';
 	var aeCont = '<div class="event">';
 	$.each(aData['aInformanten'], function (k, v) {
 		aCont += '<div class="inftitel infid' + k + '" title="ID: ' + k + '" data-id="' + k + '">' + v['k'] + '</div>';
 		aeCont += '<div class="infe infid' + k + '" data-id="' + k + '"><div class="notoken">&nbsp;</div></div>';
-	});
-	$.each(aData['aTokens'], function (k, v) {
-		var aEventKey = searchbypk(v['e'], aData['aEvents']);
-		if (aData['aEvents'][aEventKey]['tid']) {
-			aData['aEvents'][aEventKey]['tid'].push(k);
-		} else {
-			aData['aEvents'][aEventKey]['tid'] = [k];
-		};
 	});
 	$('#annotationstoolvorlage').append(aCont + '</div></div>');
 	$('#annotationstoolvorlage').append(aeCont + '</div>');
@@ -40,6 +33,26 @@ function newAnnotationForm (data) {
 	}).width(infWidth);
 	var azWidth = $('#annotationstoolvorlage .annotationszeile').width();
 	$('#annotationstoolvorlage').css('display', 'none');
+
+	// Token IDs zu Events zuordnen.
+	$.each(aData['aTokens'], function (k, v) {
+		var aEventKey = searchbypk(v['e'], aData['aEvents']);
+		if (aData['aEvents'][aEventKey]['tid']) {
+			aData['aEvents'][aEventKey]['tid'].push(k);
+		} else {
+			aData['aEvents'][aEventKey]['tid'] = [k];
+		};
+	});
+
+	// Events mit selber Startzeit markieren
+	$.each(aData['aEvents'], function (k, v) {
+		if (k < aData['aEvents'].length - 1 && aData['aEvents'][k]['s'] === aData['aEvents'][k + 1]['s']) {
+			aData['aEvents'][k]['syncn'] = true;
+		}
+		if (k > 0 && aData['aEvents'][k]['s'] === aData['aEvents'][k - 1]['s']) {
+			aData['aEvents'][k]['syncp'] = true;
+		}
+	});
 
 	var aline = 0;
 	var aeventpline = 1;
@@ -66,24 +79,53 @@ function newAnnotationForm (data) {
 				mk = aData['aEvents'].length - 1;
 			}
 			for (var k = vk; k <= mk; k++) {
-				v = aData['aEvents'][k];
-				var ac = 'eid' + v['pk'];
-				if (aeventpline === 1) {
-					ac += ' fc';
-				};
 				// Event mit Token hinzufügen.
+				v = aData['aEvents'][k];
+				var ac = '';
+				if (aeventpline === 1) {
+					ac += 'fc';
+				};
+				var aV;
+				var aTitle = '';
+				var syncK = k;
+				var syncKm = k;
+				while (syncK >= 0 && syncK < aData['aEvents'].length) {
+					aV = aData['aEvents'][syncK];
+					aTitle += 'ID: ' + aV['pk'] + ' | Zeit: ' + aV['s'] + ' - ' + aV['e'] + ' | Layer: ' + aV['l'] + String.fromCharCode(10);
+					ac += ' eid' + aV['pk'];
+					if (aData['aEvents'][syncK]['syncn']) {
+						syncK += 1;
+					} else {
+						syncK = -1;
+					};
+				};
 				var aEventObj = $('#annotationstoolvorlage>.event').clone().addClass(ac).appendTo(aZeileObj);
-				aEventObj.append('<div class="eventzeit" title="' + ('Zeit: ' + v['s'] + ' - ' + v['e']) + String.fromCharCode(10) + 'Layer: ' + v['l'] + String.fromCharCode(10) + 'ID: ' + v['pk'] + '">' + v['s'] + '</div>');
+				aEventObj.append('<div class="eventzeit" title="' + aTitle + '">' + v['s'] + '</div>');
 				var aTokenCach = {};
-				$.each(v['tid'], function (k2, v2) {
-					var aToken = aData['aTokens'][v2];
-					if (!aTokenCach[aToken['i']]) { aTokenCach[aToken['i']] = ''; };
-					aTokenCach[aToken['i']] += '<div class="token" data-id="' + v2 + '">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>';
-				});
+				syncK = k;
+				while (syncK >= 0 && syncK < aData['aEvents'].length) {
+					aV = aData['aEvents'][syncK];
+					$.each(aV['tid'], function (k2, v2) {
+						var aToken = aData['aTokens'][v2];
+						ac = 'token';
+						if (aToken['fo'] > 0) {
+							ac += ' fragment';
+						};
+						if (!aTokenCach[aToken['i']]) { aTokenCach[aToken['i']] = ''; };
+						aTokenCach[aToken['i']] += '<div class="' + ac + '" data-id="' + v2 + '">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>';
+					});
+					if (aData['aEvents'][syncK]['syncn']) {
+						syncK += 1;
+						syncKm = syncK;
+					} else {
+						syncK = -1;
+					};
+				};
 				$.each(aTokenCach, function (k2, v2) {
 					aEventObj.find('.infe.infid' + k2).html(v2);
 				});
 				aeventpline += 1;
+
 				// Zeilenbreite überprüfen und ggf. Token in eine neue Zeile verschieben.
 				if ($(aZeileObj).width() > azWidth) {
 					if (aeventpline > 2) {
@@ -99,8 +141,9 @@ function newAnnotationForm (data) {
 						};
 					});
 				};
+				k = syncKm;
 			};
-			aEventK = mk + 1;
+			aEventK = syncKm + 1;
 			rTTimer = setTimeout(renderTokens, 1);
 		} else {
 			$('#atloading').remove();
