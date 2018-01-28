@@ -52,7 +52,7 @@ def start(request, ipk=0, tpk=0):
 			if aToken.likely_error:
 				aTokenset['le'] = 1
 			aTokens[aToken.pk] = aTokenset
-		return httpOutput(json.dumps({'aTokenTypes': aTokenTypes, 'aSaetze': aSaetze, 'aEvents': aEvents, 'aInformanten': aInformanten, 'aTokens': aTokens}))
+		return httpOutput(json.dumps({'aTokenTypes': aTokenTypes, 'aSaetze': aSaetze, 'aEvents': aEvents, 'aInformanten': aInformanten, 'aTokens': aTokens}), 'application/json')
 
 	if 'ainformant' in request.POST:
 		ipk = int(request.POST.get('ainformant'))

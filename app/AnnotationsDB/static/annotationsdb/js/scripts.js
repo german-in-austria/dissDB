@@ -17,8 +17,9 @@
 			clearTimeout(rTTimer);
 			$('.lmfabc').removeClass('open');
 			$(this).addClass('open');
+			$('.mcon').html('<div id="atloading">Daten werden geladen ...</div>');
 			$.post($(this).attr('href'), { csrfmiddlewaretoken: csrf }, function (d) {
-				newAnnotationForm(JSON.parse(d));
+				newAnnotationForm(d);
 			}).fail(function (d) {
 				alert('error');
 				console.log(d);

@@ -1,12 +1,14 @@
 #atloading {
 	position: absolute;
-	left: 22px;
-	top: 6px;
+	left: 35%;
+	right: 35%;
+	top: 30%;
 	font-weight: bold;
 	font-size: 20px;
-	z-index: 1000;
+	z-index: 1000000;
 	background: #fee;
-	padding: 5px 20px;
+	padding: 10% 20px;
+	text-align: center;
 }
 
 .annotationszeile {
@@ -65,6 +67,8 @@
 	padding: 0px 5px 3px;
 	border-left: 1px solid #ccc;
 	font-size: 10px;
+	right: 0px;
+	overflow: hidden;
 }
 .event:hover .eventzeit {
 	background: #eef;
@@ -72,6 +76,7 @@
 	font-weight: bold;
 	z-index: 1000;
 	min-width: 100%;
+	right: auto;
 }
 
 .token, .notoken {

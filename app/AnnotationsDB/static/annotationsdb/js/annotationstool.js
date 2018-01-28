@@ -1,6 +1,7 @@
 /* global $ performance */
 
 var rTTimer;
+var aData;
 
 function searchbypk (nameKey, myArray) {
 	for (var i = 0; i < myArray.length; i++) {
@@ -11,22 +12,23 @@ function searchbypk (nameKey, myArray) {
 }
 
 function newAnnotationForm (data) {
+	aData = data;
 	var t0 = performance.now();
-	console.log(data);
-	$('.mcon').html('<div id="atloading">Lade ... <span>0</span> %</div><div id="annotationstool"></div><div id="annotationstoolvorlage"></div>');
+	console.log(aData);
+	$('.mcon').html('<div id="atloading">Daten werden verarbeitet ... <span>0</span> %</div><div id="annotationstool"></div><div id="annotationstoolvorlage"></div>');
 	var infWidth = 0;
 	var aCont = '<div class="annotationszeile"><div class="infstitel">';
 	var aeCont = '<div class="event">';
-	$.each(data['aInformanten'], function (k, v) {
+	$.each(aData['aInformanten'], function (k, v) {
 		aCont += '<div class="inftitel infid' + k + '" title="ID: ' + k + '" data-id="' + k + '">' + v['k'] + '</div>';
 		aeCont += '<div class="infe infid' + k + '" data-id="' + k + '"><div class="notoken">&nbsp;</div></div>';
 	});
-	$.each(data['aTokens'], function (k, v) {
-		var aEventKey = searchbypk(v['e'], data['aEvents']);
-		if (data['aEvents'][aEventKey]['tid']) {
-			data['aEvents'][aEventKey]['tid'].push(k);
+	$.each(aData['aTokens'], function (k, v) {
+		var aEventKey = searchbypk(v['e'], aData['aEvents']);
+		if (aData['aEvents'][aEventKey]['tid']) {
+			aData['aEvents'][aEventKey]['tid'].push(k);
 		} else {
-			data['aEvents'][aEventKey]['tid'] = [k];
+			aData['aEvents'][aEventKey]['tid'] = [k];
 		};
 	});
 	$('#annotationstoolvorlage').append(aCont + '</div></div>');
@@ -47,6 +49,8 @@ function newAnnotationForm (data) {
 	var lZeileObj;
 	addNewLine();
 	renderTokens();
+
+	// Alle Events mit Token rendern.
 	function addNewLine () {
 		aline += 1;
 		aeventpline = 1;
@@ -54,26 +58,33 @@ function newAnnotationForm (data) {
 		aZeileObj = $('#annotationstoolvorlage>.annotationszeile').clone().addClass('az' + aline).appendTo('#annotationstool');
 	}
 	function renderTokens () {
-		if (aEventK < data['aEvents'].length) {
-			$('#atloading>span').html((100 / (data['aEvents'].length - 1) * aEventK).toFixed(1));
+		if (aEventK < aData['aEvents'].length) {
+			$('#atloading>span').html((100 / (aData['aEvents'].length - 1) * aEventK).toFixed(1));
 			var vk = aEventK;
-			var mk = vk + 25;
-			if (mk > data['aEvents'].length - 1) {
-				mk = data['aEvents'].length - 1;
+			var mk = vk + 50;
+			if (mk > aData['aEvents'].length - 1) {
+				mk = aData['aEvents'].length - 1;
 			}
 			for (var k = vk; k <= mk; k++) {
-				v = data['aEvents'][k];
+				v = aData['aEvents'][k];
 				var ac = 'eid' + v['pk'];
 				if (aeventpline === 1) {
 					ac += ' fc';
 				};
+				// Event mit Token hinzufügen.
 				var aEventObj = $('#annotationstoolvorlage>.event').clone().addClass(ac).appendTo(aZeileObj);
 				aEventObj.append('<div class="eventzeit" title="' + ('Zeit: ' + v['s'] + ' - ' + v['e']) + String.fromCharCode(10) + 'Layer: ' + v['l'] + String.fromCharCode(10) + 'ID: ' + v['pk'] + '">' + v['s'] + '</div>');
+				var aTokenCach = {};
 				$.each(v['tid'], function (k2, v2) {
-					var aToken = data['aTokens'][v2];
-					aEventObj.find('.infe.infid' + aToken['i']).append('<div class="token" data-id="' + v2 + '">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>');
+					var aToken = aData['aTokens'][v2];
+					if (!aTokenCach[aToken['i']]) { aTokenCach[aToken['i']] = ''; };
+					aTokenCach[aToken['i']] += '<div class="token" data-id="' + v2 + '">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>';
+				});
+				$.each(aTokenCach, function (k2, v2) {
+					aEventObj.find('.infe.infid' + k2).html(v2);
 				});
 				aeventpline += 1;
+				// Zeilenbreite überprüfen und ggf. Token in eine neue Zeile verschieben.
 				if ($(aZeileObj).width() > azWidth) {
 					if (aeventpline > 2) {
 						addNewLine();
@@ -82,7 +93,7 @@ function newAnnotationForm (data) {
 					} else {
 						addNewLine();
 					}
-					$.each(data['aInformanten'], function (k, v) {
+					$.each(aData['aInformanten'], function (k, v) {
 						if (lZeileObj.find('.infid' + k + '>.token').length === 0) {
 							lZeileObj.find('.infid' + k).addClass('leererinf');
 						};
@@ -97,7 +108,6 @@ function newAnnotationForm (data) {
 			console.log('renderTokens: ' + Math.ceil(t2 - t0) + ' ms.');
 		}
 	};
-	$('#annotationstool').data('data', data);
 	var t1 = performance.now();
 	console.log('newAnnotationForm: ' + Math.ceil(t1 - t0) + ' ms.');
 };
