@@ -63,7 +63,7 @@ function newAnnotationForm (data) {
 	addNewLine();
 	renderTokens();
 
-	// Alle Events mit Token rendern.
+	// Events mit Token rendern.
 	function addNewLine () {
 		aline += 1;
 		aeventpline = 1;
@@ -81,25 +81,28 @@ function newAnnotationForm (data) {
 			for (var k = vk; k <= mk; k++) {
 				// Event mit Token hinzufügen.
 				v = aData['aEvents'][k];
-				var ac = '';
+				var aClass = '';
 				if (aeventpline === 1) {
-					ac += 'fc';
+					aClass += 'fc';
 				};
-				var aV;
-				var aTitle = '';
 				var syncK = k;
 				var syncKm = k;
+				// Titel, Data und Klassen für Event erstellen
+				var aTitle = '';
+				var aDataF = [];
+				var aV;
 				while (syncK >= 0 && syncK < aData['aEvents'].length) {
 					aV = aData['aEvents'][syncK];
 					aTitle += 'ID: ' + aV['pk'] + ' | Zeit: ' + aV['s'] + ' - ' + aV['e'] + ' | Layer: ' + aV['l'] + String.fromCharCode(10);
-					ac += ' eid' + aV['pk'];
+					aDataF.push(aV['pk']);
+					aClass += ' eid' + aV['pk'];
 					if (aData['aEvents'][syncK]['syncn']) {
 						syncK += 1;
 					} else {
 						syncK = -1;
 					};
 				};
-				var aEventObj = $('#annotationstoolvorlage>.event').clone().addClass(ac).appendTo(aZeileObj);
+				var aEventObj = $('#annotationstoolvorlage>.event').clone().addClass(aClass).data(aDataF).appendTo(aZeileObj);
 				aEventObj.append('<div class="eventzeit" title="' + aTitle + '">' + v['s'] + '</div>');
 				var aTokenCach = {};
 				syncK = k;
@@ -107,12 +110,12 @@ function newAnnotationForm (data) {
 					aV = aData['aEvents'][syncK];
 					$.each(aV['tid'], function (k2, v2) {
 						var aToken = aData['aTokens'][v2];
-						ac = 'token';
+						aClass = 'token';
 						if (aToken['fo'] > 0) {
-							ac += ' fragment';
+							aClass += ' fragment';
 						};
 						if (!aTokenCach[aToken['i']]) { aTokenCach[aToken['i']] = ''; };
-						aTokenCach[aToken['i']] += '<div class="' + ac + '" data-id="' + v2 + '">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>';
+						aTokenCach[aToken['i']] += '<div class="' + aClass + '" data-id="' + v2 + '">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>';
 					});
 					if (aData['aEvents'][syncK]['syncn']) {
 						syncK += 1;
