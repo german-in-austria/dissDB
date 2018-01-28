@@ -115,7 +115,7 @@ function newAnnotationForm (data) {
 							aClass += ' fragment';
 						};
 						if (!aTokenCach[aToken['i']]) { aTokenCach[aToken['i']] = ''; };
-						aTokenCach[aToken['i']] += '<div class="' + aClass + '" data-id="' + v2 + '">' + ((aToken['tt'] === 2) ? '' : '&nbsp;') + aToken['t'] + '</div>';
+						aTokenCach[aToken['i']] += '<div class="' + aClass + '" data-id="' + v2 + '">' + (((aToken['tt'] === 2) || (aToken['fo'] > 0)) ? '' : '&nbsp;') + aToken['t'] + '</div>';
 					});
 					if (aData['aEvents'][syncK]['syncn']) {
 						syncK += 1;
