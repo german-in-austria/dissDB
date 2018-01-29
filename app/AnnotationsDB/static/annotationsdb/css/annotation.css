@@ -86,10 +86,19 @@
 .token, .notoken {
 	display: inline-block;
 	padding: 5px 0px;
+  cursor: pointer;
 }
 .token.fragment {
 	color: #666;
 	background: #fafafa;
+}
+.token.viewed {
+	border: 1px solid #ddf;
+  margin: -1px;
+}
+.token.lastview {
+  border: 1px solid #aaf;
+  margin: -1px;
 }
 .token:hover {
 	background:#efe;

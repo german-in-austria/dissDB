@@ -1,4 +1,4 @@
-/* global $ performance */
+/* global $ performance makeModal */
 
 var rTTimer;
 var aData;
@@ -15,7 +15,7 @@ function newAnnotationForm (data) {
 	aData = data;
 	var t0 = performance.now();
 	console.log(aData);
-	$('.mcon').html('<div id="atloading">Daten werden verarbeitet ... <span>0</span> %</div><div id="annotationstool"></div><div id="annotationstoolvorlage"></div>');
+	$('.mcon').removeClass('ready').addClass('loading').html('<div id="atloading">Daten werden verarbeitet ... <span>0</span> %</div><div id="annotationstool"></div><div id="annotationstoolvorlage"></div>');
 	// Vorlage für Zeilen erstellen
 	var infWidth = 0;
 	var aCont = '<div class="annotationszeile"><div class="infstitel">';
@@ -150,6 +150,7 @@ function newAnnotationForm (data) {
 			rTTimer = setTimeout(renderTokens, 1);
 		} else {
 			$('#atloading').remove();
+			$('.mcon').removeClass('loading').addClass('ready');
 			var t2 = performance.now();
 			console.log('renderTokens: ' + Math.ceil(t2 - t0) + ' ms.');
 		}
@@ -157,3 +158,73 @@ function newAnnotationForm (data) {
 	var t1 = performance.now();
 	console.log('newAnnotationForm: ' + Math.ceil(t1 - t0) + ' ms.');
 };
+
+// Modal mit Tokendaten
+$(document).on('click', '.mcon.ready .token', function (e) {
+	var aTokenD = aData['aTokens'][$(this).data('id')];
+	console.log(aTokenD);
+	$('.token').removeClass('lastview');
+	$(this).addClass('viewed lastview');
+	var aTitel = 'Token: <b>' + aTokenD['t'] + '</b>';
+	var aBody = '';
+	aBody += '<div class="form-group">' +
+							'<label for="aTokenID" class="col-sm-3 control-label">ID</label>' +
+							'<div class="col-sm-9"><p class="form-control-static" id="aTokenID">' + $(this).data('id') + '</div>' +
+						'</div>';
+	aBody += '<div class="form-group">' +
+							'<label for="aTokenText" class="col-sm-3 control-label">text</label>' +
+							'<div class="col-sm-9"><input type="text" class="form-control" id="aTokenText" value="' + ((aTokenD['t']) ? aTokenD['t'] : '') + '"></div>' +
+						'</div>';
+	var aSel = '';
+	$.each(aData['aTokenTypes'], function (k, v) {
+		aSel += '<option value="' + v + '"' + ((Number(k) === aTokenD['tt']) ? ' selected' : '') + '>' + v['n'] + '</option>';
+	});
+	aBody +=	'<div class="form-group">' +
+							'<label for="aTokenType" class="col-sm-3 control-label">token_type</label>' +
+							'<div class="col-sm-9"><select class="form-control" id="aTokenType">' + aSel + '</select></div>' +
+						'</div>';
+	aBody += '<div class="form-group">' +
+							'<label for="aTokenOrtho" class="col-sm-3 control-label">ortho</label>' +
+							'<div class="col-sm-9"><input type="text" class="form-control" id="aTokenOrtho" value="' + ((aTokenD['o']) ? aTokenD['o'] : '') + '"></div>' +
+						'</div>';
+	aBody += '<div class="form-group">' +
+							'<label for="aTokenIDInf" class="col-sm-3 control-label">ID_Inf</label>' +
+							'<div class="col-sm-9"><p class="form-control-static" id="aTokenIDInf">' + aData['aInformanten'][aTokenD['i']]['k'] + '(' + aData['aInformanten'][aTokenD['i']]['ka'] + ') - ID: ' + aTokenD['i'] + '</div>' +
+						'</div>';
+	if (aTokenD['fo']) {
+		aBody += '<div class="form-group">' +
+								'<label for="aTokenfragmentof" class="col-sm-3 control-label">fragment_of</label>' +
+								'<div class="col-sm-9"><p class="form-control-static" id="aTokenfragmentof">' + aData['aTokens'][aTokenD['fo']]['t'] + ' - ID: ' + aTokenD['fo'] + '</div>' +
+							'</div>';
+	};
+	aBody += '<div class="form-group">' +
+							'<label for="aTokenReihung" class="col-sm-3 control-label">token_reihung</label>' +
+							'<div class="col-sm-9"><p class="form-control-static" id="aTokenReihung">' + ((aTokenD['tr']) ? aTokenD['tr'] : '') + '</p></div>' +
+						'</div>';
+	aBody += '<div class="form-group">' +
+							'<label for="aTokenEventID" class="col-sm-3 control-label">event_id</label>' +
+							'<div class="col-sm-9"><p class="form-control-static" id="aTokenEventID">' + aData['aEvents'][searchbypk(aTokenD['e'], aData['aEvents'])]['s'] + ' - ID: ' + aTokenD['e'] + '</p></div>' +
+						'</div>';
+	aBody += '<div class="form-group">' +
+							'<label for="aTokenLikelyError" class="col-sm-3 control-label">likely_error</label>' +
+							'<div class="col-sm-9"><label class="checkbox-inline"><input type="checkbox" id="aTokenLikelyError" value="1"' + ((aTokenD['le'] === 1) ? ' checked' : '') + '> Ja</label></div>' +
+						'</div>';
+	if (aTokenD['s']) {
+		aBody += '<div class="form-group">' +
+								'<label for="aTokenSentenceID" class="col-sm-3 control-label">sentence_id</label>' +
+								'<div class="col-sm-9"><p class="form-control-static" id="aTokenSentenceID">' + aData['aSaetze'][aTokenD['s']]['t'] + ' - ID: ' + aTokenD['s'] + '</div>' +
+							'</div>';
+	};
+	if (aTokenD['sr']) {
+		aBody += '<div class="form-group">' +
+								'<label for="aTokenSequenceInSentence" class="col-sm-3 control-label">sequence_in_sentence</label>' +
+								'<div class="col-sm-9"><p class="form-control-static" id="aTokenSequenceInSentence">' + aTokenD['sr'] + '</p></div>' +
+							'</div>';
+	};
+	aBody += '<div class="form-group">' +
+							'<label for="aTokenTextInOrtho" class="col-sm-3 control-label">text_in_ortho</label>' +
+							'<div class="col-sm-9"><input type="text" class="form-control" id="aTokenTextInOrtho" value="' + ((aTokenD['to']) ? aTokenD['to'] : '') + '"></div>' +
+						'</div>';
+	aBody = '<div class="form-horizontal">' + aBody + '</div>';
+	makeModal(aTitel, aBody, 'tokeninfos');
+});
