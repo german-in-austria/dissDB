@@ -34,8 +34,17 @@ function newAnnotationForm (data) {
 	var azWidth = $('#annotationstoolvorlage .annotationszeile').width();
 	$('#annotationstoolvorlage').css('display', 'none');
 
-	// Token IDs zu Events zuordnen.
+	// Token Daten verarbeiten
 	$.each(aData['aTokens'], function (k, v) {
+		// Verweisende Fragmente zuordnen
+		if (v['fo']) {
+			if (aData['aTokens'][v['fo']]['hf']) {
+				aData['aTokens'][v['fo']]['hf'].push(k);
+			} else {
+				aData['aTokens'][v['fo']]['hf'] = [k];
+			}
+		};
+		// Token IDs zu Events zuordnen.
 		var aEventKey = searchbypk(v['e'], aData['aEvents']);
 		if (aData['aEvents'][aEventKey]['tid']) {
 			aData['aEvents'][aEventKey]['tid'].push(k);
@@ -44,8 +53,9 @@ function newAnnotationForm (data) {
 		};
 	});
 
-	// Events mit selber Startzeit markieren
+	// Event Daten verarbeiten
 	$.each(aData['aEvents'], function (k, v) {
+		// Events mit selber Startzeit markieren
 		if (k < aData['aEvents'].length - 1 && aData['aEvents'][k]['s'] === aData['aEvents'][k + 1]['s']) {
 			aData['aEvents'][k]['syncn'] = true;
 		}
@@ -225,6 +235,16 @@ $(document).on('click', '.mcon.ready .token', function (e) {
 							'<label for="aTokenTextInOrtho" class="col-sm-3 control-label">text_in_ortho</label>' +
 							'<div class="col-sm-9"><input type="text" class="form-control" id="aTokenTextInOrtho" value="' + ((aTokenD['to']) ? aTokenD['to'] : '') + '"></div>' +
 						'</div>';
+	if (aTokenD['hf']) {
+		var aFrags = '';
+		$.each(aTokenD['hf'], function (k, v) {
+			aFrags += '<li>' + aData['aTokens'][v]['t'] + ' (' + v + ')</li>';
+		});
+		aBody += '<div class="form-group">' +
+								'<label class="col-sm-3 control-label">Fragmente</label>' +
+								'<div class="col-sm-9"><ul class="form-control-static hflist">' + aFrags + '</ul></div>' +
+							'</div>';
+	};
 	aBody = '<div class="form-horizontal">' + aBody + '</div>';
 	makeModal(aTitel, aBody, 'tokeninfos');
 });
