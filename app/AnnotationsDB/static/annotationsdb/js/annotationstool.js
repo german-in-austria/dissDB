@@ -80,6 +80,15 @@ function newAnnotationForm (data) {
 		lZeileObj = aZeileObj;
 		aZeileObj = $('#annotationstoolvorlage>.annotationszeile').clone().addClass('az' + aline).appendTo('#annotationstool');
 	}
+	function renderToken (aID) {
+		var aClass;
+		var aToken = aData['aTokens'][aID];
+		aClass = 'token';
+		if (aToken['fo'] > 0) {
+			aClass += ' fragment';
+		};
+		return '<div class="' + aClass + '" data-id="' + aID + '">' + (((aToken['tt'] === 2) || (aToken['fo'] > 0)) ? '' : '&nbsp;') + aToken['t'] + '</div>';
+	};
 	function renderTokens () {
 		if (aEventK < aData['aEvents'].length) {
 			$('#atloading>span').html((100 / (aData['aEvents'].length - 1) * aEventK).toFixed(1));
@@ -119,13 +128,8 @@ function newAnnotationForm (data) {
 				while (syncK >= 0 && syncK < aData['aEvents'].length) {
 					aV = aData['aEvents'][syncK];
 					$.each(aV['tid'], function (k2, v2) {
-						var aToken = aData['aTokens'][v2];
-						aClass = 'token';
-						if (aToken['fo'] > 0) {
-							aClass += ' fragment';
-						};
-						if (!aTokenCach[aToken['i']]) { aTokenCach[aToken['i']] = ''; };
-						aTokenCach[aToken['i']] += '<div class="' + aClass + '" data-id="' + v2 + '">' + (((aToken['tt'] === 2) || (aToken['fo'] > 0)) ? '' : '&nbsp;') + aToken['t'] + '</div>';
+						if (!aTokenCach[aData['aTokens'][v2]['i']]) { aTokenCach[aData['aTokens'][v2]['i']] = ''; };
+						aTokenCach[aData['aTokens'][v2]['i']] += renderToken(v2);
 					});
 					if (aData['aEvents'][syncK]['syncn']) {
 						syncK += 1;
