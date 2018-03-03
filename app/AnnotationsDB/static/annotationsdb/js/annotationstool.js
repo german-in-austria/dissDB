@@ -16,6 +16,7 @@ function newAnnotationForm (data) {
 	aData = data;
 	var t0 = performance.now();
 	console.log(aData);
+	activeToken();
 	$('.mcon').removeClass('ready').addClass('loading').html('<div id="atloading">Daten werden verarbeitet ... <span>0</span> %</div><div id="annotationstool"></div><div id="annotationstoolvorlage"></div>');
 	// Vorlage für Zeilen erstellen
 	var infWidth = 0;
@@ -38,6 +39,8 @@ function newAnnotationForm (data) {
 	// Token Daten verarbeiten
 	$.each(aData['aTokens'], function (k, v) {
 		// Verweisende Fragmente zuordnen
+		console.log(k);
+		console.log(v['fo']);
 		if (v['fo']) {
 			if (aData['aTokens'][v['fo']]['hf']) {
 				aData['aTokens'][v['fo']]['hf'].push(k);
@@ -168,6 +171,8 @@ function newAnnotationForm (data) {
 			$('.mcon').removeClass('loading').addClass('ready');
 			var t2 = performance.now();
 			console.log('renderTokens: ' + Math.ceil(t2 - t0) + ' ms.');
+			$('body').focus();
+			nextToken();
 		}
 	};
 	var t1 = performance.now();
@@ -176,6 +181,7 @@ function newAnnotationForm (data) {
 
 // Modal mit Tokendaten
 $(document).on('click', '.mcon.ready .token', function (e) {
+	activeToken($(this).data('id'));
 	var aTokenD = aData['aTokens'][$(this).data('id')];
 	function formGroup (aTitle, aContent, aId = false) {
 		return '<div class="form-group">' +
@@ -220,3 +226,93 @@ $(document).on('click', '.mcon.ready .token', function (e) {
 	aBody = '<div class="form-horizontal">' + aBody + '</div>';
 	makeModal(aTitel, aBody, 'tokeninfos');
 });
+
+// Wenn Modal angezeigt wird
+$(document).on('shown.bs.modal', '#js-modal.tokeninfos', function (e) {
+	$('#aTokenText').focus();
+});
+
+// Tokenauswahl per Tastatur
+$(document).on('keyup', 'body:not(.modal-open)', function (e) {
+	if ($('.mcon.ready #annotationstool').length > 0) {
+		if (e.keyCode === 37) {
+			prevToken();
+		}
+		if (e.keyCode === 39) {
+			nextToken();
+		}
+	};
+});
+
+function activeToken (nSelect = false) {
+	console.log('Auswahl: ' + nSelect);
+	$('.token').removeClass('selected');
+	if (nSelect) {
+		var aSelToken = $('.token[data-id="' + nSelect + '"]');
+		aSelToken.addClass('selected');
+		selToken = nSelect;
+		var astop = $('.mcon').scrollTop();
+		var asbottom = astop + $('.mcon').innerHeight();
+		var atop = astop + aSelToken.parent().parent().parent().offset().top - 100;
+		var abottom = atop + aSelToken.parent().parent().parent().outerHeight(true) + 200;
+		if (atop < astop) {
+			$('.mcon').stop().animate({scrollTop: atop}, 250);
+		} else if (abottom > asbottom) {
+			$('.mcon').stop().animate({scrollTop: abottom - $('.mcon').innerHeight()}, 250);
+		}
+		console.log(astop + ' x ' + asbottom);
+		console.log(atop + ' x ' + abottom);
+	} else {
+		selToken = false;
+	}
+}
+
+function nextToken () {
+	if (selToken && $('.token[data-id="' + selToken + '"]').length > 0) {
+		var aToken = $('.token[data-id="' + selToken + '"]');
+		var nToken = aToken.next();
+		if (nToken.length === 0) {
+			var aInfId = aToken.parent().data('id');
+			var aEvent = aToken.parent().parent();
+			var nEvent = aEvent.nextAll().has('.infe[data-id="' + aInfId + '"]>.token').first();
+			if (nEvent.length === 0) {
+				nEvent = aEvent.parent().nextAll().has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').first();
+			}
+			if (nEvent && nEvent.length > 0) {
+				nToken = nEvent.find('.infe[data-id="' + aInfId + '"]>.token:first-child');
+			}
+		}
+		if (nToken.length > 0) {
+			activeToken(nToken.data('id'));
+		} else {
+			activeToken();
+		}
+	} else {
+		activeToken($('.token').first().data('id'));
+	}
+}
+
+function prevToken () {
+	if (selToken && $('.token[data-id="' + selToken + '"]').length > 0) {
+		var aToken = $('.token[data-id="' + selToken + '"]');
+		var nToken = aToken.prev();
+		if (nToken.length === 0) {
+			var aInfId = aToken.parent().data('id');
+			var aEvent = aToken.parent().parent();
+			var nEvent = aEvent.prevAll().has('.infe[data-id="' + aInfId + '"]>.token').first();
+			if (nEvent.length === 0) {
+				nEvent = aEvent.parent().prevAll().has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').last();
+			}
+			if (nEvent && nEvent.length > 0) {
+				nToken = nEvent.find('.infe[data-id="' + aInfId + '"]>.token:last-child');
+			}
+		}
+		if (nToken.length > 0) {
+			activeToken(nToken.data('id'));
+		} else {
+			activeToken();
+		}
+	} else {
+		activeToken($('.token').last().data('id'));
+	}
+}

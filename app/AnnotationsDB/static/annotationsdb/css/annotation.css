@@ -106,6 +106,10 @@
 .notoken {
 	width: 0px;
 }
+.token.selected {
+	border-bottom: 5px solid #00f;
+	padding-bottom: 1px;
+}
 
 /*
 .informant {
