@@ -39,8 +39,6 @@ function newAnnotationForm (data) {
 	// Token Daten verarbeiten
 	$.each(aData['aTokens'], function (k, v) {
 		// Verweisende Fragmente zuordnen
-		console.log(k);
-		console.log(v['fo']);
 		if (v['fo']) {
 			if (aData['aTokens'][v['fo']]['hf']) {
 				aData['aTokens'][v['fo']]['hf'].push(k);
@@ -260,8 +258,6 @@ function activeToken (nSelect = false) {
 		} else if (abottom > asbottom) {
 			$('.mcon').stop().animate({scrollTop: abottom - $('.mcon').innerHeight()}, 250);
 		}
-		console.log(astop + ' x ' + asbottom);
-		console.log(atop + ' x ' + abottom);
 	} else {
 		selToken = false;
 	}
