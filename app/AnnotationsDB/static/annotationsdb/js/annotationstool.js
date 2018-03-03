@@ -2,6 +2,7 @@
 
 var rTTimer;
 var aData;
+var selToken = false;
 
 function searchbypk (nameKey, myArray) {
 	for (var i = 0; i < myArray.length; i++) {
@@ -176,78 +177,45 @@ function newAnnotationForm (data) {
 // Modal mit Tokendaten
 $(document).on('click', '.mcon.ready .token', function (e) {
 	var aTokenD = aData['aTokens'][$(this).data('id')];
+	function formGroup (aTitle, aContent, aId = false) {
+		return '<div class="form-group">' +
+							'<label' + ((aId) ? ' for="' + aId + '"' : '') + ' class="col-sm-3 control-label">' + aTitle + '</label>' +
+							'<div class="col-sm-9">' + aContent + '</div>' +
+						'</div>';
+	}
 	console.log(aTokenD);
 	$('.token').removeClass('lastview');
 	$(this).addClass('viewed lastview');
 	var aTitel = 'Token: <b>' + aTokenD['t'] + '</b>';
 	var aBody = '';
-	aBody += '<div class="form-group">' +
-							'<label for="aTokenID" class="col-sm-3 control-label">ID</label>' +
-							'<div class="col-sm-9"><p class="form-control-static" id="aTokenID">' + $(this).data('id') + '</div>' +
-						'</div>';
-	aBody += '<div class="form-group">' +
-							'<label for="aTokenText" class="col-sm-3 control-label">text</label>' +
-							'<div class="col-sm-9"><input type="text" class="form-control" id="aTokenText" value="' + ((aTokenD['t']) ? aTokenD['t'] : '') + '"></div>' +
-						'</div>';
+	aBody += formGroup('ID', '<p class="form-control-static" id="aTokenID">' + $(this).data('id') + '</p>', 'aTokenID');
+	aBody += formGroup('text', '<input type="text" class="form-control" id="aTokenText" value="' + ((aTokenD['t']) ? aTokenD['t'] : '') + '">', 'aTokenText');
 	var aSel = '';
 	$.each(aData['aTokenTypes'], function (k, v) {
 		aSel += '<option value="' + v + '"' + ((Number(k) === aTokenD['tt']) ? ' selected' : '') + '>' + v['n'] + '</option>';
 	});
-	aBody +=	'<div class="form-group">' +
-							'<label for="aTokenType" class="col-sm-3 control-label">token_type</label>' +
-							'<div class="col-sm-9"><select class="form-control" id="aTokenType">' + aSel + '</select></div>' +
-						'</div>';
-	aBody += '<div class="form-group">' +
-							'<label for="aTokenOrtho" class="col-sm-3 control-label">ortho</label>' +
-							'<div class="col-sm-9"><input type="text" class="form-control" id="aTokenOrtho" value="' + ((aTokenD['o']) ? aTokenD['o'] : '') + '"></div>' +
-						'</div>';
-	aBody += '<div class="form-group">' +
-							'<label for="aTokenIDInf" class="col-sm-3 control-label">ID_Inf</label>' +
-							'<div class="col-sm-9"><p class="form-control-static" id="aTokenIDInf">' + aData['aInformanten'][aTokenD['i']]['k'] + '(' + aData['aInformanten'][aTokenD['i']]['ka'] + ') - ID: ' + aTokenD['i'] + '</div>' +
-						'</div>';
+	aBody +=	formGroup('token_type', '<select class="form-control" id="aTokenType">' + aSel + '</select>', 'aTokenType');
+	aBody += formGroup('ortho', '<input type="text" class="form-control" id="aTokenOrtho" value="' + ((aTokenD['o']) ? aTokenD['o'] : '') + '">', 'aTokenOrtho');
+	aBody += formGroup('ID_Inf', '<p class="form-control-static" id="aTokenIDInf">' + aData['aInformanten'][aTokenD['i']]['k'] + '(' + aData['aInformanten'][aTokenD['i']]['ka'] + ') - ID: ' + aTokenD['i'] + '</p>', 'aTokenIDInf');
 	if (aTokenD['fo']) {
-		aBody += '<div class="form-group">' +
-								'<label for="aTokenfragmentof" class="col-sm-3 control-label">fragment_of</label>' +
-								'<div class="col-sm-9"><p class="form-control-static" id="aTokenfragmentof">' + aData['aTokens'][aTokenD['fo']]['t'] + ' - ID: ' + aTokenD['fo'] + '</div>' +
-							'</div>';
+		aBody += formGroup('fragment_of', '<p class="form-control-static" id="aTokenfragmentof">' + aData['aTokens'][aTokenD['fo']]['t'] + ' - ID: ' + aTokenD['fo'] + '</p>', 'aTokenfragmentof');
 	};
-	aBody += '<div class="form-group">' +
-							'<label for="aTokenReihung" class="col-sm-3 control-label">token_reihung</label>' +
-							'<div class="col-sm-9"><p class="form-control-static" id="aTokenReihung">' + ((aTokenD['tr']) ? aTokenD['tr'] : '') + '</p></div>' +
-						'</div>';
-	aBody += '<div class="form-group">' +
-							'<label for="aTokenEventID" class="col-sm-3 control-label">event_id</label>' +
-							'<div class="col-sm-9"><p class="form-control-static" id="aTokenEventID">' + aData['aEvents'][searchbypk(aTokenD['e'], aData['aEvents'])]['s'] + ' - ID: ' + aTokenD['e'] + '</p></div>' +
-						'</div>';
-	aBody += '<div class="form-group">' +
-							'<label for="aTokenLikelyError" class="col-sm-3 control-label">likely_error</label>' +
-							'<div class="col-sm-9"><label class="checkbox-inline"><input type="checkbox" id="aTokenLikelyError" value="1"' + ((aTokenD['le'] === 1) ? ' checked' : '') + '> Ja</label></div>' +
-						'</div>';
+	aBody += formGroup('token_reihung', '<p class="form-control-static" id="aTokenReihung">' + ((aTokenD['tr']) ? aTokenD['tr'] : '') + '</p>', 'aTokenReihung');
+	aBody += formGroup('event_id', '<p class="form-control-static" id="aTokenEventID">' + aData['aEvents'][searchbypk(aTokenD['e'], aData['aEvents'])]['s'] + ' - ID: ' + aTokenD['e'] + '</p>', 'aTokenEventID');
+	aBody += formGroup('likely_error', '<label class="checkbox-inline"><input type="checkbox" id="aTokenLikelyError" value="1"' + ((aTokenD['le'] === 1) ? ' checked' : '') + '> Ja</label>', 'aTokenLikelyError');
 	if (aTokenD['s']) {
-		aBody += '<div class="form-group">' +
-								'<label for="aTokenSentenceID" class="col-sm-3 control-label">sentence_id</label>' +
-								'<div class="col-sm-9"><p class="form-control-static" id="aTokenSentenceID">' + aData['aSaetze'][aTokenD['s']]['t'] + ' - ID: ' + aTokenD['s'] + '</div>' +
-							'</div>';
+		aBody += formGroup('sentence_id', '<p class="form-control-static" id="aTokenSentenceID">' + aData['aSaetze'][aTokenD['s']]['t'] + ' - ID: ' + aTokenD['s'] + '</p>', 'aTokenSentenceID');
 	};
 	if (aTokenD['sr']) {
-		aBody += '<div class="form-group">' +
-								'<label for="aTokenSequenceInSentence" class="col-sm-3 control-label">sequence_in_sentence</label>' +
-								'<div class="col-sm-9"><p class="form-control-static" id="aTokenSequenceInSentence">' + aTokenD['sr'] + '</p></div>' +
-							'</div>';
+		aBody += formGroup('sequence_in_sentence', '<p class="form-control-static" id="aTokenSequenceInSentence">' + aTokenD['sr'] + '</p>', 'aTokenSequenceInSentence');
 	};
-	aBody += '<div class="form-group">' +
-							'<label for="aTokenTextInOrtho" class="col-sm-3 control-label">text_in_ortho</label>' +
-							'<div class="col-sm-9"><input type="text" class="form-control" id="aTokenTextInOrtho" value="' + ((aTokenD['to']) ? aTokenD['to'] : '') + '"></div>' +
-						'</div>';
+	aBody += formGroup('text_in_ortho', '<input type="text" class="form-control" id="aTokenTextInOrtho" value="' + ((aTokenD['to']) ? aTokenD['to'] : '') + '">', 'aTokenTextInOrtho');
 	if (aTokenD['hf']) {
 		var aFrags = '';
 		$.each(aTokenD['hf'], function (k, v) {
 			aFrags += '<li>' + aData['aTokens'][v]['t'] + ' (' + v + ')</li>';
 		});
-		aBody += '<div class="form-group">' +
-								'<label class="col-sm-3 control-label">Fragmente</label>' +
-								'<div class="col-sm-9"><ul class="form-control-static hflist">' + aFrags + '</ul></div>' +
-							'</div>';
+		aBody += formGroup('Fragmente', '<ul class="form-control-static hflist">' + aFrags + '</ul>');
 	};
 	aBody = '<div class="form-horizontal">' + aBody + '</div>';
 	makeModal(aTitel, aBody, 'tokeninfos');
