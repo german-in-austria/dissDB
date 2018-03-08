@@ -285,6 +285,9 @@ function nextToken () {
 			var nEvent = aEvent.nextAll().has('.infe[data-id="' + aInfId + '"]>.token').first();
 			if (nEvent.length === 0) {
 				nEvent = aEvent.parent().nextAll(':lt(10)').has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').first();
+				if (!nEvent || nEvent.length === 0) {
+					nEvent = aEvent.parent().nextAll().has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').first();
+				}
 			}
 			if (nEvent && nEvent.length > 0) {
 				nToken = nEvent.find('.infe[data-id="' + aInfId + '"]>.token:first-child');
@@ -310,6 +313,9 @@ function prevToken () {
 			var nEvent = aEvent.prevAll().has('.infe[data-id="' + aInfId + '"]>.token').first();
 			if (nEvent.length === 0) {
 				nEvent = aEvent.parent().prevAll(':lt(10)').has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').last();
+				if (!nEvent || nEvent.length === 0) {
+					nEvent = aEvent.parent().prevAll().has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').last();
+				}
 			}
 			if (nEvent && nEvent.length > 0) {
 				nToken = nEvent.find('.infe[data-id="' + aInfId + '"]>.token:last-child');
