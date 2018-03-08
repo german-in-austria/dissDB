@@ -1,4 +1,4 @@
-/* global $ performance makeModal */
+/* global $ performance makeModal confirm */
 
 var rTTimer;
 var aData;
@@ -223,11 +223,41 @@ $(document).on('click', '.mcon.ready .token', function (e) {
 		aBody += formGroup('Fragmente', '<ul class="form-control-static hflist">' + aFrags + '</ul>');
 	};
 	aBody = '<div class="form-horizontal">' + aBody + '</div>';
-	makeModal(aTitel, aBody, 'tokeninfos');
+	makeModal(aTitel, aBody, 'tokeninfos', '<button type="button" class="btn btn-danger" id="delToken" tabindex="9999">Löschen</button><button type="button" class="btn btn-primary" id="saveToken">Speichern</button>');
+});
+
+$(document).on('click', '#js-modal.tokeninfos:not(.loading) #delToken', function (e) {
+	if (confirm('Token wirklich unwiederruflich löschen?')) {
+		$('#js-modal.tokeninfos').addClass('loading');
+		console.log('Löschen!');
+	}
+});
+
+$(document).on('click', '#js-modal.tokeninfos:not(.loading) #saveToken', function (e) {
+	console.log('Speichern!');
+	// $('#js-modal.tokeninfos').addClass('loading');
+});
+
+// Token geändert?
+$(document).on('change keyup', '#js-modal.tokeninfos input, #js-modal.tokeninfos select', function (e) {
+	if (e.keyCode !== 9 && e.keyCode !== 16 && e.keyCode !== 37 && e.keyCode !== 39 && e.keyCode !== 13) {
+		$('#js-modal.tokeninfos').addClass('changed');
+	}
+});
+
+// Wenn Modal geschlossen wird
+$(document).on('hide.bs.modal', '#js-modal.tokeninfos', function (e) {
+	if ($('#js-modal.tokeninfos').hasClass('changed') && !confirm('Änderungen wirklich verwerfen?')) {
+		e.preventDefault();
+	}
+	if ($('#js-modal.tokeninfos').hasClass('loading')) {
+		e.preventDefault();
+	}
 });
 
 // Wenn Modal angezeigt wird
 $(document).on('shown.bs.modal', '#js-modal.tokeninfos', function (e) {
+	$('#js-modal.tokeninfos').removeClass('loading');
 	$('#aTokenText').focus();
 });
 

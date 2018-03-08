@@ -111,6 +111,27 @@
 	padding-bottom: 1px;
 }
 
+#js-modal.tokeninfos.loading:after {
+	content: 'Lade ...';
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background: rgba(0,0,0,0.25);
+	color: #fff;
+	font-size: 50px;
+	text-align: center;
+	line-height: 70vh;
+	text-shadow: 2px 3px 4px #000;
+}
+
+#js-modal.tokeninfos:not(.changed) #saveToken  {
+	background: #eee;
+	border-color: #ccc;
+	color: #bbb;
+}
+
 /*
 .informant {
 	border: 1px solid #eee;

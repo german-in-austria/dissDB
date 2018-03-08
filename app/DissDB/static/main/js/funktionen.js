@@ -7,11 +7,11 @@ function makeScrollTo () {
 		$(this).removeClass('scrollto').parents('.lmfa').scrollTop($(this).offset().top - 250);
 	});
 };
-function makeModal (atitel, abody, aclass = '') {						/* Modal erstellen */
+function makeModal (atitel, abody, aclass = '', aButtons = '') {						/* Modal erstellen */
 	var amodal = '<div id="js-modal" class="modal fade ' + aclass + '" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Schließen"><span aria-hidden="true">&times;</span></button>' +
      '<h4 class="modal-title">' + atitel + '</h4></div>' +
      '<div class="modal-body">' + abody + '</div>' +
-     '<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>' +
+     '<div class="modal-footer">' + aButtons + '<button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>' +
      '</div></div></div>';
 	$('#js-modal').remove();
 	$('body').append(amodal);
