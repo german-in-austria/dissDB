@@ -169,6 +169,7 @@ function newAnnotationForm (data) {
 			$('.mcon').removeClass('loading').addClass('ready');
 			var t2 = performance.now();
 			console.log('renderTokens: ' + Math.ceil(t2 - t0) + ' ms.');
+			$(':focus').blur();
 			$('body').focus();
 			nextToken();
 		}
@@ -234,19 +235,30 @@ $(document).on('shown.bs.modal', '#js-modal.tokeninfos', function (e) {
 $(document).on('keyup', 'body:not(.modal-open)', function (e) {
 	if ($('.mcon.ready #annotationstool').length > 0) {
 		if (e.keyCode === 37) {
+			$(':focus').blur();
 			prevToken();
-		}
-		if (e.keyCode === 39) {
+		} else if (e.keyCode === 39) {
+			$(':focus').blur();
 			nextToken();
+		} else if (e.keyCode === 38) {
+			$(':focus').blur();
+			prevInf();
+		} else if (e.keyCode === 40) {
+			$(':focus').blur();
+			nextInf();
+		} else if (e.keyCode === 13) {
+			$(':focus').blur();
+			$('.token[data-id="' + selToken + '"]').click();
 		}
+		// console.log(e.keyCode);
 	};
 });
 
 function activeToken (nSelect = false) {
-	console.log('Auswahl: ' + nSelect);
+	// console.log('Auswahl: ' + nSelect);
 	$('.token').removeClass('selected');
-	if (nSelect) {
-		var aSelToken = $('.token[data-id="' + nSelect + '"]');
+	var aSelToken = $('.token[data-id="' + nSelect + '"]');
+	if (nSelect && aSelToken.length > 0) {
 		aSelToken.addClass('selected');
 		selToken = nSelect;
 		var astop = $('.mcon').scrollTop();
@@ -272,7 +284,7 @@ function nextToken () {
 			var aEvent = aToken.parent().parent();
 			var nEvent = aEvent.nextAll().has('.infe[data-id="' + aInfId + '"]>.token').first();
 			if (nEvent.length === 0) {
-				nEvent = aEvent.parent().nextAll().has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').first();
+				nEvent = aEvent.parent().nextAll(':lt(10)').has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').first();
 			}
 			if (nEvent && nEvent.length > 0) {
 				nToken = nEvent.find('.infe[data-id="' + aInfId + '"]>.token:first-child');
@@ -297,7 +309,7 @@ function prevToken () {
 			var aEvent = aToken.parent().parent();
 			var nEvent = aEvent.prevAll().has('.infe[data-id="' + aInfId + '"]>.token').first();
 			if (nEvent.length === 0) {
-				nEvent = aEvent.parent().prevAll().has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').last();
+				nEvent = aEvent.parent().prevAll(':lt(10)').has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').last();
 			}
 			if (nEvent && nEvent.length > 0) {
 				nToken = nEvent.find('.infe[data-id="' + aInfId + '"]>.token:last-child');
@@ -310,5 +322,57 @@ function prevToken () {
 		}
 	} else {
 		activeToken($('.token').last().data('id'));
+	}
+}
+
+function nextInf () {
+	if (selToken && $('.token[data-id="' + selToken + '"]').length > 0) {
+		var aToken = $('.token[data-id="' + selToken + '"]');
+		var aInf = aToken.parent();
+		var nInf = aInf.nextAll('.infe').has('.token').first();
+		if (nInf.length === 0) {
+			var aInfId = aInf.data('id');
+			var nInfId = $('#annotationstoolvorlage .inftitel[data-id="' + aInfId + '"]').next();
+			var aEvent = aInf.parent();
+			var nEvent = false;
+			if (nInfId.length > 0) {
+				nInfId = nInfId.data('id');
+				nEvent = aEvent.nextAll().has('.infe[data-id="' + nInfId + '"]>.token').first();
+				nInf = nEvent.find('.infe[data-id="' + nInfId + '"]');
+			}
+			if (!nEvent || nEvent.length === 0) {
+				nEvent = aEvent.parent().nextAll(':lt(10)').has('.infe>.token').first().find('.event').has('.infe>.token').first();
+				nInf = nEvent.find('.infe').has('.token').first();
+			}
+		}
+		if (nInf.length > 0) {
+			activeToken(nInf.find('.token').first().data('id'));
+		}
+	}
+}
+
+function prevInf () {
+	if (selToken && $('.token[data-id="' + selToken + '"]').length > 0) {
+		var aToken = $('.token[data-id="' + selToken + '"]');
+		var aInf = aToken.parent();
+		var nInf = aInf.prevAll('.infe').has('.token').first();
+		if (nInf.length === 0) {
+			var aInfId = aInf.data('id');
+			var nInfId = $('#annotationstoolvorlage .inftitel[data-id="' + aInfId + '"]').prev();
+			var aEvent = aInf.parent();
+			var nEvent = false;
+			if (nInfId.length > 0) {
+				nInfId = nInfId.data('id');
+				nEvent = aEvent.nextAll().has('.infe[data-id="' + nInfId + '"]>.token').first();
+				nInf = nEvent.find('.infe[data-id="' + nInfId + '"]');
+			}
+			if (!nEvent || nEvent.length === 0) {
+				nEvent = aEvent.parent().prevAll(':lt(10)').has('.infe>.token').first().find('.event').has('.infe>.token').first();
+				nInf = nEvent.find('.infe').has('.token').first();
+			}
+		}
+		if (nInf.length > 0) {
+			activeToken(nInf.find('.token').first().data('id'));
+		}
 	}
 }
