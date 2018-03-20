@@ -284,6 +284,7 @@ $(document).on('keyup', 'body:not(.modal-open)', function (e) {
 	};
 });
 
+// Aktuellen Token setzten
 function activeToken (nSelect = false) {
 	// console.log('Auswahl: ' + nSelect);
 	$('.token').removeClass('selected');
@@ -305,6 +306,7 @@ function activeToken (nSelect = false) {
 	}
 }
 
+// Nächsten Token finden
 function nextToken () {
 	if (selToken && $('.token[data-id="' + selToken + '"]').length > 0) {
 		var aToken = $('.token[data-id="' + selToken + '"]');
@@ -314,7 +316,7 @@ function nextToken () {
 			var aEvent = aToken.parent().parent();
 			var nEvent = aEvent.nextAll().has('.infe[data-id="' + aInfId + '"]>.token').first();
 			if (nEvent.length === 0) {
-				nEvent = aEvent.parent().nextAll(':lt(10)').has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').first();
+				nEvent = aEvent.parent().nextAll(':lt(25)').has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').first();
 				if (!nEvent || nEvent.length === 0) {
 					nEvent = aEvent.parent().nextAll().has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').first();
 				}
@@ -333,6 +335,7 @@ function nextToken () {
 	}
 }
 
+// Vorherigen Token finden
 function prevToken () {
 	if (selToken && $('.token[data-id="' + selToken + '"]').length > 0) {
 		var aToken = $('.token[data-id="' + selToken + '"]');
@@ -342,7 +345,7 @@ function prevToken () {
 			var aEvent = aToken.parent().parent();
 			var nEvent = aEvent.prevAll().has('.infe[data-id="' + aInfId + '"]>.token').first();
 			if (nEvent.length === 0) {
-				nEvent = aEvent.parent().prevAll(':lt(10)').has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').last();
+				nEvent = aEvent.parent().prevAll(':lt(25)').has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').last();
 				if (!nEvent || nEvent.length === 0) {
 					nEvent = aEvent.parent().prevAll().has('.infe[data-id="' + aInfId + '"]>.token').first().find('.event').has('.infe[data-id="' + aInfId + '"]>.token').last();
 				}
@@ -361,6 +364,7 @@ function prevToken () {
 	}
 }
 
+// Nächsten Informanten finden
 function nextInf () {
 	if (selToken && $('.token[data-id="' + selToken + '"]').length > 0) {
 		var aToken = $('.token[data-id="' + selToken + '"]');
@@ -377,7 +381,7 @@ function nextInf () {
 				nInf = nEvent.find('.infe[data-id="' + nInfId + '"]');
 			}
 			if (!nEvent || nEvent.length === 0) {
-				nEvent = aEvent.parent().nextAll(':lt(10)').has('.infe>.token').first().find('.event').has('.infe>.token').first();
+				nEvent = aEvent.parent().nextAll(':lt(25)').has('.infe>.token').first().find('.event').has('.infe>.token').first();
 				nInf = nEvent.find('.infe').has('.token').first();
 			}
 		}
@@ -387,6 +391,7 @@ function nextInf () {
 	}
 }
 
+// Vorherigen Informanten finden
 function prevInf () {
 	if (selToken && $('.token[data-id="' + selToken + '"]').length > 0) {
 		var aToken = $('.token[data-id="' + selToken + '"]');
@@ -403,7 +408,7 @@ function prevInf () {
 				nInf = nEvent.find('.infe[data-id="' + nInfId + '"]');
 			}
 			if (!nEvent || nEvent.length === 0) {
-				nEvent = aEvent.parent().prevAll(':lt(10)').has('.infe>.token').first().find('.event').has('.infe>.token').first();
+				nEvent = aEvent.parent().prevAll(':lt(25)').has('.infe>.token').first().find('.event').has('.infe>.token').first();
 				nInf = nEvent.find('.infe').has('.token').first();
 			}
 		}
