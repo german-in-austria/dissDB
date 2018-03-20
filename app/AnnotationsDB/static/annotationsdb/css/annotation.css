@@ -132,39 +132,7 @@
 	color: #bbb;
 }
 
-/*
-.informant {
-	border: 1px solid #eee;
-	margin: 10px;
-	white-space: nowrap;
-	width: fit-content;
+.token.error {
+  background: #f88;
+  color: #000;
 }
-
-.event {
-	display: inline-block;
-	position: relative;
-}
-.event:hover {
-	background:#ddd
-}
-.eventtime {
-	bottom: 30px;
-  font-size: 8px;
-	left: 2px;
-	position: absolute;
-}
-.event:hover .eventtime {
-	background: #ddd;
-	font-size: 12px;
-	left: 0;
-	padding: 2px 7px;
-	z-index: 1000000;
-}
-
-.token {
-	display: inline-block;
-	margin: 10px 0;
-}
-.token:hover {
-	background:#ccc
-} */

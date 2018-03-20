@@ -1,4 +1,4 @@
-/* global $ performance makeModal confirm */
+/* global $ performance makeModal confirm alert */
 
 var rTTimer;
 var aData;
@@ -15,6 +15,7 @@ function searchbypk (nameKey, myArray) {
 function newAnnotationForm (data) {
 	aData = data;
 	var t0 = performance.now();
+	var aError = '';
 	console.log(aData);
 	activeToken();
 	$('.mcon').removeClass('ready').addClass('loading').html('<div id="atloading">Daten werden verarbeitet ... <span>0</span> %</div><div id="annotationstool"></div><div id="annotationstoolvorlage"></div>');
@@ -40,10 +41,15 @@ function newAnnotationForm (data) {
 	$.each(aData['aTokens'], function (k, v) {
 		// Verweisende Fragmente zuordnen
 		if (v['fo']) {
-			if (aData['aTokens'][v['fo']]['hf']) {
-				aData['aTokens'][v['fo']]['hf'].push(k);
+			if (!aData['aTokens'][v['fo']]) {
+				aData['aTokens'][k]['error'] = true;
+				aError += '\nToken ID: ' + k + ' - ' + (aData['aTokens'][k]['errortxt'] = 'Token mit ID ' + v['fo'] + ' für "fragment_of" wurde nicht geladen!');
 			} else {
-				aData['aTokens'][v['fo']]['hf'] = [k];
+				if (aData['aTokens'][v['fo']]['hf']) {
+					aData['aTokens'][v['fo']]['hf'].push(k);
+				} else {
+					aData['aTokens'][v['fo']]['hf'] = [k];
+				}
 			}
 		};
 		// Token IDs zu Events zuordnen.
@@ -88,6 +94,9 @@ function newAnnotationForm (data) {
 		aClass = 'token';
 		if (aToken['fo'] > 0) {
 			aClass += ' fragment';
+		};
+		if (aToken['error']) {
+			aClass += ' error';
 		};
 		return '<div class="' + aClass + '" data-id="' + aID + '">' + (((aToken['tt'] === 2) || (aToken['fo'] > 0)) ? '' : '&nbsp;') + aToken['t'] + '</div>';
 	};
@@ -165,8 +174,15 @@ function newAnnotationForm (data) {
 			aEventK = syncKm + 1;
 			rTTimer = setTimeout(renderTokens, 1);
 		} else {
-			$('#atloading').remove();
-			$('.mcon').removeClass('loading').addClass('ready');
+			if (!aError) {
+				$('#atloading').remove();
+				$('.mcon').removeClass('loading').addClass('ready');
+			} else {
+				$('#atloading').html('Es gab eine Fehler bei der Datenverarbeitung!');
+				$('#atloading').css('background', '#f88');
+				alert(aError);
+				console.log(aError);
+			}
 			var t2 = performance.now();
 			console.log('renderTokens: ' + Math.ceil(t2 - t0) + ' ms.');
 			$(':focus').blur();
@@ -228,7 +244,7 @@ $(document).on('click', '.mcon.ready .token', function (e) {
 
 $(document).on('click', '#js-modal.tokeninfos:not(.loading) #delToken', function (e) {
 	if (confirm('Token wirklich unwiederruflich löschen?')) {
-		$('#js-modal.tokeninfos').addClass('loading');
+		// $('#js-modal.tokeninfos').addClass('loading');
 		console.log('Löschen!');
 	}
 });
