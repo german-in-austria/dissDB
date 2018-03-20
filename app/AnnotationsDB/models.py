@@ -56,3 +56,25 @@ class transcript(models.Model):
 		verbose_name = "Transcript"
 		verbose_name_plural = "Transcripte"
 		ordering = ('id',)
+
+class tbl_tokenset(models.Model):
+	id_von_token		= models.ForeignKey('token', related_name='rn_id_von_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Von Token ID")
+	id_bis_token		= models.ForeignKey('token', related_name='rn_id_bis_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Bis Token ID")
+	def __str__(self):
+		return "{} - {}".format(self.id_von_token, self.id_bis_token)
+	class Meta:
+		db_table = "tokenset"
+		verbose_name = "Token Set"
+		verbose_name_plural = "Token Sets"
+		ordering = ('id_von_token',)
+
+class tbl_tokentoset(models.Model):
+	id_tokenset			= models.ForeignKey('tbl_tokenset'			, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Tokenset")
+	id_token			= models.ForeignKey('token'					, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Token")
+	def __str__(self):
+		return "{} - {}".format(self.id_tokenset, self.id_token)
+	class Meta:
+		db_table = "tokentoset"
+		verbose_name = "Token to Token Set"
+		verbose_name_plural = "Token to Token Sets"
+		ordering = ('id_tokenset',)

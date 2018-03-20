@@ -2,17 +2,19 @@ from django.db import models
 
 class Antworten(models.Model):
 	von_Inf				= models.ForeignKey('Informanten'									, on_delete=models.CASCADE		, verbose_name="von Informanten")
-	zu_Aufgabe			= models.ForeignKey('Aufgaben',				blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="zu Aufgabe")
-	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
-	ist_am				= models.ForeignKey('Antwortmoeglichkeiten',	blank=True, null=True	, on_delete=models.SET_NULL	, verbose_name="Ist Antwortmöglichkeit")
+	zu_Aufgabe			= models.ForeignKey('Aufgaben'				, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="zu Aufgabe")
+	Reihung				= models.IntegerField(						  blank=True, null=True									, verbose_name="Reihung")
+	ist_am				= models.ForeignKey('Antwortmoeglichkeiten'	, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Ist Antwortmöglichkeit")
 	ist_gewaehlt		= models.BooleanField(default=False																	, verbose_name="Ist gewählt")
 	ist_nat				= models.BooleanField(default=False																	, verbose_name="Ist NAT")
-	ist_Satz			= models.ForeignKey('Saetze',				blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Ist Satz")
+	ist_Satz			= models.ForeignKey('Saetze'				, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Ist Satz")
 	ist_bfl				= models.BooleanField(default=False																	, verbose_name="Ist BFL")
-	bfl_durch_S			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="BFL durch S")
+	ist_token			= models.ForeignKey('AnnotationsDB.token'	, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Ist Token")
+	ist_tokenset		= models.ForeignKey('AnnotationsDB.tbl_tokenset'	, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Ist Tokenset")
+	bfl_durch_S			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="BFL durch S")
 	start_Antwort		= models.DurationField(																				  verbose_name="Start Antwort")
 	stop_Antwort		= models.DurationField(																				  verbose_name="Stop Antwort")
-	Kommentar			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Kommentar")
+	Kommentar			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Kommentar")
 	def __str__(self):
 		return "{}, {}".format(self.von_Inf,self.zu_Aufgabe)
 	class Meta:
