@@ -1,0 +1,24 @@
+#annotationsTool {
+  position: relative;
+	height: 100%;
+}
+
+#loading {
+	display:none;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background: rgba(0,0,0,0.25);
+	color: #fff;
+	font-size: 50px;
+	text-align: center;
+	line-height: 70vh;
+	text-shadow: 2px 3px 4px #000;
+	margin-left: -15px;
+  margin-right: -15px;
+}
+.loading #loading {
+	display: block;
+}

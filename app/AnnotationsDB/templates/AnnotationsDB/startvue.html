@@ -1,0 +1,40 @@
+{% extends 'main/basis.html' %}
+{% load staticfiles %}
+{% load dioeTags %}
+{% load crispy_forms_tags %}
+{% block title %} - Annotation (VUE){% endblock %}
+{% block ueberschrift %} - Annotation (VUE){% endblock %}
+{% block sitecss %}<link href="{% static "annotationsdb/css/annotationvue.css" %}?{% settings_value "CACH_RANDOM" %}" rel="stylesheet">{% endblock %}
+{% block inhalt %}
+<div id="annotationsTool" v-bind:class="{ loading: loading }">
+	<div class="row h100">
+		<div class="col-md-2 h100 mh200px vscroller lmfa">
+			<select name="ainformant" size="1" class="form-control mit10 mib10" v-model="menue.aInformant" @change="getMenue()">
+				<option value="0">Informant</option>
+				<option v-for="informantMitTranskripte in menue.informantenMitTranskripte" :value="informantMitTranskripte.model.pk">${informantMitTranskripte.model.model_str} - ${informantMitTranskripte.Acount} Transkripte</option>
+			</select>
+			<ul v-if="menue.aInformant > 0" class="lmfa-l">
+				<li v-for="aTranskript in menue.aTranskripte"><a href="#" class="lmfabc" :data-pk="aTranskript.model.pk" :title="'PK: ' + aTranskript.model.pk + '\nUpdate: ' + aTranskript.model.update_time + ' Uhr'" target="targetframe">${aTranskript.model.name}<span>${aTranskript.count.toLocaleString()}</span></a></li>
+			</ul>
+		</div>
+		<div class="col-md-10 h100 mh600px" style="border-right:1px solid #eee;padding:0px;padding-bottom:150px;">
+			<div class="h100 mcon vscroller">
+
+			</div>
+		</div>
+	</div>
+	<div id="loading">Lade ...</div>
+</div>
+<style>
+	html,body,body>.container { height:100%; }
+</style>
+{% endblock %}
+{% block sitejs %}
+<script>
+	var csrf='{{ csrf_token }}';
+	var audiodir = '{% settings_value "AUDIO_URL" %}';
+</script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.3.5"></script>
+<script src="{% static "annotationsdb/js/scriptsvue.js" %}?{% settings_value "CACH_RANDOM" %}"></script>
+{% endblock %}
