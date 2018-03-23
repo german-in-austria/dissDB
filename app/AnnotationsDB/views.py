@@ -5,6 +5,7 @@ import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import json
 from DB.funktionenDB import httpOutput
+import operator
 
 
 def start(request, ipk=0, tpk=0):
@@ -70,19 +71,54 @@ def startvue(request, ipk=0, tpk=0):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
 		return redirect('dissdb_login')
-	test = ''
-	error = ''
 	ipk = int(ipk)
 	tpk = int(tpk)
 	if 'getTranskript' in request.POST:
 		tpk = int(request.POST.get('getTranskript'))
 	if tpk > 0:
-		aTokenTypes = {}
-		aSaetze = {}
+		dataout = {}
+		if 'aType' in request.POST and request.POST.get('aType') == 'start':
+			aTokenTypes = {}
+			for aTokenType in adbmodels.token_type.objects.filter(token__transcript_id_id=tpk):
+				aTokenTypes[aTokenType.pk] = {'n': aTokenType.token_type_name}
+			aInformanten = {}
+			for aInf in adbmodels.token.objects.filter(transcript_id_id=tpk).values('ID_Inf').annotate(total=Count('ID_Inf')).order_by('ID_Inf'):
+				aInfM = dbmodels.Informanten.objects.get(id=aInf['ID_Inf'])
+				aInformanten[aInfM.pk] = {'k': aInfM.Kuerzel, 'ka': aInfM.Kuerzel_anonym}
+			aSaetze = {}
+			for aSatz in dbmodels.Saetze.objects.filter(token__transcript_id_id=tpk):
+				aSaetze[aSatz.pk] = {'t': aSatz.Transkript, 's': aSatz.Standardorth, 'k': aSatz.Kommentar}
+			dataout.update({'aTokenTypes': aTokenTypes, 'aInformanten': aInformanten, 'aSaetze': aSaetze})
 		aEvents = []
-		aInformanten = {}
 		aTokens = {}
-		return httpOutput(json.dumps({'aTokenTypes': aTokenTypes, 'aSaetze': aSaetze, 'aEvents': aEvents, 'aInformanten': aInformanten, 'aTokens': aTokens}), 'application/json')
+		for aEvent in adbmodels.event.objects.prefetch_related('rn_token_event_id').filter(rn_token_event_id__transcript_id_id=tpk).distinct().order_by('start_time')[:250]:
+			aEITokens = {}
+			for aEIToken in sorted(list(aEvent.rn_token_event_id.all()), key=operator.attrgetter("token_reihung")):
+				if aEIToken.ID_Inf_id not in aEITokens:
+					aEITokens[aEIToken.ID_Inf_id] = []
+				aEITokens[aEIToken.ID_Inf_id].append(aEIToken.id)
+				aTokenset = {
+					't': aEIToken.text,
+					'tt': aEIToken.token_type_id_id,
+					'tr': aEIToken.token_reihung,
+					'e': aEIToken.event_id_id,
+					'to': aEIToken.text_in_ortho,
+					'i': aEIToken.ID_Inf_id,
+				}
+				if aEIToken.ortho:
+					aTokenset['o'] = aEIToken.ortho
+				if aEIToken.sentence_id_id:
+					aTokenset['s'] = aEIToken.sentence_id_id
+				if aEIToken.sequence_in_sentence:
+					aTokenset['sr'] = aEIToken.sequence_in_sentence
+				if aEIToken.fragment_of_id:
+					aTokenset['fo'] = aEIToken.fragment_of_id
+				if aEIToken.likely_error:
+					aTokenset['le'] = 1
+				aTokens[aEIToken.pk] = aTokenset
+			aEvents.append({'pk': aEvent.pk, 's': str(aEvent.start_time), 'e': str(aEvent.end_time), 'l': str(aEvent.layer if aEvent.layer else 0), 'tid': aEITokens})
+		dataout.update({'aEvents': aEvents, 'aTokens': aTokens})
+		return httpOutput(json.dumps(dataout), 'application/json')
 
 	if 'getMenue' in request.POST:
 		if 'ainformant' in request.POST:
