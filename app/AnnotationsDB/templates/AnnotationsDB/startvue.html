@@ -17,7 +17,7 @@
 				<div class="input-group-addon np"><button @click="getMenue()"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></button></div>
 			</div>
 			<ul v-if="menue.aInformant > 0" class="lmfa-l">
-				<li v-for="aTranskript in menue.aTranskripte"><a href="#" class="lmfabc" :data-pk="aTranskript.model.pk" :title="'PK: ' + aTranskript.model.pk + '\nUpdate: ' + aTranskript.model.update_time + ' Uhr'" target="targetframe">${aTranskript.model.name}<span>${aTranskript.count.toLocaleString()}</span></a></li>
+				<li v-for="aTranskript in menue.aTranskripte"><a href="#" v-on:click.prevent="getTranskript(aTranskript.model.pk)" class="lmfabc" :title="'PK: ' + aTranskript.model.pk + '\nUpdate: ' + aTranskript.model.update_time + ' Uhr'" target="targetframe">${aTranskript.model.name}<span>${aTranskript.count.toLocaleString()}</span></a></li>
 			</ul>
 		</div>
 		<div class="col-md-10 h100 mh600px" style="border-right:1px solid #eee;padding:0px;padding-bottom:150px;">

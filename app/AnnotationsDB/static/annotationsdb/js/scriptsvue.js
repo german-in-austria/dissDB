@@ -17,12 +17,45 @@ var annotationsTool = new Vue({
 			aInformant: 0,
 			aTranskripte: []
 		},
+		annotationsTool: {
+			aTokenTypes: [],
+			aSaetze: [],
+			aEvents: [],
+			aInformanten: [],
+			aTokens: []
+		},
 		message: null
 	},
 	mounted: function () {
 		this.getMenue();
 	},
 	methods: {
+		getTranskript: function (aPK, aType = 'start', aNr = 0) {
+			this.loading = true;
+			if (aType === 'start') {
+				this.annotationsTool = {
+					aTokenTypes: [],
+					aSaetze: [],
+					aEvents: [],
+					aInformanten: [],
+					aTokens: []
+				};
+			}
+			this.$http.post('',
+				{
+					getTranskript: aPK,
+					aType: aType,
+					aNr: aNr
+				})
+			.then((response) => {
+				this.loading = false;
+				console.log(response.data);
+			})
+			.catch((err) => {
+				this.loading = false;
+				console.log(err);
+			});
+		},
 		getMenue: function () {
 			this.loading = true;
 			this.$http.post('',
@@ -31,9 +64,11 @@ var annotationsTool = new Vue({
 					ainformant: this.menue.aInformant
 				})
 			.then((response) => {
-				this.menue.informantenMitTranskripte = response.data['informantenMitTranskripte'];
-				this.menue.aInformant = response.data['aInformant'];
-				this.menue.aTranskripte = response.data['aTranskripte'];
+				this.menue = {
+					informantenMitTranskripte: response.data['informantenMitTranskripte'],
+					aInformant: response.data['aInformant'],
+					aTranskripte: response.data['aTranskripte']
+				};
 				this.loading = false;
 			})
 			.catch((err) => {
