@@ -73,6 +73,7 @@ def startvue(request, ipk=0, tpk=0):
 		return redirect('dissdb_login')
 	ipk = int(ipk)
 	tpk = int(tpk)
+
 	if 'getTranskript' in request.POST:
 		tpk = int(request.POST.get('getTranskript'))
 	if tpk > 0:
@@ -89,8 +90,12 @@ def startvue(request, ipk=0, tpk=0):
 			for aSatz in dbmodels.Saetze.objects.filter(token__transcript_id_id=tpk):
 				aSaetze[aSatz.pk] = {'t': aSatz.Transkript, 's': aSatz.Standardorth, 'k': aSatz.Kommentar}
 			dataout.update({'aTokenTypes': aTokenTypes, 'aInformanten': aInformanten, 'aSaetze': aSaetze})
+		aNr = 0
 		aEvents = []
 		aTokens = {}
+		if 'aNr' in request.POST:
+			aNr = int(request.POST.get('aNr'))
+		nNr = aNr
 		for aEvent in adbmodels.event.objects.prefetch_related('rn_token_event_id').filter(rn_token_event_id__transcript_id_id=tpk).distinct().order_by('start_time')[:250]:
 			aEITokens = {}
 			for aEIToken in sorted(list(aEvent.rn_token_event_id.all()), key=operator.attrgetter("token_reihung")):
@@ -117,7 +122,7 @@ def startvue(request, ipk=0, tpk=0):
 					aTokenset['le'] = 1
 				aTokens[aEIToken.pk] = aTokenset
 			aEvents.append({'pk': aEvent.pk, 's': str(aEvent.start_time), 'e': str(aEvent.end_time), 'l': str(aEvent.layer if aEvent.layer else 0), 'tid': aEITokens})
-		dataout.update({'aEvents': aEvents, 'aTokens': aTokens})
+		dataout.update({'nNr': nNr, 'aEvents': aEvents, 'aTokens': aTokens})
 		return httpOutput(json.dumps(dataout), 'application/json')
 
 	if 'getMenue' in request.POST:

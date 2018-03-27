@@ -1,4 +1,4 @@
-/* global csrf Vue */
+/* global csrf Vue alert */
 
 var annotationsTool = new Vue({
 	el: '#annotationsTool',
@@ -18,11 +18,14 @@ var annotationsTool = new Vue({
 			aTranskripte: []
 		},
 		annotationsTool: {
-			aTokenTypes: [],
-			aSaetze: [],
+			aPK: 0,
+			nNr: 0,
+			loaded: false,
+			aTokenTypes: {},
+			aInformanten: {},
+			aSaetze: {},
 			aEvents: [],
-			aInformanten: [],
-			aTokens: []
+			aTokens: {}
 		},
 		message: null
 	},
@@ -30,15 +33,19 @@ var annotationsTool = new Vue({
 		this.getMenue();
 	},
 	methods: {
+		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
 		getTranskript: function (aPK, aType = 'start', aNr = 0) {
 			this.loading = true;
 			if (aType === 'start') {
 				this.annotationsTool = {
-					aTokenTypes: [],
-					aSaetze: [],
+					aPK: aPK,
+					nNr: 0,
+					loaded: false,
+					aTokenTypes: {},
+					aInformanten: {},
+					aSaetze: {},
 					aEvents: [],
-					aInformanten: [],
-					aTokens: []
+					aTokens: {}
 				};
 			}
 			this.$http.post('',
@@ -48,14 +55,32 @@ var annotationsTool = new Vue({
 					aNr: aNr
 				})
 			.then((response) => {
-				this.loading = false;
+				if (aType === 'start') {
+					this.annotationsTool.aTokenTypes = response.data['aTokenTypes'];
+					this.annotationsTool.aInformanten = response.data['aInformanten'];
+					this.annotationsTool.aSaetze = response.data['aSaetze'];
+				}
+				if (this.annotationsTool.nNr === response.data['nNr']) {
+					this.annotationsTool.loaded = true;
+				}
+				this.annotationsTool.nNr = response.data['nNr'];
+				this.annotationsTool.aEvents.push.apply(this.annotationsTool.aEvents, response.data['aEvents']);
+				this.annotationsTool.aTokens = Object.assign({}, this.annotationsTool.aTokens, response.data['aTokens']);
 				console.log(response.data);
+				this.loading = false;
 			})
 			.catch((err) => {
-				this.loading = false;
 				console.log(err);
+				this.annotationsTool = {
+					aPK: 0,
+					nNr: 0,
+					loaded: false
+				};
+				alert('Fehler!');
+				this.loading = false;
 			});
 		},
+		/* getMenue: Läd aktuelle Daten für das Menü */
 		getMenue: function () {
 			this.loading = true;
 			this.$http.post('',
@@ -72,9 +97,11 @@ var annotationsTool = new Vue({
 				this.loading = false;
 			})
 			.catch((err) => {
-				this.loading = false;
 				console.log(err);
+				alert('Fehler!');
+				this.loading = false;
 			});
 		}
+
 	}
 });
