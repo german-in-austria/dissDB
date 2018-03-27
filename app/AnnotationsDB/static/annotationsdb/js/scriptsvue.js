@@ -32,11 +32,17 @@ var annotationsTool = new Vue({
 	mounted: function () {
 		this.getMenue();
 	},
+	// watch: {
+	// 	'annotationsTool.nNr': function (val) {
+	// 		console.log(val);
+	// 	}
+	// },
 	methods: {
 		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
 		getTranskript: function (aPK, aType = 'start', aNr = 0) {
-			this.loading = true;
+			console.log('Lade Datensatz ' + aNr + ' von pk: ' + aPK + ' ...');
 			if (aType === 'start') {
+				this.loading = true;
 				this.annotationsTool = {
 					aPK: aPK,
 					nNr: 0,
@@ -55,19 +61,25 @@ var annotationsTool = new Vue({
 					aNr: aNr
 				})
 			.then((response) => {
-				if (aType === 'start') {
-					this.annotationsTool.aTokenTypes = response.data['aTokenTypes'];
-					this.annotationsTool.aInformanten = response.data['aInformanten'];
-					this.annotationsTool.aSaetze = response.data['aSaetze'];
+				if (aPK === this.annotationsTool.aPK) {
+					if (aType === 'start') {
+						this.annotationsTool.aTokenTypes = response.data['aTokenTypes'];
+						this.annotationsTool.aInformanten = response.data['aInformanten'];
+						this.annotationsTool.aSaetze = response.data['aSaetze'];
+					}
+					this.annotationsTool.aEvents.push.apply(this.annotationsTool.aEvents, response.data['aEvents']);
+					this.annotationsTool.aTokens = Object.assign({}, this.annotationsTool.aTokens, response.data['aTokens']);
+					// console.log(response.data);
+					this.loading = false;
+					if (this.annotationsTool.nNr === response.data['nNr']) {
+						this.annotationsTool.nNr = response.data['nNr'];
+						this.annotationsTool.loaded = true;
+						console.log('Alle Datensätze geladen.');
+					} else if (this.annotationsTool.loaded === false) {
+						this.annotationsTool.nNr = response.data['nNr'];
+						this.getTranskript(this.annotationsTool.aPK, 'next', this.annotationsTool.nNr);
+					}
 				}
-				if (this.annotationsTool.nNr === response.data['nNr']) {
-					this.annotationsTool.loaded = true;
-				}
-				this.annotationsTool.nNr = response.data['nNr'];
-				this.annotationsTool.aEvents.push.apply(this.annotationsTool.aEvents, response.data['aEvents']);
-				this.annotationsTool.aTokens = Object.assign({}, this.annotationsTool.aTokens, response.data['aTokens']);
-				console.log(response.data);
-				this.loading = false;
 			})
 			.catch((err) => {
 				console.log(err);

@@ -96,7 +96,10 @@ def startvue(request, ipk=0, tpk=0):
 		if 'aNr' in request.POST:
 			aNr = int(request.POST.get('aNr'))
 		nNr = aNr
-		for aEvent in adbmodels.event.objects.prefetch_related('rn_token_event_id').filter(rn_token_event_id__transcript_id_id=tpk).distinct().order_by('start_time')[:250]:
+		maxQuerys = 250
+		startQuery = aNr * maxQuerys
+		endQuery = startQuery + maxQuerys
+		for aEvent in adbmodels.event.objects.prefetch_related('rn_token_event_id').filter(rn_token_event_id__transcript_id_id=tpk).distinct().order_by('start_time')[startQuery:endQuery]:
 			aEITokens = {}
 			for aEIToken in sorted(list(aEvent.rn_token_event_id.all()), key=operator.attrgetter("token_reihung")):
 				if aEIToken.ID_Inf_id not in aEITokens:
@@ -122,6 +125,8 @@ def startvue(request, ipk=0, tpk=0):
 					aTokenset['le'] = 1
 				aTokens[aEIToken.pk] = aTokenset
 			aEvents.append({'pk': aEvent.pk, 's': str(aEvent.start_time), 'e': str(aEvent.end_time), 'l': str(aEvent.layer if aEvent.layer else 0), 'tid': aEITokens})
+		if len(aEvents) == maxQuerys:
+			nNr += 1
 		dataout.update({'nNr': nNr, 'aEvents': aEvents, 'aTokens': aTokens})
 		return httpOutput(json.dumps(dataout), 'application/json')
 
