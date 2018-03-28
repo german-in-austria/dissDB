@@ -27,16 +27,12 @@ var annotationsTool = new Vue({
 			aEvents: [],
 			aTokens: {}
 		},
+		getCharWidthCach: {},
 		message: null
 	},
 	mounted: function () {
 		this.getMenue();
 	},
-	// watch: {
-	// 	'annotationsTool.nNr': function (val) {
-	// 		console.log(val);
-	// 	}
-	// },
 	methods: {
 		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
 		getTranskript: function (aPK, aType = 'start', aNr = 0) {
@@ -67,8 +63,13 @@ var annotationsTool = new Vue({
 						this.annotationsTool.aInformanten = response.data['aInformanten'];
 						this.annotationsTool.aSaetze = response.data['aSaetze'];
 					}
+					// this.annotationsTool.aTokens = Object.assign({}, this.annotationsTool.aTokens, response.data['aTokens']);
+					var athis = this;
+					Object.keys(response.data['aTokens']).map(function (key, i) {
+						athis.$set(athis.annotationsTool.aTokens, key, response.data['aTokens'][key]);
+						athis.updateToken(key);
+					});
 					this.annotationsTool.aEvents.push.apply(this.annotationsTool.aEvents, response.data['aEvents']);
-					this.annotationsTool.aTokens = Object.assign({}, this.annotationsTool.aTokens, response.data['aTokens']);
 					// console.log(response.data);
 					this.loading = false;
 					if (this.annotationsTool.nNr === response.data['nNr']) {
@@ -113,6 +114,47 @@ var annotationsTool = new Vue({
 				alert('Fehler!');
 				this.loading = false;
 			});
+		},
+		updateToken: function (key) {
+			this.$set(this.annotationsTool.aTokens[key], 't-w', this.getTextWidth(this.annotationsTool.aTokens[key]['t'], false));
+			if (this.annotationsTool.aTokens[key]['o']) {
+				this.$set(this.annotationsTool.aTokens[key], 'o-w', this.getTextWidth(this.annotationsTool.aTokens[key]['o'], false));
+			}
+			this.$set(this.annotationsTool.aTokens[key], 'to-w', this.getTextWidth(this.annotationsTool.aTokens[key]['to'], false));
+		},
+		/* Funktion zur ermittlung der Breite von Buchstaben im SVG-Element */
+		getCharWidth: function (zeichen) {
+			if (this.getCharWidthCach[zeichen]) {
+				return this.getCharWidthCach[zeichen];
+			} else {
+				if (document.getElementById('svg-text-textsize')) {
+					document.getElementById('svg-text-textsize').textContent = zeichen;
+					this.getCharWidthCach[zeichen] = document.getElementById('svg-text-textsize').getBBox().width;
+					if (this.getCharWidthCach[zeichen] === 0) {
+						document.getElementById('svg-text-textsize').textContent = 'X' + zeichen + 'X';
+						this.getCharWidthCach[zeichen] = document.getElementById('svg-text-textsize').getBBox().width - this.getCharWidth('X') * 2;
+					}
+					return this.getCharWidthCach[zeichen];
+				}
+			}
+		},
+		/* Funktion zur ermittlung der Breite von Texten im SVG-Element */
+		getTextWidth: function (text, cached = true) {
+			if (cached) {
+				var w = 0;
+				var i = text.length;
+				while (i--) {
+					w += this.getCharWidth(text.charAt(i));
+				}
+				if (w) {
+					return w;
+				}
+			} else {
+				if (document.getElementById('svg-text-textsize')) {
+					document.getElementById('svg-text-textsize').textContent = text;
+					return document.getElementById('svg-text-textsize').getBBox().width;
+				}
+			}
 		}
 
 	}

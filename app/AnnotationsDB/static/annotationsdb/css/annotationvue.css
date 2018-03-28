@@ -32,3 +32,9 @@
 	background: transparent;
 	padding: 5px 10px;
 }
+
+#annotationsvg {
+	width: 100%;
+	height: 93%;
+	margin-top: 30px;
+}
