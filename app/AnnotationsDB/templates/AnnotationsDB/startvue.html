@@ -25,16 +25,6 @@
 				<svg id="annotationsvg">
 					<g id="svg-g-transcript">
 						<text x="0" y="15">Das ist ein Test!</text>
-						<g :class="'event eid'+aEventIndex" :transform="'translate(10,'+(50+aEventIndex*140)+')'" v-for="(aEventVal, aEventIndex) in annotationsTool.aEvents">
-							<text x="0" y="0">${aEventIndex}: ${aEventVal}</text>
-							<g :class="'informant iid'+aInformantKey" :transform="'translate(20,'+(25+aInformantIndex*45)+')'" v-for="(aInformantVal, aInformantKey, aInformantIndex) in annotationsTool.aInformanten" v-if="annotationsTool.aEvents[aEventIndex].tid[aInformantKey]">
-								<text x="0" y="0">${aInformantKey}: ${aInformantVal}</text>
-								<g :class="'informant iid'+gTokenIndex" :transform="'translate('+(10+gTokenIndex*100)+',18)'" v-for="(gTokenVal, gTokenIndex) in annotationsTool.aEvents[aEventIndex].tid[aInformantKey]">
-									<text x="0" y="0">${gTokenVal}: ${annotationsTool.aTokens[gTokenVal].t}</text>
-								</g>
-							</g>
-							<!-- <text x="10" y="20">${aEventVal.tid}</text> -->
-						</g>
 					</g>
 					<g id="svg-g-textsize">
 						<text id="svg-text-textsize" x="-100" y="-100"></text>

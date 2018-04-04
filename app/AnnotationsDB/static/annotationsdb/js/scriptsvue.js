@@ -1,6 +1,4 @@
-/* global csrf Vue alert */
-
-var getCharWidthCach = {};
+/* global _ csrf Vue alert */
 
 class TranskriptClass {
 	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}, aHeight = 0) {
@@ -11,6 +9,7 @@ class TranskriptClass {
 		this.aTokens = aTokens;
 		this.aTokenFragmente = aTokenFragmente;
 		this.aHeight = aHeight;
+		this.debouncedRerenderEvents = _.debounce(this.rerenderEvents, 100);
 	}
 	reset () {
 		this.aTokenTypes = {};
@@ -23,27 +22,20 @@ class TranskriptClass {
 		return true;
 	}
 	addEvents (nEvents) {
-		var aError = '';
 		nEvents.forEach(function (val) {
 			this.updateEvent(0, val);
 		}, this);
-		if (aError) {
-			console.log(aError);
-			return false;
-		} else {
-			return true;
-		}
 	}
 	updateEvent (index = 0, values) {
 		if (index === 0) {
 			index = this.aEvents.push(values) - 1;
 			this.aEvents[index]['family'] = [index];
-			this.aEvents[index]['rerender'] = true;
+			this.setRerenderEvent(index);
 		} else {
 			index = parseInt(index);
 			this.aEvents[index] = values;
 			this.aEvents[index]['family'] = [index];
-			this.aEvents[index]['rerender'] = true;
+			this.setRerenderEvent(index);
 		}
 		Object.keys(this.aEvents).map(function (key) {
 			key = parseInt(key);
@@ -53,10 +45,25 @@ class TranskriptClass {
 				}
 				if (this.aEvents[key]['family'].indexOf(index) < 0) {
 					this.aEvents[key]['family'].push(index);
-					this.aEvents[key]['rerender'] = true;
+					this.setRerenderEvent(key);
 				}
 			}
 		}, this);
+	}
+	setRerenderEvent (key) {
+		this.aEvents[key]['rerender'] = true;
+		this.debouncedRerenderEvents();
+	}
+	rerenderEvents () {
+		var oLen = this.aEvents.length;
+		var rLen = 0;
+		this.aEvents.forEach(function (val, key) {
+			if (val['rerender']) {
+				rLen += 1;
+				this.aEvents[key]['rerender'] = false;
+			};
+		}, this);
+		console.log('rerenderEvents: ' + rLen + ' / ' + oLen);
 	}
 	addTokens (nTokens) {
 		var aError = '';
@@ -81,7 +88,7 @@ class TranskriptClass {
 			this.aTokens[key]['w-o'] = getTextWidth(this.aTokens[key]['o']);
 		}
 		if (this.aEvents[this.aTokens[key]['e']]) {
-			this.aEvents[this.aTokens[key]['e']]['rerender'] = true;
+			this.setRerenderEvent(this.aTokens[key]['e']);
 		}
 	}
 	updateTokenFragment (key, fo) {
@@ -216,6 +223,7 @@ function getCharWidth (zeichen) {
 };
 
 /* Funktion zur ermittlung der Breite von Texten im SVG-Element */
+var getCharWidthCach = {};
 function getTextWidth (text, cached = false) {
 	if (cached) {
 		var w = 0;
