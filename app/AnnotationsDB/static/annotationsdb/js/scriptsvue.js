@@ -22,6 +22,13 @@ class TranskriptClass {
 		d3.select('#svg-g-events').selectAll('*').remove();
 		return true;
 	}
+	setInformanten (nInformanten) {
+		this.aInformanten = {};
+		Object.keys(nInformanten).map(function (key, i) {
+			this.aInformanten[key] = nInformanten[key];
+			this.aInformanten[key]['i'] = i;
+		}, this);
+	}
 	addEvents (nEvents) {
 		nEvents.forEach(function (val) {
 			this.updateEvent(0, val);
@@ -86,7 +93,27 @@ class TranskriptClass {
 					this.aEvents[fKey]['svg'] = this.aEvents[firstFamily]['f-svg'].append('g');
 				}
 				// Inhalt
-				this.aEvents[fKey]['svg'].append('text').attr('x', 5).attr('y', 15 + i * 15).text(this.aEvents[fKey]['pk'] + '(' + fKey + '): ' + JSON.stringify(this.aEvents[fKey]['tid']));
+				Object.keys(this.aEvents[fKey]['tid']).map(function (ikey) {
+					if (!this.aEvents[fKey]['tid-svg']) {
+						this.aEvents[fKey]['tid-svg'] = {};
+					}
+					if (this.aEvents[fKey]['tid-svg'][ikey]) {
+						this.aEvents[fKey]['tid-svg'][ikey].selectAll('*').remove();
+					} else {
+						this.aEvents[fKey]['tid-svg'][ikey] = this.aEvents[fKey]['svg'].append('g');
+					}
+					this.aEvents[fKey]['tid-svg'][ikey].append('rect').attr('class', 'ibg');
+					this.aEvents[fKey]['tid-svg'][ikey].attr('transform', 'translate(0,' + (2 + this.aInformanten[ikey]['i'] * 44) + ')');
+					var lxw = 5;
+					this.aEvents[fKey]['tid'][ikey].forEach(function (tKey) {
+						var atxt = this.aEvents[fKey]['tid-svg'][ikey].append('g');
+						atxt.append('text').attr('x', lxw).attr('y', 15).text(this.aTokens[tKey]['t']);
+						atxt.append('text').attr('x', lxw).attr('y', 35).text(this.aTokens[tKey]['to']);
+						lxw = lxw + atxt.node().getBBox().width + 5;
+					}, this);
+					var aBBox = this.aEvents[fKey]['tid-svg'][ikey].node().getBBox();
+					this.aEvents[fKey]['tid-svg'][ikey].select('rect.ibg').attr('x', 2).attr('y', 0).attr('width', aBBox.width + 5).attr('height', aBBox.height + 2);
+				}, this);
 				// Erledigt
 				this.aEvents[fKey]['rerender'] = false;
 			}, this);
@@ -94,21 +121,14 @@ class TranskriptClass {
 			this.aEvents[firstFamily]['f-svg'].select('rect.ebg')
 				.attr('width', aBBox.width + 2)
 				.attr('height', aBBox.height + 2);
-			this.aEvents[firstFamily]['pos'] = {'x': 10, 'y': 10 + firstFamily * 22, 'w': aBBox.width + 2, 'h': aBBox.height + 2};
+			this.aEvents[firstFamily]['pos'] = {'x': 10, 'y': 10 + firstFamily * 100, 'w': aBBox.width + 2, 'h': aBBox.height + 2};
 			this.aEvents[firstFamily]['f-svg'].attr('transform', 'translate(' + this.aEvents[firstFamily]['pos']['x'] + ',' + this.aEvents[firstFamily]['pos']['y'] + ')');
 		};
 	}
 	addTokens (nTokens) {
-		var aError = '';
 		Object.keys(nTokens).map(function (key, i) {
 			this.updateToken(key, nTokens[key]);
 		}, this);
-		if (aError) {
-			console.log(aError);
-			return false;
-		} else {
-			return true;
-		}
 	}
 	updateToken (key, values) {
 		this.aTokens[key] = values;
@@ -182,7 +202,7 @@ var annotationsTool = new Vue({
 				if (aPK === this.annotationsTool.aPK) {
 					if (aType === 'start') {
 						transkript['aTokenTypes'] = response.data['aTokenTypes'];
-						transkript['aInformanten'] = response.data['aInformanten'];
+						transkript.setInformanten(response.data['aInformanten']);
 						transkript['aSaetze'] = response.data['aSaetze'];
 					}
 					transkript.addTokens(response.data['aTokens']);
