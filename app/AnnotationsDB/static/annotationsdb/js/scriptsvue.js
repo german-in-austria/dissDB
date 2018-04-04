@@ -1,13 +1,16 @@
 /* global csrf Vue alert */
 
+var getCharWidthCach = {};
+
 class TranskriptClass {
-	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}) {
+	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}, aHeight = 0) {
 		this.aTokenTypes = aTokenTypes;
 		this.aInformanten = aInformanten;
 		this.aSaetze = aSaetze;
 		this.aEvents = aEvents;
 		this.aTokens = aTokens;
 		this.aTokenFragmente = aTokenFragmente;
+		this.aHeight = aHeight;
 	}
 	reset () {
 		this.aTokenTypes = {};
@@ -16,6 +19,7 @@ class TranskriptClass {
 		this.aEvents = [];
 		this.aTokens = {};
 		this.aTokenFragmente = {};
+		this.aHeight = 0;
 		return true;
 	}
 	addEvents (nEvents) {
@@ -71,10 +75,20 @@ class TranskriptClass {
 		if (this.aTokens[key]['fo']) {
 			this.updateTokenFragment(key, this.aTokens[key]['fo']);
 		};
+		this.aTokens[key]['w-t'] = getTextWidth(this.aTokens[key]['t']);
+		this.aTokens[key]['w-to'] = getTextWidth(this.aTokens[key]['to']);
+		if (this.aTokens[key]['o']) {
+			this.aTokens[key]['w-o'] = getTextWidth(this.aTokens[key]['o']);
+		}
+		if (this.aEvents[this.aTokens[key]['e']]) {
+			this.aEvents[this.aTokens[key]['e']]['rerender'] = true;
+		}
 	}
 	updateTokenFragment (key, fo) {
 		if (this.aTokenFragmente[fo]) {
-			this.aTokenFragmente[fo].push(key);
+			if (this.aTokenFragmente[fo].indexOf(key) < 0) {
+				this.aTokenFragmente[fo].push(key);
+			}
 		} else {
 			this.aTokenFragmente[fo] = [key];
 		}
@@ -105,7 +119,6 @@ var annotationsTool = new Vue({
 			nNr: 0,
 			loaded: false
 		},
-		getCharWidthCach: {},
 		message: null
 	},
 	mounted: function () {
@@ -182,41 +195,41 @@ var annotationsTool = new Vue({
 				alert('Fehler!');
 				this.loading = false;
 			});
-		},
-		/* Funktion zur ermittlung der Breite von Buchstaben im SVG-Element */
-		getCharWidth: function (zeichen) {
-			if (this.getCharWidthCach[zeichen]) {
-				return this.getCharWidthCach[zeichen];
-			} else {
-				if (document.getElementById('svg-text-textsize')) {
-					document.getElementById('svg-text-textsize').textContent = zeichen;
-					this.getCharWidthCach[zeichen] = document.getElementById('svg-text-textsize').getBBox().width;
-					if (this.getCharWidthCach[zeichen] === 0) {
-						document.getElementById('svg-text-textsize').textContent = 'X' + zeichen + 'X';
-						this.getCharWidthCach[zeichen] = document.getElementById('svg-text-textsize').getBBox().width - this.getCharWidth('X') * 2;
-					}
-					return this.getCharWidthCach[zeichen];
-				}
-			}
-		},
-		/* Funktion zur ermittlung der Breite von Texten im SVG-Element */
-		getTextWidth: function (text, cached = true) {
-			if (cached) {
-				var w = 0;
-				var i = text.length;
-				while (i--) {
-					w += this.getCharWidth(text.charAt(i));
-				}
-				if (w) {
-					return w;
-				}
-			} else {
-				if (document.getElementById('svg-text-textsize')) {
-					document.getElementById('svg-text-textsize').textContent = text;
-					return document.getElementById('svg-text-textsize').getBBox().width;
-				}
-			}
 		}
 
 	}
 });
+
+/* Funktion zur ermittlung der Breite von Buchstaben im SVG-Element */
+function getCharWidth (zeichen) {
+	if (!getCharWidthCach[zeichen]) {
+		if (document.getElementById('svg-text-textsize')) {
+			document.getElementById('svg-text-textsize').textContent = zeichen;
+			getCharWidthCach[zeichen] = document.getElementById('svg-text-textsize').getBBox().width;
+			if (getCharWidthCach[zeichen] === 0) {
+				document.getElementById('svg-text-textsize').textContent = 'X' + zeichen + 'X';
+				getCharWidthCach[zeichen] = document.getElementById('svg-text-textsize').getBBox().width - getCharWidth('X') * 2;
+			}
+		}
+	}
+	return getCharWidthCach[zeichen];
+};
+
+/* Funktion zur ermittlung der Breite von Texten im SVG-Element */
+function getTextWidth (text, cached = false) {
+	if (cached) {
+		var w = 0;
+		var i = text.length;
+		while (i--) {
+			w += getCharWidth(text.charAt(i));
+		}
+		if (w) {
+			return w;
+		}
+	} else {
+		if (document.getElementById('svg-text-textsize')) {
+			document.getElementById('svg-text-textsize').textContent = text;
+			return document.getElementById('svg-text-textsize').getBBox().width;
+		}
+	}
+}
