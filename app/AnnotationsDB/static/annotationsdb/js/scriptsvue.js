@@ -1,4 +1,4 @@
-/* global _ $ d3 csrf Vue alert performance */
+/* global _ d3 csrf Vue alert performance */
 
 class TranskriptClass {
 	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}) {
@@ -43,9 +43,11 @@ class TranskriptClass {
 			if (key !== index && this.aEvents[key]['s'] === this.aEvents[index]['s']) {
 				if (this.aEvents[index]['family'].indexOf(key) < 0) {
 					this.aEvents[index]['family'].push(key);
+					this.aEvents[index]['family'].sort();
 				}
 				if (this.aEvents[key]['family'].indexOf(index) < 0) {
 					this.aEvents[key]['family'].push(index);
+					this.aEvents[key]['family'].sort();
 					this.setRerenderEvent(key);
 				}
 			}
@@ -68,32 +70,33 @@ class TranskriptClass {
 		console.log('rerenderEvents: ' + Math.ceil(t1 - t0) + ' ms');
 	}
 	rerenderEvent (key, rePos = false) {
+		var firstFamily = this.aEvents[key]['family'][0];
 		if (this.aEvents[key]['rerender']) {
 			// Passende SVG-Gruppe laden/erstellen
-			if (this.aEvents[key]['svg']) {
-				this.aEvents[key]['svg'].selectAll('*').remove();
-			} else {
-				this.aEvents[key]['svg'] = d3.select('#svg-g-events').append('g');
+			if (!this.aEvents[firstFamily]['f-svg']) {
+				this.aEvents[firstFamily]['f-svg'] = d3.select('#svg-g-events').append('g');
+				this.aEvents[firstFamily]['f-svg'].append('rect').attr('class', 'ebg')
+					.attr('x', 0).attr('y', 0)
+					.attr('width', 10).attr('height', 10);
 			}
-			// Inhalte
-			this.aEvents[key]['svg'].append('text').attr('x', 0).attr('y', 15).text(JSON.stringify(this.aEvents[key]['tid']));
-			// Box um Event hinzufügen
-			var aBBox = this.aEvents[key]['svg'].node().getBBox();
-			this.aEvents[key]['svg'].append('rect')
-				.attr('x', -5).attr('y', -5)
-				.attr('width', aBBox.width + 10).attr('height', aBBox.height + 10);
-			this.aEvents[key]['rerender'] = false;
-			rePos = true;
+			this.aEvents[key]['family'].forEach(function (fKey, i) {
+				if (this.aEvents[fKey]['svg']) {
+					this.aEvents[fKey]['svg'].selectAll('*').remove();
+				} else {
+					this.aEvents[fKey]['svg'] = this.aEvents[firstFamily]['f-svg'].append('g');
+				}
+				// Inhalt
+				this.aEvents[fKey]['svg'].append('text').attr('x', 5).attr('y', 15 + i * 15).text(this.aEvents[fKey]['pk'] + '(' + fKey + '): ' + JSON.stringify(this.aEvents[fKey]['tid']));
+				// Erledigt
+				this.aEvents[fKey]['rerender'] = false;
+			}, this);
+			var aBBox = this.aEvents[firstFamily]['f-svg'].node().getBBox();
+			this.aEvents[firstFamily]['f-svg'].select('rect.ebg')
+				.attr('width', aBBox.width + 2)
+				.attr('height', aBBox.height + 2);
+			this.aEvents[firstFamily]['pos'] = {'x': 10, 'y': 10 + firstFamily * 22, 'w': aBBox.width + 2, 'h': aBBox.height + 2};
+			this.aEvents[firstFamily]['f-svg'].attr('transform', 'translate(' + this.aEvents[firstFamily]['pos']['x'] + ',' + this.aEvents[firstFamily]['pos']['y'] + ')');
 		};
-		if (rePos) {
-			var sBBox = this.aEvents[key]['svg'].node().getBBox();
-			if (this.aEvents[key - 1]) {
-				this.aEvents[key]['pos'] = {'x': 10, 'y': this.aEvents[key - 1]['pos']['y'] + this.aEvents[key - 1]['pos']['h'] + 1, 'w': sBBox.width, 'h': sBBox.height};
-			} else {
-				this.aEvents[key]['pos'] = {'x': 10, 'y': 50, 'w': sBBox.width, 'h': sBBox.height};
-			}
-			this.aEvents[key]['svg'].attr('transform', 'translate(' + this.aEvents[key]['pos']['x'] + ',' + this.aEvents[key]['pos']['y'] + ')');
-		}
 	}
 	addTokens (nTokens) {
 		var aError = '';

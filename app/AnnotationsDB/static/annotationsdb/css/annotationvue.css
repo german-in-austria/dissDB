@@ -39,7 +39,6 @@
 	margin-top: 30px;
 }
 
-#svg-g-events > g > rect {
-    fill: none;
-    outline: 1px solid;
+#svg-g-events rect.ebg {
+	fill: #eee;
 }
