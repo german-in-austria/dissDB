@@ -69,12 +69,15 @@ class TranskriptClass {
 	}
 	rerenderEvent (key, rePos = false) {
 		if (this.aEvents[key]['rerender']) {
+			// Passende SVG-Gruppe laden/erstellen
 			if (this.aEvents[key]['svg']) {
 				this.aEvents[key]['svg'].selectAll('*').remove();
 			} else {
 				this.aEvents[key]['svg'] = d3.select('#svg-g-events').append('g');
 			}
+			// Inhalte
 			this.aEvents[key]['svg'].append('text').attr('x', 0).attr('y', 15).text(JSON.stringify(this.aEvents[key]['tid']));
+			// Box um Event hinzufügen
 			var aBBox = this.aEvents[key]['svg'].node().getBBox();
 			this.aEvents[key]['svg'].append('rect')
 				.attr('x', -5).attr('y', -5)
@@ -83,7 +86,13 @@ class TranskriptClass {
 			rePos = true;
 		};
 		if (rePos) {
-			this.aEvents[key]['svg'].attr('transform', 'translate(' + 10 + ',' + (50 + 30 * key) + ')');
+			var sBBox = this.aEvents[key]['svg'].node().getBBox();
+			if (this.aEvents[key - 1]) {
+				this.aEvents[key]['pos'] = {'x': 10, 'y': this.aEvents[key - 1]['pos']['y'] + this.aEvents[key - 1]['pos']['h'] + 1, 'w': sBBox.width, 'h': sBBox.height};
+			} else {
+				this.aEvents[key]['pos'] = {'x': 10, 'y': 50, 'w': sBBox.width, 'h': sBBox.height};
+			}
+			this.aEvents[key]['svg'].attr('transform', 'translate(' + this.aEvents[key]['pos']['x'] + ',' + this.aEvents[key]['pos']['y'] + ')');
 		}
 	}
 	addTokens (nTokens) {
