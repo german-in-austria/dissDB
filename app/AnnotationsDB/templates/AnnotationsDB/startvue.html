@@ -25,6 +25,7 @@
 				<svg id="annotationsvg">
 					<g id="svg-g-transcript">
 						<text x="0" y="15">Das ist ein Test!</text>
+						<g id="svg-g-events"></g>
 					</g>
 					<g id="svg-g-textsize">
 						<text id="svg-text-textsize" x="-100" y="-100"></text>
@@ -44,6 +45,7 @@
 	var csrf='{{ csrf_token }}';
 	var audiodir = '{% settings_value "AUDIO_URL" %}';
 </script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.3.5"></script>
 <script src="{% static "main/js/lodash.min.js" %}"></script>
