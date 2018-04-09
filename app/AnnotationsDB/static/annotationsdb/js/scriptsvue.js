@@ -1,11 +1,12 @@
 /* global _ d3 csrf Vue alert performance */
 
 class TranskriptClass {
-	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}) {
+	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}, tEvents = []) {
 		this.aTokenTypes = aTokenTypes;
 		this.aInformanten = aInformanten;
 		this.aSaetze = aSaetze;
 		this.aEvents = aEvents;
+		this.tEvents = tEvents;
 		this.aTokens = aTokens;
 		this.aTokenFragmente = aTokenFragmente;
 		this.debouncedRerenderEvents = _.debounce(this.rerenderEvents, 100);
@@ -16,6 +17,7 @@ class TranskriptClass {
 		this.aInformanten = {};
 		this.aSaetze = {};
 		this.aEvents = [];
+		this.tEvents = [];
 		this.aTokens = {};
 		this.aTokenFragmente = {};
 		d3.select('#annotationsvg').style('height', 'auto');
@@ -45,6 +47,7 @@ class TranskriptClass {
 			this.aEvents[index]['family'] = [index];
 			this.setRerenderEvent(index);
 		}
+		// family ... ersetzen durch tEvents
 		Object.keys(this.aEvents).map(function (key) {
 			key = parseInt(key);
 			if (key !== index && this.aEvents[key]['s'] === this.aEvents[index]['s']) {
@@ -59,6 +62,32 @@ class TranskriptClass {
 				}
 			}
 		}, this);
+		// tEvetns erstellen/updaten
+		var newTEvent = true;
+		Object.keys(this.tEvents).map(function (key) {
+			if (this.tEvents[key]) {
+				if (this.tEvents[key]['s'] === this.aEvents[index]['s'] && this.tEvents[key]['e'] === this.aEvents[index]['e']) {
+					console.log('update tEvent');
+					Object.keys(this.aEvents[index].tid).map(function (xKey, i) {
+						this.tEvents[key]['eId'][xKey] = index;
+						this.tEvents[key]['rerender'] = true;
+					}, this);
+					newTEvent = false;
+				}
+			}
+		}, this);
+		if (newTEvent) {
+			var atEvent = {
+				s: this.aEvents[index]['s'],
+				e: this.aEvents[index]['e'],
+				rerender: true,
+				eId: {}
+			};
+			Object.keys(this.aEvents[index].tid).map(function (key, i) {
+				atEvent['eId'][key] = index;
+			}, this);
+			this.tEvents.push(atEvent);
+		}
 	}
 	setRerenderEvent (key) {
 		this.aEvents[key]['rerender'] = true;
