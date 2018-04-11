@@ -45,3 +45,12 @@
 #svg-g-events rect.ibg {
 	fill: #fbfbfb;
 }
+
+g.eInf > rect {
+  fill: #eee;
+	outline: 1px solid #aaa;
+}
+
+g.eTok > rect {
+    fill: #fff;
+}

@@ -1,7 +1,9 @@
 /* global _ d3 csrf Vue alert performance */
 
+const eInfHeight = 60;
+
 class TranskriptClass {
-	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}, tEvents = []) {
+	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}, tEvents = [], d3eventsize = {}) {
 		this.aTokenTypes = aTokenTypes;
 		this.aInformanten = aInformanten;
 		this.aSaetze = aSaetze;
@@ -9,8 +11,9 @@ class TranskriptClass {
 		this.tEvents = tEvents;
 		this.aTokens = aTokens;
 		this.aTokenFragmente = aTokenFragmente;
-		this.debouncedRerenderEvents = _.debounce(this.rerenderEvents, 100);
+		this.debouncedPrerenderEvents = _.debounce(this.prerenderEvents, 100);
 		this.debouncedSVGHeight = _.debounce(this.svgHeight, 50);
+		this.d3eventsize = d3eventsize;
 	}
 	reset () {
 		this.aTokenTypes = {};
@@ -20,6 +23,7 @@ class TranskriptClass {
 		this.tEvents = [];
 		this.aTokens = {};
 		this.aTokenFragmente = {};
+		this.d3eventsize = d3.select('#svg-g-eventsize');
 		d3.select('#annotationsvg').style('height', 'auto');
 		d3.select('#svg-g-events').selectAll('*').remove();
 		return true;
@@ -39,35 +43,18 @@ class TranskriptClass {
 	updateEvent (index = 0, values) {
 		if (index === 0) {
 			index = this.aEvents.push(values) - 1;
-			this.aEvents[index]['family'] = [index];
 			this.setRerenderEvent(index);
 		} else {
 			index = parseInt(index);
 			this.aEvents[index] = values;
-			this.aEvents[index]['family'] = [index];
 			this.setRerenderEvent(index);
 		}
-		// family ... ersetzen durch tEvents
-		Object.keys(this.aEvents).map(function (key) {
-			key = parseInt(key);
-			if (key !== index && this.aEvents[key]['s'] === this.aEvents[index]['s']) {
-				if (this.aEvents[index]['family'].indexOf(key) < 0) {
-					this.aEvents[index]['family'].push(key);
-					this.aEvents[index]['family'].sort();
-				}
-				if (this.aEvents[key]['family'].indexOf(index) < 0) {
-					this.aEvents[key]['family'].push(index);
-					this.aEvents[key]['family'].sort();
-					this.setRerenderEvent(key);
-				}
-			}
-		}, this);
 		// tEvetns erstellen/updaten
 		var newTEvent = true;
 		Object.keys(this.tEvents).map(function (key) {
 			if (this.tEvents[key]) {
 				if (this.tEvents[key]['s'] === this.aEvents[index]['s'] && this.tEvents[key]['e'] === this.aEvents[index]['e']) {
-					console.log('update tEvent');
+					// console.log('update tEvent');
 					Object.keys(this.aEvents[index].tid).map(function (xKey, i) {
 						this.tEvents[key]['eId'][xKey] = index;
 						this.tEvents[key]['rerender'] = true;
@@ -91,68 +78,62 @@ class TranskriptClass {
 	}
 	setRerenderEvent (key) {
 		this.aEvents[key]['rerender'] = true;
-		this.debouncedRerenderEvents();
+		this.debouncedPrerenderEvents();
 	}
 	svgHeight () {
-		d3.select('#annotationsvg').style('height', d3.select('#svg-g-transcript').node().getBBox().height + 50);
+		// d3.select('#annotationsvg').style('height', d3.select('#svg-g-transcript').node().getBBox().height + 50);
+		this.renderTEvent(6, d3.select('#svg-g-events')); // Test ... später löschen!
+		d3.select('#svg-g-events').attr('transform', 'translate(5,5)');
 	}
-	rerenderEvents () {
+	prerenderEvents () {
 		var t0 = performance.now();
-		this.aEvents.forEach(function (val, key) {
-			this.rerenderEvent(key);
+		this.tEvents.forEach(function (val, key) {
+			this.preRenderTEvent(key);
 		}, this);
 		this.debouncedSVGHeight();
 		var t1 = performance.now();
-		console.log('rerenderEvents: ' + Math.ceil(t1 - t0) + ' ms');
+		console.log('prerenderEvents: ' + Math.ceil(t1 - t0) + ' ms');
 	}
-	rerenderEvent (key, rePos = false) {
-		var firstFamily = this.aEvents[key]['family'][0];
-		if (this.aEvents[key]['rerender']) {
-			// Passende SVG-Gruppe laden/erstellen
-			if (!this.aEvents[firstFamily]['f-svg']) {
-				this.aEvents[firstFamily]['f-svg'] = d3.select('#svg-g-events').append('g');
-				this.aEvents[firstFamily]['f-svg'].append('rect').attr('class', 'ebg')
-					.attr('x', 0).attr('y', 0)
-					.attr('width', 10).attr('height', 10);
+	preRenderTEvent (key) {
+		if (this.tEvents[key]['rerender']) {
+			// console.log('preRenderTEvent ...');
+			this.renderTEvent(key, this.d3eventsize, true);
+			this.tEvents[key]['svgWidth'] = this.d3eventsize.node().getBBox().width + 1;
+			this.tEvents[key]['rerender'] = false;
+		}
+	}
+	renderTEvent (key, d3target, fast = false) {
+		d3target.selectAll('*').remove();
+		Object.keys(this.aInformanten).map(function (iKey, iI) {	// Informanten durchzählen
+			var d3eInf = d3target.append('g').attr('transform', 'translate(0,' + (iI * (eInfHeight + 2)) + ')');
+			if (!fast) {
+				d3eInf.append('rect').attr('x', 0).attr('y', 0).attr('width', 10).attr('height', eInfHeight - 10);
 			}
-			this.aEvents[key]['family'].forEach(function (fKey, i) {
-				if (this.aEvents[fKey]['svg']) {
-					this.aEvents[fKey]['svg'].selectAll('*').remove();
-				} else {
-					this.aEvents[fKey]['svg'] = this.aEvents[firstFamily]['f-svg'].append('g');
-				}
-				// Inhalt
-				Object.keys(this.aEvents[fKey]['tid']).map(function (ikey) {
-					if (!this.aEvents[fKey]['tid-svg']) {
-						this.aEvents[fKey]['tid-svg'] = {};
-					}
-					if (this.aEvents[fKey]['tid-svg'][ikey]) {
-						this.aEvents[fKey]['tid-svg'][ikey].selectAll('*').remove();
-					} else {
-						this.aEvents[fKey]['tid-svg'][ikey] = this.aEvents[fKey]['svg'].append('g');
-					}
-					this.aEvents[fKey]['tid-svg'][ikey].append('rect').attr('class', 'ibg');
-					this.aEvents[fKey]['tid-svg'][ikey].attr('transform', 'translate(0,' + (2 + this.aInformanten[ikey]['i'] * 44) + ')');
-					var lxw = 5;
-					this.aEvents[fKey]['tid'][ikey].forEach(function (tKey) {
-						var atxt = this.aEvents[fKey]['tid-svg'][ikey].append('g');
-						atxt.append('text').attr('x', lxw).attr('y', 15).text(this.aTokens[tKey]['t']);
-						atxt.append('text').attr('x', lxw).attr('y', 35).text(this.aTokens[tKey]['to']);
-						lxw = lxw + atxt.node().getBBox().width + 5;
+			Object.keys(this.tEvents[key]['eId']).map(function (eKey, eI) {
+				if (eKey === iKey) {
+					var aEvent = this.aEvents[this.tEvents[key]['eId'][eKey]];
+					var aTokensIds = aEvent['tid'][iKey];
+					var aX = 1;
+					aTokensIds.forEach(function (aTokenId) {
+						var d3aToken = d3eInf.append('g').attr('transform', 'translate(' + aX + ',1)');
+						if (!fast) {
+							d3aToken.attr('class', 'eTok eTok' + aTokenId).attr('data-eTok', aTokenId);
+							d3aToken.append('rect').attr('x', 0).attr('y', 0).attr('width', 1).attr('height', eInfHeight - 12);
+						}
+						d3aToken.append('text').attr('x', 1).attr('y', 18).text(this.aTokens[aTokenId]['t']);
+						d3aToken.append('text').attr('x', 1).attr('y', 43).text(this.aTokens[aTokenId]['to']);
+						aX += d3aToken.node().getBBox().width + 5; // Leerzeichen?!
+						if (!fast) {
+							d3aToken.select('rect').attr('width', d3aToken.node().getBBox().width + 1);
+						}
 					}, this);
-					var aBBox = this.aEvents[fKey]['tid-svg'][ikey].node().getBBox();
-					this.aEvents[fKey]['tid-svg'][ikey].select('rect.ibg').attr('x', 2).attr('y', 0).attr('width', aBBox.width + 5).attr('height', aBBox.height + 2);
-				}, this);
-				// Erledigt
-				this.aEvents[fKey]['rerender'] = false;
+				}
 			}, this);
-			var aBBox = this.aEvents[firstFamily]['f-svg'].node().getBBox();
-			this.aEvents[firstFamily]['f-svg'].select('rect.ebg')
-				.attr('width', aBBox.width + 2)
-				.attr('height', aBBox.height + 2);
-			this.aEvents[firstFamily]['pos'] = {'x': 10, 'y': 10 + firstFamily * 100, 'w': aBBox.width + 2, 'h': aBBox.height + 2};
-			this.aEvents[firstFamily]['f-svg'].attr('transform', 'translate(' + this.aEvents[firstFamily]['pos']['x'] + ',' + this.aEvents[firstFamily]['pos']['y'] + ')');
-		};
+			if (!fast) {
+				d3eInf.attr('class', 'eInf eInf' + iKey).attr('data-eInf', iKey);
+				d3eInf.select('rect').attr('width', d3eInf.node().getBBox().width + 1);
+			}
+		}, this);
 	}
 	addTokens (nTokens) {
 		Object.keys(nTokens).map(function (key, i) {
