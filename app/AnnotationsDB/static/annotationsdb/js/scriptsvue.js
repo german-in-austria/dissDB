@@ -1,9 +1,9 @@
-/* global _ d3 csrf Vue alert performance */
+/* global _ $ d3 csrf Vue alert performance */
 
 const eInfHeight = 60;
 
 class TranskriptClass {
-	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}, tEvents = [], d3eventsize = {}) {
+	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}, tEvents = [], zeilenTEvents = [], d3eventsize = {}) {
 		this.aTokenTypes = aTokenTypes;
 		this.aInformanten = aInformanten;
 		this.aSaetze = aSaetze;
@@ -13,6 +13,7 @@ class TranskriptClass {
 		this.aTokenFragmente = aTokenFragmente;
 		this.debouncedPrerenderEvents = _.debounce(this.prerenderEvents, 100);
 		this.debouncedSVGHeight = _.debounce(this.svgHeight, 50);
+		this.zeilenTEvents = zeilenTEvents;
 		this.d3eventsize = d3eventsize;
 	}
 	reset () {
@@ -23,6 +24,7 @@ class TranskriptClass {
 		this.tEvents = [];
 		this.aTokens = {};
 		this.aTokenFragmente = {};
+		this.zeilenTEvents = [];
 		this.d3eventsize = d3.select('#svg-g-eventsize');
 		d3.select('#annotationsvg').style('height', 'auto');
 		d3.select('#svg-g-events').selectAll('*').remove();
@@ -82,7 +84,7 @@ class TranskriptClass {
 	}
 	svgHeight () {
 		// d3.select('#annotationsvg').style('height', d3.select('#svg-g-transcript').node().getBBox().height + 50);
-		this.renderTEvent(6, d3.select('#svg-g-events')); // Test ... später löschen!
+		this.renderTEvent(0, d3.select('#svg-g-events')); // Test ... später löschen!
 		d3.select('#svg-g-events').attr('transform', 'translate(5,5)');
 	}
 	prerenderEvents () {
@@ -92,6 +94,7 @@ class TranskriptClass {
 		}, this);
 		this.debouncedSVGHeight();
 		var t1 = performance.now();
+		this.updateZeilenTEvents();
 		console.log('prerenderEvents: ' + Math.ceil(t1 - t0) + ' ms');
 	}
 	preRenderTEvent (key) {
@@ -101,6 +104,22 @@ class TranskriptClass {
 			this.tEvents[key]['svgWidth'] = this.d3eventsize.node().getBBox().width + 1;
 			this.tEvents[key]['rerender'] = false;
 		}
+	}
+	updateZeilenTEvents () {
+		var mWidth = $('#annotationsvg').width();
+		var aWidth = 0;
+		this.zeilenTEvents = [[]];
+		var aZTEv = 0;
+		this.tEvents.forEach(function (val, key) {
+			aWidth += val['svgWidth'];
+			if (aWidth < mWidth) {
+				this.zeilenTEvents[aZTEv].push(key);
+			} else {
+				aWidth = val['svgWidth'];
+				aZTEv++;
+				this.zeilenTEvents[aZTEv] = [key];
+			}
+		}, this);
 	}
 	renderTEvent (key, d3target, fast = false) {
 		d3target.selectAll('*').remove();
