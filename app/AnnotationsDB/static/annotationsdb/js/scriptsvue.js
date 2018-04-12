@@ -1,9 +1,10 @@
 /* global _ $ d3 csrf Vue alert performance */
 
+const eEventHeight = 160;
 const eInfHeight = 60;
 
 class TranskriptClass {
-	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}, tEvents = [], zeilenTEvents = [], d3eventsize = {}) {
+	constructor (aTokenTypes = {}, aInformanten = {}, aSaetze = {}, aEvents = [], aTokens = {}, aTokenFragmente = {}, tEvents = [], zeilenTEvents = [], zeilenTEventsRefresh = true, zeilenHeight = 0, d3eventsize = {}) {
 		this.aTokenTypes = aTokenTypes;
 		this.aInformanten = aInformanten;
 		this.aSaetze = aSaetze;
@@ -14,6 +15,8 @@ class TranskriptClass {
 		this.debouncedPrerenderEvents = _.debounce(this.prerenderEvents, 100);
 		this.debouncedSVGHeight = _.debounce(this.svgHeight, 50);
 		this.zeilenTEvents = zeilenTEvents;
+		this.zeilenTEventsRefresh = zeilenTEventsRefresh;
+		this.zeilenHeight = zeilenHeight;
 		this.d3eventsize = d3eventsize;
 	}
 	reset () {
@@ -25,6 +28,8 @@ class TranskriptClass {
 		this.aTokens = {};
 		this.aTokenFragmente = {};
 		this.zeilenTEvents = [];
+		this.zeilenTEventsRefresh = true;
+		this.zeilenHeight = 0;
 		this.d3eventsize = d3.select('#svg-g-eventsize');
 		d3.select('#annotationsvg').style('height', 'auto');
 		d3.select('#svg-g-events').selectAll('*').remove();
@@ -83,9 +88,8 @@ class TranskriptClass {
 		this.debouncedPrerenderEvents();
 	}
 	svgHeight () {
-		// d3.select('#annotationsvg').style('height', d3.select('#svg-g-transcript').node().getBBox().height + 50);
-		this.renderTEvent(0, d3.select('#svg-g-events')); // Test ... später löschen!
-		d3.select('#svg-g-events').attr('transform', 'translate(5,5)');
+		d3.select('#annotationsvg').style('height', this.zeilenHeight + 50);
+		this.scrollRendering();
 	}
 	prerenderEvents () {
 		var t0 = performance.now();
@@ -93,36 +97,43 @@ class TranskriptClass {
 			this.preRenderTEvent(key);
 		}, this);
 		this.debouncedSVGHeight();
-		var t1 = performance.now();
 		this.updateZeilenTEvents();
+		var t1 = performance.now();
 		console.log('prerenderEvents: ' + Math.ceil(t1 - t0) + ' ms');
 	}
 	preRenderTEvent (key) {
 		if (this.tEvents[key]['rerender']) {
-			// console.log('preRenderTEvent ...');
 			this.renderTEvent(key, this.d3eventsize, true);
-			this.tEvents[key]['svgWidth'] = this.d3eventsize.node().getBBox().width + 1;
+			this.tEvents[key]['svgWidth'] = this.d3eventsize.node().getBBox().width + 15;
 			this.tEvents[key]['rerender'] = false;
 		}
 	}
 	updateZeilenTEvents () {
-		var mWidth = $('#annotationsvg').width();
+		this.zeilenTEventsRefresh = true;
+		var mWidth = $('#annotationsvg').width() - 10;
 		var aWidth = 0;
-		this.zeilenTEvents = [[]];
+		this.zeilenTEvents = [{'eId': [], 'eH': 0}];
 		var aZTEv = 0;
+		this.zeilenHeight = 0;
 		this.tEvents.forEach(function (val, key) {
 			aWidth += val['svgWidth'];
 			if (aWidth < mWidth) {
-				this.zeilenTEvents[aZTEv].push(key);
+				this.zeilenTEvents[aZTEv]['eId'].push(key);
+				if (eEventHeight > this.zeilenTEvents[aZTEv]['eH']) {
+					this.zeilenTEvents[aZTEv]['eH'] = eEventHeight;
+				}
 			} else {
+				this.zeilenHeight += this.zeilenTEvents[aZTEv]['eH'];
 				aWidth = val['svgWidth'];
 				aZTEv++;
-				this.zeilenTEvents[aZTEv] = [key];
+				this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': eEventHeight};
 			}
 		}, this);
+		this.zeilenHeight += this.zeilenTEvents[aZTEv]['eH'];
 	}
 	renderTEvent (key, d3target, fast = false) {
 		d3target.selectAll('*').remove();
+		var bW = 0;
 		Object.keys(this.aInformanten).map(function (iKey, iI) {	// Informanten durchzählen
 			var d3eInf = d3target.append('g').attr('transform', 'translate(0,' + (iI * (eInfHeight + 2)) + ')');
 			if (!fast) {
@@ -150,9 +161,53 @@ class TranskriptClass {
 			}, this);
 			if (!fast) {
 				d3eInf.attr('class', 'eInf eInf' + iKey).attr('data-eInf', iKey);
-				d3eInf.select('rect').attr('width', d3eInf.node().getBBox().width + 1);
+				var aW = d3eInf.node().getBBox().width;
+				if (aW > bW) {
+					bW = aW;
+				}
+				d3eInf.select('rect').attr('width', bW + 1);
 			}
 		}, this);
+		if (!fast) {
+			d3target.selectAll('g.eInf>rect').attr('width', bW + 1);
+		}
+	}
+	scrollRendering () {
+		var t0 = performance.now();
+		var mWidth = $('#annotationsvg').width() - 10;
+		if (this.zeilenTEventsRefresh) {
+			d3.select('#svg-g-events').selectAll('*').remove();
+			this.zeilenTEventsRefresh = false;
+		}
+		var sHeight = $('#svgscroller').height();
+		var sPos = $('.mcon.vscroller').scrollTop() - 50;
+		var sePos = sPos + sHeight + 100;
+		var aTop = 0;
+		var aBottom = 0;
+		this.zeilenTEvents.forEach(function (val, key) {
+			aBottom = aTop + sHeight;
+			if (sePos >= aTop && sPos <= aBottom) {
+				if (!val['d3obj']) {
+					this.zeilenTEvents[key]['d3obj'] = d3.select('#svg-g-events')
+																								.append('g').attr('class', 'eZeile').attr('data-eZeile', key)
+																								.attr('transform', 'translate(0,' + aTop + ')');
+					this.zeilenTEvents[key]['d3obj'].append('rect').attr('x', 0).attr('y', 0).attr('width', mWidth).attr('height', 140);
+					var aX = 5;
+					this.zeilenTEvents[key]['eId'].forEach(function (eVal, eKey) {
+						this.renderTEvent(eVal, this.zeilenTEvents[key]['d3obj'].append('g').attr('class', 'tEvent').attr('data-tEvent', eVal).attr('transform', 'translate(' + aX + ',20)'));
+						aX += this.tEvents[eVal]['svgWidth'];
+					}, this);
+				}
+			} else {
+				if (val['d3obj']) {
+					this.zeilenTEvents[key]['d3obj'].remove();
+					delete this.zeilenTEvents[key]['d3obj'];
+				};
+			}
+			aTop += val['eH'];
+		}, this);
+		var t1 = performance.now();
+		console.log('scrollRendering: ' + Math.ceil(t1 - t0) + ' ms');
 	}
 	addTokens (nTokens) {
 		Object.keys(nTokens).map(function (key, i) {
@@ -180,6 +235,12 @@ class TranskriptClass {
 };
 
 var transkript = new TranskriptClass();
+
+document.addEventListener('scroll', function (event) {
+	if (event.target.id === 'svgscroller') {
+		transkript.scrollRendering();
+	}
+}, true);
 
 var annotationsTool = new Vue({
 	el: '#annotationsTool',

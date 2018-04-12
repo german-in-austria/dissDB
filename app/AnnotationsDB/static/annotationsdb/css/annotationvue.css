@@ -50,7 +50,10 @@ g.eInf > rect {
   fill: #eee;
 	outline: 1px solid #aaa;
 }
-
 g.eTok > rect {
     fill: #fff;
+}
+g.eZeile > rect {
+  fill: none;
+  outline: 1px solid #999;
 }
