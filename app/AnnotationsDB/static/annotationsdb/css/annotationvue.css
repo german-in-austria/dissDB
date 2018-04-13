@@ -47,8 +47,8 @@
 }
 
 g.eInf > rect {
-  fill: #eee;
-	outline: 1px solid #aaa;
+  fill: #fcfcfc;
+	outline: 1px solid #ccc;
 }
 g.eTok > rect {
     fill: #fff;
@@ -68,4 +68,15 @@ text.zInfLI {
   font-size: 12px;
   fill: #999;
   text-anchor: end;
+}
+g.tEvent > text {
+  font-size: 10px;
+  fill: #666;
+}
+.tEvent > rect {
+  fill: #eee;
+}
+.tEvent > line {
+    stroke-width: 1px;
+    stroke: #888;
 }

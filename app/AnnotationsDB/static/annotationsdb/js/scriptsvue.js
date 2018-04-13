@@ -147,14 +147,14 @@ class TranskriptClass {
 						var t1W = 0;
 						var t2W = 0;
 						aTokensIds.forEach(function (aTokenId) {
-							aSTTS.textContent = '\u00A0' + this.aTokens[aTokenId]['t'];
+							aSTTS.textContent = (((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['t'];
 							t1W = aSTTS.getBBox().width;
-							aSTTS.textContent = '\u00A0' + this.aTokens[aTokenId]['to'];
+							aSTTS.textContent = (((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['to'];
 							t2W = aSTTS.getBBox().width;
 							if (t1W > t2W) {
-								aW += t1W + 2.5;
+								aW += t1W + 1.5;
 							} else {
-								aW += t2W + 2.5;
+								aW += t2W + 1.5;
 							}
 						}, this);
 						if (aW > mW) {
@@ -166,51 +166,42 @@ class TranskriptClass {
 			return mW + 2;
 		} else {
 			var bW = 0;
+			var iAI = 0;
 			Object.keys(this.aInformanten).map(function (iKey, iI) {	// Informanten durchzählen
-				var d3eInf = d3target.append('g').attr('transform', 'translate(0,' + (iI * (eInfHeight + 2)) + ')');
-				if (!fast) {
-					d3eInf.append('rect').attr('x', 0).attr('y', 0).attr('width', 10).attr('height', eInfHeight - 10);
-				}
+				var d3eInf = d3target.append('g').attr('transform', 'translate(0,' + (iAI * (eInfHeight + 2)) + ')').attr('class', 'eInf eInf' + iKey).attr('data-eInf', iKey);
+				d3eInf.append('rect').attr('x', 0).attr('y', 0).attr('width', 10).attr('height', eInfHeight - 10);
 				Object.keys(this.tEvents[key]['eId']).map(function (eKey, eI) {
 					if (eKey === iKey) {
 						var aEvent = this.aEvents[this.tEvents[key]['eId'][eKey]];
 						var aTokensIds = aEvent['tid'][iKey];
 						var aX = 1;
 						aTokensIds.forEach(function (aTokenId) {
-							var d3aToken = d3eInf.append('g').attr('transform', 'translate(' + aX + ',1)');
-							if (!fast) {
-								d3aToken.attr('class', 'eTok eTok' + aTokenId).attr('data-eTok', aTokenId);
-								d3aToken.append('rect').attr('x', -0.5).attr('y', 0).attr('width', 1).attr('height', eInfHeight - 12);
-							}
-							d3aToken.append('text').attr('x', 1).attr('y', 18).text('\u00A0' + this.aTokens[aTokenId]['t']); // Leerzeichen?!
-							d3aToken.append('text').attr('x', 1).attr('y', 43).text('\u00A0' + this.aTokens[aTokenId]['to']); // Leerzeichen?!
+							var d3aToken = d3eInf.append('g').attr('transform', 'translate(' + aX + ',1)').attr('class', 'eTok eTok' + aTokenId).attr('data-eTok', aTokenId);
+							var d3aTokenRec = d3aToken.append('rect').attr('x', -0.5).attr('y', 0).attr('width', 1).attr('height', eInfHeight - 12);
+							d3aToken.append('text').attr('x', 0).attr('y', 18).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['t']); // Leerzeichen?!
+							d3aToken.append('text').attr('x', 0).attr('y', 43).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['to']); // Leerzeichen?!
 							var aW = d3aToken.node().getBBox().width;
 							aX += aW + 1;
-							if (!fast) {
-								d3aToken.select('rect').attr('width', aW + 1.5);
-							}
+							d3aTokenRec.attr('width', aW + 1.5);
 						}, this);
 					}
 				}, this);
-				if (!fast) {
-					d3eInf.attr('class', 'eInf eInf' + iKey).attr('data-eInf', iKey);
-					var aW = d3eInf.node().getBBox().width;
-					if (aW > bW) {
-						bW = aW;
-					}
-					d3eInf.select('rect').attr('width', bW + 1);
+				var aW = d3eInf.node().getBBox().width;
+				if (aW > bW) {
+					bW = aW;
 				}
+				d3eInf.select('rect').attr('width', bW + 1);
+				iAI++; // ToDo: Wenn aktiv!
 			}, this);
-			if (!fast) {
-				d3target.selectAll('g.eInf>rect').attr('width', bW + 1.5);
-			}
+			d3target.selectAll('g.eInf>rect').attr('width', bW + 1.5);
 		}
 	}
 	renderZInformant (d3target) {
 		var aZInfs = d3target.append('g').attr('class', 'zInfs');
+		var iAI = 0;
 		Object.keys(this.aInformanten).map(function (iKey, iI) {
 			var aZinf = aZInfs.append('g').attr('class', 'zInf zInf' + iKey).attr('data-zInf', iKey)
-												.attr('transform', 'translate(5,' + ((eEventHeight - 25) + iI * (eInfHeight + 2)) + ')');
+												.attr('transform', 'translate(5,' + ((eEventHeight - 25) + iAI * (eInfHeight + 2)) + ')');
 			aZinf.append('line').attr('x1', 0).attr('y1', 4.5)
 													.attr('x2', zInfWidth).attr('y2', 4.5);
 			aZinf.append('line').attr('x1', 0).attr('y1', eInfHeight - 4.5)
@@ -218,6 +209,7 @@ class TranskriptClass {
 			aZinf.append('text').attr('class', 'zInfI').attr('x', 5).attr('y', 12 + (eInfHeight - 12) / 2).text(this.aInformanten[iKey]['k']);
 			aZinf.append('text').attr('class', 'zInfLI').attr('x', zInfWidth - 5).attr('y', 18 + 6).text('t');
 			aZinf.append('text').attr('class', 'zInfLI').attr('x', zInfWidth - 5).attr('y', 43 + 6).text('to');
+			iAI++; // ToDo: Wenn aktiv!
 		}, this);
 	}
 	scrollRendering () {
@@ -243,9 +235,13 @@ class TranskriptClass {
 					this.renderZInformant(this.zeilenTEvents[key]['d3obj']);
 					var aX = zInfWidth + 5;
 					this.zeilenTEvents[key]['eId'].forEach(function (eVal, eKey) {
-						var tEg = this.zeilenTEvents[key]['d3obj'].append('g').attr('class', 'tEvent').attr('data-tEvent', eVal).attr('transform', 'translate(' + aX + ',' + (eEventHeight - 20) + ')');
-						this.renderTEvent(eVal, tEg);
-						aX += tEg.node().getBBox().width;
+						var d3tEg = this.zeilenTEvents[key]['d3obj'].append('g').attr('class', 'tEvent').attr('data-tEvent', eVal).attr('transform', 'translate(' + aX + ',' + (eEventHeight - 20) + ')');
+						this.renderTEvent(eVal, d3tEg);
+						var tEgW = d3tEg.node().getBBox().width;
+						aX += tEgW;
+						d3tEg.append('rect').attr('x', 0).attr('y', -15).attr('width', tEgW).attr('height', 11);
+						d3tEg.append('line').attr('x1', 0).attr('y1', -15).attr('x2', 0).attr('y2', -4);
+						d3tEg.append('text').attr('x', 4).attr('y', -6).text(this.tEvents[eVal]['s']);
 					}, this);
 				}
 			} else {
