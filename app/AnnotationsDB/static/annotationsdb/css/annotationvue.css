@@ -55,5 +55,17 @@ g.eTok > rect {
 }
 g.eZeile > rect {
   fill: none;
-  outline: 1px solid #999;
+  outline: 1px solid #ccc;
+}
+g.zInf>line {
+  stroke-width: 1px;
+  stroke: #aaa;
+}
+text.zInfI {
+  font-weight: bold;
+}
+text.zInfLI {
+  font-size: 12px;
+  fill: #999;
+  text-anchor: end;
 }
