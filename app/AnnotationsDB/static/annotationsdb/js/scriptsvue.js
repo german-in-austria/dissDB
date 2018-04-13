@@ -1,7 +1,8 @@
 /* global _ $ d3 csrf Vue alert performance */
 
-const eEventHeight = 50; // 160
-const eInfHeight = 62;
+const eEventHeight = 40;
+const eInfHeight = 63;
+const eInfTop = 25;
 const zInfWidth = 100;
 
 class TranskriptClass {
@@ -127,8 +128,8 @@ class TranskriptClass {
 						this.zeilenTEvents[aZTEv]['iId'].push(iKey);
 					}
 				}, this);
-				if ((eEventHeight + eInfHeight * this.aInfLen) > this.zeilenTEvents[aZTEv]['eH']) {
-					this.zeilenTEvents[aZTEv]['eH'] = (eEventHeight + eInfHeight * this.zeilenTEvents[aZTEv]['iId'].length);
+				if ((eEventHeight + (eInfHeight + eInfTop) * this.aInfLen) > this.zeilenTEvents[aZTEv]['eH']) {
+					this.zeilenTEvents[aZTEv]['eH'] = (eEventHeight + (eInfHeight + eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length);
 				}
 			} else {
 				this.zeilenHeight += this.zeilenTEvents[aZTEv]['eH'];
@@ -140,7 +141,7 @@ class TranskriptClass {
 						this.zeilenTEvents[aZTEv]['iId'].push(iKey);
 					}
 				}, this);
-				this.zeilenTEvents[aZTEv]['eH'] = eEventHeight + eInfHeight * this.zeilenTEvents[aZTEv]['iId'].length;
+				this.zeilenTEvents[aZTEv]['eH'] = eEventHeight + (eInfHeight + eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length;
 			}
 		}, this);
 		this.zeilenHeight += this.zeilenTEvents[aZTEv]['eH'];
@@ -180,7 +181,7 @@ class TranskriptClass {
 			var iAI = 0;
 			Object.keys(this.aInformanten).map(function (iKey, iI) {	// Informanten durchzählen
 				if (iId.indexOf(iKey) >= 0) {
-					var d3eInf = d3target.append('g').attr('transform', 'translate(0,' + (iAI * (eInfHeight + 2)) + ')').attr('class', 'eInf eInf' + iKey).attr('data-eInf', iKey);
+					var d3eInf = d3target.append('g').attr('transform', 'translate(0,' + (eInfTop + iAI * (eInfHeight + eInfTop)) + ')').attr('class', 'eInf eInf' + iKey).attr('data-einf', iKey);
 					d3eInf.append('rect').attr('x', 0).attr('y', 0).attr('width', 10).attr('height', eInfHeight - 10);
 					Object.keys(this.tEvents[key]['eId']).map(function (eKey, eI) {
 						if (eKey === iKey) {
@@ -188,7 +189,7 @@ class TranskriptClass {
 							var aTokensIds = aEvent['tid'][iKey];
 							var aX = 1;
 							aTokensIds.forEach(function (aTokenId) {
-								var d3aToken = d3eInf.append('g').attr('transform', 'translate(' + aX + ',1)').attr('class', 'eTok eTok' + aTokenId).attr('data-eTok', aTokenId);
+								var d3aToken = d3eInf.append('g').attr('transform', 'translate(' + aX + ',1)').attr('class', 'eTok eTok' + aTokenId).attr('data-etok', aTokenId);
 								var d3aTokenRec = d3aToken.append('rect').attr('x', -0.5).attr('y', 0).attr('width', 1).attr('height', eInfHeight - 12);
 								d3aToken.append('text').attr('x', 0).attr('y', 18).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['t']); // Leerzeichen?!
 								d3aToken.append('text').attr('x', 0).attr('y', 43).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['to']); // Leerzeichen?!
@@ -214,8 +215,8 @@ class TranskriptClass {
 		var iAI = 0;
 		Object.keys(this.aInformanten).map(function (iKey, iI) {
 			if (iId.indexOf(iKey) >= 0) {
-				var aZinf = aZInfs.append('g').attr('class', 'zInf zInf' + iKey).attr('data-zInf', iKey)
-													.attr('transform', 'translate(5,' + ((eEventHeight - 25) + iAI * (eInfHeight + 2)) + ')');
+				var aZinf = aZInfs.append('g').attr('class', 'zInf zInf' + iKey).attr('data-zinf', iKey)
+													.attr('transform', 'translate(5,' + ((eEventHeight - 25) + eInfTop + iAI * (eInfHeight + eInfTop)) + ')');
 				aZinf.append('line').attr('x1', 0).attr('y1', 4.5)
 														.attr('x2', zInfWidth).attr('y2', 4.5);
 				aZinf.append('line').attr('x1', 0).attr('y1', eInfHeight - 4.5)
@@ -244,13 +245,13 @@ class TranskriptClass {
 			if (sePos >= aTop && sPos <= aBottom) {
 				if (!val['d3obj']) {
 					this.zeilenTEvents[key]['d3obj'] = d3.select('#svg-g-events')
-																								.append('g').attr('class', 'eZeile').attr('data-eZeile', key)
+																								.append('g').attr('class', 'eZeile').attr('data-ezeile', key)
 																								.attr('transform', 'translate(0,' + aTop + ')');
-					this.zeilenTEvents[key]['d3obj'].append('rect').attr('x', 0).attr('y', 0).attr('width', mWidth).attr('height', (eEventHeight + eInfHeight * val['iId'].length) - 20);
+					this.zeilenTEvents[key]['d3obj'].append('rect').attr('x', 0).attr('y', 0).attr('width', mWidth).attr('height', (eEventHeight + (eInfHeight + eInfTop) * val['iId'].length) - 20);
 					this.renderZInformant(this.zeilenTEvents[key]['d3obj'], val['iId']);
 					var aX = zInfWidth + 5;
 					this.zeilenTEvents[key]['eId'].forEach(function (eVal, eKey) {
-						var d3tEg = this.zeilenTEvents[key]['d3obj'].append('g').attr('class', 'tEvent').attr('data-tEvent', eVal).attr('transform', 'translate(' + aX + ',' + (eEventHeight - 20) + ')');
+						var d3tEg = this.zeilenTEvents[key]['d3obj'].append('g').attr('class', 'tEvent').attr('data-tevent', eVal).attr('transform', 'translate(' + aX + ',' + (eEventHeight - 20) + ')');
 						this.renderTEvent(eVal, d3tEg, false, val['iId']);
 						var tEgW = d3tEg.node().getBBox().width;
 						aX += tEgW;
@@ -303,6 +304,18 @@ document.addEventListener('scroll', function (event) {
 	}
 }, true);
 
+$(document).on('click', 'g.eTok', function (e) {
+	alert('Click: ' + $(this).data('etok'));
+});
+
+$(document).on('mouseenter', 'g.eTok', function (e) {
+	// console.log('Enter: ' + $(this).data('etok'));
+});
+
+$(document).on('mouseleave', 'g.eTok', function (e) {
+	// console.log('Leave: ' + $(this).data('etok'));
+});
+
 var annotationsTool = new Vue({
 	el: '#annotationsTool',
 	delimiters: ['${', '}'],
@@ -323,7 +336,7 @@ var annotationsTool = new Vue({
 		annotationsTool: {
 			aPK: 0,
 			nNr: 0,
-			loaded: false
+			loaded: true
 		},
 		message: null
 	},

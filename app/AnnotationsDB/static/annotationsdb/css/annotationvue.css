@@ -46,12 +46,34 @@
 	fill: #fbfbfb;
 }
 
+#loadsym {
+  position: absolute;
+	display:none;
+  right: 25px;
+  top: 5px;
+  color: #00f;
+  font-size: 24px;
+}
+
+.bgloading #loadsym {
+	display: block;
+}
+
 g.eInf > rect {
   fill: #fcfcfc;
 	outline: 1px solid #ccc;
 }
+g.eInf:hover > rect {
+  outline: 1px solid #777;
+}
+g.eTok {
+  cursor: pointer;
+}
 g.eTok > rect {
-    fill: #fff;
+  fill: #fff;
+}
+g.eTok:hover > rect {
+  fill: #efe;
 }
 g.eZeile > rect {
   fill: none;
@@ -77,6 +99,6 @@ g.tEvent > text {
   fill: #eee;
 }
 .tEvent > line {
-    stroke-width: 1px;
-    stroke: #888;
+  stroke-width: 1px;
+  stroke: #888;
 }

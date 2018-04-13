@@ -6,7 +6,7 @@
 {% block ueberschrift %} - Annotation (VUE){% endblock %}
 {% block sitecss %}<link href="{% static "annotationsdb/css/annotationvue.css" %}?{% settings_value "CACH_RANDOM" %}" rel="stylesheet">{% endblock %}
 {% block inhalt %}
-<div id="annotationsTool" v-bind:class="{ loading: loading }">
+<div id="annotationsTool" v-bind:class="{ loading: loading, bgloading: !annotationsTool.loaded }">
 	<div class="row h100">
 		<div class="col-md-2 h100 mh200px vscroller lmfa">
 			<div class="input-group mit10 mib10">
@@ -33,6 +33,7 @@
 					</g>
 				</svg>
 			</div>
+			<div id="loadsym"><span class="glyphicon glyphicon-refresh gly-spin" aria-hidden="true"></span></div>
 		</div>
 	</div>
 	<div id="loading">Lade ...</div>
