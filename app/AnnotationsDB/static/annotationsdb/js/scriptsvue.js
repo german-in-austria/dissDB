@@ -1,4 +1,4 @@
-/* global _ $ d3 csrf Vue alert performance */
+/* global _ $ d3 csrf Vue alert performance makeModal */
 
 const eEventHeight = 40;
 const eInfHeight = 63;
@@ -255,9 +255,10 @@ class TranskriptClass {
 						this.renderTEvent(eVal, d3tEg, false, val['iId']);
 						var tEgW = d3tEg.node().getBBox().width;
 						aX += tEgW;
-						d3tEg.append('rect').attr('x', 0).attr('y', -15).attr('width', tEgW).attr('height', 11);
-						d3tEg.append('line').attr('x1', 0).attr('y1', -15).attr('x2', 0).attr('y2', -4);
-						d3tEg.append('text').attr('x', 4).attr('y', -6).text(this.tEvents[eVal]['s']);
+						var d3tEgZ = d3tEg.append('g').attr('class', 'zeit');
+						d3tEgZ.append('rect').attr('x', 0).attr('y', -15).attr('width', tEgW).attr('height', 11);
+						d3tEgZ.append('line').attr('x1', 0).attr('y1', -15).attr('x2', 0).attr('y2', -4);
+						d3tEgZ.append('text').attr('x', 4).attr('y', -6).text(secondsToDuration(durationToSeconds(this.tEvents[eVal]['s']), 3));
 					}, this);
 				}
 			} else {
@@ -307,13 +308,44 @@ document.addEventListener('scroll', function (event) {
 $(document).on('click', 'g.eTok', function (e) {
 	alert('Click: ' + $(this).data('etok'));
 });
-
 $(document).on('mouseenter', 'g.eTok', function (e) {
 	// console.log('Enter: ' + $(this).data('etok'));
 });
-
 $(document).on('mouseleave', 'g.eTok', function (e) {
 	// console.log('Leave: ' + $(this).data('etok'));
+});
+
+$(document).on('click', 'g.tEvent > .zeit', function (e) {
+	var aTitel = 'Events:';
+	var aBody = '';
+	var aTEvent = $(this).parent().data('tevent');
+	aBody += '<div class="form-horizontal">' + formGroup('Zeit', '<p class="form-control-static">' + transkript.tEvents[aTEvent]['s'] + ' -  ' + transkript.tEvents[aTEvent]['e'] + '</p>') + '</div>';
+	Object.keys(transkript.aInformanten).map(function (iKey, iI) {
+		var aEId = transkript.tEvents[aTEvent]['eId'][iKey];
+		if (aEId >= 0) {
+			aBody += '<hr>';
+			aBody += '<div class="form-horizontal">';
+			aBody += formGroup('Informant', '<p class="form-control-static">' + transkript.aInformanten[iKey]['k'] + ' (' + transkript.aInformanten[iKey]['ka'] + ' - Id: ' + iKey + ')' + '</p>');
+			aBody += formGroup('ID', '<p class="form-control-static">' + transkript.aEvents[aEId]['pk'] + '</p>');
+			aBody += formGroup('Start', '<p class="form-control-static">' + transkript.aEvents[aEId]['s'] + '</p>');
+			aBody += formGroup('Ende', '<p class="form-control-static">' + transkript.aEvents[aEId]['e'] + '</p>');
+			aBody += formGroup('Layer', '<p class="form-control-static">' + transkript.aEvents[aEId]['l'] + '</p>');
+			var aTxt = '';
+			Object.keys(transkript.aEvents[aEId]['tid']).map(function (iKey, iI) {
+				aTxt += '<b>' + iKey + ':</b> ';
+				var aMax = transkript.aEvents[aEId]['tid'][iKey].length - 1;
+				transkript.aEvents[aEId]['tid'][iKey].forEach(function (val, i) {
+					aTxt += val + ((i < aMax) ? ', ' : '');
+				});
+				aTxt += '<br>';
+			});
+			aBody += formGroup('Token IDs', '<p class="form-control-static">' + aTxt + '</p>');
+			aBody += '</div>';
+
+			console.log(transkript.aEvents[aEId]);
+		}
+	});
+	makeModal(aTitel, aBody, 'tEventInfo', '');
 });
 
 var annotationsTool = new Vue({
@@ -418,3 +450,35 @@ var annotationsTool = new Vue({
 
 	}
 });
+
+/* Sonstiges */
+function formGroup (aTitle, aContent, aId = false) {
+	return '<div class="form-group">' +
+						'<label' + ((aId) ? ' for="' + aId + '"' : '') + ' class="col-sm-3 control-label">' + aTitle + '</label>' +
+						'<div class="col-sm-9">' + aContent + '</div>' +
+					'</div>';
+}
+
+/* Audioplayer */
+function durationToSeconds (hms) {
+	var s = 0.0;
+	if (hms && hms.indexOf(':') > -1) {
+		var a = hms.split(':');
+		if (a.length > 2) { s += parseFloat(a[a.length - 3]) * 60 * 60; }
+		if (a.length > 1) { s += parseFloat(a[a.length - 2]) * 60; }
+		if (a.length > 0) { s += parseFloat(a[a.length - 1]); }
+	} else {
+		s = parseFloat(hms);
+		if (isNaN(s)) { s = 0.0; }
+	}
+	return s;
+}
+function secondsToDuration (sec, fix = 6) {
+	var v = '';
+	if (sec < 0) { sec = -sec; v = '-'; }
+	var h = parseInt(sec / 3600);
+	sec %= 3600;
+	var m = parseInt(sec / 60);
+	var s = sec % 60;
+	return v + ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s.toFixed(fix)).slice(-(3 + fix));
+}

@@ -91,14 +91,17 @@ text.zInfLI {
   fill: #999;
   text-anchor: end;
 }
-g.tEvent > text {
+g.tEvent > .zeit {
+	cursor: pointer;
+}
+g.tEvent > .zeit > text {
   font-size: 10px;
   fill: #666;
 }
-.tEvent > rect {
+g.tEvent > .zeit > rect {
   fill: #eee;
 }
-.tEvent > line {
+g.tEvent > .zeit > line {
   stroke-width: 1px;
   stroke: #888;
 }
