@@ -79,6 +79,15 @@ g.eZeile > rect {
   fill: none;
   outline: 1px solid #ccc;
 }
+g.zInf {
+	cursor: pointer;
+}
+g.zInf > rect {
+	fill: #fff;
+}
+g.zInf:hover > rect {
+	fill: #eef;
+}
 g.zInf>line {
   stroke-width: 1px;
   stroke: #aaa;

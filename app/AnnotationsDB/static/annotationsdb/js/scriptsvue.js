@@ -217,6 +217,8 @@ class TranskriptClass {
 			if (iId.indexOf(iKey) >= 0) {
 				var aZinf = aZInfs.append('g').attr('class', 'zInf zInf' + iKey).attr('data-zinf', iKey)
 													.attr('transform', 'translate(5,' + ((eEventHeight - 25) + eInfTop + iAI * (eInfHeight + eInfTop)) + ')');
+				aZinf.append('rect').attr('x', 0).attr('y', 4.5)
+														.attr('width', zInfWidth).attr('height', eInfHeight - 9);
 				aZinf.append('line').attr('x1', 0).attr('y1', 4.5)
 														.attr('x2', zInfWidth).attr('y2', 4.5);
 				aZinf.append('line').attr('x1', 0).attr('y1', eInfHeight - 4.5)
@@ -315,10 +317,22 @@ $(document).on('mouseleave', 'g.eTok', function (e) {
 	// console.log('Leave: ' + $(this).data('etok'));
 });
 
-$(document).on('click', 'g.tEvent > .zeit', function (e) {
-	var aTitel = 'Events:';
+$(document).on('click', 'g.zInf', function (e) {
+	var aInf = $(this).data('zinf');
+	var aTitel = 'Informant';
 	var aBody = '';
+	aBody += '<div class="form-horizontal">';
+	aBody += formGroup('ID', '<p class="form-control-static">' + aInf + '</p>');
+	aBody += formGroup('Kürzel', '<p class="form-control-static">' + transkript.aInformanten[aInf]['k'] + '</p>');
+	aBody += formGroup('Kürzel Anonym', '<p class="form-control-static">' + transkript.aInformanten[aInf]['ka'] + '</p>');
+	aBody += '</div>';
+	makeModal(aTitel, aBody, 'aInformantenInfo', '');
+});
+
+$(document).on('click', 'g.tEvent > .zeit', function (e) {
 	var aTEvent = $(this).parent().data('tevent');
+	var aTitel = 'Events';
+	var aBody = '';
 	aBody += '<div class="form-horizontal">' + formGroup('Zeit', '<p class="form-control-static">' + transkript.tEvents[aTEvent]['s'] + ' -  ' + transkript.tEvents[aTEvent]['e'] + '</p>') + '</div>';
 	Object.keys(transkript.aInformanten).map(function (iKey, iI) {
 		var aEId = transkript.tEvents[aTEvent]['eId'][iKey];
