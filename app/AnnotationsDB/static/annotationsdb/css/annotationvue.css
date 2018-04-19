@@ -86,8 +86,13 @@ g.eZeile > rect {
   outline: 1px solid #ccc;
 }
 g.eTok>line {
-  stroke: #00f;
   stroke-width: 2;
+}
+g.eTok>line.blue {
+  stroke: #00a;
+}
+g.eTok>line.green {
+  stroke: #0a0;
 }
 g.zInf {
 	cursor: pointer;

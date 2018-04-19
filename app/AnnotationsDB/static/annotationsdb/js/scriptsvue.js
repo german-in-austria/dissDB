@@ -206,8 +206,13 @@ class TranskriptClass {
 								d3aTokenRec.attr('width', aW + 1.5);
 								if (this.aTokens[aTokenId]['fo']) {
 									d3aToken.append('line').attr('x2', 3).attr('y1', eInfHeight - 10.5)
-																					.attr('x1', aW - 3).attr('y2', eInfHeight - 10.5)
-																					.attr('marker-end', 'url(#arrow)');
+																					.attr('x1', aW).attr('y2', eInfHeight - 10.5)
+																					.attr('class', 'blue').attr('marker-end', 'url(#arrow-blue)');
+								}
+								if (this.aTokenFragmente[aTokenId]) {
+									d3aToken.append('line').attr('x1', 0).attr('y1', eInfHeight - 10.5)
+																					.attr('x2', aW - 3).attr('y2', eInfHeight - 10.5)
+																					.attr('class', 'green').attr('marker-end', 'url(#arrow-green)');
 								}
 							}, this);
 						}
