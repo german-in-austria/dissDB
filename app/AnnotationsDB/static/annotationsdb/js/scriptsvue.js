@@ -191,7 +191,7 @@ class TranskriptClass {
 							var aTokensIds = aEvent['tid'][iKey];
 							var aX = 1;
 							aTokensIds.forEach(function (aTokenId) {
-								var d3aToken = d3eInf.append('g').attr('transform', 'translate(' + aX + ',1)').attr('class', 'eTok eTok' + aTokenId).attr('data-etok', aTokenId);
+								var d3aToken = d3eInf.append('g').attr('transform', 'translate(' + aX + ',1)').attr('class', 'eTok eTok' + aTokenId + ' eTokT' + this.aTokens[aTokenId]['tt']).attr('data-etok', aTokenId);
 								if (this.aTokens[aTokenId]['viewed']) {
 									d3aToken.classed('viewed', true);
 								}
@@ -204,6 +204,9 @@ class TranskriptClass {
 								var aW = d3aToken.node().getBBox().width;
 								aX += aW + 1;
 								d3aTokenRec.attr('width', aW + 1.5);
+								d3aToken.append('line').attr('x2', 2).attr('y1', eInfHeight - 4)
+																				.attr('x1', aW - 2).attr('y2', eInfHeight - 4)
+																				.attr('class', 'visit');
 								if (this.aTokens[aTokenId]['fo']) {
 									d3aToken.append('line').attr('x2', 3).attr('y1', eInfHeight - 10.5)
 																					.attr('x1', aW).attr('y2', eInfHeight - 10.5)
@@ -267,7 +270,7 @@ class TranskriptClass {
 					this.zeilenTEvents[key]['d3obj'] = d3.select('#svg-g-events')
 																								.append('g').attr('class', 'eZeile').attr('data-ezeile', key)
 																								.attr('transform', 'translate(0,' + aTop + ')');
-					this.zeilenTEvents[key]['d3obj'].append('rect').attr('x', 0).attr('y', 0).attr('width', mWidth).attr('height', (eEventHeight + (eInfHeight + eInfTop) * val['iId'].length) - 20);
+					this.zeilenTEvents[key]['d3obj'].append('rect').attr('x', 0).attr('y', 0).attr('width', mWidth).attr('height', (eEventHeight + (eInfHeight + eInfTop) * val['iId'].length) - 18);
 					this.renderZInformant(this.zeilenTEvents[key]['d3obj'], val['iId']);
 					var aX = zInfWidth + 5;
 					this.zeilenTEvents[key]['eId'].forEach(function (eVal, eKey) {
@@ -373,7 +376,7 @@ $(document).on('click', 'g.eTok', function (e) {
 	aBody += formGroup('text', '<input type="text" class="form-control" id="aTokenText" value="' + ((aTokenD['t']) ? aTokenD['t'] : '') + '">', 'aTokenText');
 	var aSel = '';
 	$.each(transkript.aTokenTypes, function (k, v) {
-		aSel += '<option value="' + v + '"' + ((Number(k) === aTokenD['tt']) ? ' selected' : '') + '>' + v['n'] + '</option>';
+		aSel += '<option value="' + k + '"' + ((Number(k) === aTokenD['tt']) ? ' selected' : '') + '>' + v['n'] + '</option>';
 	});
 	aBody +=	formGroup('token_type', '<select class="form-control" id="aTokenType">' + aSel + '</select>', 'aTokenType');
 	aBody += formGroup('ortho', '<input type="text" class="form-control" id="aTokenOrtho" value="' + ((aTokenD['o']) ? aTokenD['o'] : '') + '">', 'aTokenOrtho');

@@ -72,18 +72,14 @@ g.eTok {
 g.eTok > rect {
   fill: #fff;
 }
-g.eTok.viewed > rect {
-    fill: #fafaff;
+g.eTok.eTokT3 > rect, g.eTok.eTokT5 > rect {
+	fill: #fafaff;
 }
-g.eTok.lastview > rect {
-    fill: #f0f0ff;
+g.eTok.eTokT4 > rect {
+	fill: #fffcfa;
 }
-g.eTok:hover > rect {
-  fill: #efe;
-}
-g.eZeile > rect {
-  fill: none;
-  outline: 1px solid #ccc;
+g.eTok.eTokT7 > rect {
+	fill: #fffafa;
 }
 g.eTok>line {
   stroke-width: 2;
@@ -93,6 +89,25 @@ g.eTok>line.blue {
 }
 g.eTok>line.green {
   stroke: #0a0;
+}
+g.eTok > line.visit {
+  stroke: #ccc;
+	stroke-width: 4px;
+	stroke-linecap: round;
+}
+g.eTok.viewed > line.visit {
+	stroke: #bbf;
+}
+g.eTok.lastview > line.visit {
+	stroke: #99f;
+}
+g.eTok:hover > line.visit {
+	stroke: #9f9;
+}
+
+g.eZeile > rect {
+  fill: none;
+  outline: 1px solid #ccc;
 }
 g.zInf {
 	cursor: pointer;
