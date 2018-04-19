@@ -72,12 +72,22 @@ g.eTok {
 g.eTok > rect {
   fill: #fff;
 }
+g.eTok.viewed > rect {
+    fill: #fafaff;
+}
+g.eTok.lastview > rect {
+    fill: #f0f0ff;
+}
 g.eTok:hover > rect {
   fill: #efe;
 }
 g.eZeile > rect {
   fill: none;
   outline: 1px solid #ccc;
+}
+g.eTok>line {
+  stroke: #00f;
+  stroke-width: 2;
 }
 g.zInf {
 	cursor: pointer;

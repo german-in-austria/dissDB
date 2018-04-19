@@ -21,6 +21,7 @@ class TranskriptClass {
 		this.zeilenTEventsRefresh = zeilenTEventsRefresh;
 		this.zeilenHeight = zeilenHeight;
 		this.d3eventsize = d3eventsize;
+		this.d3TokenLastView = -1;
 	}
 	reset () {
 		this.aTokenTypes = {};
@@ -35,6 +36,7 @@ class TranskriptClass {
 		this.zeilenTEventsRefresh = true;
 		this.zeilenHeight = 0;
 		this.d3eventsize = d3.select('#svg-g-eventsize');
+		this.d3TokenLastView = -1;
 		d3.select('#annotationsvg').style('height', 'auto');
 		d3.select('#svg-g-events').selectAll('*').remove();
 		return true;
@@ -159,9 +161,9 @@ class TranskriptClass {
 						var t1W = 0;
 						var t2W = 0;
 						aTokensIds.forEach(function (aTokenId) {
-							aSTTS.textContent = (((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['t'];
+							aSTTS.textContent = (((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.getTokenFragment(aTokenId, 't');
 							t1W = aSTTS.getBBox().width;
-							aSTTS.textContent = (((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['to'];
+							aSTTS.textContent = (((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.getTokenFragment(aTokenId, 'to');
 							t2W = aSTTS.getBBox().width;
 							if (t1W > t2W) {
 								aW += t1W + 1.5;
@@ -190,12 +192,23 @@ class TranskriptClass {
 							var aX = 1;
 							aTokensIds.forEach(function (aTokenId) {
 								var d3aToken = d3eInf.append('g').attr('transform', 'translate(' + aX + ',1)').attr('class', 'eTok eTok' + aTokenId).attr('data-etok', aTokenId);
+								if (this.aTokens[aTokenId]['viewed']) {
+									d3aToken.classed('viewed', true);
+								}
+								if (this.d3TokenLastView === aTokenId) {
+									d3aToken.classed('lastview', true);
+								}
 								var d3aTokenRec = d3aToken.append('rect').attr('x', -0.5).attr('y', 0).attr('width', 1).attr('height', eInfHeight - 12);
-								d3aToken.append('text').attr('x', 0).attr('y', 18).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['t']); // Leerzeichen?!
-								d3aToken.append('text').attr('x', 0).attr('y', 43).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.aTokens[aTokenId]['to']); // Leerzeichen?!
+								d3aToken.append('text').attr('x', 0).attr('y', 18).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.getTokenFragment(aTokenId, 't')); // Leerzeichen?!
+								d3aToken.append('text').attr('x', 0).attr('y', 43).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.getTokenFragment(aTokenId, 'to')); // Leerzeichen?!
 								var aW = d3aToken.node().getBBox().width;
 								aX += aW + 1;
 								d3aTokenRec.attr('width', aW + 1.5);
+								if (this.aTokens[aTokenId]['fo']) {
+									d3aToken.append('line').attr('x2', 3).attr('y1', eInfHeight - 10.5)
+																					.attr('x1', aW - 3).attr('y2', eInfHeight - 10.5)
+																					.attr('marker-end', 'url(#arrow)');
+								}
 							}, this);
 						}
 					}, this);
@@ -297,6 +310,21 @@ class TranskriptClass {
 			this.aTokenFragmente[fo] = [key];
 		}
 	}
+	getTokenFragment (tId, field) {
+		if (this.aTokenFragmente[tId]) {
+			var aTtxt = this.aTokens[tId][field];
+			this.aTokenFragmente[tId].forEach(function (val) {
+				var aPos = aTtxt.lastIndexOf(this.aTokens[val][field]);
+				console.log(aTtxt + ' < ' + this.aTokens[val][field] + ' - ' + aPos);
+				if (aPos > 0) {
+					aTtxt = aTtxt.substr(0, aPos);
+				}
+			}, this);
+			return aTtxt;
+		} else {
+			return this.aTokens[tId][field];
+		}
+	}
 };
 
 var transkript = new TranskriptClass();
@@ -308,13 +336,45 @@ document.addEventListener('scroll', function (event) {
 }, true);
 
 $(document).on('click', 'g.eTok', function (e) {
-	alert('Click: ' + $(this).data('etok'));
-});
-$(document).on('mouseenter', 'g.eTok', function (e) {
-	// console.log('Enter: ' + $(this).data('etok'));
-});
-$(document).on('mouseleave', 'g.eTok', function (e) {
-	// console.log('Leave: ' + $(this).data('etok'));
+	var eTok = $(this).data('etok');
+	transkript.aTokens[eTok]['viewed'] = true;
+	transkript.d3TokenLastView = eTok;
+	var aTokenD = transkript.aTokens[eTok];
+	d3.selectAll('g.eTok').classed('lastview', false);
+	d3.select(this).classed('lastview', true).classed('viewed', true);
+	var aTitel = 'Token: <b>' + aTokenD['t'] + '</b>';
+	var aBody = '';
+	aBody += formGroup('ID', '<p class="form-control-static" id="aTokenID">' + eTok + '</p>', 'aTokenID');
+	aBody += formGroup('text', '<input type="text" class="form-control" id="aTokenText" value="' + ((aTokenD['t']) ? aTokenD['t'] : '') + '">', 'aTokenText');
+	var aSel = '';
+	$.each(transkript.aTokenTypes, function (k, v) {
+		aSel += '<option value="' + v + '"' + ((Number(k) === aTokenD['tt']) ? ' selected' : '') + '>' + v['n'] + '</option>';
+	});
+	aBody +=	formGroup('token_type', '<select class="form-control" id="aTokenType">' + aSel + '</select>', 'aTokenType');
+	aBody += formGroup('ortho', '<input type="text" class="form-control" id="aTokenOrtho" value="' + ((aTokenD['o']) ? aTokenD['o'] : '') + '">', 'aTokenOrtho');
+	aBody += formGroup('ID_Inf', '<p class="form-control-static" id="aTokenIDInf">' + transkript.aInformanten[aTokenD['i']]['k'] + '(' + transkript.aInformanten[aTokenD['i']]['ka'] + ') - ID: ' + aTokenD['i'] + '</p>', 'aTokenIDInf');
+	if (aTokenD['fo']) {
+		aBody += formGroup('fragment_of', '<p class="form-control-static" id="aTokenfragmentof">' + transkript.aTokens[aTokenD['fo']]['t'] + ' - ID: ' + aTokenD['fo'] + '</p>', 'aTokenfragmentof');
+	};
+	aBody += formGroup('token_reihung', '<p class="form-control-static" id="aTokenReihung">' + ((aTokenD['tr']) ? aTokenD['tr'] : '') + '</p>', 'aTokenReihung');
+	aBody += formGroup('event_id', '<p class="form-control-static" id="aTokenEventID">' + transkript.aEvents[searchbypk(aTokenD['e'], transkript.aEvents)]['s'] + ' - ID: ' + aTokenD['e'] + '</p>', 'aTokenEventID');
+	aBody += formGroup('likely_error', '<label class="checkbox-inline"><input type="checkbox" id="aTokenLikelyError" value="1"' + ((aTokenD['le'] === 1) ? ' checked' : '') + '> Ja</label>', 'aTokenLikelyError');
+	if (aTokenD['s']) {
+		aBody += formGroup('sentence_id', '<p class="form-control-static" id="aTokenSentenceID">' + transkript.aSaetze[aTokenD['s']]['t'] + ' - ID: ' + aTokenD['s'] + '</p>', 'aTokenSentenceID');
+	};
+	if (aTokenD['sr']) {
+		aBody += formGroup('sequence_in_sentence', '<p class="form-control-static" id="aTokenSequenceInSentence">' + aTokenD['sr'] + '</p>', 'aTokenSequenceInSentence');
+	};
+	aBody += formGroup('text_in_ortho', '<input type="text" class="form-control" id="aTokenTextInOrtho" value="' + ((aTokenD['to']) ? aTokenD['to'] : '') + '">', 'aTokenTextInOrtho');
+	if (transkript.aTokenFragmente[eTok]) {
+		var aFrags = '';
+		$.each(transkript.aTokenFragmente[eTok], function (k, v) {
+			aFrags += '<li>' + transkript.aTokens[v]['t'] + ' (' + v + ')</li>';
+		});
+		aBody += formGroup('Fragmente', '<ul class="form-control-static hflist">' + aFrags + '</ul>');
+	};
+	aBody = '<div class="form-horizontal">' + aBody + '</div>';
+	makeModal(aTitel, aBody, 'tokeninfos', '<button type="button" class="btn btn-danger" id="delToken" tabindex="9999" disabled>Löschen</button><button type="button" class="btn btn-primary" id="saveToken" disabled>Speichern</button>');
 });
 
 $(document).on('click', 'g.zInf', function (e) {
@@ -471,6 +531,13 @@ function formGroup (aTitle, aContent, aId = false) {
 						'<label' + ((aId) ? ' for="' + aId + '"' : '') + ' class="col-sm-3 control-label">' + aTitle + '</label>' +
 						'<div class="col-sm-9">' + aContent + '</div>' +
 					'</div>';
+}
+function searchbypk (nameKey, myArray) {
+	for (var i = 0; i < myArray.length; i++) {
+		if (myArray[i].pk === nameKey) {
+			return i;
+		}
+	}
 }
 
 /* Audioplayer */
