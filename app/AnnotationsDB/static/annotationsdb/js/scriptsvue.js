@@ -161,9 +161,9 @@ class TranskriptClass {
 						var t1W = 0;
 						var t2W = 0;
 						aTokensIds.forEach(function (aTokenId) {
-							aSTTS.textContent = (((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.getTokenFragment(aTokenId, 't');
+							aSTTS.textContent = this.getTokenString(aTokenId, 't');
 							t1W = aSTTS.getBBox().width;
-							aSTTS.textContent = (((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.getTokenFragment(aTokenId, 'to');
+							aSTTS.textContent = this.getTokenString(aTokenId, 'o', 't');
 							t2W = aSTTS.getBBox().width;
 							if (t1W > t2W) {
 								aW += t1W + 1.5;
@@ -199,8 +199,8 @@ class TranskriptClass {
 									d3aToken.classed('lastview', true);
 								}
 								var d3aTokenRec = d3aToken.append('rect').attr('x', -0.5).attr('y', 0).attr('width', 1).attr('height', eInfHeight - 12);
-								d3aToken.append('text').attr('x', 0).attr('y', 18).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.getTokenFragment(aTokenId, 't')); // Leerzeichen?!
-								d3aToken.append('text').attr('x', 0).attr('y', 43).text((((this.aTokens[aTokenId]['tt'] === 2) || (this.aTokens[aTokenId]['fo'] > 0)) ? '' : '\u00A0') + this.getTokenFragment(aTokenId, 'to')); // Leerzeichen?!
+								d3aToken.append('text').attr('x', 0).attr('y', 18).text(this.getTokenString(aTokenId, 't'));
+								d3aToken.append('text').attr('x', 0).attr('y', 43).text(this.getTokenString(aTokenId, 'o', 't'));
 								var aW = d3aToken.node().getBBox().width;
 								aX += aW + 1;
 								d3aTokenRec.attr('width', aW + 1.5);
@@ -243,7 +243,7 @@ class TranskriptClass {
 														.attr('x2', zInfWidth).attr('y2', eInfHeight - 4.5);
 				aZinf.append('text').attr('class', 'zInfI').attr('x', 5).attr('y', 12 + (eInfHeight - 12) / 2).text(this.aInformanten[iKey]['k']);
 				aZinf.append('text').attr('class', 'zInfLI').attr('x', zInfWidth - 5).attr('y', 18 + 6).text('t');
-				aZinf.append('text').attr('class', 'zInfLI').attr('x', zInfWidth - 5).attr('y', 43 + 6).text('to');
+				aZinf.append('text').attr('class', 'zInfLI').attr('x', zInfWidth - 5).attr('y', 43 + 6).text('o');
 				iAI++; // ToDo: Wenn aktiv!
 			}
 		}, this);
@@ -315,20 +315,40 @@ class TranskriptClass {
 			this.aTokenFragmente[fo] = [key];
 		}
 	}
-	getTokenFragment (tId, field) {
+	getTokenString (tId, field, bfield = false) {
+		var space = '\u00A0';
+		var aTxt = this.getTokenFragment(tId, field, bfield);
+		if ((this.aTokens[tId]['tt'] === 2) || (this.aTokens[tId]['fo'] > 0)) {
+			space = '';
+		}
+		if (aTxt[0] === '_') {
+			aTxt = aTxt.substr(1);
+			space = '';
+		};
+		if (aTxt[aTxt.length - 1] === '_') {
+			aTxt = aTxt.substr(0, aTxt.length - 1);
+		};
+		return space + aTxt;
+	}
+	getTokenFragment (tId, field, bfield = false) {
+		var aTtxt = this.aTokens[tId][field];
+		if (bfield && !aTtxt) {
+			aTtxt = this.aTokens[tId][bfield];
+		}
 		if (this.aTokenFragmente[tId]) {
-			var aTtxt = this.aTokens[tId][field];
 			this.aTokenFragmente[tId].forEach(function (val) {
-				var aPos = aTtxt.lastIndexOf(this.aTokens[val][field]);
-				console.log(aTtxt + ' < ' + this.aTokens[val][field] + ' - ' + aPos);
+				var nTtxt = this.aTokens[val][field];
+				if (bfield && !nTtxt) {
+					nTtxt = this.aTokens[val][bfield];
+				}
+				var aPos = aTtxt.lastIndexOf(nTtxt);
 				if (aPos > 0) {
 					aTtxt = aTtxt.substr(0, aPos);
 				}
 			}, this);
 			return aTtxt;
-		} else {
-			return this.aTokens[tId][field];
 		}
+		return aTtxt;
 	}
 };
 
