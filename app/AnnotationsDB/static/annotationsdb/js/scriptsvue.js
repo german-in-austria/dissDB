@@ -328,9 +328,9 @@ class TranskriptClass {
 			aTxt = aTxt.substr(1);
 			space = '';
 		};
-		if (aTxt[aTxt.length - 1] === '_') {
-			aTxt = aTxt.substr(0, aTxt.length - 1);
-		};
+		// if (aTxt[aTxt.length - 1] === '_') {
+		// 	aTxt = aTxt.substr(0, aTxt.length - 1);
+		// };
 		return space + aTxt;
 	}
 	getTokenFragment (tId, field, bfield = false) {
