@@ -13,7 +13,7 @@ import Datenbank.models as dbmodels
 
 
 
-class InfErhebungForm(forms.ModelForm):
+class EinzelErhebungForm(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
 		self.helper = FormHelper()
 		self.helper.form_class = 'form-horizontal'
@@ -22,8 +22,7 @@ class InfErhebungForm(forms.ModelForm):
 		self.helper.form_method = 'post'
 		self.helper.form_action = ''
 		self.helper.add_input(Submit('submit', 'Speichern'))
-		super(InfErhebungForm, self).__init__(*args, **kwargs)
+		super(EinzelErhebungForm, self).__init__(*args, **kwargs)
 	class Meta:
-		model = dbmodels.InfErhebung
+		model = dbmodels.EinzelErhebung
 		fields = '__all__'
-

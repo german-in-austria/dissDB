@@ -76,7 +76,7 @@ var unsavedEIAufgabe = 0;
 	$(document).on('mouseenter','button.ant-ftag',function(){$(this).siblings('button.ant-tag').addClass('addhover')})
 	$(document).on('mouseleave','button.ant-ftag',function(){$(this).siblings('button.ant-tag').removeClass('addhover')})
 	/* Audio */
-	$(document).on('click','#aufgabenprogress, #inferhebungprogress',progressClick)
+	$(document).on('click','#aufgabenprogress, #einzelerhebungprogress',progressClick)
 	$(document).on('click','#audio-play-pause',playPauseClick)
 	$(document).on('click','#audio-fast-backward',fastBackwardClick)
 	$(document).on('click','#audio-fast-forward',fastForwardClick)

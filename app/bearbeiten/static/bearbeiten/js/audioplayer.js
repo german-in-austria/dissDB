@@ -73,12 +73,12 @@ function secondsToDuration(sec) {
 }
 function setAudioMarks() {
 	audiomarks = []
-	$('#aufgabenprogress .markarea,#inferhebungprogress .markarea').remove()
+	$('#aufgabenprogress .markarea,#einzelerhebungprogress .markarea').remove()
 	if($('.antwort').length>0) {
 		aeltuasErh = durationToSeconds($('#start_ErhInfAufgaben').val())
 		aeltuaeErh = durationToSeconds($('#stop_ErhInfAufgaben').val())
 		aeltualErh = aeltuaeErh-aeltuasErh
-		$('#inferhebungprogress').append('<div class="markarea" style="left:'+(100/audio.duration*(aeltuasErh))+'%;width:'+(100/audio.duration*(aeltuaeErh-aeltuasErh))+'%"></div>')
+		$('#einzelerhebungprogress').append('<div class="markarea" style="left:'+(100/audio.duration*(aeltuasErh))+'%;width:'+(100/audio.duration*(aeltuaeErh-aeltuasErh))+'%"></div>')
 		$('.antwort').each(function() {
 			asSec = durationToSeconds($(this).find('input[name="start_Antwort"]').val())
 			aeSec = durationToSeconds($(this).find('input[name="stop_Antwort"]').val())
@@ -113,7 +113,7 @@ function setAudioPlayer() {
 function progressBarUpdate() {
 	$('.pb-akttime').html(secondsToDuration(audio.currentTime))
 	if(audioisnewset==0) {
-		$('#inferhebungprogress .progress-bar').css('width',(100/audio.duration*audio.currentTime)+'%')
+		$('#einzelerhebungprogress .progress-bar').css('width',(100/audio.duration*audio.currentTime)+'%')
 		aeltuasErh = durationToSeconds($('#start_ErhInfAufgaben').val())
 		aeltuaeErh = durationToSeconds($('#stop_ErhInfAufgaben').val())
 		if(audio.currentTime>=aeltuasErh && audio.currentTime<=aeltuaeErh) {
@@ -127,17 +127,17 @@ function progressBarUpdate() {
 }
 setInterval(progressBarUpdate, 50);
 audio.addEventListener("durationchange", function() {
-	$('#inferhebungprogress .pb-endtime').html(secondsToDuration(audio.duration))
+	$('#einzelerhebungprogress .pb-endtime').html(secondsToDuration(audio.duration))
 }, false);
 audio.addEventListener("play", function() {
 	if(audioisnewset==1) {
 		setTimeout(function() { audio.currentTime = durationToSeconds($('#erhinfaufgaben option:selected').data('start_aufgabe')); setAudioMarks(); }, 100)
 		audioisnewset = 0
 	}
-	$('#aufgabenprogress .progress-bar, #inferhebungprogress .progress-bar').addClass('active')
+	$('#aufgabenprogress .progress-bar, #einzelerhebungprogress .progress-bar').addClass('active')
 	$('#audio-play-pause .glyphicon').addClass('glyphicon-pause').removeClass('glyphicon-play')
 }, false);
 audio.addEventListener("pause", function() {
-	$('#aufgabenprogress .progress-bar, #inferhebungprogress .progress-bar').removeClass('active')
+	$('#aufgabenprogress .progress-bar, #einzelerhebungprogress .progress-bar').removeClass('active')
 	$('#audio-play-pause .glyphicon').addClass('glyphicon-play').removeClass('glyphicon-pause')
 }, false);

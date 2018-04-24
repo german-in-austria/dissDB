@@ -188,9 +188,10 @@ class Informanten(models.Model):
 		verbose_name_plural = "Informanten"
 		ordering = ('id',)
 
-class InfErhebung(models.Model):
+class EinzelErhebung(models.Model):
 	ID_Erh				= models.ForeignKey('Erhebungen'									, on_delete=models.CASCADE		, verbose_name="ID Erhebung")
 	ID_Inf				= models.ForeignKey('Informanten'									, on_delete=models.CASCADE		, verbose_name="ID Informant")
+	id_transcript		= models.ForeignKey('AnnotationsDB.transcript', blank=True, null=True, on_delete=models.SET_NULL	, verbose_name="ID Transkript")
 	Datum				= models.DateField(																					  verbose_name="Datum")
 	Explorator			= models.IntegerField(																				  verbose_name="Explorator")
 	Kommentar			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Kommentar")
@@ -202,13 +203,24 @@ class InfErhebung(models.Model):
 	def __str__(self):
 		return "{} {}<->{}".format(self.Datum,self.ID_Erh,self.ID_Inf)
 	class Meta:
-		db_table = "InfErhebung"
-		verbose_name = "InfErhebung"
-		verbose_name_plural = "InfErhebungen"
+		db_table = "EinzelErhebung"
+		verbose_name = "Einzel Erhebung"
+		verbose_name_plural = "Einzel Erhebungen"
 		ordering = ('Datum',)
 
+class Inf_zu_Erhebung(models.Model):
+	ID_Inf				= models.ForeignKey('Informanten'									, on_delete=models.CASCADE		, verbose_name="Zu Informant")
+	id_einzelerhebung	= models.ForeignKey('EinzelErhebung'								, on_delete=models.CASCADE		, verbose_name="zu EinzelErhebung")
+	def __str__(self):
+		return "{}<->{}".format(self.id_Erh,self.id_Aufgabe)
+	class Meta:
+		db_table = "Inf_zu_Erhebung"
+		verbose_name = "Informant zu Erhebung"
+		verbose_name_plural = "Informanten zu Erhebungen"
+		ordering = ('ID_Inf',)
+
 class ErhInfAufgaben(models.Model):
-	id_InfErh			= models.ForeignKey('InfErhebung'									, on_delete=models.CASCADE		, verbose_name="ID InfErhebung")
+	id_InfErh			= models.ForeignKey('EinzelErhebung'								, on_delete=models.CASCADE		, verbose_name="ID EinzelErhebung")
 	id_Aufgabe			= models.ForeignKey('Aufgaben'										, on_delete=models.CASCADE		, verbose_name="ID Aufgaben")
 	Reihung				= models.IntegerField(						blank=True, null=True									, verbose_name="Reihung")
 	start_Aufgabe		= models.DurationField(																				  verbose_name="Start Aufgabe")
