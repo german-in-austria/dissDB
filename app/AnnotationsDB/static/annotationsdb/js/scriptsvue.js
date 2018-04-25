@@ -424,6 +424,9 @@ var annotationsTool = new Vue({
 			console.log('Lade Datensatz ' + aNr + ' von pk: ' + aPK + ' ...');
 			if (aType === 'start') {
 				this.loading = true;
+				this.aInfInfo = -1;
+				this.tEventInfo = -1;
+				this.aTokenInfo = {};
 				this.annotationsTool = {
 					aPK: aPK,
 					nNr: 0,
