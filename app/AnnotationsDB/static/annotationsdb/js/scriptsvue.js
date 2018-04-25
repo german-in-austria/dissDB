@@ -367,87 +367,22 @@ $(document).on('click', 'g.eTok', function (e) {
 	var eTok = $(this).data('etok');
 	transkript.aTokens[eTok]['viewed'] = true;
 	transkript.d3TokenLastView = eTok;
-	var aTokenD = transkript.aTokens[eTok];
 	d3.selectAll('g.eTok').classed('lastview', false);
 	d3.select(this).classed('lastview', true).classed('viewed', true);
-	var aTitel = 'Token: <b>' + aTokenD['t'] + '</b>';
-	var aBody = '';
-	aBody += formGroup('ID', '<p class="form-control-static" id="aTokenID">' + eTok + '</p>', 'aTokenID');
-	aBody += formGroup('text', '<input type="text" class="form-control" id="aTokenText" value="' + ((aTokenD['t']) ? aTokenD['t'] : '') + '">', 'aTokenText');
-	var aSel = '';
-	$.each(transkript.aTokenTypes, function (k, v) {
-		aSel += '<option value="' + k + '"' + ((Number(k) === aTokenD['tt']) ? ' selected' : '') + '>' + v['n'] + '</option>';
-	});
-	aBody +=	formGroup('token_type', '<select class="form-control" id="aTokenType">' + aSel + '</select>', 'aTokenType');
-	aBody += formGroup('ortho', '<input type="text" class="form-control" id="aTokenOrtho" value="' + ((aTokenD['o']) ? aTokenD['o'] : '') + '">', 'aTokenOrtho');
-	aBody += formGroup('ID_Inf', '<p class="form-control-static" id="aTokenIDInf">' + transkript.aInformanten[aTokenD['i']]['k'] + '(' + transkript.aInformanten[aTokenD['i']]['ka'] + ') - ID: ' + aTokenD['i'] + '</p>', 'aTokenIDInf');
-	if (aTokenD['fo']) {
-		aBody += formGroup('fragment_of', '<p class="form-control-static" id="aTokenfragmentof">' + transkript.aTokens[aTokenD['fo']]['t'] + ' - ID: ' + aTokenD['fo'] + '</p>', 'aTokenfragmentof');
-	};
-	aBody += formGroup('token_reihung', '<p class="form-control-static" id="aTokenReihung">' + ((aTokenD['tr']) ? aTokenD['tr'] : '') + '</p>', 'aTokenReihung');
-	aBody += formGroup('event_id', '<p class="form-control-static" id="aTokenEventID">' + transkript.aEvents[searchbypk(aTokenD['e'], transkript.aEvents)]['s'] + ' - ID: ' + aTokenD['e'] + '</p>', 'aTokenEventID');
-	aBody += formGroup('likely_error', '<label class="checkbox-inline"><input type="checkbox" id="aTokenLikelyError" value="1"' + ((aTokenD['le'] === 1) ? ' checked' : '') + '> Ja</label>', 'aTokenLikelyError');
-	if (aTokenD['s']) {
-		aBody += formGroup('sentence_id', '<p class="form-control-static" id="aTokenSentenceID">' + transkript.aSaetze[aTokenD['s']]['t'] + ' - ID: ' + aTokenD['s'] + '</p>', 'aTokenSentenceID');
-	};
-	if (aTokenD['sr']) {
-		aBody += formGroup('sequence_in_sentence', '<p class="form-control-static" id="aTokenSequenceInSentence">' + aTokenD['sr'] + '</p>', 'aTokenSequenceInSentence');
-	};
-	aBody += formGroup('text_in_ortho', '<input type="text" class="form-control" id="aTokenTextInOrtho" value="' + ((aTokenD['to']) ? aTokenD['to'] : '') + '">', 'aTokenTextInOrtho');
-	if (transkript.aTokenFragmente[eTok]) {
-		var aFrags = '';
-		$.each(transkript.aTokenFragmente[eTok], function (k, v) {
-			aFrags += '<li>' + transkript.aTokens[v]['t'] + ' (' + v + ')</li>';
-		});
-		aBody += formGroup('Fragmente', '<ul class="form-control-static hflist">' + aFrags + '</ul>');
-	};
-	aBody = '<div class="form-horizontal">' + aBody + '</div>';
-	makeModal(aTitel, aBody, 'tokeninfos', '<button type="button" class="btn btn-danger" id="delToken" tabindex="9999" disabled>Löschen</button><button type="button" class="btn btn-primary" id="saveToken" disabled>Speichern</button>');
+	annotationsTool.aTokenInfo = _.clone(transkript.aTokens[1]);
+	annotationsTool.aTokenInfo['pk'] = 1;
+	annotationsTool.aTokenInfo['e-txt'] = transkript.aEvents[searchbypk(transkript.aTokens[eTok]['e'], transkript.aEvents)]['s'];
+	setTimeout(function () { $('#aTokenInfo').modal('show'); }, 20);
 });
 
 $(document).on('click', 'g.zInf', function (e) {
-	var aInf = $(this).data('zinf');
-	var aTitel = 'Informant';
-	var aBody = '';
-	aBody += '<div class="form-horizontal">';
-	aBody += formGroup('ID', '<p class="form-control-static">' + aInf + '</p>');
-	aBody += formGroup('Kürzel', '<p class="form-control-static">' + transkript.aInformanten[aInf]['k'] + '</p>');
-	aBody += formGroup('Kürzel Anonym', '<p class="form-control-static">' + transkript.aInformanten[aInf]['ka'] + '</p>');
-	aBody += '</div>';
-	makeModal(aTitel, aBody, 'aInformantenInfo', '');
+	annotationsTool.aInfInfo = $(this).data('zinf');
+	setTimeout(function () { $('#aInformantenInfo').modal('show'); }, 20);
 });
 
 $(document).on('click', 'g.tEvent > .zeit', function (e) {
-	var aTEvent = $(this).parent().data('tevent');
-	var aTitel = 'Events';
-	var aBody = '';
-	aBody += '<div class="form-horizontal">' + formGroup('Zeit', '<p class="form-control-static">' + transkript.tEvents[aTEvent]['s'] + ' -  ' + transkript.tEvents[aTEvent]['e'] + '</p>') + '</div>';
-	Object.keys(transkript.aInformanten).map(function (iKey, iI) {
-		var aEId = transkript.tEvents[aTEvent]['eId'][iKey];
-		if (aEId >= 0) {
-			aBody += '<hr>';
-			aBody += '<div class="form-horizontal">';
-			aBody += formGroup('Informant', '<p class="form-control-static">' + transkript.aInformanten[iKey]['k'] + ' (' + transkript.aInformanten[iKey]['ka'] + ' - Id: ' + iKey + ')' + '</p>');
-			aBody += formGroup('ID', '<p class="form-control-static">' + transkript.aEvents[aEId]['pk'] + '</p>');
-			aBody += formGroup('Start', '<p class="form-control-static">' + transkript.aEvents[aEId]['s'] + '</p>');
-			aBody += formGroup('Ende', '<p class="form-control-static">' + transkript.aEvents[aEId]['e'] + '</p>');
-			aBody += formGroup('Layer', '<p class="form-control-static">' + transkript.aEvents[aEId]['l'] + '</p>');
-			var aTxt = '';
-			Object.keys(transkript.aEvents[aEId]['tid']).map(function (iKey, iI) {
-				aTxt += '<b>' + iKey + ':</b> ';
-				var aMax = transkript.aEvents[aEId]['tid'][iKey].length - 1;
-				transkript.aEvents[aEId]['tid'][iKey].forEach(function (val, i) {
-					aTxt += val + ((i < aMax) ? ', ' : '');
-				});
-				aTxt += '<br>';
-			});
-			aBody += formGroup('Token IDs', '<p class="form-control-static">' + aTxt + '</p>');
-			aBody += '</div>';
-
-			console.log(transkript.aEvents[aEId]);
-		}
-	});
-	makeModal(aTitel, aBody, 'tEventInfo', '');
+	annotationsTool.tEventInfo = $(this).parent().data('tevent');
+	setTimeout(function () { $('#tEventInfo').modal('show'); }, 20);
 });
 
 var annotationsTool = new Vue({
@@ -472,10 +407,16 @@ var annotationsTool = new Vue({
 			nNr: 0,
 			loaded: true
 		},
+		aInfInfo: -1,
+		tEventInfo: -1,
+		aTokenInfo: {},
 		message: null
 	},
 	mounted: function () {
 		this.getMenue();
+	},
+	computed: {
+		xTranskript: function () { return transkript; }
 	},
 	methods: {
 		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
