@@ -101,7 +101,7 @@ def start(request,ipk=0,apk=0):
 				xtags.append({'ebene':dbmodels.TagEbene.objects.filter(pk=xval['id_TagEbene']), 'tags':getTagFamilie(dbmodels.AntwortenTags.objects.filter(id_Antwort=val.pk, id_TagEbene=xval['id_TagEbene']).order_by('Reihung'))})
 			Antworten.append({'model':val, 'ptags':ptags, 'stags':stags, 'xtags':xtags})
 		Antworten.append(eAntwort)
-		ErhInfAufgaben = dbmodels.ErhInfAufgaben.objects.filter(id_Aufgabe=apk,id_InfErh__ID_Inf__pk=ipk)
+		ErhInfAufgaben = dbmodels.ErhInfAufgaben.objects.filter(id_Aufgabe=apk, id_InfErh__inf_zu_erhebung__ID_Inf__pk=ipk)
 		aPresetTags = []
 		for val in PresetTags.objects.filter(Q(presettagszuaufgabe__id_Aufgabe__pk=apk) | Q(presettagszuaufgabe=None)):
 			aPresetTags.append({'model':val,'tagfamilie':getTagFamiliePT(val.id_Tags.all()),'test':test})

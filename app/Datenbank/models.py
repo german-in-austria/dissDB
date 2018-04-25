@@ -190,7 +190,6 @@ class Informanten(models.Model):
 
 class EinzelErhebung(models.Model):
 	ID_Erh				= models.ForeignKey('Erhebungen'									, on_delete=models.CASCADE		, verbose_name="ID Erhebung")
-	ID_Inf				= models.ForeignKey('Informanten'									, on_delete=models.CASCADE		, verbose_name="ID Informant")
 	id_transcript		= models.ForeignKey('AnnotationsDB.transcript', blank=True, null=True, on_delete=models.SET_NULL	, verbose_name="ID Transkript")
 	Datum				= models.DateField(																					  verbose_name="Datum")
 	Explorator			= models.IntegerField(																				  verbose_name="Explorator")
@@ -201,7 +200,7 @@ class EinzelErhebung(models.Model):
 	Ort					= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Ort")
 	Besonderheiten		= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Besonderheiten")
 	def __str__(self):
-		return "{} {}<->{}".format(self.Datum,self.ID_Erh,self.ID_Inf)
+		return "{} {} <-> {}".format(self.Datum, self.ID_Erh, ",".join([str(ize.ID_Inf) for ize in self.inf_zu_erhebung_set.all()]))
 	class Meta:
 		db_table = "EinzelErhebung"
 		verbose_name = "Einzel Erhebung"
