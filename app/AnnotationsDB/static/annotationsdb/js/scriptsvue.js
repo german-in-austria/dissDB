@@ -338,7 +338,7 @@ class TranskriptClass {
 		if (bfield && !aTtxt) {
 			aTtxt = this.aTokens[tId][bfield];
 		}
-		if (this.aTokenFragmente[tId]) {
+		if (this.aTokenFragmente[tId] && this.aTokenFragmente[tId].length === 1) {
 			this.aTokenFragmente[tId].forEach(function (val) {
 				var nTtxt = this.aTokens[val][field];
 				if (bfield && !nTtxt) {
@@ -369,8 +369,8 @@ $(document).on('click', 'g.eTok', function (e) {
 	transkript.d3TokenLastView = eTok;
 	d3.selectAll('g.eTok').classed('lastview', false);
 	d3.select(this).classed('lastview', true).classed('viewed', true);
-	annotationsTool.aTokenInfo = _.clone(transkript.aTokens[1]);
-	annotationsTool.aTokenInfo['pk'] = 1;
+	annotationsTool.aTokenInfo = _.clone(transkript.aTokens[eTok]);
+	annotationsTool.aTokenInfo['pk'] = eTok;
 	annotationsTool.aTokenInfo['e-txt'] = transkript.aEvents[searchbypk(transkript.aTokens[eTok]['e'], transkript.aEvents)]['s'];
 	setTimeout(function () { $('#aTokenInfo').modal('show'); }, 20);
 });
