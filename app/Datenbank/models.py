@@ -212,7 +212,7 @@ class Inf_zu_Erhebung(models.Model):
 	ID_Inf				= models.ForeignKey('Informanten'									, on_delete=models.CASCADE		, verbose_name="Zu Informant")
 	id_einzelerhebung	= models.ForeignKey('EinzelErhebung'								, on_delete=models.CASCADE		, verbose_name="zu EinzelErhebung")
 	def __str__(self):
-		return "{}<->{}".format(self.id_Erh,self.id_Aufgabe)
+		return "{}<->{}".format(self.ID_Inf,self.id_einzelerhebung)
 	class Meta:
 		db_table = "Inf_zu_Erhebung"
 		verbose_name = "Informant zu Erhebung"
