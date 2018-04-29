@@ -101,7 +101,7 @@ g.eTok.viewed > line.visit {
 g.eTok.lastview > line.visit {
 	stroke: #99f;
 }
-g.eTok:hover > line.visit {
+g.eTok:hover > line.visit, g.eTok.selected > line.visit {
 	stroke: #9f9;
 }
 

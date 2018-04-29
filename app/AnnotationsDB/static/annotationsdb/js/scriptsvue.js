@@ -385,6 +385,11 @@ $(document).on('click', 'g.tEvent > .zeit', function (e) {
 	setTimeout(function () { $('#tEventInfo').modal('show'); }, 20);
 });
 
+// Wenn Modal angezeigt wird
+$(document).on('shown.bs.modal', '#aTokenInfo', function (e) {
+	$('#aTokenText').focus();
+});
+
 var annotationsTool = new Vue({
 	el: '#annotationsTool',
 	delimiters: ['${', '}'],
@@ -410,6 +415,7 @@ var annotationsTool = new Vue({
 		aInfInfo: -1,
 		tEventInfo: -1,
 		aTokenInfo: {},
+		selToken: false,
 		message: null
 	},
 	mounted: function () {
@@ -423,9 +429,12 @@ var annotationsTool = new Vue({
 		getTranskript: function (aPK, aType = 'start', aNr = 0) {
 			console.log('Lade Datensatz ' + aNr + ' von pk: ' + aPK + ' ...');
 			if (aType === 'start') {
+				$(':focus').blur();
+				$('#annotationsvg').focus();
 				this.loading = true;
 				this.aInfInfo = -1;
 				this.tEventInfo = -1;
+				this.selToken = false;
 				this.aTokenInfo = {};
 				this.annotationsTool = {
 					aPK: aPK,
@@ -498,12 +507,6 @@ var annotationsTool = new Vue({
 });
 
 /* Sonstiges */
-function formGroup (aTitle, aContent, aId = false) {
-	return '<div class="form-group">' +
-						'<label' + ((aId) ? ' for="' + aId + '"' : '') + ' class="col-sm-3 control-label">' + aTitle + '</label>' +
-						'<div class="col-sm-9">' + aContent + '</div>' +
-					'</div>';
-}
 function searchbypk (nameKey, myArray) {
 	for (var i = 0; i < myArray.length; i++) {
 		if (myArray[i].pk === nameKey) {
