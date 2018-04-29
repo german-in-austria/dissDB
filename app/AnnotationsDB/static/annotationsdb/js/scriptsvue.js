@@ -1,32 +1,13 @@
 /* global _ $ d3 csrf Vue alert performance */
 
+/* Wenn gescrollt wird */
 document.addEventListener('scroll', function (event) {
 	if (event.target.id === 'svgscroller') {
 		annotationsTool.scrollRendering();
 	}
 }, true);
 
-$(document).on('click', 'g.eTok', function (e) {
-	var eTok = $(this).data('etok');
-	annotationsTool.aTokens[eTok]['viewed'] = true;
-	annotationsTool.d3TokenLastView = eTok;
-	annotationsTool.aTokenInfo = _.clone(annotationsTool.aTokens[eTok]);
-	annotationsTool.aTokenInfo['pk'] = eTok;
-	annotationsTool.aTokenInfo['e-txt'] = annotationsTool.aEvents[searchbypk(annotationsTool.aTokens[eTok]['e'], annotationsTool.aEvents)]['s'];
-	setTimeout(function () { $('#aTokenInfo').modal('show'); }, 20);
-});
-
-$(document).on('click', 'g.zInf', function (e) {
-	annotationsTool.aInfInfo = $(this).data('zinf');
-	setTimeout(function () { $('#aInformantenInfo').modal('show'); }, 20);
-});
-
-$(document).on('click', 'g.tEvent > .zeit', function (e) {
-	annotationsTool.tEventInfo = $(this).parent().data('tevent');
-	setTimeout(function () { $('#tEventInfo').modal('show'); }, 20);
-});
-
-// Wenn Modal angezeigt wird
+/* Wenn Modal angezeigt wird */
 $(document).on('shown.bs.modal', '#aTokenInfo', function (e) {
 	$('#aTokenText').focus();
 });
@@ -217,7 +198,6 @@ var annotationsTool = new Vue({
 			Object.keys(this.tEvents).map(function (key) {
 				if (this.tEvents[key]) {
 					if (this.tEvents[key]['s'] === this.aEvents[index]['s'] && this.tEvents[key]['e'] === this.aEvents[index]['e']) {
-						// console.log('update tEvent');
 						Object.keys(this.aEvents[index].tid).map(function (xKey, i) {
 							this.tEvents[key]['eId'][xKey] = index;
 							this.tEvents[key]['rerender'] = true;
@@ -374,17 +354,18 @@ var annotationsTool = new Vue({
 		},
 		/* scrollRendering */
 		scrollRendering: function () {
-			var sHeight = $('#svgscroller').height();
-			var sPos = $('.mcon.vscroller').scrollTop() - 10;
-			var sePos = sPos + sHeight + 20;
+			var sHeight = $('#svgscroller').height() + 75;
+			var sPos = $('.mcon.vscroller').scrollTop();
+			var sePos = sPos + sHeight;
 			var aTop = 0;
 			var aBottom = 0;
 			var cRenderZeilen = [];
 			this.zeilenTEvents.forEach(function (val, key) {
-				aBottom = aTop + sHeight;
+				aBottom = aTop + val['eH'];
 				if (sePos >= aTop && sPos <= aBottom) {
 					cRenderZeilen.push(key);
 				}
+				// this.renderZeilen = [];
 				this.renderZeilen = cRenderZeilen;
 				aTop += val['eH'];
 			}, this);
@@ -411,6 +392,26 @@ var annotationsTool = new Vue({
 				this.loading = false;
 			});
 		},
+		/* Events */
+		/* showTEventInfos */
+		showTEventInfos: function (tId) {
+			this.tEventInfo = tId;
+			setTimeout(function () { $('#tEventInfo').modal('show'); }, 20);
+		},
+		/* showaInfInfos */
+		showaInfInfos: function (iId) {
+			this.aInfInfo = iId;
+			setTimeout(function () { $('#aInformantenInfo').modal('show'); }, 20);
+		},
+		/* showaTokenInfos */
+		showaTokenInfos: function (eTok) {
+			annotationsTool.aTokens[eTok]['viewed'] = true;
+			this.d3TokenLastView = eTok;
+			this.aTokenInfo = _.clone(this.aTokens[eTok]);
+			this.aTokenInfo['pk'] = eTok;
+			this.aTokenInfo['e-txt'] = this.aEvents[this.searchbypk(this.aTokens[eTok]['e'], this.aEvents)]['s'];
+			setTimeout(function () { $('#aTokenInfo').modal('show'); }, 20);
+		},
 		/* Sonsitge Funktionen: */
 		objectKeyFilter: function (obj, key) {
 			var nObj = {};
@@ -420,6 +421,13 @@ var annotationsTool = new Vue({
 				}
 			}, this);
 			return nObj;
+		},
+		searchbypk: function (nameKey, myArray) {
+			for (var i = 0; i < myArray.length; i++) {
+				if (myArray[i].pk === nameKey) {
+					return i;
+				}
+			}
 		},
 		/* Zeit umrechnen */
 		durationToSeconds: function (hms) {
@@ -447,12 +455,3 @@ var annotationsTool = new Vue({
 
 	}
 });
-
-/* Sonstiges */
-function searchbypk (nameKey, myArray) {
-	for (var i = 0; i < myArray.length; i++) {
-		if (myArray[i].pk === nameKey) {
-			return i;
-		}
-	}
-}

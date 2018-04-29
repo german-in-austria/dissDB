@@ -33,10 +33,10 @@
 					</defs>
 					<g id="svg-g-transcript">
 						<g id="svg-g-events" transform="translate(5,5)">
-							<g class="eZeile" :data-ezeile="aZeile" :transform="'translate(0,'+zeilenTEvents[aZeile]['eT']+')'" v-for="aZeile in renderZeilen">
+							<g class="eZeile" :transform="'translate(0,'+zeilenTEvents[aZeile]['eT']+')'" v-for="aZeile in renderZeilen">
 								<rect x="0" y="0" :width="mWidth-10" :height="zeilenTEvents[aZeile]['eH']-18" />
 								<g class="zInfs">
-									<g :class="'zInf zInf'+aInfKey" :data-zinf="aInfKey" :transform="'translate(5, '+((eEventHeight - 25) + eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
+									<g :class="'zInf zInf'+aInfKey" v-on:click="showaInfInfos(aInfKey)" :transform="'translate(5, '+((eEventHeight - 25) + eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
 										<rect x="0" y="4.5" :width="zInfWidth" :height="eInfHeight - 9" />
 										<line x1="0" y1="4.5" :x2="zInfWidth" y2="4.5" />
 										<line x1="0" :y1="eInfHeight-4.5" :x2="zInfWidth" :y2="eInfHeight-4.5" />
@@ -45,11 +45,11 @@
 										<text class="zInfLI" :x="zInfWidth-5" y="49">o</text>
 									</g>
 								</g>
-								<g class="tEvent" :data-tevent="tEventId" :transform="'translate('+(zInfWidth + 5 + tEvents[tEventId]['svgLeft'])+','+(eEventHeight-20)+')'" v-for="tEventId in zeilenTEvents[aZeile]['eId']">
-									<g :class="'eInf eInf'+aInfKey" :data-einf="aInfKey" :transform="'translate(0,'+(eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
+								<g class="tEvent" :transform="'translate('+(zInfWidth + 5 + tEvents[tEventId]['svgLeft'])+','+(eEventHeight-20)+')'" v-for="tEventId in zeilenTEvents[aZeile]['eId']">
+									<g :class="'eInf eInf'+aInfKey" :transform="'translate(0,'+(eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
 										<rect x="0" y="0" :width="tEvents[tEventId]['svgWidth']+1" :height="eInfHeight-10" />
 										<template v-if="aEvents[tEvents[tEventId].eId[aInfKey]]">
-											<g :class="'eTok eTok' + aTokenId + ' eTokT' + aTokens[aTokenId]['tt'] + ((aTokens[aTokenId]['viewed'])?' viewed':'') + ((d3TokenLastView === aTokenId)?' lastview':'') + ((d3TokenSelected === aTokenId)?' selected':'')" :data-etok="aTokenId" :transform="'translate('+(aTokens[aTokenId]['svgLeft']-1)+',1)'" v-for="aTokenId in aEvents[tEvents[tEventId].eId[aInfKey]]['tid'][aInfKey]">
+											<g v-on:click="showaTokenInfos(aTokenId)" :class="'eTok eTok' + aTokenId + ' eTokT' + aTokens[aTokenId]['tt'] + ((aTokens[aTokenId]['viewed'])?' viewed':'') + ((d3TokenLastView === aTokenId)?' lastview':'') + ((d3TokenSelected === aTokenId)?' selected':'')" :transform="'translate('+(aTokens[aTokenId]['svgLeft']-1)+',1)'" v-for="aTokenId in aEvents[tEvents[tEventId].eId[aInfKey]]['tid'][aInfKey]">
 												<rect x="-0.5" y="0" :width="aTokens[aTokenId]['svgWidth']" :height="eInfHeight - 12" />
 												<text x="0" y="18">${ getTokenString(aTokenId, 't') }</text>
 												<text x="0" y="43">${ getTokenString(aTokenId, 'o', 't') }</text>
@@ -59,7 +59,7 @@
 											</g>
 										</template>
 									</g>
-									<g class="zeit">
+									<g class="zeit" v-on:click="showTEventInfos(tEventId)">
 										<rect x="0" y="-15" :width="tEvents[tEventId]['svgWidth']+1" height="11" />
 										<line x1="0" y1="-15" x2="0" y2="-4" />
 										<text x="4" y="-6">${ secondsToDuration(durationToSeconds(tEvents[tEventId]['s']), 3) }</text>
