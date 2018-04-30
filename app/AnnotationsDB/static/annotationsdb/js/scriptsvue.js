@@ -200,7 +200,8 @@ var annotationsTool = new Vue({
 		/* updateEvent */
 		updateEvent: function (index = 0, values) {
 			if (index === 0) {
-				index = this.aEvents.push(values) - 1;
+				index = this.aEvents.push({}) - 1;
+				this.aEvents[index] = values;
 				this.setRerenderEvent(index);
 			} else {
 				index = parseInt(index);
@@ -234,7 +235,8 @@ var annotationsTool = new Vue({
 				Object.keys(this.aEvents[index].tid).map(function (key, i) {
 					atEvent['eId'][key] = index;
 				}, this);
-				this.tEvents.push(atEvent);
+				var tEvIndex = this.tEvents.push({}) - 1;
+				this.tEvents[tEvIndex] = atEvent;
 			}
 		},
 		/* setRerenderEvent */
