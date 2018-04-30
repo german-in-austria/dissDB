@@ -60,6 +60,7 @@ var annotationsTool = new Vue({
 		selToken: false,
 		message: null,
 		mWidth: $('#annotationsvg').width(),
+		getCharWidthCach: {},
 		eEventHeight: 40,
 		eInfHeight: 63,
 		eInfTop: 25,
@@ -263,7 +264,6 @@ var annotationsTool = new Vue({
 		},
 		sizeTEvent: function (key, d3target) {
 			var mW = 0;
-			var aSTTS = this.svgTTS;
 			Object.keys(this.aInformanten).map(function (iKey, iI) {	// Informanten durchzählen
 				Object.keys(this.tEvents[key]['eId']).map(function (eKey, eI) {
 					if (eKey === iKey) {
@@ -274,10 +274,8 @@ var annotationsTool = new Vue({
 						var t1W = 0;
 						var t2W = 0;
 						aTokensIds.forEach(function (aTokenId) {
-							aSTTS.textContent = this.getTokenString(aTokenId, 't');
-							t1W = aSTTS.getBBox().width;
-							aSTTS.textContent = this.getTokenString(aTokenId, 'o', 't');
-							t2W = aSTTS.getBBox().width;
+							t1W = this.getTextWidth(this.getTokenString(aTokenId, 't'), false);
+							t2W = this.getTextWidth(this.getTokenString(aTokenId, 'o', 't'), false);
 							if (t1W > t2W) {
 								tW = t1W + 1.5;
 							} else {
@@ -384,7 +382,7 @@ var annotationsTool = new Vue({
 					cRenderZeilen.push(key);
 				}
 				aTop += val['eH'];
-				return aTop > sePos
+				return aTop > sePos;
 			}, this);
 			// this.renderZeilen = [];
 			this.renderZeilen = cRenderZeilen;
@@ -437,6 +435,40 @@ var annotationsTool = new Vue({
 			this.aTokenInfo['pk'] = eTok;
 			this.aTokenInfo['e-txt'] = this.aEvents[this.searchbypk(this.aTokens[eTok]['e'], this.aEvents)]['s'];
 			setTimeout(function () { $('#aTokenInfo').modal('show'); }, 20);
+		},
+		/* Funktion zur ermittlung der Breite von Buchstaben im SVG-Element */
+		getCharWidth: function (zeichen) {
+			if (this.getCharWidthCach[zeichen]) {
+				return this.getCharWidthCach[zeichen];
+			} else {
+				if (this.svgTTS) {
+					this.svgTTS.textContent = zeichen;
+					this.getCharWidthCach[zeichen] = this.svgTTS.getBBox().width;
+					if (this.getCharWidthCach[zeichen] === 0) {
+						this.svgTTS.textContent = 'X' + zeichen + 'X';
+						this.getCharWidthCach[zeichen] = this.svgTTS.getBBox().width - this.getCharWidth('X') * 2;
+					}
+					return this.getCharWidthCach[zeichen];
+				}
+			}
+		},
+		/* Funktion zur ermittlung der Breite von Texten im SVG-Element */
+		getTextWidth: function (text, cached = true) {
+			if (cached) {
+				var w = 0;
+				var i = text.length;
+				while (i--) {
+					w += this.getCharWidth(text.charAt(i));
+				}
+				if (w) {
+					return w;
+				}
+			} else {
+				if (this.svgTTS) {
+					this.svgTTS.textContent = text;
+					return this.svgTTS.getBBox().width;
+				}
+			}
 		},
 		/* Sonsitge Funktionen: */
 		objectKeyFilter: function (obj, key) {
