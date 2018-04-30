@@ -77,15 +77,19 @@ def startvue(request, ipk=0, tpk=0):
 	if 'getTranskript' in request.POST:
 		tpk = int(request.POST.get('getTranskript'))
 	if tpk > 0:
+		maxQuerys = 250
 		dataout = {}
 		if 'aType' in request.POST and request.POST.get('aType') == 'start':
 			aTranskriptData = adbmodels.transcript.objects.get(pk=tpk)
 			aTranskript = {'pk': aTranskriptData.pk, 'ut': aTranskriptData.update_time.strftime("%d.%m.%Y- %H:%M"), 'n': aTranskriptData.name}
-			aEinzelErhebungData = dbmodels.EinzelErhebung.objects.get(id_transcript_id=tpk)
-			aEinzelErhebung = {
-				'pk': aEinzelErhebungData.pk, 'trId': aEinzelErhebungData.id_transcript_id, 'd': aEinzelErhebungData.Datum.strftime("%d.%m.%Y- %H:%M"), 'e': aEinzelErhebungData.Explorator, 'k': aEinzelErhebungData.Kommentar,
-				'dp': aEinzelErhebungData.Dateipfad, 'af': aEinzelErhebungData.Audiofile,
-				'lf': aEinzelErhebungData.Logfile, 'o': aEinzelErhebungData.Ort, 'b': aEinzelErhebungData.Besonderheiten}
+			aEinzelErhebung = {}
+			aEinzelErhebungData = dbmodels.EinzelErhebung.objects.filter(id_transcript_id=tpk)
+			if aEinzelErhebungData:
+				aEinzelErhebungData = aEinzelErhebungData[0]
+				aEinzelErhebung = {
+					'pk': aEinzelErhebungData.pk, 'trId': aEinzelErhebungData.id_transcript_id, 'd': aEinzelErhebungData.Datum.strftime("%d.%m.%Y- %H:%M"), 'e': aEinzelErhebungData.Explorator, 'k': aEinzelErhebungData.Kommentar,
+					'dp': aEinzelErhebungData.Dateipfad, 'af': aEinzelErhebungData.Audiofile,
+					'lf': aEinzelErhebungData.Logfile, 'o': aEinzelErhebungData.Ort, 'b': aEinzelErhebungData.Besonderheiten}
 			aTokenTypes = {}
 			for aTokenType in adbmodels.token_type.objects.filter(token__transcript_id_id=tpk):
 				aTokenTypes[aTokenType.pk] = {'n': aTokenType.token_type_name}
@@ -96,14 +100,14 @@ def startvue(request, ipk=0, tpk=0):
 			aSaetze = {}
 			for aSatz in dbmodels.Saetze.objects.filter(token__transcript_id_id=tpk):
 				aSaetze[aSatz.pk] = {'t': aSatz.Transkript, 's': aSatz.Standardorth, 'k': aSatz.Kommentar}
-			dataout.update({'aTranskript': aTranskript, 'aEinzelErhebung': aEinzelErhebung, 'aTokenTypes': aTokenTypes, 'aInformanten': aInformanten, 'aSaetze': aSaetze})
+			aTmNr = int(adbmodels.event.objects.prefetch_related('rn_token_event_id').filter(rn_token_event_id__transcript_id_id=tpk).distinct().order_by('start_time').count() / maxQuerys)
+			dataout.update({'aTranskript': aTranskript, 'aEinzelErhebung': aEinzelErhebung, 'aTokenTypes': aTokenTypes, 'aInformanten': aInformanten, 'aSaetze': aSaetze, 'aTmNr': aTmNr})
 		aNr = 0
 		aEvents = []
 		aTokens = {}
 		if 'aNr' in request.POST:
 			aNr = int(request.POST.get('aNr'))
 		nNr = aNr
-		maxQuerys = 250
 		startQuery = aNr * maxQuerys
 		endQuery = startQuery + maxQuerys
 		for aEvent in adbmodels.event.objects.prefetch_related('rn_token_event_id').filter(rn_token_event_id__transcript_id_id=tpk).distinct().order_by('start_time')[startQuery:endQuery]:

@@ -7,9 +7,11 @@ Vue.component('annotationsaudioplayer', {
 	data: function () {
 		return {
 			audio: undefined,
+			audioInterval: undefined,
 			loaded: false,
 			duration: 0,
 			aPos: 0,
+			lPos: -1,
 			aPosRel: 0,
 			paused: true,
 			playing: false
@@ -35,30 +37,43 @@ Vue.component('annotationsaudioplayer', {
 	},
 	methods: {
 		play: function () {
-			if (this.playing && !this.paused) return;
+			if ((this.playing && !this.paused) || !this.loaded) return;
 			this.paused = false;
-			this.audio.play();
 			this.playing = true;
+			this.audio.play();
 		},
 		pause: function () {
-			this.paused = !this.paused;
-			(this.paused) ? this.audio.pause() : this.audio.play();
+			if ((!this.playing && this.paused) || !this.loaded) return;
+			this.paused = true;
+			this.playing = false;
+			this.audio.pause();
 		},
 		audioPlayPause: function (e) {
-			if (e.type === 'pause' && this.playing === false) {
+			if (e.type === 'pause') {
 				this.paused = true;
+				this.playing = false;
 			}
 		},
 		audioPlayingUI: function (e) {
-			this.aPos = parseInt(this.audio.currentTime);
-			this.aPosRel = (this.aPos / this.duration);
+			if (this.loaded) {
+				this.aPos = this.audio.currentTime;
+				if (this.aPos !== this.lPos) {
+					this.lPos = this.aPos;
+					this.$emit('audiopos', this.aPos);
+					this.aPosRel = (this.aPos / this.duration);
+				}
+			}
 		},
 		audioLoaded: function () {
 			if (this.audio.readyState >= 2) {
 				this.loaded = true;
-				this.duration = parseInt(this.audio.duration);
+				this.duration = this.audio.duration;
+				this.$emit('audioduration', this.duration);
 			} else {
-				throw new Error('Failed to load sound file');
+				this.playing = false;
+				this.paused = true;
+				this.loaded = false;
+				throw new Error('Audiodatei konnte nicht geladen werden!');
 			}
 		},
 		/* Zeit umrechnen */
@@ -87,13 +102,16 @@ Vue.component('annotationsaudioplayer', {
 	},
 	mounted: function () {
 		this.audio = this.$el.querySelectorAll('audio')[0];
-		this.audio.addEventListener('timeupdate', this.audioPlayingUI);
 		this.audio.addEventListener('loadeddata', this.audioLoaded);
 		this.audio.addEventListener('pause', this.audioPlayPause);
 		this.audio.addEventListener('play', this.audioPlayPause);
+		// this.audio.addEventListener('timeupdate', this.audioPlayingUI);
+		this.audioInterval = setInterval(this.audioPlayingUI, 100);
 	},
 	beforeDestroy: function () {
-		this.audio.removeEventListener('timeupdate', this.audioPlayingUI);
+		this.$emit('audiopos', 0);
+		clearInterval(this.audioInterval);
+		// this.audio.removeEventListener('timeupdate', this.audioPlayingUI);
 		this.audio.removeEventListener('loadeddata', this.audioLoaded);
 		this.audio.removeEventListener('pause', this.audioPlayPause);
 		this.audio.removeEventListener('play', this.audioPlayPause);

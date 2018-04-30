@@ -48,13 +48,20 @@
 
 #loadsym {
   position: absolute;
+	text-align: center;
 	display:none;
   right: 25px;
   top: 5px;
   color: #00f;
   font-size: 24px;
 }
-
+#loadsym>div {
+	background: #f9fdc6ad;
+	font-size: 16px;
+	min-width: 50px;
+	border-radius: 3px;
+	padding: 2px 5px;
+}
 .bgloading #loadsym {
 	display: block;
 }
@@ -139,6 +146,12 @@ g.tEvent > .zeit > text {
 }
 g.tEvent > .zeit > rect {
   fill: #eee;
+}
+g.tEvent > .zeit > rect.past {
+  fill: #eef;
+}
+g.tEvent > .zeit > rect.akt {
+  fill: #efe;
 }
 g.tEvent > .zeit > line {
   stroke-width: 1px;

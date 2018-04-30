@@ -34,6 +34,7 @@ var annotationsTool = new Vue({
 			nNr: 0,
 			loaded: true
 		},
+		aTmNr: 1,
 		aTranskript: {},
 		aEinzelErhebung: {},
 		aTokenTypes: {},
@@ -48,8 +49,11 @@ var annotationsTool = new Vue({
 		zeilenHeight: 0,
 		renderZeilen: [],
 		d3eventsize: d3.select('#svg-g-eventsize'),
+		svgTTS: document.getElementById('svg-text-textsize'),
 		d3TokenLastView: -1,
 		d3TokenSelected: -1,
+		audioPos: 0,
+		audioDuration: 0,
 		aInfInfo: -1,
 		tEventInfo: -1,
 		aTokenInfo: {},
@@ -92,8 +96,11 @@ var annotationsTool = new Vue({
 			this.zeilenHeight = 0;
 			this.renderZeilen = [];
 			this.d3eventsize = d3.select('#svg-g-eventsize');
+			this.svgTTS = document.getElementById('svg-text-textsize');
 			this.d3TokenLastView = -1;
 			this.d3TokenSelected = -1;
+			this.audioPos = 0;
+			this.audioDuration = 0;
 			return true;
 		},
 		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
@@ -118,6 +125,7 @@ var annotationsTool = new Vue({
 			.then((response) => {
 				if (aPK === this.annotationsTool.aPK) {
 					if (aType === 'start') {
+						this.aTmNr = response.data['aTmNr'];
 						this.aTranskript = response.data['aTranskript'];
 						this.aEinzelErhebung = response.data['aEinzelErhebung'];
 						this.aTokenTypes = response.data['aTokenTypes'];
@@ -255,7 +263,7 @@ var annotationsTool = new Vue({
 		},
 		sizeTEvent: function (key, d3target) {
 			var mW = 0;
-			var aSTTS = document.getElementById('svg-text-textsize');
+			var aSTTS = this.svgTTS;
 			Object.keys(this.aInformanten).map(function (iKey, iI) {	// Informanten durchzählen
 				Object.keys(this.tEvents[key]['eId']).map(function (eKey, eI) {
 					if (eKey === iKey) {
@@ -370,15 +378,16 @@ var annotationsTool = new Vue({
 			var aTop = 0;
 			var aBottom = 0;
 			var cRenderZeilen = [];
-			this.zeilenTEvents.forEach(function (val, key) {
+			this.zeilenTEvents.some(function (val, key) {
 				aBottom = aTop + val['eH'];
 				if (sePos >= aTop && sPos <= aBottom) {
 					cRenderZeilen.push(key);
 				}
-				// this.renderZeilen = [];
-				this.renderZeilen = cRenderZeilen;
 				aTop += val['eH'];
+				return aTop > sePos
 			}, this);
+			// this.renderZeilen = [];
+			this.renderZeilen = cRenderZeilen;
 		},
 		/* getMenue: Läd aktuelle Daten für das Menü */
 		getMenue: function () {
@@ -403,6 +412,13 @@ var annotationsTool = new Vue({
 			});
 		},
 		/* Events */
+		/* setAudioPos */
+		setAudioPos: function (aPos) {
+			this.audioPos = aPos;
+		},
+		setAudioDuration: function (aPos) {
+			this.audioDuration = aPos;
+		},
 		/* showTEventInfos */
 		showTEventInfos: function (tId) {
 			this.tEventInfo = tId;

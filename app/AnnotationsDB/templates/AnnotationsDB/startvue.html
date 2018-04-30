@@ -60,7 +60,8 @@
 										</template>
 									</g>
 									<g class="zeit" v-on:click="showTEventInfos(tEventId)">
-										<rect x="0" y="-15" :width="tEvents[tEventId]['svgWidth']+1" height="11" />
+										<rect x="0" y="-15" :width="tEvents[tEventId]['svgWidth']+1" height="11" v-bind:class="{ past: audioPos >= tEvents[tEventId].ae }"/>
+										<rect x="0" y="-15" :width="(tEvents[tEventId]['svgWidth']+1)/tEvents[tEventId].al*(audioPos-tEvents[tEventId].as)" height="11" class="akt" v-if="audioPos > tEvents[tEventId].as && audioPos < tEvents[tEventId].ae" />
 										<line x1="0" y1="-15" x2="0" y2="-4" />
 										<text x="4" y="-6">${ secondsToDuration(durationToSeconds(tEvents[tEventId]['s']), 3) }</text>
 									</g>
@@ -76,9 +77,9 @@
 				</svg>
 			</div>
 			<div class="audioplayer-at">
-				<annotationsaudioplayer :audiofile="aEinzelErhebung.dp+aEinzelErhebung.af+'.mp3'" v-if="aEinzelErhebung.af" />
+				<annotationsaudioplayer :audiofile="aEinzelErhebung.dp+aEinzelErhebung.af+'.mp3'"  @audiopos="setAudioPos($event)" @audioduration="setAudioDuration($event)" v-if="aEinzelErhebung.af" />
 			</div>
-			<div id="loadsym"><span class="glyphicon glyphicon-refresh gly-spin" aria-hidden="true"></span></div>
+			<div id="loadsym"><span class="glyphicon glyphicon-refresh gly-spin" aria-hidden="true"></span><div>${ parseInt(99/aTmNr*annotationsTool.nNr) } %</div></div>
 		</div>
 	</div>
 	<div id="loading">Lade ...</div>
@@ -176,13 +177,13 @@
 
 <!-- Audioplayer Vorlage -->
 <script type="text/x-template" id="annotationsaudioplayer-template">
-	<div class="annotationsaudioplayer">
+	<div v-bind:class="{ annotationsaudioplayer: true, loading: !loaded, paused: paused, playing: playing }">
 		<audio><source :src="audiodirC+audiofileC" type="audio/mpeg"></audio>
 		<p>
 			Geladen: ${ loaded }<br>
 			Dauer: ${ duration } sec. - ${ secondsToDuration(duration) }<br>
-			Position: ${ aPos } sec. - ${ secondsToDuration(aPos) } - ${ aPosRel.toFixed(2) } %<br>
-			Pause: ${ paused } | Play: ${ playing }<br>
+			Position: ${ aPos.toFixed(3) } sec. - ${ secondsToDuration(aPos,3) } - ${ aPosRel.toFixed(2) } %<br>
+			Paused: ${ paused } | Playing: ${ playing }<br>
 			<button @click="((paused)?play():pause())"><span :class="'glyphicon glyphicon-'+((paused)?'play':'pause')" aria-hidden="true"></span></button>
 		</p>
 	</div>
