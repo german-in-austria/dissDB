@@ -48,6 +48,7 @@ var annotationsTool = new Vue({
 		zeilenTEvents: [],
 		zeilenHeight: 0,
 		renderZeilen: [],
+		renderZeilenOld: [],
 		svgTTS: document.getElementById('svg-text-textsize'),
 		d3TokenLastView: -1,
 		d3TokenSelected: -1,
@@ -384,7 +385,10 @@ var annotationsTool = new Vue({
 				return aTop > sePos;
 			}, this);
 			// this.renderZeilen = [];
-			this.renderZeilen = cRenderZeilen;
+			if (this.renderZeilenOld !== cRenderZeilen) {
+				this.renderZeilen = cRenderZeilen;
+				this.renderZeilenOld = this.renderZeilen;
+			}
 			// var t1 = performance.now();
 			// console.log('scrollRendering: ' + Math.ceil(t1 - t0) + ' ms');
 		},
