@@ -79,6 +79,13 @@ def startvue(request, ipk=0, tpk=0):
 	if tpk > 0:
 		dataout = {}
 		if 'aType' in request.POST and request.POST.get('aType') == 'start':
+			aTranskriptData = adbmodels.transcript.objects.get(pk=tpk)
+			aTranskript = {'pk': aTranskriptData.pk, 'ut': aTranskriptData.update_time.strftime("%d.%m.%Y- %H:%M"), 'n': aTranskriptData.name}
+			aEinzelErhebungData = dbmodels.EinzelErhebung.objects.get(id_transcript_id=tpk)
+			aEinzelErhebung = {
+				'pk': aEinzelErhebungData.pk, 'trId': aEinzelErhebungData.id_transcript_id, 'd': aEinzelErhebungData.Datum.strftime("%d.%m.%Y- %H:%M"), 'e': aEinzelErhebungData.Explorator, 'k': aEinzelErhebungData.Kommentar,
+				'dp': aEinzelErhebungData.Dateipfad, 'af': aEinzelErhebungData.Audiofile,
+				'lf': aEinzelErhebungData.Logfile, 'o': aEinzelErhebungData.Ort, 'b': aEinzelErhebungData.Besonderheiten}
 			aTokenTypes = {}
 			for aTokenType in adbmodels.token_type.objects.filter(token__transcript_id_id=tpk):
 				aTokenTypes[aTokenType.pk] = {'n': aTokenType.token_type_name}
@@ -89,7 +96,7 @@ def startvue(request, ipk=0, tpk=0):
 			aSaetze = {}
 			for aSatz in dbmodels.Saetze.objects.filter(token__transcript_id_id=tpk):
 				aSaetze[aSatz.pk] = {'t': aSatz.Transkript, 's': aSatz.Standardorth, 'k': aSatz.Kommentar}
-			dataout.update({'aTokenTypes': aTokenTypes, 'aInformanten': aInformanten, 'aSaetze': aSaetze})
+			dataout.update({'aTranskript': aTranskript, 'aEinzelErhebung': aEinzelErhebung, 'aTokenTypes': aTokenTypes, 'aInformanten': aInformanten, 'aSaetze': aSaetze})
 		aNr = 0
 		aEvents = []
 		aTokens = {}

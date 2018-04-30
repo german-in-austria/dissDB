@@ -34,6 +34,8 @@ var annotationsTool = new Vue({
 			nNr: 0,
 			loaded: true
 		},
+		aTranskript: {},
+		aEinzelErhebung: {},
 		aTokenTypes: {},
 		aInformanten: {},
 		aInfLen: 0,
@@ -76,6 +78,8 @@ var annotationsTool = new Vue({
 				nNr: 0,
 				loaded: true
 			};
+			this.aTranskript = {};
+			this.aEinzelErhebung = {};
 			this.aTokenTypes = {};
 			this.aInformanten = {};
 			this.aInfLen = 0;
@@ -114,6 +118,8 @@ var annotationsTool = new Vue({
 			.then((response) => {
 				if (aPK === this.annotationsTool.aPK) {
 					if (aType === 'start') {
+						this.aTranskript = response.data['aTranskript'];
+						this.aEinzelErhebung = response.data['aEinzelErhebung'];
 						this.aTokenTypes = response.data['aTokenTypes'];
 						this.setInformanten(response.data['aInformanten']);
 						this.aSaetze = response.data['aSaetze'];
@@ -210,9 +216,13 @@ var annotationsTool = new Vue({
 				var atEvent = {
 					s: this.aEvents[index]['s'],
 					e: this.aEvents[index]['e'],
+					as: this.durationToSeconds(this.aEvents[index]['s']),
+					ae: this.durationToSeconds(this.aEvents[index]['e']),
+					al: 0,
 					rerender: true,
 					eId: {}
 				};
+				atEvent['al'] = atEvent['ae'] - atEvent['as'];
 				Object.keys(this.aEvents[index].tid).map(function (key, i) {
 					atEvent['eId'][key] = index;
 				}, this);
