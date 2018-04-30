@@ -69,13 +69,9 @@
 							</g>
 						</g>
 					</g>
-					<g id="svg-g-textsize">
-						<text id="svg-text-textsize" x="-100" y="-100"></text>
-					</g>
-					<g id="svg-g-eventsize" transform="translate(-500,-500)">
-					</g>
 				</svg>
 			</div>
+			<svg style="position:absolute;right:0px;bottom:0px;width:1px;height:1px;"><text id="svg-text-textsize" x="-100" y="-100"></text></svg>
 			<div class="audioplayer-at">
 				<annotationsaudioplayer :audiofile="aEinzelErhebung.dp+aEinzelErhebung.af+'.mp3'"  @audiopos="setAudioPos($event)" @audioduration="setAudioDuration($event)" v-if="aEinzelErhebung.af" />
 			</div>

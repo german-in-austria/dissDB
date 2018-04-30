@@ -1,4 +1,4 @@
-/* global _ $ d3 csrf Vue alert performance */
+/* global _ $ csrf Vue alert performance */
 
 /* Wenn gescrollt wird */
 document.addEventListener('scroll', function (event) {
@@ -48,7 +48,6 @@ var annotationsTool = new Vue({
 		zeilenTEvents: [],
 		zeilenHeight: 0,
 		renderZeilen: [],
-		d3eventsize: d3.select('#svg-g-eventsize'),
 		svgTTS: document.getElementById('svg-text-textsize'),
 		d3TokenLastView: -1,
 		d3TokenSelected: -1,
@@ -96,7 +95,6 @@ var annotationsTool = new Vue({
 			this.zeilenTEvents = [];
 			this.zeilenHeight = 0;
 			this.renderZeilen = [];
-			this.d3eventsize = d3.select('#svg-g-eventsize');
 			this.svgTTS = document.getElementById('svg-text-textsize');
 			this.d3TokenLastView = -1;
 			this.d3TokenSelected = -1;
@@ -258,11 +256,11 @@ var annotationsTool = new Vue({
 		}, 50),
 		preRenderTEvent: function (key) {
 			if (this.tEvents[key]['rerender']) {
-				this.tEvents[key]['svgWidth'] = this.sizeTEvent(key, this.d3eventsize);
+				this.tEvents[key]['svgWidth'] = this.sizeTEvent(key);
 				this.tEvents[key]['rerender'] = false;
 			}
 		},
-		sizeTEvent: function (key, d3target) {
+		sizeTEvent: function (key) {
 			var mW = 0;
 			Object.keys(this.aInformanten).map(function (iKey, iI) {	// Informanten durchzählen
 				Object.keys(this.tEvents[key]['eId']).map(function (eKey, eI) {
@@ -370,6 +368,7 @@ var annotationsTool = new Vue({
 		},
 		/* scrollRendering */
 		scrollRendering: function () {
+			// var t0 = performance.now();
 			var sHeight = $('#svgscroller').height() + 75;
 			var sPos = $('.mcon.vscroller').scrollTop();
 			var sePos = sPos + sHeight;
@@ -386,6 +385,8 @@ var annotationsTool = new Vue({
 			}, this);
 			// this.renderZeilen = [];
 			this.renderZeilen = cRenderZeilen;
+			// var t1 = performance.now();
+			// console.log('scrollRendering: ' + Math.ceil(t1 - t0) + ' ms');
 		},
 		/* getMenue: Läd aktuelle Daten für das Menü */
 		getMenue: function () {
