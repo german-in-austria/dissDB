@@ -73,7 +73,7 @@
 			</div>
 			<svg style="position:absolute;right:0px;bottom:0px;width:1px;height:1px;"><text id="svg-text-textsize" x="-100" y="-100"></text></svg>
 			<div class="audioplayer-at">
-				<annotationsaudioplayer :audiofile="aEinzelErhebung.dp+aEinzelErhebung.af+'.mp3'"  @audiopos="setAudioPos($event)" @audioduration="setAudioDuration($event)" v-if="aEinzelErhebung.af" />
+				<annotationsaudioplayer :audiofile="aEinzelErhebung.dp+aEinzelErhebung.af"  @audiopos="setAudioPos($event)" @audioduration="setAudioDuration($event)" v-if="aEinzelErhebung.af" />
 			</div>
 			<div id="loadsym"><span class="glyphicon glyphicon-refresh gly-spin" aria-hidden="true"></span><div>${ parseInt(99/aTmNr*annotationsTool.nNr) } %</div></div>
 		</div>
@@ -174,14 +174,29 @@
 <!-- Audioplayer Vorlage -->
 <script type="text/x-template" id="annotationsaudioplayer-template">
 	<div v-bind:class="{ annotationsaudioplayer: true, loading: !loaded, paused: paused, playing: playing }">
-		<audio><source :src="audiodirC+audiofileC" type="audio/mpeg"></audio>
-		<p>
-			Geladen: ${ loaded }<br>
-			Dauer: ${ duration } sec. - ${ secondsToDuration(duration) }<br>
-			Position: ${ aPos.toFixed(3) } sec. - ${ secondsToDuration(aPos,3) } - ${ aPosRel.toFixed(2) } %<br>
-			Paused: ${ paused } | Playing: ${ playing }<br>
-			<button @click="((paused)?play():pause())"><span :class="'glyphicon glyphicon-'+((paused)?'play':'pause')" aria-hidden="true"></span></button>
-		</p>
+		<div class="mib20 mit20"></div>
+		<div class="row">
+			<div class="col-xs-12 mib10 text-center">
+				<div class="audiobtn">
+					<button @click="fastBackward"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span></button>
+					<!-- <button><span class="glyphicon glyphicon-step-backward" aria-hidden="true"></span></button> -->
+					<button @click="backward"><span class="glyphicon glyphicon-backward" aria-hidden="true"></span></button>
+					<button @click="((paused)?play():pause())"><span :class="'glyphicon glyphicon-'+((paused)?'play':'pause')" aria-hidden="true"></span></button>
+					<button @click="forward"><span class="glyphicon glyphicon-forward" aria-hidden="true"></span></button>
+					<!-- <button><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> -->
+					<button @click="fastForward"><span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
+				</div>
+			</div>
+			<div class="col-xs-12">
+				<div id="gesamtprogress" class="progress audioprogress" v-on:click="setAudioPos">
+					<div v-bind:class="{ 'progress-bar': true, 'progress-bar-striped': true, active: playing }" role="progressbar" :style="'width: '+aPosProz.toFixed(2)+'%;'"></div>
+					<span class="pb-timer pb-starttime">${ secondsToDuration(0) }</span>
+					<span class="pb-timer pb-akttime">${ secondsToDuration(aPos) }</span>
+					<span class="pb-timer pb-endtime">${ secondsToDuration(duration) }</span>
+				</div>
+			</div>
+		</div>
+		<audio><source :src="audiodirC+audiofileC+'.mp3'" type="audio/mpeg"></audio>
 	</div>
 </script>
 

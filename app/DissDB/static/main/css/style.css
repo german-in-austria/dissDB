@@ -45,6 +45,9 @@ h1,.h1,h2,.h2,h3,.h3 {
 .mit10 {
 	margin-top:10px;
 }
+.mit20 {
+	margin-top:20px;
+}
 .mib5 {
 	margin-bottom:5px;
 }
@@ -536,6 +539,9 @@ button.ant-tag.addhover {
 .progress {
   margin-bottom: 9px;
   position:relative;
+}
+.progress > * {
+	pointer-events: none;
 }
 #ap-control {
   padding: 10px 15px;

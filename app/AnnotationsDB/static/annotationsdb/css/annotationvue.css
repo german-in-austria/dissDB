@@ -164,4 +164,5 @@ g.tEvent > .zeit > line {
   height: 150px;
   bottom: 0;
   left: 0;
+	padding: 10px 15px;
 }

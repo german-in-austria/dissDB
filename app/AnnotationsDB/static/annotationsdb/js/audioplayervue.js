@@ -13,6 +13,7 @@ Vue.component('annotationsaudioplayer', {
 			aPos: 0,
 			lPos: -1,
 			aPosRel: 0,
+			aPosProz: 0,
 			paused: true,
 			playing: false
 		};
@@ -36,6 +37,7 @@ Vue.component('annotationsaudioplayer', {
 		}
 	},
 	methods: {
+		/* Steuerung */
 		play: function () {
 			if ((this.playing && !this.paused) || !this.loaded) return;
 			this.paused = false;
@@ -48,6 +50,51 @@ Vue.component('annotationsaudioplayer', {
 			this.playing = false;
 			this.audio.pause();
 		},
+		setAudioPos: function (e) {
+			var pos = e.target.getBoundingClientRect();
+			var seekPos = (e.clientX - pos.left) / pos.width;
+			this.audio.currentTime = this.duration * seekPos;
+		},
+		fastForward: function () {
+			if (!this.loaded) return;
+			this.audio.currentTime = this.duration;
+		},
+		fastBackward: function () {
+			if (!this.loaded) return;
+			this.audio.currentTime = 0;
+		},
+		forward: function () {
+			if (!this.loaded) return;
+			this.audio.currentTime = this.audio.currentTime + 10;
+		},
+		backward: function () {
+			if (!this.loaded) return;
+			this.audio.currentTime = this.audio.currentTime - 10;
+		},
+		/* Tastatur */
+		keyUp: function (e) {
+			// console.log(e.keyCode);
+			if (e.ctrlKey && e.keyCode === 32) { // ctrl+space
+				if (this.paused) {
+					this.play();
+				} else {
+					this.pause();
+				}
+			} else if (e.ctrlKey && e.keyCode === 89) { // ctrl+y
+				this.fastBackward();
+			} else if (e.ctrlKey && e.keyCode === 88) { // ctrl+x'
+				this.fastForward();
+			} else if (e.ctrlKey && e.keyCode === 50) { // ctrl+2
+				this.backward();
+			} else if (e.ctrlKey && e.keyCode === 51) { // ctrl+3
+				this.forward();
+			} else if (e.ctrlKey && e.keyCode === 49) { // ctrl+1
+				// this.stepBackward();
+			} else if (e.ctrlKey && e.keyCode === 52) { // ctrl+4
+				// this.stepForward();
+			}
+		},
+		/* Funktionen */
 		audioPlayPause: function (e) {
 			if (e.type === 'pause') {
 				this.paused = true;
@@ -61,6 +108,7 @@ Vue.component('annotationsaudioplayer', {
 					this.lPos = this.aPos;
 					this.$emit('audiopos', this.aPos);
 					this.aPosRel = (this.aPos / this.duration);
+					this.aPosProz = this.aPosRel * 100;
 				}
 			}
 		},
@@ -107,6 +155,7 @@ Vue.component('annotationsaudioplayer', {
 		this.audio.addEventListener('play', this.audioPlayPause);
 		// this.audio.addEventListener('timeupdate', this.audioPlayingUI);
 		this.audioInterval = setInterval(this.audioPlayingUI, 100);
+		window.addEventListener('keyup', this.keyUp);
 	},
 	beforeDestroy: function () {
 		this.$emit('audiopos', 0);
@@ -115,5 +164,6 @@ Vue.component('annotationsaudioplayer', {
 		this.audio.removeEventListener('loadeddata', this.audioLoaded);
 		this.audio.removeEventListener('pause', this.audioPlayPause);
 		this.audio.removeEventListener('play', this.audioPlayPause);
+		window.removeEventListener('keyup', this.keyUp);
 	}
 });
