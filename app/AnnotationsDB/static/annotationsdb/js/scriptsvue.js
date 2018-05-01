@@ -1,17 +1,5 @@
 /* global _ $ csrf Vue alert performance */
 
-/* Wenn gescrollt wird */
-document.addEventListener('scroll', function (event) {
-	if (event.target.id === 'svgscroller') {
-		annotationsTool.scrollRendering();
-	}
-}, true);
-
-/* Wenn Modal angezeigt wird */
-$(document).on('shown.bs.modal', '#aTokenInfo', function (e) {
-	$('#aTokenText').focus();
-});
-
 var annotationsTool = new Vue({
 	el: '#annotationsTool',
 	delimiters: ['${', '}'],
@@ -65,9 +53,6 @@ var annotationsTool = new Vue({
 		eInfHeight: 63,
 		eInfTop: 25,
 		zInfWidth: 100
-	},
-	mounted: function () {
-		this.getMenue();
 	},
 	computed: {
 	},
@@ -517,6 +502,16 @@ var annotationsTool = new Vue({
 			var s = sec % 60;
 			return v + ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s.toFixed(fix)).slice(-(3 + fix));
 		}
-
+	},
+	mounted: function () {
+		document.getElementById('svgscroller').addEventListener('scroll', this.scrollRendering);
+		this.getMenue();
+		/* Wenn Modal angezeigt wird */
+		$(document).on('shown.bs.modal', '#aTokenInfo', function (e) {
+			$('#aTokenText').focus();
+		});
+	},
+	beforeDestroy: function () {
+		document.getElementById('svgscroller').removeEventListener('scroll', this.scrollRendering);
 	}
 });
