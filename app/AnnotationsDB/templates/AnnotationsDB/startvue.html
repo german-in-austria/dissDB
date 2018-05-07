@@ -34,10 +34,10 @@
 					</defs>
 					<g id="svg-g-transcript">
 						<g id="svg-g-events" transform="translate(5,5)">
-							<g class="eZeile" :transform="'translate(0,'+zeilenTEvents[aZeile]['eT']+')'" v-for="aZeile in renderZeilen">
+							<g :class="{eZeile: true, selected: aZeile==d3ZeileSelected}" :transform="'translate(0,'+zeilenTEvents[aZeile]['eT']+')'" v-for="aZeile in renderZeilen">
 								<rect x="0" y="0" :width="mWidth-10" :height="zeilenTEvents[aZeile]['eH']-18" />
 								<g class="zInfs">
-									<g :class="'zInf zInf'+aInfKey" v-on:click="showaInfInfos(aInfKey)" :transform="'translate(5, '+((eEventHeight - 25) + eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
+									<g :class="'zInf zInf'+aInfKey+((aInfKey==d3InfSelected)?' selected':'')" v-on:click="showaInfInfos(aInfKey)" :transform="'translate(5, '+((eEventHeight - 25) + eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
 										<rect x="0" y="4.5" :width="zInfWidth" :height="eInfHeight - 9" />
 										<line x1="0" y1="4.5" :x2="zInfWidth" y2="4.5" />
 										<line x1="0" :y1="eInfHeight-4.5" :x2="zInfWidth" :y2="eInfHeight-4.5" />

@@ -116,14 +116,20 @@ g.eZeile > rect {
   fill: none;
   outline: 1px solid #ccc;
 }
+g.eZeile.selected > rect {
+  outline: 2px solid #999;
+}
 g.zInf {
 	cursor: pointer;
 }
 g.zInf > rect {
 	fill: #fff;
 }
+g.eZeile.selected g.zInf.selected > rect {
+  fill: #fcfcff;
+}
 g.zInf:hover > rect {
-	fill: #eef;
+	fill: #eef !important;
 }
 g.zInf>line {
   stroke-width: 1px;
