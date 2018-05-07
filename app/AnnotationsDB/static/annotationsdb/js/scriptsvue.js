@@ -116,6 +116,8 @@ var annotationsTool = new Vue({
 						this.aTokenTypes = response.data['aTokenTypes'];
 						this.setInformanten(response.data['aInformanten']);
 						this.aSaetze = response.data['aSaetze'];
+						this.focusFocusCatch();
+						setTimeout(this.selectNextToken, 200);
 					}
 					this.addTokens(response.data['aTokens']);
 					this.addEvents(response.data['aEvents']);
@@ -423,6 +425,7 @@ var annotationsTool = new Vue({
 		showaTokenInfos: function (eTok) {
 			annotationsTool.aTokens[eTok]['viewed'] = true;
 			this.d3TokenLastView = eTok;
+			this.d3TokenSelected = eTok;
 			this.aTokenInfo = _.clone(this.aTokens[eTok]);
 			this.aTokenInfo['pk'] = eTok;
 			this.aTokenInfo['e-txt'] = this.aEvents[this.searchbypk(this.aTokens[eTok]['e'], this.aEvents)]['s'];
@@ -501,6 +504,120 @@ var annotationsTool = new Vue({
 			var m = parseInt(sec / 60);
 			var s = sec % 60;
 			return v + ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s.toFixed(fix)).slice(-(3 + fix));
+		},
+		/* Tastatur */
+		focusCatchKeyUp: function (e) {
+			if (e.keyCode === 39) { // rechts
+				this.selectNextToken();
+			} else if (e.keyCode === 37) { // links
+				this.selectPrevToken();
+			} else if (e.keyCode === 38) { // oben
+			} else if (e.keyCode === 40) { // unten
+			} else if (e.keyCode === 13) { // Enter
+				if (this.d3TokenSelected > -1) {
+					this.showaTokenInfos(this.d3TokenSelected);
+				}
+			} else {
+				console.log('focusCatchKeyUp: ' + e.keyCode);
+			}
+		},
+		focusFocusCatch: function () {
+			$('#focuscatch').focus();
+		},
+		/* Nächstes Token auswählen */
+		selectNextToken: function () {
+			var aSelTok = this.d3TokenSelected;
+			var aENr = 0;
+			var nSelTok = -1;
+			var aIId = -1;
+			if (aSelTok < 0) {
+				if (this.tEvents[0]) {
+					aENr = this.tEvents[0].eId[Object.keys(this.tEvents[0].eId)[0]];
+					this.d3TokenSelected = this.aEvents[aENr]['tid'][Object.keys(this.aEvents[aENr]['tid'])[0]][0];
+				}
+			} else {
+				aENr = this.searchbypk(this.aTokens[aSelTok]['e'], this.aEvents);
+				aIId = Object.keys(this.aEvents[aENr]['tid'])[0];
+				this.aEvents[aENr]['tid'][aIId].forEach(function (val, key) {
+					if (val === aSelTok) {
+						var tSelTok = this.aEvents[aENr]['tid'][aIId][key + 1];
+						if (tSelTok) {
+							nSelTok = tSelTok;
+						}
+					}
+				}, this);
+				if (nSelTok > -1) {
+					this.d3TokenSelected = nSelTok;
+				} else {
+					aENr = this.searchbypk(this.aTokens[aSelTok]['e'], this.aEvents);
+					aIId = this.aTokens[aSelTok]['i'];
+					var nEvG = false;
+					this.tEvents.some(function (val, key) {
+						if (val['eId'][aIId] === aENr) {
+							nEvG = true;
+						} else if (nEvG) {
+							if (val['eId'][aIId] >= 0) {
+								nSelTok = this.aEvents[val['eId'][aIId]]['tid'][aIId][0];
+								return true;
+							}
+						}
+					}, this);
+					this.d3TokenSelected = nSelTok;
+					if (nSelTok === -1) {
+						this.selectNextToken();
+					}
+				}
+			}
+		},
+		/* Vorherigen Token auswählen */
+		selectPrevToken: function () {
+			var aSelTok = this.d3TokenSelected;
+			var aENr = 0;
+			var nSelTok = -1;
+			var aIId = -1;
+			if (aSelTok < 0) {
+				var atEM = this.tEvents.length - 1;
+				if (this.tEvents[atEM]) {
+					var eIdKeys = Object.keys(this.tEvents[atEM].eId);
+					aENr = this.tEvents[atEM].eId[eIdKeys[eIdKeys.length - 1]];
+					var tidKeys = Object.keys(this.aEvents[aENr]['tid']);
+					var aTSL = this.aEvents[aENr]['tid'][tidKeys[tidKeys.length - 1]];
+					this.d3TokenSelected = aTSL[aTSL.length - 1];
+				}
+			} else {
+				aENr = this.searchbypk(this.aTokens[aSelTok]['e'], this.aEvents);
+				aIId = Object.keys(this.aEvents[aENr]['tid'])[0];
+				this.aEvents[aENr]['tid'][aIId].forEach(function (val, key) {
+					if (val === aSelTok) {
+						var tSelTok = this.aEvents[aENr]['tid'][aIId][key - 1];
+						if (tSelTok) {
+							nSelTok = tSelTok;
+						}
+					}
+				}, this);
+				if (nSelTok > -1) {
+					this.d3TokenSelected = nSelTok;
+				} else {
+					aENr = this.searchbypk(this.aTokens[aSelTok]['e'], this.aEvents);
+					aIId = this.aTokens[aSelTok]['i'];
+					var nEvG = false;
+					this.tEvents.slice().reverse().some(function (val, key) {
+						if (val['eId'][aIId] === aENr) {
+							nEvG = true;
+						} else if (nEvG) {
+							if (val['eId'][aIId] >= 0) {
+								var aEtid = this.aEvents[val['eId'][aIId]]['tid'][aIId];
+								nSelTok = aEtid[aEtid.length - 1];
+								return true;
+							}
+						}
+					}, this);
+					this.d3TokenSelected = nSelTok;
+					if (nSelTok === -1) {
+						this.selectPrevToken();
+					}
+				}
+			}
 		}
 	},
 	mounted: function () {
@@ -509,6 +626,10 @@ var annotationsTool = new Vue({
 		/* Wenn Modal angezeigt wird */
 		$(document).on('shown.bs.modal', '#aTokenInfo', function (e) {
 			$('#aTokenText').focus();
+		});
+		/* Wenn Modal ausgeblendet wurde */
+		$(document).on('hidden.bs.modal', '.modal', function (e) {
+			annotationsTool.focusFocusCatch();
 		});
 	},
 	beforeDestroy: function () {

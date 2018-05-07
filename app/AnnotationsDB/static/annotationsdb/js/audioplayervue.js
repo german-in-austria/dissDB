@@ -1,4 +1,4 @@
-/* global _ $ Vue audiodir */
+/* global Vue audiodir */
 
 Vue.component('annotationsaudioplayer', {
 	delimiters: ['${', '}'],
