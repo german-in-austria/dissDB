@@ -63,6 +63,7 @@ var annotationsTool = new Vue({
 			if (nVal > -1) {
 				this.d3ZeileSelected = this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchbypk(this.aTokens[this.d3TokenSelected]['e'], this.aEvents)));
 				this.d3InfSelected = this.aTokens[this.d3TokenSelected]['i'];
+				this.scrollToToken(this.d3TokenSelected);
 			} else {
 				this.d3ZeileSelected = -1;
 				this.d3InfSelected = -1;
@@ -563,13 +564,10 @@ var annotationsTool = new Vue({
 		},
 		/* Zu Token scrollen */
 		scrollToToken: function (tId) {
-			console.log('scrollToToken');
 			var sHeight = $('#svgscroller').height() + 75;
 			var sTop = $('.mcon.vscroller').scrollTop();
 			var sBottom = sTop + sHeight;
-			console.log('sTop:' + sTop + ' - sBottom: ' + sBottom);
 			var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchbypk(this.aTokens[this.d3TokenSelected]['e'], this.aEvents)))];
-			console.log(aZTE);
 			var sTo = 0;
 			if (aZTE['eT'] < sTop) {
 				sTo = aZTE['eT'] - 20;
@@ -583,100 +581,71 @@ var annotationsTool = new Vue({
 		},
 		/* Nächstes Token auswählen */
 		selectNextToken: function () {
-			var aSelTok = this.d3TokenSelected;
-			var aENr = 0;
-			var nSelTok = -1;
-			var aIId = -1;
-			if (aSelTok < 0) {
-				if (this.tEvents[0]) {
-					aENr = this.tEvents[0].eId[Object.keys(this.tEvents[0].eId)[0]];
-					this.d3TokenSelected = this.aEvents[aENr]['tid'][Object.keys(this.aEvents[aENr]['tid'])[0]][0];
-				}
-			} else {
-				aENr = this.searchbypk(this.aTokens[aSelTok]['e'], this.aEvents);
-				aIId = Object.keys(this.aEvents[aENr]['tid'])[0];
-				this.aEvents[aENr]['tid'][aIId].forEach(function (val, key) {
-					if (val === aSelTok) {
-						var tSelTok = this.aEvents[aENr]['tid'][aIId][key + 1];
-						if (tSelTok) {
-							nSelTok = tSelTok;
-						}
-					}
-				}, this);
-				if (nSelTok > -1) {
-					this.d3TokenSelected = nSelTok;
-				} else {
-					aENr = this.searchbypk(this.aTokens[aSelTok]['e'], this.aEvents);
-					aIId = this.aTokens[aSelTok]['i'];
-					var nEvG = false;
-					this.tEvents.some(function (val, key) {
-						if (val['eId'][aIId] === aENr) {
-							nEvG = true;
-						} else if (nEvG) {
-							if (val['eId'][aIId] >= 0) {
-								nSelTok = this.aEvents[val['eId'][aIId]]['tid'][aIId][0];
-								return true;
-							}
-						}
-					}, this);
-					this.d3TokenSelected = nSelTok;
-					if (nSelTok === -1) {
-						this.selectNextToken();
-					}
-				}
-			}
-			this.scrollToToken(this.d3TokenSelected);
+			this.d3TokenSelected = this.tokenNextPrev(this.d3TokenSelected);
 		},
 		/* Vorherigen Token auswählen */
 		selectPrevToken: function () {
-			var aSelTok = this.d3TokenSelected;
+			this.d3TokenSelected = this.tokenNextPrev(this.d3TokenSelected, false);
+		},
+		/* Nächster/Vorheriger Token (next = true next else prev) */
+		tokenNextPrev: function (aTId, next = true) {
+			var nTId = -1;
 			var aENr = 0;
-			var nSelTok = -1;
-			var aIId = -1;
-			if (aSelTok < 0) {
-				var atEM = this.tEvents.length - 1;
-				if (this.tEvents[atEM]) {
-					var eIdKeys = Object.keys(this.tEvents[atEM].eId);
-					aENr = this.tEvents[atEM].eId[eIdKeys[eIdKeys.length - 1]];
-					var tidKeys = Object.keys(this.aEvents[aENr]['tid']);
-					var aTSL = this.aEvents[aENr]['tid'][tidKeys[tidKeys.length - 1]];
-					this.d3TokenSelected = aTSL[aTSL.length - 1];
-				}
-			} else {
-				aENr = this.searchbypk(this.aTokens[aSelTok]['e'], this.aEvents);
-				aIId = Object.keys(this.aEvents[aENr]['tid'])[0];
-				this.aEvents[aENr]['tid'][aIId].forEach(function (val, key) {
-					if (val === aSelTok) {
-						var tSelTok = this.aEvents[aENr]['tid'][aIId][key - 1];
-						if (tSelTok) {
-							nSelTok = tSelTok;
-						}
+			if (this.tEvents[0]) {
+				if (aTId < 0) {
+					/* Erster/Letzer Token */
+					if (next) {
+						aENr = this.tEvents[0].eId[Object.keys(this.tEvents[0].eId)[0]];
+						nTId = this.aEvents[aENr]['tid'][Object.keys(this.aEvents[aENr]['tid'])[0]][0];
+					} else {
+						var atEM = this.tEvents.length - 1;
+						var eIdKeys = Object.keys(this.tEvents[atEM].eId);
+						aENr = this.tEvents[atEM].eId[eIdKeys[eIdKeys.length - 1]];
+						var tidKeys = Object.keys(this.aEvents[aENr]['tid']);
+						var aTSL = this.aEvents[aENr]['tid'][tidKeys[tidKeys.length - 1]];
+						nTId = aTSL[aTSL.length - 1];
 					}
-				}, this);
-				if (nSelTok > -1) {
-					this.d3TokenSelected = nSelTok;
 				} else {
-					aENr = this.searchbypk(this.aTokens[aSelTok]['e'], this.aEvents);
-					aIId = this.aTokens[aSelTok]['i'];
-					var nEvG = false;
-					this.tEvents.slice().reverse().some(function (val, key) {
-						if (val['eId'][aIId] === aENr) {
-							nEvG = true;
-						} else if (nEvG) {
-							if (val['eId'][aIId] >= 0) {
-								var aEtid = this.aEvents[val['eId'][aIId]]['tid'][aIId];
-								nSelTok = aEtid[aEtid.length - 1];
-								return true;
+					/* Nächster/Vorheriger Token */
+					aENr = this.searchbypk(this.aTokens[aTId]['e'], this.aEvents);
+					var aIId = this.aTokens[aTId]['i'];
+					if (this.aEvents[aENr]['tid'][aIId]) {
+						this.aEvents[aENr]['tid'][aIId].forEach(function (val, key) {
+							if (val === aTId) {
+								var tSelTok = this.aEvents[aENr]['tid'][aIId][key + ((next) ? 1 : -1)];
+								if (tSelTok) {
+									nTId = tSelTok;
+								}
 							}
-						}
-					}, this);
-					this.d3TokenSelected = nSelTok;
-					if (nSelTok === -1) {
-						this.selectPrevToken();
+						}, this);
+					}
+					/* Nächsten/Vorherigen Token im nächsten/vorherigen Event suchen */
+					if (nTId < 0) {
+						var tEventsData = this.tEvents;
+						var nEvG = false;
+						if (!next) { tEventsData = tEventsData.slice().reverse(); }
+						tEventsData.some(function (val, key) {
+							if (val['eId'][aIId] === aENr) {
+								nEvG = true;
+							} else if (nEvG) {
+								if (val['eId'][aIId] >= 0) {
+									if (next) {
+										nTId = this.aEvents[val['eId'][aIId]]['tid'][aIId][0];
+									} else {
+										var aEtid = this.aEvents[val['eId'][aIId]]['tid'][aIId];
+										nTId = aEtid[aEtid.length - 1];
+									}
+									return true;
+								}
+							}
+						}, this);
+					}
+					if (nTId < 0) {
+						nTId = this.tokenNextPrev(-1, next);
 					}
 				}
 			}
-			this.scrollToToken(this.d3TokenSelected);
+			return nTId;
 		}
 	},
 	mounted: function () {
