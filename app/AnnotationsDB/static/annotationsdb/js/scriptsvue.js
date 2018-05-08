@@ -538,47 +538,6 @@ var annotationsTool = new Vue({
 		focusFocusCatch: function () {
 			$('#focuscatch').focus();
 		},
-		/* Tokenauswahl */
-		getTEventOfAEvent: function (aEId) {
-			var nKey = -1;
-			this.tEvents.some(function (val, key) {
-				Object.keys(val['eId']).some(function (xKey, i) {
-					if (val['eId'][xKey] === aEId) {
-						nKey = key;
-						return true;
-					}
-				}, this);
-				return (nKey > -1);
-			}, this);
-			return nKey;
-		},
-		getZeileOfTEvent: function (aTEId) {
-			var nKey = -1;
-			this.zeilenTEvents.some(function (val, key) {
-				if (val['eId'].indexOf(aTEId) > -1) {
-					nKey = key;
-					return true;
-				}
-			}, this);
-			return nKey;
-		},
-		/* Zu Token scrollen */
-		scrollToToken: function (tId) {
-			var sHeight = $('#svgscroller').height() + 75;
-			var sTop = $('.mcon.vscroller').scrollTop();
-			var sBottom = sTop + sHeight;
-			var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchbypk(this.aTokens[this.d3TokenSelected]['e'], this.aEvents)))];
-			var sTo = 0;
-			if (aZTE['eT'] < sTop) {
-				sTo = aZTE['eT'] - 20;
-				if (sTo < 0) { sTo = 0; }
-				$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
-			} else if ((aZTE['eT'] + aZTE['eH']) > sBottom) {
-				sTo = (aZTE['eT'] + aZTE['eH'] + 20) - sHeight * 0.8;
-				if (sTo < 0) { sTo = 0; }
-				$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
-			}
-		},
 		/* Nächstes Token auswählen */
 		selectNextToken: function () {
 			this.d3TokenSelected = this.tokenNextPrev(this.d3TokenSelected);
@@ -621,20 +580,15 @@ var annotationsTool = new Vue({
 					}
 					/* Nächsten/Vorherigen Token im nächsten/vorherigen Event suchen */
 					if (nTId < 0) {
-						var tEventsData = this.tEvents;
+						var tEventsData = ((next) ? this.tEvents : this.tEvents.slice().reverse());
 						var nEvG = false;
-						if (!next) { tEventsData = tEventsData.slice().reverse(); }
 						tEventsData.some(function (val, key) {
 							if (val['eId'][aIId] === aENr) {
 								nEvG = true;
 							} else if (nEvG) {
 								if (val['eId'][aIId] >= 0) {
-									if (next) {
-										nTId = this.aEvents[val['eId'][aIId]]['tid'][aIId][0];
-									} else {
-										var aEtid = this.aEvents[val['eId'][aIId]]['tid'][aIId];
-										nTId = aEtid[aEtid.length - 1];
-									}
+									var aEtid = this.aEvents[val['eId'][aIId]]['tid'][aIId];
+									nTId = ((next) ? aEtid[0] : aEtid[aEtid.length - 1]);
 									return true;
 								}
 							}
@@ -646,6 +600,47 @@ var annotationsTool = new Vue({
 				}
 			}
 			return nTId;
+		},
+		/* Zu Token scrollen */
+		scrollToToken: function (tId) {
+			var sHeight = $('#svgscroller').height() + 75;
+			var sTop = $('.mcon.vscroller').scrollTop();
+			var sBottom = sTop + sHeight;
+			var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchbypk(this.aTokens[this.d3TokenSelected]['e'], this.aEvents)))];
+			var sTo = 0;
+			if (aZTE['eT'] < sTop) {
+				sTo = aZTE['eT'] - 20;
+				if (sTo < 0) { sTo = 0; }
+				$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
+			} else if ((aZTE['eT'] + aZTE['eH']) > sBottom) {
+				sTo = (aZTE['eT'] + aZTE['eH'] + 20) - sHeight * 0.8;
+				if (sTo < 0) { sTo = 0; }
+				$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
+			}
+		},
+		/* Funktionen für Tokenauswahl */
+		getTEventOfAEvent: function (aEId) {
+			var nKey = -1;
+			this.tEvents.some(function (val, key) {
+				Object.keys(val['eId']).some(function (xKey, i) {
+					if (val['eId'][xKey] === aEId) {
+						nKey = key;
+						return true;
+					}
+				}, this);
+				return (nKey > -1);
+			}, this);
+			return nKey;
+		},
+		getZeileOfTEvent: function (aTEId) {
+			var nKey = -1;
+			this.zeilenTEvents.some(function (val, key) {
+				if (val['eId'].indexOf(aTEId) > -1) {
+					nKey = key;
+					return true;
+				}
+			}, this);
+			return nKey;
 		}
 	},
 	mounted: function () {
