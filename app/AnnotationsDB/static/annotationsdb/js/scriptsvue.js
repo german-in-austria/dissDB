@@ -525,8 +525,10 @@ var annotationsTool = new Vue({
 				this.selectNextToken();
 			} else if (e.keyCode === 37) { // links
 				this.selectPrevToken();
-			} else if (e.keyCode === 38) { // oben
 			} else if (e.keyCode === 40) { // unten
+				this.selectNextInf();
+			} else if (e.keyCode === 38) { // oben
+				this.selectPrevInf();
 			} else if (e.keyCode === 13) { // Enter
 				if (this.d3TokenSelected > -1) {
 					this.showaTokenInfos(this.d3TokenSelected);
@@ -545,6 +547,127 @@ var annotationsTool = new Vue({
 		/* Vorherigen Token auswählen */
 		selectPrevToken: function () {
 			this.d3TokenSelected = this.tokenNextPrev(this.d3TokenSelected, false);
+		},
+		/* Nächsten Informanten/Zeile auswählen */
+		selectNextInf: function () {
+			if (this.tEvents[0]) {
+				var aTId = this.d3TokenSelected;
+				if (aTId < 0) {
+					this.d3TokenSelected = this.tokenNextPrev(-1);
+				} else {
+					var aIId = this.aTokens[aTId]['i'];
+					var aZAEKey = this.getTEventOfAEvent(this.searchbypk(this.aTokens[aTId]['e'], this.aEvents));
+					var aZAE = this.tEvents[aZAEKey];
+					var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey)];
+					var aInfAv = Object.keys(this.objectKeyFilter(this.aInformanten, aZTE['iId']));
+					var nTokSel = -1;
+					if (String(aInfAv[aInfAv.length - 1]) !== String(aIId)) {
+						var nIId = this.getNextPrevValueOfValue(Object.keys(aZAE['eId']), String(aIId));
+						if (nIId === false) {
+							nIId = this.getNextPrevValueOfValue(Object.keys(this.aInformanten), String(aIId));
+							var aTEvents = this.getNextPrevValuesOfValue(aZTE['eId'], aZAEKey);
+							aTEvents.some(function (tEKey, tI) {
+								if (this.tEvents[tEKey]['eId'][nIId]) {
+									nTokSel = this.aEvents[this.tEvents[tEKey]['eId'][nIId]]['tid'][nIId][0];
+									return true;
+								}
+							}, this);
+						} else {
+							nTokSel = this.aEvents[aZAE['eId'][nIId]]['tid'][nIId][0];
+						};
+					}
+					if (nTokSel < 0) {
+						var tmpZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey) + 1];
+						if (tmpZTE) {
+							var tmpZTEeId = tmpZTE['eId'];
+							var tmpTEeId = this.tEvents[tmpZTEeId[0]]['eId'];
+							var tmpAEtid = this.aEvents[tmpTEeId[Object.keys(tmpTEeId)[0]]]['tid'];
+							nTokSel = tmpAEtid[Object.keys(tmpAEtid)[0]][0];
+						}
+					}
+					if (nTokSel < 0) {
+						nTokSel = this.tokenNextPrev(-1, false);
+					}
+					this.d3TokenSelected = nTokSel;
+				}
+			}
+		},
+		/* Vorherigen Informanten/Zeile auswählen */
+		selectPrevInf: function () {
+			if (this.tEvents[0]) {
+				var aTId = this.d3TokenSelected;
+				if (aTId < 0) {
+					this.d3TokenSelected = this.tokenNextPrev(-1, false);
+				} else {
+					var aIId = this.aTokens[aTId]['i'];
+					var aZAEKey = this.getTEventOfAEvent(this.searchbypk(this.aTokens[aTId]['e'], this.aEvents));
+					var aZAE = this.tEvents[aZAEKey];
+					var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey)];
+					var aInfAv = Object.keys(this.objectKeyFilter(this.aInformanten, aZTE['iId']));
+					var nTokSel = -1;
+					if (String(aInfAv[0]) !== String(aIId)) {
+						var nIId = this.getNextPrevValueOfValue(Object.keys(aZAE['eId']), String(aIId), false);
+						if (nIId === false) {
+							nIId = this.getNextPrevValueOfValue(Object.keys(this.aInformanten), String(aIId), false);
+							var aTEvents = this.getNextPrevValuesOfValue(aZTE['eId'], aZAEKey, false);
+							aTEvents.some(function (tEKey, tI) {
+								if (this.tEvents[tEKey]['eId'][nIId]) {
+									var tmpAE = this.aEvents[this.tEvents[tEKey]['eId'][nIId]]['tid'][nIId];
+									nTokSel = tmpAE[tmpAE.length - 1];
+									return true;
+								}
+							}, this);
+						} else {
+							var tmpAE = this.aEvents[aZAE['eId'][nIId]]['tid'][nIId];
+							nTokSel = tmpAE[0];
+						};
+					}
+					if (nTokSel < 0) {
+						var tmpZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey) - 1];
+						if (tmpZTE) {
+							var tmpZTEeId = tmpZTE['eId'];
+							var tmpTEeId = this.tEvents[tmpZTEeId[tmpZTEeId.length - 1]]['eId'];
+							var tmpTEeIdK = Object.keys(tmpTEeId);
+							var tmpAEtid = this.aEvents[tmpTEeId[tmpTEeIdK[tmpTEeIdK.length - 1]]]['tid'];
+							var tmpAEtidK = Object.keys(tmpAEtid);
+							var tmpAEtidS = tmpAEtid[tmpAEtidK[tmpAEtidK.length - 1]];
+							nTokSel = tmpAEtidS[tmpAEtidS.length - 1];
+						}
+					}
+					if (nTokSel < 0) {
+						nTokSel = this.tokenNextPrev(-1);
+					}
+					this.d3TokenSelected = nTokSel;
+				}
+			}
+		},
+		getNextPrevValuesOfValue: function (list, val, next = true) {
+			var nEvG = false;
+			var nVal = [];
+			var xList = ((next) ? list : list.slice().reverse());
+			xList.some(function (v, i) {
+				if (nEvG) {
+					nVal.push(v);
+				}
+				if (v === val) {
+					nEvG = true;
+				}
+			}, this);
+			return nVal;
+		},
+		getNextPrevValueOfValue: function (list, val, next = true) {
+			var nEvG = false;
+			var nVal = false;
+			var xList = ((next) ? list : list.slice().reverse());
+			xList.some(function (v, i) {
+				if (v === val) {
+					nEvG = true;
+				} else if (nEvG) {
+					nVal = v;
+					return true;
+				}
+			}, this);
+			return nVal;
 		},
 		/* Nächster/Vorheriger Token (next = true next else prev) */
 		tokenNextPrev: function (aTId, next = true) {
