@@ -4,7 +4,10 @@
 {% load crispy_forms_tags %}
 {% block title %} - Annotation (VUE){% endblock %}
 {% block ueberschrift %} - Annotation (VUE){% endblock %}
-{% block sitecss %}<link href="{% static "annotationsdb/css/annotationvue.css" %}?{% settings_value "CACH_RANDOM" %}" rel="stylesheet">{% endblock %}
+{% block sitecss %}
+	<link href="{% static "db/css/tagsystemvue.css" %}?{% settings_value "CACH_RANDOM" %}" rel="stylesheet">
+	<link href="{% static "annotationsdb/css/annotationvue.css" %}?{% settings_value "CACH_RANDOM" %}" rel="stylesheet">
+{% endblock %}
 {% block inhalt %}
 <div id="annotationsTool" v-bind:class="{ loading: loading, bgloading: !annotationsTool.loaded }">
 	<div class="row h100">
@@ -171,34 +174,8 @@
 
 </div>
 
-<!-- Audioplayer Vorlage -->
-<script type="text/x-template" id="annotationsaudioplayer-template">
-	<div v-bind:class="{ annotationsaudioplayer: true, loading: !loaded, paused: paused, playing: playing }">
-		<div class="mib20 mit20"></div>
-		<div class="row">
-			<div class="col-xs-12 mib10 text-center">
-				<div class="audiobtn">
-					<button @click="fastBackward"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span></button>
-					<!-- <button><span class="glyphicon glyphicon-step-backward" aria-hidden="true"></span></button> -->
-					<button @click="backward"><span class="glyphicon glyphicon-backward" aria-hidden="true"></span></button>
-					<button @click="((paused)?play():pause())"><span :class="'glyphicon glyphicon-'+((paused)?'play':'pause')" aria-hidden="true"></span></button>
-					<button @click="forward"><span class="glyphicon glyphicon-forward" aria-hidden="true"></span></button>
-					<!-- <button><span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></button> -->
-					<button @click="fastForward"><span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
-				</div>
-			</div>
-			<div class="col-xs-12">
-				<div id="gesamtprogress" class="progress audioprogress" v-on:click="setAudioPos">
-					<div v-bind:class="{ 'progress-bar': true, 'progress-bar-striped': true, active: playing }" role="progressbar" :style="'width: '+aPosProz.toFixed(2)+'%;'"></div>
-					<span class="pb-timer pb-starttime">${ secondsToDuration(0) }</span>
-					<span class="pb-timer pb-akttime">${ secondsToDuration(aPos) }</span>
-					<span class="pb-timer pb-endtime">${ secondsToDuration(duration) }</span>
-				</div>
-			</div>
-		</div>
-		<audio><source :src="audiodirC+audiofileC+'.ogg'" type="audio/ogg"></audio>
-	</div>
-</script>
+{% include "AnnotationsDB/audioplayervue.html" %}
+{% include "DB/tagsystemvue.html" %}
 
 <style>
 	html,body,body>.container { height:100%; }
@@ -214,5 +191,6 @@
 <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.3.5"></script>
 <script src="{% static "main/js/lodash.min.js" %}"></script>
 <script src="{% static "annotationsdb/js/audioplayervue.js" %}?{% settings_value "CACH_RANDOM" %}"></script>
+<script src="{% static "db/js/tagsystemvue.js" %}?{% settings_value "CACH_RANDOM" %}"></script>
 <script src="{% static "annotationsdb/js/scriptsvue.js" %}?{% settings_value "CACH_RANDOM" %}"></script>
 {% endblock %}
