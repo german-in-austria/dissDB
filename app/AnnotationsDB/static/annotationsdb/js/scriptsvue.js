@@ -536,6 +536,7 @@ var annotationsTool = new Vue({
 			} else {
 				console.log('focusCatchKeyUp: ' + e.keyCode);
 			}
+			e.target.value = '';
 		},
 		focusFocusCatch: function () {
 			$('#focuscatch').focus();
