@@ -7,4 +7,5 @@ urlpatterns = [
 	url(r'^view/(?P<app_name>[A-ZÄÖÜa-zäöüß0-9_]+)/(?P<tabelle_name>[A-ZÄÖÜa-zäöüß0-9_]+)/{0,1}$', views.view, name='view'),
 	url(r'^search/{0,1}$', views.search, name='search'),
 	url(r'^diagramm/{0,1}$', views.view_diagramm, name='diagramm'),
+	url(r'^tagsystemvue/{0,1}$', views.tagsystemvue, name='tagsystemvue'),
 ]

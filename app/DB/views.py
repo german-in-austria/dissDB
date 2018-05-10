@@ -265,3 +265,11 @@ def view_diagramm(request):
 		'DB/diagramm.html',
 		RequestContext(request, {'tabellen': tabellen, 'error': error, 'info': info}),
 	)
+
+
+def tagsystemvue(request):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return redirect('dioedb_login')
+	tags = {}
+	return httpOutput(tags, mimetype='application/json')

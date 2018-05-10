@@ -1,24 +1,29 @@
 <script type="text/x-template" id="tagsystem-template">
 	<div v-bind:class="{ 'form-horizontal': true, 'tag-forms': true, tagsystem: true }">
-		<div class="form-group tag-line">
-			<label :class="'col-sm-'+colLeft+' control-label'">
-				<select class="tagebene w100">
-					<option value="0">Ebene auswählen (Löschen)</option>
-					<option value="1" selected="">PrimärEbene</option>
-				</select>
-			</label>
-			<div :class="'col-sm-'+colRight">
-				<div class="form-control-static reihung-tags">
-					<div class="r-tag-familie r-tag-familie-pchilds" data-generation="None" data-pk="0">
-						<div class="r-tag-familie" data-generation="None" data-pk="999"><button class="ant-tag" data-id_tag="999" data-pk="12587">IRR</button></div>
-						<button class="ant-ftag"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+		<template v-if="!(loadingTags && loadingTagEbenen)">
+			<div class="form-group tag-line">
+				<label :class="'col-sm-'+colLeft+' control-label'">
+					<select class="tagebene w100">
+						<option value="0">Ebene auswählen (Löschen)</option>
+						<option value="1" selected="">PrimärEbene</option>
+					</select>
+				</label>
+				<div :class="'col-sm-'+colRight">
+					<div class="form-control-static reihung-tags">
+						<div class="r-tag-familie r-tag-familie-pchilds" data-generation="None" data-pk="0">
+							<div class="r-tag-familie" data-generation="None" data-pk="999"><button class="ant-tag" data-id_tag="999" data-pk="12587">IRR</button></div>
+							<button class="ant-ftag"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+						</div>
+						<button class="ant-ctag"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
 					</div>
-					<button class="ant-ctag"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
 				</div>
 			</div>
-		</div>
-		<div class="form-group add-tag-line-line">
-			<div :class="'col-sm-'+colLeft"><button class="add-tag-line"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Tag-Ebene</button></div>
-		</div>
+			<div class="form-group add-tag-line-line">
+				<div :class="'col-sm-'+colLeft"><button class="add-tag-line"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Tag-Ebene</button></div>
+			</div>
+		</template>
+		<template v-else>
+			<div class="form-group"><div :class="'col-sm-offset-'+colLeft+' col-sm-'+colRight"><p class="form-control-static">Lade Tagsystem ...</p></div></div>
+		</template>
 	</div>
 </script>
