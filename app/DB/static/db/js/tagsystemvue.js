@@ -1,7 +1,7 @@
 /* global Vue csrf alert */
 
 /* Cache für Tags und Presets */
-const tagsystemCache = new Vue({data: { tagsCache: {}, presetsCache: {} }});
+const tagsystemCache = new Vue({data: { baseCache: undefined, tagsCache: undefined, presetsCache: undefined }});
 
 /* Komponente für Tagsystem */
 Vue.component('tagsystem', {
@@ -19,7 +19,7 @@ Vue.component('tagsystem', {
 		return {
 			colLeft: this.cols || 2,
 			cache: tagsystemCache,
-			loadingTagEbenen: true,
+			loadingBase: true,
 			loadingTags: true,
 			loadingPresets: true
 		};
@@ -29,50 +29,76 @@ Vue.component('tagsystem', {
 			return 12 - this.colLeft;
 		}
 	},
+	watch: {
+		tags: function (nVal, oVal) {
+			this.getBase();
+			this.getPresets();
+		}
+	},
 	methods: {
-		getTagEbenen: function () {
-			this.$http.post('',
-				{
-					getTagEbenen: 1
+		getBase: function () {
+			if (!this.cache.baseCache) {
+				console.log('Base laden ...');
+				this.$http.post('',
+					{
+						getBase: 1
+					})
+				.then((response) => {
+					this.loadingBase = false;
+					this.cache.baseCache = response.data;
+					this.getTags();
 				})
-			.then((response) => {
-				this.loadingTagEbenen = false;
-			})
-			.catch((err) => {
-				console.log(err);
-				alert('Fehler!');
-			});
+				.catch((err) => {
+					console.log(err);
+					alert('Fehler!');
+				});
+			} else {
+				console.log('Base aus cache ...');
+				this.getTags();
+			}
 		},
 		getTags: function () {
-			this.$http.post('',
-				{
-					getTags: 1
+			if (!this.cache.tagsCache) {
+				console.log('Tags laden ...');
+				this.$http.post('',
+					{
+						getTags: 1
+					})
+				.then((response) => {
+					this.loadingTags = false;
+					this.cache.tagsCache = response.data['tags'];
 				})
-			.then((response) => {
-				this.loadingTags = false;
-			})
-			.catch((err) => {
-				console.log(err);
-				alert('Fehler!');
-			});
+				.catch((err) => {
+					console.log(err);
+					alert('Fehler!');
+				});
+			} else {
+				console.log('Tags aus cache ...');
+			}
 		},
 		getPresets: function () {
-			this.$http.post('',
-				{
-					getPresets: 1
+			if (!this.cache.presetsCache) {
+				console.log('Presets laden ...');
+				this.$http.post('',
+					{
+						getPresets: 1
+					})
+				.then((response) => {
+					this.loadingPresets = false;
+					this.cache.presetsCache = response.data['presets'];
 				})
-			.then((response) => {
-				this.loadingPresets = false;
-			})
-			.catch((err) => {
-				console.log(err);
-				alert('Fehler!');
-			});
+				.catch((err) => {
+					console.log(err);
+					alert('Fehler!');
+				});
+			} else {
+				console.log('Presets aus cache ...');
+			}
 		}
 	},
 	mounted: function () {
-		this.getTagEbenen();
-		this.getTags();
+		console.log('Tagsystem mounted ...');
+		this.getBase();
 		this.getPresets();
 	}
 });

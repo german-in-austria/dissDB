@@ -145,10 +145,10 @@ class TagFamilie(models.Model):
 class Phaenomene(models.Model):
 	Bez_Phaenomen		= models.CharField(max_length=511																	, verbose_name="Bezeichnung Phänomen")
 	Beschr_Phaenomen	= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Beschreibung Phänomen")
-	zu_PhänBer			= models.IntegerField(						blank=True, null=True									, verbose_name="Zu Phänomenen Ber")
+	zu_PhaenBer			= models.IntegerField(						blank=True, null=True									, verbose_name="Zu Phänomenen Ber")
 	Kommentar			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Kommentar")
 	def __str__(self):
-		return "{} ({})".format(self.Bez_Phaenomen,self.zu_PhänBer)
+		return "{} ({})".format(self.Bez_Phaenomen,self.zu_PhaenBer)
 	class Meta:
 		db_table = "Phaenomene"
 		verbose_name = "Phänomen"

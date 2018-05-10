@@ -271,5 +271,40 @@ def tagsystemvue(request):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
 		return redirect('dioedb_login')
-	tags = {}
-	return httpOutput(tags, mimetype='application/json')
+	import Datenbank.models as dbmodels
+	output = {}
+	if 'getBase' in request.POST:
+		tagebenen = []
+		for TagEbene in dbmodels.TagEbene.objects.all():
+			tagebenen.append({'pk': TagEbene.pk, 't': TagEbene.Name})
+		output['tagebenen'] = tagebenen
+		phaenomene = {}
+		for phaenomen in dbmodels.Phaenomene.objects.all():
+			phaenomene[phaenomen.pk] = {
+				'b': phaenomen.Bez_Phaenomen,
+				'bs': phaenomen.Beschr_Phaenomen,
+				'zpb': phaenomen.zu_PhaenBer,
+				'k': phaenomen.Kommentar
+			}
+		output['phaenomene'] = phaenomene
+	if 'getTags' in request.POST:
+		tags = {}
+		tagsReihung = []
+		for tag in dbmodels.Tags.objects.all():
+			tagsReihung.append(tag.pk)
+			tags[tag.pk] = {
+				't': tag.Tag,
+				'tl': tag.Tag_lang,
+				'k': tag.Kommentar,
+				'r': tag.AReihung,
+				'g': tag.Generation,
+			}
+			if tag.zu_Phaenomen:
+				tags[tag.pk]['zppk'] = tag.zu_Phaenomen_id
+		output['tags'] = {'tags': tags, 'tagsReihung': tagsReihung}
+	if 'getPresets' in request.POST:
+		# import bearbeiten.models as bmodels
+		presets = {}
+		# ToDo
+		output['presets'] = presets
+	return httpOutput(json.dumps(output), mimetype='application/json')
