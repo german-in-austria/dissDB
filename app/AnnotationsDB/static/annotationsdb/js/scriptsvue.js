@@ -44,9 +44,9 @@ var annotationsTool = new Vue({
 		d3InfSelected: -1,
 		audioPos: 0,
 		audioDuration: 0,
-		aInfInfo: -1,
-		tEventInfo: -1,
-		aTokenInfo: {},
+		aInfInfo: undefined,
+		tEventInfo: undefined,
+		aTokenInfo: undefined,
 		selToken: false,
 		message: null,
 		mWidth: $('#annotationsvg').width(),
@@ -73,10 +73,10 @@ var annotationsTool = new Vue({
 	methods: {
 		reset: function () {
 			this.loading = true;
-			this.aInfInfo = -1;
-			this.tEventInfo = -1;
+			this.aInfInfo = undefined;
+			this.tEventInfo = undefined;
 			this.selToken = false;
-			this.aTokenInfo = {};
+			this.aTokenInfo = undefined;
 			this.annotationsTool = {
 				aPK: 0,
 				nNr: 0,
@@ -776,6 +776,9 @@ var annotationsTool = new Vue({
 		});
 		/* Wenn Modal ausgeblendet wurde */
 		$(document).on('hidden.bs.modal', '.modal', function (e) {
+			if ($(this).data('unset')) {
+				annotationsTool[$(this).data('unset')] = undefined;
+			}
 			annotationsTool.focusFocusCatch();
 		});
 	},

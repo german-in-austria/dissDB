@@ -85,7 +85,7 @@
 	<div id="loading">Lade ...</div>
 
 	<!-- Informationen zu Informanten anzeigen -->
-	<div id="aInformantenInfo" class="modal fade" tabindex="-1" role="dialog" v-if="aInfInfo >= 0 && aInformanten[aInfInfo]">
+	<div id="aInformantenInfo" class="modal fade" tabindex="-1" role="dialog" data-unset="aInfInfo" v-if="aInfInfo >= 0 && aInformanten[aInfInfo]">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -105,7 +105,7 @@
 	</div>
 
 	<!-- Informationen zu Events anzeigen -->
-	<div id="tEventInfo" class="modal fade" tabindex="-1" role="dialog" v-if="tEventInfo >= 0 && tEvents[tEventInfo]">
+	<div id="tEventInfo" class="modal fade" tabindex="-1" role="dialog" data-unset="tEventInfo" v-if="tEventInfo >= 0 && tEvents[tEventInfo]">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -137,7 +137,7 @@
 	</div>
 
 	<!-- Informationen zu Token anzeigen -->
-	<div id="aTokenInfo" class="modal fade" tabindex="-1" role="dialog" v-if="aTokenInfo['pk']">
+	<div id="aTokenInfo" class="modal fade" tabindex="-1" role="dialog" data-unset="aTokenInfo" v-if="aTokenInfo && aTokenInfo['pk']">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
