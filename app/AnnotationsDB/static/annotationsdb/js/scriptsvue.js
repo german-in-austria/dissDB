@@ -175,6 +175,9 @@ var annotationsTool = new Vue({
 		/* updateToken */
 		updateToken: function (key, values) {
 			this.aTokens[key] = values;
+			if (!this.aTokens[key]['tags']) {
+				this.aTokens[key]['tags'] = undefined;
+			}
 			if (this.aTokens[key]['fo']) {
 				this.updateTokenFragment(key, this.aTokens[key]['fo']);
 			};
@@ -421,6 +424,9 @@ var annotationsTool = new Vue({
 		/* setAudioPos */
 		setAudioPos: function (aPos) {
 			this.audioPos = aPos;
+		},
+		setATokenInfo: function (aVal, aKey) {
+			this.aTokenInfo[aKey] = aVal;
 		},
 		setAudioDuration: function (aPos) {
 			this.audioDuration = aPos;

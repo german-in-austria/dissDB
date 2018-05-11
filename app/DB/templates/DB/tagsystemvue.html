@@ -1,29 +1,47 @@
 <script type="text/x-template" id="tagsystem-template">
 	<div v-bind:class="{ 'form-horizontal': true, 'tag-forms': true, tagsystem: true }">
 		<template v-if="!(loadingTags && loadingBase)">
-			<div class="form-group tag-line">
+			<div class="form-group tag-line" v-for="aEbene in aTags">
 				<label :class="'col-sm-'+colLeft+' control-label'">
-					<select class="tagebene w100">
+					<select class="tagebene w100" v-model="aEbene['e']">
 						<option value="0">Ebene auswählen (Löschen)</option>
 						<option v-for="tagebene in cache.baseCache.tagebenen" :value="tagebene.pk">${tagebene.t}</option>
 					</select>
 				</label>
 				<div :class="'col-sm-'+colRight">
-					<div class="form-control-static reihung-tags">
-						<div class="r-tag-familie r-tag-familie-pchilds" data-generation="None" data-pk="0">
-							<!-- <div class="r-tag-familie" data-generation="None" data-pk="999"><button class="ant-tag" data-id_tag="999" data-pk="12587">IRR</button></div> -->
-							<button class="ant-ftag"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-						</div>
+					<div class="form-control-static reihung-tags" v-if="aEbene['e']>0">
+						<tagsystemtags :ebene="aEbene['e']" generation=0 />
 						<button class="ant-ctag"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
 					</div>
+					<p class="form-control-static" v-else><b>Ebene auswählen!</b></p>
 				</div>
 			</div>
 			<div class="form-group add-tag-line-line">
-				<div :class="'col-sm-'+colLeft"><button class="add-tag-line"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Tag-Ebene</button></div>
+				<div :class="'col-sm-'+colLeft"><button class="add-tag-line" @click="addEbene"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Tag-Ebene</button></div>
 			</div>
 		</template>
 		<template v-else>
 			<div class="form-group"><div :class="'col-sm-offset-'+colLeft+' col-sm-'+colRight"><p class="form-control-static">Lade Tagsystem ...</p></div></div>
 		</template>
+	</div>
+</script>
+
+<script type="text/x-template" id="tagsystem-tags-template">
+	<div class="r-tag-familie">
+		<!-- <div class="r-tag-familie"><button class="ant-tag">IRR</button></div> -->
+		<tagsystemselecttag :generation="generation" :ebene="ebene" />
+	</div>
+</script>
+
+<script type="text/x-template" id="tagsystem-selecttag-tags-template">
+	<div>
+		<button class="ant-ftag" @click="seltags"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+		<div class="tags seltags open" v-if="isOpen">
+			<div class="tag-familie" data-classes="r-tag-familie" v-for="tagR in cache.tagsCache.tagsReihung" v-if="(!cache.tagsCache.tags[tagR].g||cache.tagsCache.tags[tagR].g===generation)&&(!cache.tagsCache.tags[tagR].tezt || (cache.tagsCache.tags[tagR].tezt&&cache.tagsCache.tags[tagR].tezt.indexOf(ebene)>-1))">
+				<button class="ptagsbtn" ref="ptagsbtn" @click="ptagsbtn(tagR)" v-on:blur="seltagsBlur" :title="cache.tagsCache.tags[tagR].tl+' - ID: '+tagR">
+					${ cache.tagsCache.tags[tagR].t }
+				</button>
+			</div>
+		</div>
 	</div>
 </script>

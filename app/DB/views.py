@@ -301,6 +301,14 @@ def tagsystemvue(request):
 			}
 			if tag.zu_Phaenomen:
 				tags[tag.pk]['zppk'] = tag.zu_Phaenomen_id
+			try:
+				tmpTezt = []
+				for tezt in dbmodels.TagEbeneZuTag.objects.filter(id_Tag_id=tag.pk):
+					tmpTezt.append(tezt.id_TagEbene_id)
+				if tmpTezt:
+					tags[tag.pk]['tezt'] = tmpTezt
+			except:
+				pass
 		output['tags'] = {'tags': tags, 'tagsReihung': tagsReihung}
 	if 'getPresets' in request.POST:
 		# import bearbeiten.models as bmodels

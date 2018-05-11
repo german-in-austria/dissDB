@@ -21,7 +21,8 @@ Vue.component('tagsystem', {
 			cache: tagsystemCache,
 			loadingBase: true,
 			loadingTags: true,
-			loadingPresets: true
+			loadingPresets: true,
+			aTags: this.tags || []
 		};
 	},
 	computed: {
@@ -53,7 +54,8 @@ Vue.component('tagsystem', {
 					alert('Fehler!');
 				});
 			} else {
-				console.log('Base aus cache ...');
+				console.log('Base aus Cache ...');
+				this.loadingBase = false;
 				this.getTags();
 			}
 		},
@@ -73,7 +75,8 @@ Vue.component('tagsystem', {
 					alert('Fehler!');
 				});
 			} else {
-				console.log('Tags aus cache ...');
+				console.log('Tags aus Cache ...');
+				this.loadingTags = false;
 			}
 		},
 		getPresets: function () {
@@ -92,13 +95,68 @@ Vue.component('tagsystem', {
 					alert('Fehler!');
 				});
 			} else {
-				console.log('Presets aus cache ...');
+				console.log('Presets aus Cache ...');
+				this.loadingPresets = false;
 			}
+		},
+		addEbene: function () {
+			this.aTags.push({'e': 0, 'tags': []});
 		}
 	},
 	mounted: function () {
 		console.log('Tagsystem mounted ...');
+		this.$emit('tags', this.aTags);
 		this.getBase();
 		this.getPresets();
+	}
+});
+
+/* Tags */
+Vue.component('tagsystemtags', {
+	delimiters: ['${', '}'],
+	template: '#tagsystem-tags-template',
+	props: ['generation', 'ebene'],
+	data: function () {
+		return {
+			cache: tagsystemCache
+		};
+	},
+	computed: {
+	},
+	watch: {
+	},
+	methods: {
+	},
+	mounted: function () {
+	}
+});
+
+/* Tags */
+Vue.component('tagsystemselecttag', {
+	delimiters: ['${', '}'],
+	template: '#tagsystem-selecttag-tags-template',
+	props: ['generation', 'ebene'],
+	data: function () {
+		return {
+			cache: tagsystemCache,
+			isOpen: false
+		};
+	},
+	methods: {
+		ptagsbtn: function (tagId) {
+			this.isOpen = false;
+			console.log('Tag mit ID ' + tagId + ' hinzufügen ...');
+		},
+		seltags: function () {
+			this.isOpen = true;
+			this.$nextTick(() => this.$refs.ptagsbtn[0].focus());
+		},
+		seltagsBlur: function () {
+			this.$nextTick(function () {
+				if (this.$refs.ptagsbtn.indexOf(document.activeElement) < 0) {
+					this.isOpen = false;
+				}
+			});
+		}
 	}
 });
