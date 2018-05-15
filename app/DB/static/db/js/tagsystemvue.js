@@ -101,11 +101,11 @@ Vue.component('tagsystem', {
 		},
 		addEbene: function () {
 			this.aTags.push({'e': 0, 'tags': []});
+			this.$emit('tags', this.aTags);
 		}
 	},
 	mounted: function () {
 		console.log('Tagsystem mounted ...');
-		this.$emit('tags', this.aTags);
 		this.getBase();
 		this.getPresets();
 	}
@@ -115,10 +115,12 @@ Vue.component('tagsystem', {
 Vue.component('tagsystemtags', {
 	delimiters: ['${', '}'],
 	template: '#tagsystem-tags-template',
-	props: ['generation', 'ebene'],
+	props: ['generation', 'ebene', 'tags', 'parents'],
 	data: function () {
 		return {
-			cache: tagsystemCache
+			cache: tagsystemCache,
+			aTags: this.tags || [],
+			aParents: this.parents || []
 		};
 	},
 	computed: {
@@ -126,6 +128,10 @@ Vue.component('tagsystemtags', {
 	watch: {
 	},
 	methods: {
+		// editTag: function (aVal) {
+		// 	console.log('tagsystemtags');
+		// 	console.log(aVal);
+		// }
 	},
 	mounted: function () {
 	}
@@ -135,16 +141,19 @@ Vue.component('tagsystemtags', {
 Vue.component('tagsystemselecttag', {
 	delimiters: ['${', '}'],
 	template: '#tagsystem-selecttag-tags-template',
-	props: ['generation', 'ebene'],
+	props: ['generation', 'ebene', 'tags', 'parents'],
 	data: function () {
 		return {
 			cache: tagsystemCache,
+			aTags: this.tags || [],
+			aParents: this.parents || [],
 			isOpen: false
 		};
 	},
 	methods: {
 		ptagsbtn: function (tagId) {
 			this.isOpen = false;
+			console.log(this.aTags.push({'tag': tagId, 'tags': []}));
 			console.log('Tag mit ID ' + tagId + ' hinzufügen ...');
 		},
 		seltags: function () {

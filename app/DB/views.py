@@ -309,6 +309,14 @@ def tagsystemvue(request):
 					tags[tag.pk]['tezt'] = tmpTezt
 			except:
 				pass
+			try:
+				tmpChilds = []
+				for aCTags in dbmodels.TagFamilie.objects.filter(id_ParentTag_id=tag.pk).order_by('id_ParentTag__AReihung'):
+					tmpChilds.append(aCTags.pk)
+				if tmpChilds:
+					tags[tag.pk]['c'] = tmpChilds
+			except:
+				pass
 		output['tags'] = {'tags': tags, 'tagsReihung': tagsReihung}
 	if 'getPresets' in request.POST:
 		# import bearbeiten.models as bmodels
