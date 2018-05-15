@@ -138,10 +138,10 @@ Vue.component('tagsystemtags', {
 });
 
 /* Tags */
-Vue.component('tagsystemselecttag', {
+Vue.component('tagsystemselecttags', {
 	delimiters: ['${', '}'],
 	template: '#tagsystem-selecttag-tags-template',
-	props: ['generation', 'ebene', 'tags', 'parents'],
+	props: ['generation', 'ebene', 'tags', 'parents', 'tag'],
 	data: function () {
 		return {
 			cache: tagsystemCache,
@@ -151,21 +151,54 @@ Vue.component('tagsystemselecttag', {
 		};
 	},
 	methods: {
-		ptagsbtn: function (tagId) {
-			this.isOpen = false;
-			console.log(this.aTags.push({'tag': tagId, 'tags': []}));
-			console.log('Tag mit ID ' + tagId + ' hinzufügen ...');
-		},
 		seltags: function () {
 			this.isOpen = true;
-			this.$nextTick(() => this.$refs.ptagsbtn[0].focus());
+		},
+		closePtagsbtn: function () {
+			this.isOpen = false;
+		}
+	},
+	mounted: function () {
+	}
+});
+
+Vue.component('tagsystemselecttag', {
+	delimiters: ['${', '}'],
+	template: '#tagsystem-selecttag-tag-template',
+	props: ['generation', 'ebene', 'tags', 'parents', 'agen', 'tag'],
+	data: function () {
+		return {
+			cache: tagsystemCache,
+			aTags: this.tags || [],
+			aTag: this.tag || undefined,
+			aParents: this.parents || []
+		};
+	},
+	methods: {
+		ptagsbtn: function (tagId) {
+			if (this.aTag) {
+				console.log(this.aTags);
+				this.aTags.tag = tagId;
+			} else {
+				this.aTags.push({'tag': tagId, 'tags': []});
+			}
+			this.$emit('closePtagsbtn');
+			console.log('Tag mit ID ' + tagId + ' hinzufügen ...');
 		},
 		seltagsBlur: function () {
 			this.$nextTick(function () {
 				if (this.$refs.ptagsbtn.indexOf(document.activeElement) < 0) {
-					this.isOpen = false;
+					this.$emit('closePtagsbtn');
 				}
 			});
 		}
+	},
+	mounted: function () {
+		this.$refs.ptagsbtn.some(function (aElement) {
+			if ((aElement.className.indexOf('selected') >= 0 && this.tag) || (aElement.className.indexOf('parent') < 0 && !this.tag)) {
+				this.$nextTick(() => aElement.focus());
+				return true;
+			}
+		}, this);
 	}
 });
