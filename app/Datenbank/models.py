@@ -158,7 +158,7 @@ class Phaenomene(models.Model):
 class Phaenomenbereich(models.Model):
 	Bez_Phaenomenbereich		= models.CharField(max_length=511																	, verbose_name="Bezeichnung Phänomenbereich")
 	def __str__(self):
-		return "{}".format(self.Bez_Phänomen)
+		return "{}".format(self.Bez_Phaenomen)
 	class Meta:
 		db_table = "Phaenomenbereich"
 		verbose_name = "Phänomenbereich"
