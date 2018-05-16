@@ -174,6 +174,42 @@ Vue.component('tagsystemselecttag', {
 			aParents: this.parents || []
 		};
 	},
+	computed: {
+		getATags: function () {
+			var aTags = [];
+			this.cache.tagsCache.tagsReihung.forEach(function (tId, key) {
+				var cTag = this.cache.tagsCache.tags[tId];
+				if (parseInt(this.generation) > 0) {
+					if (parseInt(this.agen) === 0) {
+						if (this.aParents[this.agen] === tId) {
+							aTags.push({'tId': tId, 'p': true});
+						} else {
+							if ((cTag.g === null) && (!cTag.tezt || (cTag.tezt && cTag.tezt.indexOf(this.ebene) > -1))) {
+								aTags.push({'tId': tId, 'a': true});
+							}
+						}
+					} else {
+						if (this.aParents[this.agen] === tId) {
+							aTags.push({'tId': tId, 'p': true});
+						} else {
+							if (parseInt(this.generation) === parseInt(this.agen)) {
+								if ((cTag.g === null || cTag.g === parseInt(this.agen)) &&
+										(!cTag.tezt || (cTag.tezt && cTag.tezt.indexOf(this.ebene) > -1)) &&
+										(this.cache.tagsCache.tags[this.aParents[this.agen - 1]] && this.cache.tagsCache.tags[this.aParents[this.agen - 1]].c && this.cache.tagsCache.tags[this.aParents[this.agen - 1]].c.indexOf(tId) > -1)) {
+									aTags.push({'tId': tId, 'e': true});
+								}
+							}
+						}
+					}
+				} else {
+					if ((cTag.g === null || cTag.g === parseInt(this.generation)) && (!cTag.tezt || (cTag.tezt && cTag.tezt.indexOf(this.ebene) > -1)) && (!cTag.p)) {
+						aTags.push({'tId': tId, 'b': true, 'g': cTag.g});
+					}
+				}
+			}, this);
+			return aTags;
+		}
+	},
 	methods: {
 		ptagsbtn: function (tagId) {
 			if (this.aTag) {
@@ -187,18 +223,23 @@ Vue.component('tagsystemselecttag', {
 		},
 		seltagsBlur: function () {
 			this.$nextTick(function () {
-				if (this.$refs.ptagsbtn.indexOf(document.activeElement) < 0) {
+				if (document.activeElement.className.indexOf('ptagsbtn')) {
 					this.$emit('closePtagsbtn');
 				}
 			});
+		},
+		closePtagsbtn: function () {
+			this.$emit('closePtagsbtn');
 		}
 	},
 	mounted: function () {
-		this.$refs.ptagsbtn.some(function (aElement) {
-			if ((aElement.className.indexOf('selected') >= 0 && this.tag) || (aElement.className.indexOf('parent') < 0 && !this.tag)) {
-				this.$nextTick(() => aElement.focus());
-				return true;
-			}
-		}, this);
+		if (this.$refs.ptagsbtn) {
+			this.$refs.ptagsbtn.some(function (aElement) {
+				if ((aElement.className.indexOf('selected') >= 0 && this.tag) || (aElement.className.indexOf('parent') < 0 && !this.tag)) {
+					this.$nextTick(() => aElement.focus());
+					return true;
+				}
+			}, this);
+		}
 	}
 });

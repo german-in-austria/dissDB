@@ -65,3 +65,7 @@ button.ant-ftag {
   padding: 1px;
   border-radius: 5px;
 }
+
+.tag-familie.hidden-parent>div>.tag-familie {
+	margin-left: 10px;
+}

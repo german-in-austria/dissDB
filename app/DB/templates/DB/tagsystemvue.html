@@ -41,10 +41,8 @@
 
 <script type="text/x-template" id="tagsystem-selecttag-tags-template">
 	<div class="iblock prel">
-		<button v-bind:class="{'ant-ftag': !tag,'ant-tag': tag}" @click="seltags"><span class="glyphicon glyphicon-plus" aria-hidden="true" v-if="!tag"></span>${ tag ? cache.tagsCache.tags[tag].t : '' }</button>
+		<button v-bind:class="{'ant-ftag': !tag, 'ant-tag': tag}" @click="seltags"><span class="glyphicon glyphicon-plus" aria-hidden="true" v-if="!tag"></span>${ tag ? cache.tagsCache.tags[tag].t : '' }</button>
 		<div class="tags seltags open" v-if="isOpen">
-			<div>Generation: ${ generation }</div>
-			<div>Parents: ${ aParents }</div>
 			<tagsystemselecttag :generation="parseInt(generation)" agen=0 :ebene="ebene" :parents="aParents" :tags="aTags" :tag="tag" @closePtagsbtn="closePtagsbtn()" />
 		</div>
 	</div>
@@ -52,8 +50,9 @@
 
 <script type="text/x-template" id="tagsystem-selecttag-tag-template">
 	<div class="iblock">
-		<div class="tag-familie" data-classes="r-tag-familie" v-for="tagR in cache.tagsCache.tagsReihung" v-if="(!cache.tagsCache.tags[tagR].g||cache.tagsCache.tags[tagR].g===generation)&&(!cache.tagsCache.tags[tagR].tezt || (cache.tagsCache.tags[tagR].tezt&&cache.tagsCache.tags[tagR].tezt.indexOf(ebene)>-1))">
-			<button v-bind:class="{'ptagsbtn': true, 'selected': (aTag===tagR)}" ref="ptagsbtn" @click="ptagsbtn(tagR)" v-on:blur="seltagsBlur" :title="cache.tagsCache.tags[tagR].tl+' - ID: '+tagR">${ cache.tagsCache.tags[tagR].t }</button>
+		<div v-bind:class="{'tag-familie': true, 'hidden-parent': tagR.p}" data-classes="r-tag-familie" v-for="tagR in getATags">
+			<button v-bind:class="{'ptagsbtn': true, 'selected': (aTag===tagR.tId&&parseInt(agen)===parseInt(generation))}" :disabled="tagR.p" ref="ptagsbtn" @click="ptagsbtn(tagR.tId)" v-on:blur="seltagsBlur" :title="cache.tagsCache.tags[tagR.tId].tl+' - ID: '+tagR.tId">${ cache.tagsCache.tags[tagR.tId].t }</button>
+			<tagsystemselecttag :generation="parseInt(generation)" :agen="parseInt(agen)+1" :ebene="ebene" :parents="aParents" :tags="aTags" :tag="aTag" v-if="tagR.p"  @closePtagsbtn="closePtagsbtn()" />
 		</div>
 	</div>
 </script>

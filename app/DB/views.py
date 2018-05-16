@@ -312,9 +312,17 @@ def tagsystemvue(request):
 			try:
 				tmpChilds = []
 				for aCTags in dbmodels.TagFamilie.objects.filter(id_ParentTag_id=tag.pk).order_by('id_ParentTag__AReihung'):
-					tmpChilds.append(aCTags.pk)
+					tmpChilds.append(aCTags.id_ChildTag_id)
 				if tmpChilds:
 					tags[tag.pk]['c'] = tmpChilds
+			except:
+				pass
+			try:
+				tmpParents = []
+				for aCTags in dbmodels.TagFamilie.objects.filter(id_ChildTag_id=tag.pk).order_by('id_ChildTag__AReihung'):
+					tmpParents.append(aCTags.id_ParentTag_id)
+				if tmpParents:
+					tags[tag.pk]['p'] = tmpParents
 			except:
 				pass
 		output['tags'] = {'tags': tags, 'tagsReihung': tagsReihung}
