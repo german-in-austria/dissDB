@@ -1,4 +1,4 @@
-/* global Vue csrf alert */
+/* global _ Vue csrf alert confirm */
 
 /* Cache für Tags und Presets */
 const tagsystemCache = new Vue({data: { baseCache: undefined, tagsCache: undefined, presetsCache: undefined }});
@@ -22,7 +22,9 @@ Vue.component('tagsystem', {
 			loadingBase: true,
 			loadingTags: true,
 			loadingPresets: true,
-			aTags: this.tags || []
+			aTags: this.tags || [],
+			aTagsRR: [],
+			reRender: false
 		};
 	},
 	computed: {
@@ -102,6 +104,12 @@ Vue.component('tagsystem', {
 		addEbene: function () {
 			this.aTags.push({'e': 0, 'tags': []});
 			this.$emit('tags', this.aTags);
+		},
+		changeTag: function (aTags, tagIndex) {
+			Vue.set(this.aTags[tagIndex].tags, _.clone(aTags));
+			this.$emit('tags', this.aTags);
+			this.reRender = true;
+			this.$nextTick(() => { this.reRender = false; });
 		}
 	},
 	mounted: function () {
@@ -115,7 +123,7 @@ Vue.component('tagsystem', {
 Vue.component('tagsystemtags', {
 	delimiters: ['${', '}'],
 	template: '#tagsystem-tags-template',
-	props: ['generation', 'ebene', 'tags', 'parents'],
+	props: ['generation', 'ebene', 'tags', 'parents', 'tagindex'],
 	data: function () {
 		return {
 			cache: tagsystemCache,
@@ -128,10 +136,10 @@ Vue.component('tagsystemtags', {
 	watch: {
 	},
 	methods: {
-		// editTag: function (aVal) {
-		// 	console.log('tagsystemtags');
-		// 	console.log(aVal);
-		// }
+		changeTag: function (aTags, tagIndex) {
+			Vue.set(this.aTags[tagIndex].tags, _.clone(aTags));
+			this.$emit('changetag', this.aTags, this.tagindex);
+		}
 	},
 	mounted: function () {
 	}
@@ -141,7 +149,7 @@ Vue.component('tagsystemtags', {
 Vue.component('tagsystemselecttags', {
 	delimiters: ['${', '}'],
 	template: '#tagsystem-selecttag-tags-template',
-	props: ['generation', 'ebene', 'tags', 'parents', 'tag'],
+	props: ['generation', 'ebene', 'tags', 'parents', 'tag', 'tagindex'],
 	data: function () {
 		return {
 			cache: tagsystemCache,
@@ -156,6 +164,9 @@ Vue.component('tagsystemselecttags', {
 		},
 		closePtagsbtn: function () {
 			this.isOpen = false;
+		},
+		changeTag: function (aTags, tagIndex) {
+			this.$emit('changetag', aTags, tagIndex);
 		}
 	},
 	mounted: function () {
@@ -165,7 +176,7 @@ Vue.component('tagsystemselecttags', {
 Vue.component('tagsystemselecttag', {
 	delimiters: ['${', '}'],
 	template: '#tagsystem-selecttag-tag-template',
-	props: ['generation', 'ebene', 'tags', 'parents', 'agen', 'tag'],
+	props: ['generation', 'ebene', 'tags', 'parents', 'agen', 'tag', 'tagindex'],
 	data: function () {
 		return {
 			cache: tagsystemCache,
@@ -213,11 +224,14 @@ Vue.component('tagsystemselecttag', {
 	methods: {
 		ptagsbtn: function (tagId) {
 			if (this.aTag) {
-				console.log(this.aTags);
-				this.aTags.tag = tagId;
+				if (this.aTag !== tagId && ((!this.aTags.tags || this.aTags.tags.length < 1) ||	confirm('Sollen die "Children" tatsächlich gelöscht werden?'))) {
+					this.aTags.tag = tagId;
+					this.aTags.tags = [];
+				}
 			} else {
 				this.aTags.push({'tag': tagId, 'tags': []});
 			}
+			this.$emit('changetag', this.aTags, this.tagindex);
 			this.$emit('closePtagsbtn');
 			console.log('Tag mit ID ' + tagId + ' hinzufügen ...');
 		},
@@ -230,6 +244,9 @@ Vue.component('tagsystemselecttag', {
 		},
 		closePtagsbtn: function () {
 			this.$emit('closePtagsbtn');
+		},
+		changeTag: function (aTags, tagIndex) {
+			this.$emit('changetag', aTags, tagIndex);
 		}
 	},
 	mounted: function () {

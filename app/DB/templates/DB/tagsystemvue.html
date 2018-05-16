@@ -1,7 +1,7 @@
 <script type="text/x-template" id="tagsystem-template">
 	<div v-bind:class="{ 'form-horizontal': true, 'tag-forms': true, tagsystem: true }">
-		<template v-if="!(loadingTags && loadingBase)">
-			<div class="form-group tag-line" v-for="aEbene in aTags">
+		<template v-if="!(loadingTags && loadingBase) && !reRender">
+			<div class="form-group tag-line" v-for="(aEbene, aEbeneIndex) in aTags">
 				<label :class="'col-sm-'+colLeft+' control-label'">
 					<select class="tagebene w100" v-model="aEbene['e']">
 						<option value="0">Ebene auswählen (Löschen)</option>
@@ -11,8 +11,8 @@
 				<div :class="'col-sm-'+colRight">
 					<div class="form-control-static reihung-tags" v-if="aEbene['e']>0">
 						<div class="r-tag-familie r-tag-familie-pchilds">
-							<tagsystemtags :ebene="aEbene['e']" generation=0 :tags="aEbene['tags']" :parents="[]" />
-							<tagsystemselecttags :ebene="aEbene['e']" generation=0 :tags="aEbene['tags']" :parents="[]" />
+							<tagsystemtags :ebene="aEbene['e']" generation=0 :tags="aEbene['tags']" :parents="[]" :tagindex="aEbeneIndex" @changetag="changeTag" />
+							<tagsystemselecttags :ebene="aEbene['e']" generation=0 :tags="aEbene['tags']" tagindex="-1" :parents="[]" :tagindex="aEbeneIndex" @changetag="changeTag" />
 						</div>
 						<button class="ant-ctag"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
 					</div>
@@ -31,19 +31,19 @@
 
 <script type="text/x-template" id="tagsystem-tags-template">
 	<div class="iblock">
-		<div v-bind:class="{'r-tag-familie': true, 'r-tag-familie-pchilds': cache.tagsCache.tags[aTag.tag].c, 'error': (!cache.tagsCache.tags[aTag.tag].c && (aTag.tags && aTag.tags.length>0))}" v-for="aTag in aTags">
-			<tagsystemselecttags :generation="parseInt(generation)" :ebene="ebene" :parents="aParents" :tags="aTag" :tag="aTag.tag" />
-			<tagsystemtags :generation="parseInt(generation)+1" :ebene="ebene" :tags="aTag.tags" :parents="aParents.concat(aTag.tag)" />
-			<tagsystemselecttags :generation="parseInt(generation)+1" :ebene="ebene" :parents="aParents.concat(aTag.tag)" :tags="aTag.tags" v-if="cache.tagsCache.tags[aTag.tag].c" />
+		<div v-bind:class="{'r-tag-familie': true, 'r-tag-familie-pchilds': cache.tagsCache.tags[aTag.tag].c, 'error': (!cache.tagsCache.tags[aTag.tag].c && (aTag.tags && aTag.tags.length>0))}" v-for="(aTag, aTagIndex) in aTags">
+			<tagsystemselecttags :generation="parseInt(generation)" :ebene="ebene" :parents="aParents" :tags="aTag" :tag="aTag.tag" :tagindex="aTagIndex" @changetag="changeTag" />
+			<tagsystemtags :generation="parseInt(generation)+1" :ebene="ebene" :tags="aTag.tags" :parents="aParents.concat(aTag.tag)" :tagindex="aTagIndex" @changetag="changeTag"/>
+			<tagsystemselecttags :generation="parseInt(generation)+1" :ebene="ebene" :parents="aParents.concat(aTag.tag)" :tags="aTag.tags" :tagindex="aTagIndex" v-if="cache.tagsCache.tags[aTag.tag].c" @changetag="changeTag" />
 		</div>
 	</div>
 </script>
 
 <script type="text/x-template" id="tagsystem-selecttag-tags-template">
 	<div class="iblock prel">
-		<button v-bind:class="{'ant-ftag': !tag, 'ant-tag': tag}" @click="seltags"><span class="glyphicon glyphicon-plus" aria-hidden="true" v-if="!tag"></span>${ tag ? cache.tagsCache.tags[tag].t : '' }</button>
+		<button v-bind:class="{'ant-ftag': !tag, 'ant-tag': tag}" @click="seltags" :title="tagindex"><span class="glyphicon glyphicon-plus" aria-hidden="true" v-if="!tag"></span>${ tag ? cache.tagsCache.tags[tag].t : '' }</button>
 		<div class="tags seltags open" v-if="isOpen">
-			<tagsystemselecttag :generation="parseInt(generation)" agen=0 :ebene="ebene" :parents="aParents" :tags="aTags" :tag="tag" @closePtagsbtn="closePtagsbtn()" />
+			<tagsystemselecttag :generation="parseInt(generation)" agen=0 :ebene="ebene" :parents="aParents" :tags="aTags" :tag="tag" :tagindex="tagindex" @closePtagsbtn="closePtagsbtn()" @changetag="changeTag" />
 		</div>
 	</div>
 </script>
@@ -52,7 +52,7 @@
 	<div class="iblock">
 		<div v-bind:class="{'tag-familie': true, 'hidden-parent': tagR.p}" data-classes="r-tag-familie" v-for="tagR in getATags">
 			<button v-bind:class="{'ptagsbtn': true, 'selected': (aTag===tagR.tId&&parseInt(agen)===parseInt(generation))}" :disabled="tagR.p" ref="ptagsbtn" @click="ptagsbtn(tagR.tId)" v-on:blur="seltagsBlur" :title="cache.tagsCache.tags[tagR.tId].tl+' - ID: '+tagR.tId">${ cache.tagsCache.tags[tagR.tId].t }</button>
-			<tagsystemselecttag :generation="parseInt(generation)" :agen="parseInt(agen)+1" :ebene="ebene" :parents="aParents" :tags="aTags" :tag="aTag" v-if="tagR.p"  @closePtagsbtn="closePtagsbtn()" />
+			<tagsystemselecttag :generation="parseInt(generation)" :agen="parseInt(agen)+1" :ebene="ebene" :parents="aParents" :tags="aTags" :tag="aTag" v-if="tagR.p" :tagindex="tagindex" @closePtagsbtn="closePtagsbtn()" @changetag="changeTag" />
 		</div>
 	</div>
 </script>
