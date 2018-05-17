@@ -69,3 +69,19 @@ button.ant-ftag {
 .tag-familie.hidden-parent>div>.tag-familie {
 	margin-left: 10px;
 }
+
+.tagscontrol {
+  margin-bottom: 5px;
+  min-width: 110px;
+}
+.ptagsdel {
+	padding-right: 8px;
+}
+.tagscontrol .ptagsbtn[disabled] {
+  background: #ddd;
+  color: #888;
+}
+.ant-tag.error {
+	background: #f1bfbf !important;
+	color: #e00 !important;
+}

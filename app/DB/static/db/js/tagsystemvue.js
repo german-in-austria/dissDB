@@ -23,7 +23,6 @@ Vue.component('tagsystem', {
 			loadingTags: true,
 			loadingPresets: true,
 			aTags: this.tags || [],
-			aTagsRR: [],
 			reRender: false
 		};
 	},
@@ -149,7 +148,7 @@ Vue.component('tagsystemtags', {
 Vue.component('tagsystemselecttags', {
 	delimiters: ['${', '}'],
 	template: '#tagsystem-selecttag-tags-template',
-	props: ['generation', 'ebene', 'tags', 'parents', 'tag', 'tagindex'],
+	props: ['generation', 'ebene', 'tags', 'parents', 'tag', 'tagindex', 'tagindexmax'],
 	data: function () {
 		return {
 			cache: tagsystemCache,
@@ -167,6 +166,13 @@ Vue.component('tagsystemselecttags', {
 		},
 		changeTag: function (aTags, tagIndex) {
 			this.$emit('changetag', aTags, tagIndex);
+		},
+		seltagsBlur: function () {
+			this.$nextTick(function () {
+				if (document.activeElement.className.indexOf('ptagsbtn')) {
+					this.closePtagsbtn();
+				}
+			});
 		}
 	},
 	mounted: function () {
