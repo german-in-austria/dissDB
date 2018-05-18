@@ -144,8 +144,10 @@ Vue.component('tagsystemtags', {
 			this.$emit('changetag', this.aTags, this.tagindex);
 		},
 		deltag: function (tagIndex) {
-			this.aTags.splice(tagIndex, 1);
-			this.$emit('changetag', this.aTags, this.tagindex);
+			if (confirm('Sollen der Tag "' + this.cache.tagsCache.tags[this.aTags[tagIndex].tag].t + '" inkl. aller "Children" tatsächlich gelöscht werden?')) {
+				this.aTags.splice(tagIndex, 1);
+				this.$emit('changetag', this.aTags, this.tagindex);
+			}
 		}
 	},
 	mounted: function () {
@@ -191,9 +193,7 @@ Vue.component('tagsystemselecttags', {
 			this.closePtagsbtn();
 		},
 		deltag: function () {
-			if (confirm('Sollen der Tag "' + this.cache.tagsCache.tags[this.tagindex].t + '" inkl. aller "Children" tatsächlich gelöscht werden?')) {
-				this.$emit('deltag', this.tagindex);
-			}
+			this.$emit('deltag', this.tagindex);
 			this.closePtagsbtn();
 		}
 	},
