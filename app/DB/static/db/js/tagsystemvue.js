@@ -109,6 +109,17 @@ Vue.component('tagsystem', {
 			this.$emit('tags', this.aTags);
 			this.reRender = true;
 			this.$nextTick(() => { this.reRender = false; });
+		},
+		/* Sonsitge Funktionen: */
+		ebeneVorhanden: function (eId) {
+			var vorhanden = false;
+			this.aTags.some(function (aEbene) {
+				if (aEbene.e === eId) {
+					vorhanden = true;
+					return true;
+				}
+			}, this);
+			return vorhanden;
 		}
 	},
 	mounted: function () {

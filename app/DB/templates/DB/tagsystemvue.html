@@ -5,7 +5,7 @@
 				<label :class="'col-sm-'+colLeft+' control-label'">
 					<select class="tagebene w100" v-model="aEbene['e']">
 						<option value="0">Ebene auswählen (Löschen)</option>
-						<option v-for="tagebene in cache.baseCache.tagebenen" :value="tagebene.pk">${tagebene.t}</option>
+						<option v-for="tagebene in cache.baseCache.tagebenen" :value="tagebene.pk" :disabled="(aEbene['e']!==tagebene.pk) && ebeneVorhanden(tagebene.pk)">${tagebene.t}</option>
 					</select>
 				</label>
 				<div :class="'col-sm-'+colRight">
