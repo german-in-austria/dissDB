@@ -138,6 +138,14 @@ Vue.component('tagsystemtags', {
 		changeTag: function (aTags, tagIndex) {
 			Vue.set(this.aTags[tagIndex].tags, _.clone(aTags));
 			this.$emit('changetag', this.aTags, this.tagindex);
+		},
+		movetag: function (tagIndex, aDir) {
+			this.aTags.splice(tagIndex + aDir, 0, this.aTags.splice(tagIndex, 1)[0]);
+			this.$emit('changetag', this.aTags, this.tagindex);
+		},
+		deltag: function (tagIndex) {
+			this.aTags.splice(tagIndex, 1);
+			this.$emit('changetag', this.aTags, this.tagindex);
 		}
 	},
 	mounted: function () {
@@ -173,6 +181,20 @@ Vue.component('tagsystemselecttags', {
 					this.closePtagsbtn();
 				}
 			});
+		},
+		movetagleft: function () {
+			this.$emit('movetag', this.tagindex, -1);
+			this.closePtagsbtn();
+		},
+		movetagright: function () {
+			this.$emit('movetag', this.tagindex, 1);
+			this.closePtagsbtn();
+		},
+		deltag: function () {
+			if (confirm('Sollen der Tag "' + this.cache.tagsCache.tags[this.tagindex].t + '" inkl. aller "Children" tatsächlich gelöscht werden?')) {
+				this.$emit('deltag', this.tagindex);
+			}
+			this.closePtagsbtn();
 		}
 	},
 	mounted: function () {

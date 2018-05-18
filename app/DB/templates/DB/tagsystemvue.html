@@ -32,7 +32,7 @@
 <script type="text/x-template" id="tagsystem-tags-template">
 	<div class="iblock">
 		<div v-bind:class="{'r-tag-familie': true, 'r-tag-familie-pchilds': cache.tagsCache.tags[aTag.tag].c, 'error': (!cache.tagsCache.tags[aTag.tag].c && (aTag.tags && aTag.tags.length>0))}" v-for="(aTag, aTagIndex) in aTags">
-			<tagsystemselecttags :generation="parseInt(generation)" :ebene="ebene" :parents="aParents" :tags="aTag" :tag="aTag.tag" :tagindex="aTagIndex" :tagindexmax="aTags.length-1" @changetag="changeTag" />
+			<tagsystemselecttags :generation="parseInt(generation)" :ebene="ebene" :parents="aParents" :tags="aTag" :tag="aTag.tag" :tagindex="aTagIndex" :tagindexmax="aTags.length-1" @movetag="movetag" @deltag="deltag" @changetag="changeTag" />
 			<tagsystemtags :generation="parseInt(generation)+1" :ebene="ebene" :tags="aTag.tags" :parents="aParents.concat(aTag.tag)" :tagindex="aTagIndex" @changetag="changeTag"/>
 			<tagsystemselecttags :generation="parseInt(generation)+1" :ebene="ebene" :parents="aParents.concat(aTag.tag)" :tags="aTag.tags" :tagindex="aTagIndex" v-if="cache.tagsCache.tags[aTag.tag].c" @changetag="changeTag" />
 		</div>
@@ -44,9 +44,9 @@
 		<button v-bind:class="{'ant-ftag': !tag, 'ant-tag': tag, 'error': (tag && (cache.tagsCache.tags[tag].tezt && cache.tagsCache.tags[tag].tezt.indexOf(this.ebene) < 0))}" @click="seltags"><span class="glyphicon glyphicon-plus" aria-hidden="true" v-if="!tag"></span>${ tag ? cache.tagsCache.tags[tag].t : '' }</button>
 		<div class="tags seltags open" v-if="isOpen">
 			<div class="tagscontrol" v-if="tag">
-				<button class="ptagsbtn ptagsleft" title="Aktuellen Tag nach links verschieben" tabindex="-1" :disabled="tagindex<1" v-on:blur="seltagsBlur"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
-				<button class="ptagsbtn ptagsdel" data-pk="0" title="Aktuellen Tag löschen" tabindex="-1" v-on:blur="seltagsBlur"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
-				<button class="ptagsbtn ptagsright" title="Aktuellen Tag nach rechts verschieben" tabindex="-1" :disabled="!(tagindex<tagindexmax)" v-on:blur="seltagsBlur"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+				<button class="ptagsbtn ptagsleft" title="Aktuellen Tag nach links verschieben" tabindex="-1" :disabled="tagindex<1" @click="movetagleft" v-on:blur="seltagsBlur"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+				<button class="ptagsbtn ptagsdel" data-pk="0" title="Aktuellen Tag löschen" tabindex="-1" @click="deltag()" v-on:blur="seltagsBlur"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+				<button class="ptagsbtn ptagsright" title="Aktuellen Tag nach rechts verschieben" tabindex="-1" :disabled="!(tagindex<tagindexmax)" @click="movetagright" v-on:blur="seltagsBlur"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
 			</div>
 			<tagsystemselecttag :generation="parseInt(generation)" agen=0 :ebene="ebene" :parents="aParents" :tags="aTags" :tag="tag" :tagindex="tagindex" @closePtagsbtn="closePtagsbtn()" @changetag="changeTag" />
 		</div>
