@@ -25,7 +25,7 @@
 					<g :class="'eInf eInf'+aInfKey" :transform="'translate(0,'+(eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
 						<rect x="0" y="0" :width="tEvents[tEventId]['svgWidth']+1" :height="eInfHeight-10" />
 						<template v-if="aEvents[tEvents[tEventId].eId[aInfKey]]">
-							<g v-on:click="showaTokenInfos(aTokenId)" :class="'eTok eTok' + aTokenId + ' eTokT' + aTokens[aTokenId]['tt'] + ((aTokens[aTokenId]['viewed'])?' viewed':'') + ((d3TokenLastView === aTokenId)?' lastview':'') + ((d3TokenSelected === aTokenId)?' selected':'')" :transform="'translate('+(aTokens[aTokenId]['svgLeft']-1)+',1)'" v-for="aTokenId in aEvents[tEvents[tEventId].eId[aInfKey]]['tid'][aInfKey]">
+							<g v-on:click="showaTokenInfos(aTokenId)" :class="'eTok eTok' + aTokenId + ' eTokT' + aTokens[aTokenId]['tt'] + ((aTokens[aTokenId]['viewed'])?' viewed':'') + ((d3TokenLastView === aTokenId)?' lastview':'') + ((d3TokenSelected === aTokenId)?' selected':'') + ((inSuchErgebnisse(aTokenId))?' found':'')" :transform="'translate('+(aTokens[aTokenId]['svgLeft']-1)+',1)'" v-for="aTokenId in aEvents[tEvents[tEventId].eId[aInfKey]]['tid'][aInfKey]">
 								<rect x="-0.5" y="0" :width="aTokens[aTokenId]['svgWidth']" :height="eInfHeight - 12" />
 								<text x="0" y="18">${ getTokenString(aTokenId, 't') }</text>
 								<text x="0" y="43">${ getTokenString(aTokenId, 'o', 't') }</text>

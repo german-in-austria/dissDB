@@ -77,7 +77,7 @@ var annotationsTool = new Vue({
 		},
 		showSuche: function (nVal, oVal) {
 			if (nVal) {
-				this.$nextTick(() => { $('#suchtext').focus(); });
+				this.$nextTick(() => { this.focusSuchText(); });
 			} else {
 				this.suchText = '';
 				this.suchTokens = [];
@@ -572,6 +572,7 @@ var annotationsTool = new Vue({
 		focusCatchKeyDown: function (e) {
 			if (e.ctrlKey && e.keyCode === 70) { // Strg + F
 				e.preventDefault();
+				this.focusSuchText();
 				this.showSuche = true;
 			}
 		},
@@ -583,6 +584,9 @@ var annotationsTool = new Vue({
 		},
 		focusFocusCatch: function () {
 			$('#focuscatch').focus();
+		},
+		focusSuchText: function () {
+			$('#suchtext').focus();
 		},
 		/* Nächstes Token auswählen */
 		selectNextToken: function () {
@@ -822,12 +826,26 @@ var annotationsTool = new Vue({
 						if (aToken.o && aToken.o.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; } else
 						if (aToken.to && aToken.to.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; }
 						if (addToken) {
-							this.suchTokens.push({'id': key});
+							this.suchTokens.push({'id': parseInt(key)});
 						}
 					}, this);
 				}
+				if (this.suchTokens.length > 0) {
+					this.d3TokenSelected = this.suchTokens[0].id;
+					annotationsTool.focusFocusCatch();
+				}
 				this.suchen = false;
 			}
+		},
+		inSuchErgebnisse: function (aTId) {
+			var found = false;
+			this.suchTokens.some(function (val) {
+				if (val.id === aTId) {
+					found = true;
+					return true;
+				}
+			}, this);
+			return found;
 		}
 	},
 	mounted: function () {

@@ -13,7 +13,7 @@
 	<div class="row h100">
 		<div class="col-md-2 h100 mh200px vscroller lmfa">
 			<div class="suchgroup" v-if="annotationsTool.aPK>0&&showSuche">
-				<h4>Suchen:<a href="#" @click="showSuche=false" class="pull-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></h4>
+				<h4>Suchen:<a href="#" v-on:click.prevent="showSuche=false" class="pull-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></h4>
 				<div class="lmfasff">
 					<div class="iwdbtn">
 						<input v-on:keyup="sucheCatchKeyUp" id="suchtext" type="text" size="20" class="lmfasf" placeholder="Suchen ..." v-model="suchText">
