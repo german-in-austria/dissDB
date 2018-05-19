@@ -16,7 +16,7 @@
 				<h4>Suchen:<a href="#" v-on:click.prevent="showSuche=false" class="pull-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></h4>
 				<div class="lmfasff">
 					<div class="iwdbtn">
-						<input v-on:keyup="sucheCatchKeyUp" id="suchtext" type="text" size="20" class="lmfasf" placeholder="Suchen ..." v-model="suchText">
+						<input v-on:keyup="sucheCatchKeyUp" v-on:keydown="sucheCatchKeyDown" id="suchtext" type="text" size="20" class="lmfasf" placeholder="Suchen ..." v-model="suchText">
 						<button class="idbtn" title="Eingabe loeschen!" @click="suchText=''"><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>
 					</div>
 				</div>

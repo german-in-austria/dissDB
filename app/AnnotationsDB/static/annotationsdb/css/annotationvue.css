@@ -80,8 +80,7 @@ g.eTok > rect {
   fill: #fff;
 }
 g.eTok.found > rect {
-	fill: #ddf !important;
-	stroke: #00f !important;
+	fill: #ccf !important;
 }
 g.eTok.eTokT3 > rect, g.eTok.eTokT5 > rect {
 	fill: #fafaff;

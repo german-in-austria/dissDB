@@ -61,7 +61,8 @@ var annotationsTool = new Vue({
 		showSuche: false,
 		suchen: false,
 		suchText: '',
-		suchTokens: []
+		suchTokens: [],
+		suchTokensInfo: {}
 	},
 	computed: {
 	},
@@ -82,6 +83,7 @@ var annotationsTool = new Vue({
 			} else {
 				this.suchText = '';
 				this.suchTokens = [];
+				this.suchTokensInfo = {};
 				this.focusFocusCatch();
 			}
 		},
@@ -581,12 +583,21 @@ var annotationsTool = new Vue({
 				e.preventDefault();
 				this.focusSuchText();
 				this.showSuche = true;
+			} else if (e.keyCode === 114) {
+				e.preventDefault();
+				this.naechsterSuchToken(e.shiftKey);
 			}
 		},
 		sucheCatchKeyUp: function (e) {
 			if (e.keyCode === 27) {
-				this.showSuche = false;
 				e.preventDefault();
+				this.showSuche = false;
+			}
+		},
+		sucheCatchKeyDown: function (e) {
+			if (e.keyCode === 114) {
+				e.preventDefault();
+				this.naechsterSuchToken(e.shiftKey);
 			}
 		},
 		focusFocusCatch: function () {
@@ -825,34 +836,43 @@ var annotationsTool = new Vue({
 			if (this.showSuche && !this.suchen) {
 				this.suchen = true;
 				this.suchTokens = [];
+				this.suchTokensInfo = {};
 				if (this.suchText.length > 1) {	// Suche durchführen
-					Object.keys(this.aTokens).map(function (key, i) {
+					this.aTokenReihung.forEach(function (key) {
 						var aToken = this.aTokens[key];
 						var addToken = false;
 						if (aToken.t && aToken.t.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; } else
 						if (aToken.o && aToken.o.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; } else
 						if (aToken.to && aToken.to.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; }
 						if (addToken) {
-							this.suchTokens.push({'id': parseInt(key)});
+							this.suchTokens.push(parseInt(key));
+							this.suchTokensInfo[parseInt(key)] = {'z': 0};
 						}
 					}, this);
 				}
 				if (this.suchTokens.length > 0) {
-					this.d3TokenSelected = this.suchTokens[0].id;
+					this.naechsterSuchToken();
 					annotationsTool.focusFocusCatch();
 				}
 				this.suchen = false;
 			}
 		},
-		inSuchErgebnisse: function (aTId) {
-			var found = false;
-			this.suchTokens.some(function (val) {
-				if (val.id === aTId) {
-					found = true;
-					return true;
+		naechsterSuchToken: function (rev = false) {
+			if (this.suchTokens.length > 0) {
+				var aList = _.clone(this.aTokenReihung);
+				if (rev) {
+					aList = aList.slice().reverse();
 				}
-			}, this);
-			return found;
+				if (this.d3TokenSelected && aList.indexOf(this.d3TokenSelected) > 0 && aList.indexOf(this.d3TokenSelected) < aList.length - 1) {
+					aList = aList.concat(aList.splice(0, aList.indexOf(this.d3TokenSelected) + 1));
+				}
+				aList.some(function (val, index) {
+					if (this.suchTokens.indexOf(val) >= 0) {
+						this.d3TokenSelected = val;
+						return true;
+					}
+				}, this);
+			}
 		}
 	},
 	mounted: function () {
