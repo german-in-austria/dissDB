@@ -24,10 +24,24 @@
 						<b>Tokens:</b> ${ Object.keys(aTokens).length.toLocaleString() }
 					</div>
 				</div>
+				<div v-bind:class="{'infpanel': true, 'open': showTokenInfo}" v-if="d3TokenSelected&&aTokens[d3TokenSelected]">
+					<a href="#" v-on:click.prevent="showTokenInfo=!showTokenInfo"><b>Akutelles Token</b> (ID: ${ d3TokenSelected })<span :class="'glyphicon glyphicon-' + ((showTokenInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+					<div v-if="showTokenInfo" v-for="aToken in [aTokens[d3TokenSelected]]">
+						<b>Text:</b> ${ aToken.t }<br>
+						<b>Ortho:</b>  ${ aToken.o }<br>
+						<b title="Text in Ortho:">T. in Or.:</b>  ${ aToken.to }<br>
+						<b>Typ:</b> <span :title="'ID: '+aToken.tt">${ aTokenTypes[aToken.tt].n }</span><br>
+						<template v-if="aToken.fo"><b title="Fragment von:">Frag.:</b> <span :title="'ID: '+aToken.fo">${ aTokens[aToken.fo]['t'] }</span><br></template>
+						<b>likely_error:</b> ${ ((aToken.le)?'Ja':'Nein') }<br>
+						<template v-if="aToken.s"><b>Satz:</b> <span :title="'ID: '+aToken.s">${ ((aSaetze[aToken.s].t)?aSaetze[aToken.s].t:('ID: '+aToken.s)) }</span><br></template>
+						<template v-if="aToken.s"><b>Satz Reihung:</b> ${ ((aToken.sr)?aToken.sr.toLocaleString():0) }<br></template>
+						<template v-if="aTokenFragmente[d3TokenSelected]"><b>Fragmente:</b> <span :title="'ID: '+aToFragKey" v-for="(aToFragKey, aIndex) in aTokenFragmente[d3TokenSelected]">${ ((aIndex)?', ':'')+aTokens[aToFragKey].t }</span><br></template>
+					</div>
+				</div>
 				<hr>
 			</div>
 			<div class="selgroup">
-				<h4>Transkript auswählen:</h4>
+				<h4>Transkript:</h4>
 				<div class="input-group mit10 mib10">
 					<select name="ainformant" size="1" class="form-control" v-model="menue.aInformant" @change="getMenue()">
 						<option value="0">Informant</option>
@@ -136,7 +150,7 @@
 					<div v-for="(aInfVal, aInfKey) in aInformanten" v-if="tEvents[tEventInfo]['eId'][aInfKey] >= 0">
 						<hr>
 						<div class="form-horizontal" v-for="aEventKey in [tEvents[tEventInfo]['eId'][aInfKey]]">
-							<div class="form-group"><label class="col-sm-3 control-label">Informant</label><div class="col-sm-9"><p class="form-control-static">${ aInfVal['k'] } (${ aInfVal['ka'] } - Id: ${ aInfKey })</p></div></div>
+							<div class="form-group"><label class="col-sm-3 control-label">Informant</label><div class="col-sm-9"><p class="form-control-static">${ aInfVal['k'] } (${ aInfVal['ka'] } - ID: ${ aInfKey })</p></div></div>
 							<div class="form-group"><label class="col-sm-3 control-label">ID</label><div class="col-sm-9"><p class="form-control-static">${ aEvents[aEventKey]['pk'] }</p></div></div>
 							<div class="form-group"><label class="col-sm-3 control-label">Start</label><div class="col-sm-9"><p class="form-control-static">${ aEvents[aEventKey]['s'] }</p></div></div>
 							<div class="form-group"><label class="col-sm-3 control-label">Ende</label><div class="col-sm-9"><p class="form-control-static">${ aEvents[aEventKey]['e'] }</p></div></div>
@@ -171,7 +185,7 @@
 							</select>
 						</div></div>
 						<div class="form-group"><label for="aTokenOrtho" class="col-sm-3 control-label">ortho</label><div class="col-sm-9"><input type="text" class="form-control" id="aTokenOrtho" v-model="aTokenInfo['o']"></div></div>
-						<div class="form-group"><label for="aTokenIDInf" class="col-sm-3 control-label">ID_Inf</label><div class="col-sm-9"><p class="form-control-static" id="aTokenIDInf">${ aInformanten[aTokenInfo['i']]['k'] } (${ aInformanten[aTokenInfo['i']]['ka'] } - Id: ${ aTokenInfo['i'] })</p></div></div>
+						<div class="form-group"><label for="aTokenIDInf" class="col-sm-3 control-label">ID_Inf</label><div class="col-sm-9"><p class="form-control-static" id="aTokenIDInf">${ aInformanten[aTokenInfo['i']]['k'] } (${ aInformanten[aTokenInfo['i']]['ka'] } - ID: ${ aTokenInfo['i'] })</p></div></div>
 						<div class="form-group" v-if="aTokenInfo['fo']"><label for="aTokenfragmentof" class="col-sm-3 control-label">fragment_of</label><div class="col-sm-9"><p class="form-control-static" id="aTokenfragmentof">${ aTokens[aTokenInfo['fo']]['t'] } - ID: ${ aTokenInfo['fo'] }</p></div></div>
 						<div class="form-group"><label for="aTokenReihung" class="col-sm-3 control-label">token_reihung</label><div class="col-sm-9"><p class="form-control-static" id="aTokenReihung">${ aTokenInfo['tr'] }</p></div></div>
 						<div class="form-group"><label for="aTokenEventID" class="col-sm-3 control-label">event_id</label><div class="col-sm-9"><p class="form-control-static" id="aTokenEventID">${ aTokenInfo['e-txt'] } - ID: ${ aTokenInfo['e'] }</p></div></div>

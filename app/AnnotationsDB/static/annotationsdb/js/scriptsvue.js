@@ -55,7 +55,8 @@ var annotationsTool = new Vue({
 		eInfHeight: 63,
 		eInfTop: 25,
 		zInfWidth: 100,
-		showTransInfo: true
+		showTransInfo: true,
+		showTokenInfo: true
 	},
 	computed: {
 	},

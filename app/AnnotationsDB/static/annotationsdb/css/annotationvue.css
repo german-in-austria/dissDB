@@ -184,6 +184,10 @@ g.tEvent > .zeit > line {
   width: 10px;
   height: 10px;
 }
+
+.infpanel {
+	margin-bottom: 10px;
+}
 .infpanel>a {
 	display: block;
 	background: #fff;
