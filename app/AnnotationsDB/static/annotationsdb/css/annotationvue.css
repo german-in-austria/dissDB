@@ -184,3 +184,27 @@ g.tEvent > .zeit > line {
   width: 10px;
   height: 10px;
 }
+.infpanel>a {
+	display: block;
+	background: #fff;
+	padding: 2px 10px 3px 7px;
+  color: #333;
+	text-decoration: none;
+}
+.infpanel.open>a {
+	background: #ddd;
+	color: #272C31;
+}
+.infpanel>a:hover, .infpanel>a:focus {
+	background: #555;
+	color: #ddd;
+}
+.infpanel>a>.glyphicon {
+	top: 4px;
+}
+.infpanel>div {
+  border: 1px solid #ddd;
+  padding: 6px;
+  font-size: 14px;
+  background: #fff;
+}
