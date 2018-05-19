@@ -1,0 +1,26 @@
+<h4>Informationen:</h4>
+<div v-bind:class="{'infpanel': true, 'open': showTransInfo}" v-if="aTranskript.pk">
+	<a href="#" v-on:click.prevent="showTransInfo=!showTransInfo"><b>Transkript</b><span :class="'glyphicon glyphicon-' + ((showTransInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+	<div v-if="showTransInfo">
+		<b>Name:</b> ${ aTranskript.n } (ID: ${ aTranskript.pk })<br>
+		<b>Update Zeit:</b> ${ aTranskript.ut }<br>
+		<b>Informanten:</b> <span v-for="(aInf, aInfKey) in aInformanten" :title="'Anonym: '+aInf.ka+' - ID: '+aInfKey">${ ((aInf.i)?', ':'')+aInf.k }</span><br>
+		<b>Events:</b> ${ aEvents.length.toLocaleString() }<br>
+		<b>Tokens:</b> ${ Object.keys(aTokens).length.toLocaleString() }
+	</div>
+</div>
+<div v-bind:class="{'infpanel': true, 'open': showTokenInfo}" v-if="d3TokenSelected&&aTokens[d3TokenSelected]">
+	<a href="#" v-on:click.prevent="showTokenInfo=!showTokenInfo"><b>Akutelles Token</b> (ID: ${ d3TokenSelected })<span :class="'glyphicon glyphicon-' + ((showTokenInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+	<div v-if="showTokenInfo" v-for="aToken in [aTokens[d3TokenSelected]]">
+		<b>Text:</b> ${ aToken.t }<br>
+		<b>Ortho:</b>  ${ aToken.o }<br>
+		<b title="Text in Ortho:">T. in Or.:</b>  ${ aToken.to }<br>
+		<b>Typ:</b> <span :title="'ID: '+aToken.tt">${ aTokenTypes[aToken.tt].n }</span><br>
+		<b>likely_error:</b> ${ ((aToken.le)?'Ja':'Nein') }<br>
+		<template v-if="aToken.s"><b>Satz:</b> <span :title="'ID: '+aToken.s">${ ((aSaetze[aToken.s].t)?aSaetze[aToken.s].t:('ID: '+aToken.s)) }</span><br></template>
+		<template v-if="aToken.s"><b>Satz Reihung:</b> ${ ((aToken.sr)?aToken.sr.toLocaleString():0) }<br></template>
+		<template v-if="aToken.fo"><b title="Fragment von:">Frag. von:</b> <span :title="'ID: '+aToken.fo">${ aTokens[aToken.fo]['t'] }</span><br></template>
+		<template v-if="aTokenFragmente[d3TokenSelected]"><b>Fragmente:</b> <span :title="'ID: '+aToFragKey" v-for="(aToFragKey, aIndex) in aTokenFragmente[d3TokenSelected]">${ ((aIndex)?', ':'')+aTokens[aToFragKey].t }</span><br></template>
+	</div>
+</div>
+<hr>

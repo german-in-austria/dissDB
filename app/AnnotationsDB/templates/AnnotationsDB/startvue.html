@@ -13,98 +13,16 @@
 	<div class="row h100">
 		<div class="col-md-2 h100 mh200px vscroller lmfa">
 			<div class="infgroup" v-if="annotationsTool.aPK>0">
-				<h4>Informationen:</h4>
-				<div v-bind:class="{'infpanel': true, 'open': showTransInfo}" v-if="aTranskript.pk">
-					<a href="#" v-on:click.prevent="showTransInfo=!showTransInfo"><b>Transkript</b><span :class="'glyphicon glyphicon-' + ((showTransInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
-					<div v-if="showTransInfo">
-						<b>Name:</b> ${ aTranskript.n } (ID: ${ aTranskript.pk })<br>
-						<b>Update Zeit:</b> ${ aTranskript.ut }<br>
-						<b>Informanten:</b> <span v-for="(aInf, aInfKey) in aInformanten" :title="'Anonym: '+aInf.ka+' - ID: '+aInfKey">${ ((aInf.i)?', ':'')+aInf.k }</span><br>
-						<b>Events:</b> ${ aEvents.length.toLocaleString() }<br>
-						<b>Tokens:</b> ${ Object.keys(aTokens).length.toLocaleString() }
-					</div>
-				</div>
-				<div v-bind:class="{'infpanel': true, 'open': showTokenInfo}" v-if="d3TokenSelected&&aTokens[d3TokenSelected]">
-					<a href="#" v-on:click.prevent="showTokenInfo=!showTokenInfo"><b>Akutelles Token</b> (ID: ${ d3TokenSelected })<span :class="'glyphicon glyphicon-' + ((showTokenInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
-					<div v-if="showTokenInfo" v-for="aToken in [aTokens[d3TokenSelected]]">
-						<b>Text:</b> ${ aToken.t }<br>
-						<b>Ortho:</b>  ${ aToken.o }<br>
-						<b title="Text in Ortho:">T. in Or.:</b>  ${ aToken.to }<br>
-						<b>Typ:</b> <span :title="'ID: '+aToken.tt">${ aTokenTypes[aToken.tt].n }</span><br>
-						<template v-if="aToken.fo"><b title="Fragment von:">Frag.:</b> <span :title="'ID: '+aToken.fo">${ aTokens[aToken.fo]['t'] }</span><br></template>
-						<b>likely_error:</b> ${ ((aToken.le)?'Ja':'Nein') }<br>
-						<template v-if="aToken.s"><b>Satz:</b> <span :title="'ID: '+aToken.s">${ ((aSaetze[aToken.s].t)?aSaetze[aToken.s].t:('ID: '+aToken.s)) }</span><br></template>
-						<template v-if="aToken.s"><b>Satz Reihung:</b> ${ ((aToken.sr)?aToken.sr.toLocaleString():0) }<br></template>
-						<template v-if="aTokenFragmente[d3TokenSelected]"><b>Fragmente:</b> <span :title="'ID: '+aToFragKey" v-for="(aToFragKey, aIndex) in aTokenFragmente[d3TokenSelected]">${ ((aIndex)?', ':'')+aTokens[aToFragKey].t }</span><br></template>
-					</div>
-				</div>
-				<hr>
+				{% include "AnnotationsDB/annotationsinfos.html" %}
 			</div>
 			<div class="selgroup">
-				<h4>Transkript:</h4>
-				<div class="input-group mit10 mib10">
-					<select name="ainformant" size="1" class="form-control" v-model="menue.aInformant" @change="getMenue()">
-						<option value="0">Informant</option>
-						<option v-for="informantMitTranskripte in menue.informantenMitTranskripte" :value="informantMitTranskripte.model.pk">${informantMitTranskripte.model.model_str} - ${informantMitTranskripte.Acount} Transkripte</option>
-					</select>
-					<div class="input-group-addon np"><button @click="getMenue()"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></button></div>
-				</div>
-				<ul v-if="menue.aInformant > 0" class="lmfa-l">
-					<li v-for="aTranskript in menue.aTranskripte"><a href="#" v-on:click.prevent="getTranskript(aTranskript.model.pk)" v-bind:class="{ lmfabc: true, open: annotationsTool.aPK === aTranskript.model.pk }" :title="'PK: ' + aTranskript.model.pk + '\nUpdate: ' + aTranskript.model.update_time + ' Uhr'">${aTranskript.model.name}<span>${aTranskript.count.toLocaleString()}</span></a></li>
-				</ul>
+				{% include "AnnotationsDB/annotationsmenue.html" %}
 			</div>
 		</div>
 		<div class="col-md-10 h100 mh600px" style="border-right:1px solid #eee;padding:0px;padding-bottom:150px;" @click="focusFocusCatch">
 			<input id="focuscatch" v-on:keyup.prevent="focusCatchKeyUp" />
 			<div id="svgscroller" class="h100 mcon vscroller">
-				<svg id="annotationsvg" :style="'height:'+zeilenHeight+'px;'">
-					<defs>
-						<marker id="arrow-blue" markerWidth="5" markerHeight="5" refX="3" refY="3" orient="auto" markerUnits="strokeWidth">
-							<path d="M0,1 L0,5 L5,3 z" fill="#00a"/>
-						</marker>
-						<marker id="arrow-green" markerWidth="5" markerHeight="5" refX="3" refY="3" orient="auto" markerUnits="strokeWidth">
-							<path d="M0,1 L0,5 L5,3 z" fill="#0a0"/>
-						</marker>
-					</defs>
-					<g id="svg-g-transcript">
-						<g id="svg-g-events" transform="translate(5,5)">
-							<g :class="{eZeile: true, selected: aZeile==d3ZeileSelected}" :transform="'translate(0,'+zeilenTEvents[aZeile]['eT']+')'" v-for="aZeile in renderZeilen">
-								<rect x="0" y="0" :width="mWidth-10" :height="zeilenTEvents[aZeile]['eH']-18" />
-								<g class="zInfs">
-									<g :class="'zInf zInf'+aInfKey+((aInfKey==d3InfSelected)?' selected':'')" v-on:click="showaInfInfos(aInfKey)" :transform="'translate(5, '+((eEventHeight - 25) + eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
-										<rect x="0" y="4.5" :width="zInfWidth" :height="eInfHeight - 9" />
-										<line x1="0" y1="4.5" :x2="zInfWidth" y2="4.5" />
-										<line x1="0" :y1="eInfHeight-4.5" :x2="zInfWidth" :y2="eInfHeight-4.5" />
-										<text class="zInfI" x="5" :y="12+(eInfHeight-12)/2">${ aInfVal['k'] }</text>
-										<text class="zInfLI" :x="zInfWidth-5" y="24">t</text>
-										<text class="zInfLI" :x="zInfWidth-5" y="49">o</text>
-									</g>
-								</g>
-								<g class="tEvent" :transform="'translate('+(zInfWidth + 5 + tEvents[tEventId]['svgLeft'])+','+(eEventHeight-20)+')'" v-for="tEventId in zeilenTEvents[aZeile]['eId']">
-									<g :class="'eInf eInf'+aInfKey" :transform="'translate(0,'+(eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
-										<rect x="0" y="0" :width="tEvents[tEventId]['svgWidth']+1" :height="eInfHeight-10" />
-										<template v-if="aEvents[tEvents[tEventId].eId[aInfKey]]">
-											<g v-on:click="showaTokenInfos(aTokenId)" :class="'eTok eTok' + aTokenId + ' eTokT' + aTokens[aTokenId]['tt'] + ((aTokens[aTokenId]['viewed'])?' viewed':'') + ((d3TokenLastView === aTokenId)?' lastview':'') + ((d3TokenSelected === aTokenId)?' selected':'')" :transform="'translate('+(aTokens[aTokenId]['svgLeft']-1)+',1)'" v-for="aTokenId in aEvents[tEvents[tEventId].eId[aInfKey]]['tid'][aInfKey]">
-												<rect x="-0.5" y="0" :width="aTokens[aTokenId]['svgWidth']" :height="eInfHeight - 12" />
-												<text x="0" y="18">${ getTokenString(aTokenId, 't') }</text>
-												<text x="0" y="43">${ getTokenString(aTokenId, 'o', 't') }</text>
-												<line x1="2" :y1="eInfHeight-4" :x2="aTokens[aTokenId]['svgWidth']-5" :y2="eInfHeight-4" class="visit" />
-												<line x2="3" :y1="eInfHeight-10.5" :x1="aTokens[aTokenId]['svgWidth']-3" :y2="eInfHeight-10.5" class="blue" marker-end="url(#arrow-blue)" v-if="aTokens[aTokenId]['fo']" />
-												<line x1="0" :y1="eInfHeight-10.5" :x2="aTokens[aTokenId]['svgWidth']-6" :y2="eInfHeight-10.5" class="green" marker-end="url(#arrow-green)" v-if="aTokenFragmente[aTokenId]" />
-											</g>
-										</template>
-									</g>
-									<g class="zeit" v-on:click="showTEventInfos(tEventId)">
-										<rect x="0" y="-15" :width="tEvents[tEventId]['svgWidth']+1" height="11" v-bind:class="{ past: audioPos >= tEvents[tEventId].ae }"/>
-										<rect x="0" y="-15" :width="(tEvents[tEventId]['svgWidth']+1)/tEvents[tEventId].al*(audioPos-tEvents[tEventId].as)" height="11" class="akt" v-if="audioPos > tEvents[tEventId].as && audioPos < tEvents[tEventId].ae" />
-										<line x1="0" y1="-15" x2="0" y2="-4" />
-										<text x="4" y="-6">${ secondsToDuration(durationToSeconds(tEvents[tEventId]['s']), 3) }</text>
-									</g>
-								</g>
-							</g>
-						</g>
-					</g>
-				</svg>
+				{% include "AnnotationsDB/annotationsvg.html" %}
 			</div>
 			<svg style="position:absolute;right:0px;bottom:0px;width:1px;height:1px;"><text id="svg-text-textsize" x="-100" y="-100"></text></svg>
 			<div class="audioplayer-at">
@@ -114,97 +32,7 @@
 		</div>
 	</div>
 	<div id="loading">Lade ...</div>
-
-	<!-- Informationen zu Informanten anzeigen -->
-	<div id="aInformantenInfo" class="modal fade" tabindex="-1" role="dialog" data-unset="aInfInfo" v-if="aInfInfo >= 0 && aInformanten[aInfInfo]">
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Schließen"><span aria-hidden="true">×</span></button>
-					<h4 class="modal-title">Informant</h4>
-				</div>
-				<div class="modal-body">
-					<div class="form-horizontal">
-						<div class="form-group"><label class="col-sm-3 control-label">ID</label><div class="col-sm-9"><p class="form-control-static">${ aInfInfo }</p></div></div>
-						<div class="form-group"><label class="col-sm-3 control-label">Kürzel</label><div class="col-sm-9"><p class="form-control-static">${ aInformanten[aInfInfo]['k'] }</p></div></div>
-						<div class="form-group"><label class="col-sm-3 control-label">Kürzel Anonym</label><div class="col-sm-9"><p class="form-control-static">${ aInformanten[aInfInfo]['ka'] }</p></div></div>
-					</div>
-				</div>
-				<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Informationen zu Events anzeigen -->
-	<div id="tEventInfo" class="modal fade" tabindex="-1" role="dialog" data-unset="tEventInfo" v-if="tEventInfo >= 0 && tEvents[tEventInfo]">
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Schließen"><span aria-hidden="true">×</span></button>
-					<h4 class="modal-title">Events</h4>
-				</div>
-				<div class="modal-body">
-					<div class="form-horizontal">
-						<div class="form-group"><label class="col-sm-3 control-label">Zeit</label><div class="col-sm-9"><p class="form-control-static">${ tEvents[tEventInfo]['s'] } -  ${ tEvents[tEventInfo]['e'] }</p></div></div>
-					</div>
-					<div v-for="(aInfVal, aInfKey) in aInformanten" v-if="tEvents[tEventInfo]['eId'][aInfKey] >= 0">
-						<hr>
-						<div class="form-horizontal" v-for="aEventKey in [tEvents[tEventInfo]['eId'][aInfKey]]">
-							<div class="form-group"><label class="col-sm-3 control-label">Informant</label><div class="col-sm-9"><p class="form-control-static">${ aInfVal['k'] } (${ aInfVal['ka'] } - ID: ${ aInfKey })</p></div></div>
-							<div class="form-group"><label class="col-sm-3 control-label">ID</label><div class="col-sm-9"><p class="form-control-static">${ aEvents[aEventKey]['pk'] }</p></div></div>
-							<div class="form-group"><label class="col-sm-3 control-label">Start</label><div class="col-sm-9"><p class="form-control-static">${ aEvents[aEventKey]['s'] }</p></div></div>
-							<div class="form-group"><label class="col-sm-3 control-label">Ende</label><div class="col-sm-9"><p class="form-control-static">${ aEvents[aEventKey]['e'] }</p></div></div>
-							<div class="form-group"><label class="col-sm-3 control-label">Layer</label><div class="col-sm-9"><p class="form-control-static">${ aEvents[aEventKey]['l'] }</p></div></div>
-							<div class="form-group"><label class="col-sm-3 control-label">Token IDs</label><div class="col-sm-9"><p class="form-control-static">
-								<span v-for="(aTokenVal, aTokenKey) in aEvents[aEventKey]['tid']">
-									<b>${ aTokenKey }:</b> ${ aTokenVal.join(', ') }<br>
-								</span>
-							</p></div></div></div>
-					</div>
-				</div>
-				<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Informationen zu Token anzeigen -->
-	<div id="aTokenInfo" class="modal fade" tabindex="-1" role="dialog" data-unset="aTokenInfo" v-if="aTokenInfo && aTokenInfo['pk']">
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Schließen"><span aria-hidden="true">×</span></button>
-					<h4 class="modal-title">Token</h4>
-				</div>
-				<div class="modal-body">
-					<div class="form-horizontal">
-						<div class="form-group"><label for="aTokenID" class="col-sm-3 control-label">ID</label><div class="col-sm-9"><p class="form-control-static" id="aTokenID">${ aTokenInfo['pk'] }</p></div></div>
-						<div class="form-group"><label for="aTokenText" class="col-sm-3 control-label">text</label><div class="col-sm-9"><input type="text" class="form-control" id="aTokenText" v-model="aTokenInfo['t']"></div></div>
-						<div class="form-group"><label for="aTokenType" class="col-sm-3 control-label">token_type</label><div class="col-sm-9">
-							<select class="form-control" id="aTokenType" v-model="aTokenInfo['tt']">
-								<option v-for="(aTokenTypeVal, aTokenTypeKey) in aTokenTypes" :value="aTokenTypeKey">${ aTokenTypeVal['n'] }</option>
-							</select>
-						</div></div>
-						<div class="form-group"><label for="aTokenOrtho" class="col-sm-3 control-label">ortho</label><div class="col-sm-9"><input type="text" class="form-control" id="aTokenOrtho" v-model="aTokenInfo['o']"></div></div>
-						<div class="form-group"><label for="aTokenIDInf" class="col-sm-3 control-label">ID_Inf</label><div class="col-sm-9"><p class="form-control-static" id="aTokenIDInf">${ aInformanten[aTokenInfo['i']]['k'] } (${ aInformanten[aTokenInfo['i']]['ka'] } - ID: ${ aTokenInfo['i'] })</p></div></div>
-						<div class="form-group" v-if="aTokenInfo['fo']"><label for="aTokenfragmentof" class="col-sm-3 control-label">fragment_of</label><div class="col-sm-9"><p class="form-control-static" id="aTokenfragmentof">${ aTokens[aTokenInfo['fo']]['t'] } - ID: ${ aTokenInfo['fo'] }</p></div></div>
-						<div class="form-group"><label for="aTokenReihung" class="col-sm-3 control-label">token_reihung</label><div class="col-sm-9"><p class="form-control-static" id="aTokenReihung">${ aTokenInfo['tr'] }</p></div></div>
-						<div class="form-group"><label for="aTokenEventID" class="col-sm-3 control-label">event_id</label><div class="col-sm-9"><p class="form-control-static" id="aTokenEventID">${ aTokenInfo['e-txt'] } - ID: ${ aTokenInfo['e'] }</p></div></div>
-						<div class="form-group"><label for="aTokenLikelyError" class="col-sm-3 control-label">likely_error</label><div class="col-sm-9"><label class="checkbox-inline"><input type="checkbox" id="aTokenLikelyError" value="1" v-model="aTokenInfo['le']"> Ja</label></div></div>
-						<div class="form-group" v-if="aTokenInfo['s']"><label for="aTokenSentenceID" class="col-sm-3 control-label">sentence_id</label><div class="col-sm-9"><p class="form-control-static" id="aTokenSentenceID">${ aSaetze[aTokenInfo['s']]['t'] } - ID: ${ aTokenInfo['s'] }</p></div></div>
-						<div class="form-group" v-if="aTokenInfo['sr']"><label for="aTokenSequenceInSentence" class="col-sm-3 control-label">sequence_in_sentence</label><div class="col-sm-9"><p class="form-control-static" id="aTokenSequenceInSentence">${ aTokenInfo['sr'] }</p></div></div>
-						<div class="form-group"><label for="aTokenTextInOrtho" class="col-sm-3 control-label">text_in_ortho</label><div class="col-sm-9"><input type="text" class="form-control" id="aTokenTextInOrtho" v-model="aTokenInfo['to']"></div></div>
-						<div class="form-group" v-if="aTokenFragmente[aTokenInfo['pk']]"><label class="col-sm-3 control-label">Fragmente</label><div class="col-sm-9"><ul class="form-control-static hflist">
-								<li v-for="aToFragKey in aTokenFragmente[aTokenInfo['pk']]">${ aTokens[aToFragKey]['t'] } (${ aToFragKey })</li>
-						</ul></div></div>
-					</div>
-					<hr>
-					<tagsystem cols="3" :tags="aTokenInfo['tags']" @tags="setATokenInfo($event, 'tags')" />
-				</div>
-				<div class="modal-footer"><button type="button" class="btn btn-danger" id="delToken" tabindex="9999" disabled>Löschen</button><button type="button" class="btn btn-primary" id="saveToken" disabled>Speichern</button><button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>
-			</div>
-		</div>
-	</div>
-
+	{% include "AnnotationsDB/annotationsmodale.html" %}
 </div>
 
 {% include "AnnotationsDB/audioplayervue.html" %}

@@ -1,0 +1,48 @@
+<svg id="annotationsvg" :style="'height:'+zeilenHeight+'px;'">
+	<defs>
+		<marker id="arrow-blue" markerWidth="5" markerHeight="5" refX="3" refY="3" orient="auto" markerUnits="strokeWidth">
+			<path d="M0,1 L0,5 L5,3 z" fill="#00a"/>
+		</marker>
+		<marker id="arrow-green" markerWidth="5" markerHeight="5" refX="3" refY="3" orient="auto" markerUnits="strokeWidth">
+			<path d="M0,1 L0,5 L5,3 z" fill="#0a0"/>
+		</marker>
+	</defs>
+	<g id="svg-g-transcript">
+		<g id="svg-g-events" transform="translate(5,5)">
+			<g :class="{eZeile: true, selected: aZeile==d3ZeileSelected}" :transform="'translate(0,'+zeilenTEvents[aZeile]['eT']+')'" v-for="aZeile in renderZeilen">
+				<rect x="0" y="0" :width="mWidth-10" :height="zeilenTEvents[aZeile]['eH']-18" />
+				<g class="zInfs">
+					<g :class="'zInf zInf'+aInfKey+((aInfKey==d3InfSelected)?' selected':'')" v-on:click="showaInfInfos(aInfKey)" :transform="'translate(5, '+((eEventHeight - 25) + eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
+						<rect x="0" y="4.5" :width="zInfWidth" :height="eInfHeight - 9" />
+						<line x1="0" y1="4.5" :x2="zInfWidth" y2="4.5" />
+						<line x1="0" :y1="eInfHeight-4.5" :x2="zInfWidth" :y2="eInfHeight-4.5" />
+						<text class="zInfI" x="5" :y="12+(eInfHeight-12)/2">${ aInfVal['k'] }</text>
+						<text class="zInfLI" :x="zInfWidth-5" y="24">t</text>
+						<text class="zInfLI" :x="zInfWidth-5" y="49">o</text>
+					</g>
+				</g>
+				<g class="tEvent" :transform="'translate('+(zInfWidth + 5 + tEvents[tEventId]['svgLeft'])+','+(eEventHeight-20)+')'" v-for="tEventId in zeilenTEvents[aZeile]['eId']">
+					<g :class="'eInf eInf'+aInfKey" :transform="'translate(0,'+(eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
+						<rect x="0" y="0" :width="tEvents[tEventId]['svgWidth']+1" :height="eInfHeight-10" />
+						<template v-if="aEvents[tEvents[tEventId].eId[aInfKey]]">
+							<g v-on:click="showaTokenInfos(aTokenId)" :class="'eTok eTok' + aTokenId + ' eTokT' + aTokens[aTokenId]['tt'] + ((aTokens[aTokenId]['viewed'])?' viewed':'') + ((d3TokenLastView === aTokenId)?' lastview':'') + ((d3TokenSelected === aTokenId)?' selected':'')" :transform="'translate('+(aTokens[aTokenId]['svgLeft']-1)+',1)'" v-for="aTokenId in aEvents[tEvents[tEventId].eId[aInfKey]]['tid'][aInfKey]">
+								<rect x="-0.5" y="0" :width="aTokens[aTokenId]['svgWidth']" :height="eInfHeight - 12" />
+								<text x="0" y="18">${ getTokenString(aTokenId, 't') }</text>
+								<text x="0" y="43">${ getTokenString(aTokenId, 'o', 't') }</text>
+								<line x1="2" :y1="eInfHeight-4" :x2="aTokens[aTokenId]['svgWidth']-5" :y2="eInfHeight-4" class="visit" />
+								<line x2="3" :y1="eInfHeight-10.5" :x1="aTokens[aTokenId]['svgWidth']-3" :y2="eInfHeight-10.5" class="blue" marker-end="url(#arrow-blue)" v-if="aTokens[aTokenId]['fo']" />
+								<line x1="0" :y1="eInfHeight-10.5" :x2="aTokens[aTokenId]['svgWidth']-6" :y2="eInfHeight-10.5" class="green" marker-end="url(#arrow-green)" v-if="aTokenFragmente[aTokenId]" />
+							</g>
+						</template>
+					</g>
+					<g class="zeit" v-on:click="showTEventInfos(tEventId)">
+						<rect x="0" y="-15" :width="tEvents[tEventId]['svgWidth']+1" height="11" v-bind:class="{ past: audioPos >= tEvents[tEventId].ae }"/>
+						<rect x="0" y="-15" :width="(tEvents[tEventId]['svgWidth']+1)/tEvents[tEventId].al*(audioPos-tEvents[tEventId].as)" height="11" class="akt" v-if="audioPos > tEvents[tEventId].as && audioPos < tEvents[tEventId].ae" />
+						<line x1="0" y1="-15" x2="0" y2="-4" />
+						<text x="4" y="-6">${ secondsToDuration(durationToSeconds(tEvents[tEventId]['s']), 3) }</text>
+					</g>
+				</g>
+			</g>
+		</g>
+	</g>
+</svg>
