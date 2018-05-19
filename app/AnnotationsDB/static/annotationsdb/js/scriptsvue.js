@@ -443,14 +443,16 @@ var annotationsTool = new Vue({
 			setTimeout(function () { $('#aInformantenInfo').modal('show'); }, 20);
 		},
 		/* showaTokenInfos */
-		showaTokenInfos: function (eTok) {
+		showaTokenInfos: function (eTok, direkt = false) {
 			annotationsTool.aTokens[eTok]['viewed'] = true;
-			this.d3TokenLastView = eTok;
+			if (direkt || this.d3TokenSelected === eTok) {
+				this.d3TokenLastView = eTok;
+				this.aTokenInfo = _.clone(this.aTokens[eTok]);
+				this.aTokenInfo['pk'] = eTok;
+				this.aTokenInfo['e-txt'] = this.aEvents[this.searchbypk(this.aTokens[eTok]['e'], this.aEvents)]['s'];
+				setTimeout(function () { $('#aTokenInfo').modal('show'); }, 20);
+			}
 			this.d3TokenSelected = eTok;
-			this.aTokenInfo = _.clone(this.aTokens[eTok]);
-			this.aTokenInfo['pk'] = eTok;
-			this.aTokenInfo['e-txt'] = this.aEvents[this.searchbypk(this.aTokens[eTok]['e'], this.aEvents)]['s'];
-			setTimeout(function () { $('#aTokenInfo').modal('show'); }, 20);
 		},
 		/* Funktion zur ermittlung der Breite von Buchstaben im SVG-Element */
 		getCharWidth: function (zeichen) {
@@ -538,7 +540,7 @@ var annotationsTool = new Vue({
 				this.selectPrevInf();
 			} else if (e.keyCode === 13) { // Enter
 				if (this.d3TokenSelected > -1) {
-					this.showaTokenInfos(this.d3TokenSelected);
+					this.showaTokenInfos(this.d3TokenSelected, true);
 				}
 			} else {
 				console.log('focusCatchKeyUp: ' + e.keyCode);
