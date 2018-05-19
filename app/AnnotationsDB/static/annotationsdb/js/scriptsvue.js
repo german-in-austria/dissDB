@@ -814,11 +814,18 @@ var annotationsTool = new Vue({
 			if (this.showSuche && !this.suchen) {
 				this.suchen = true;
 				this.suchTokens = [];
-				console.log('Suche "' + this.suchText + '" ...');
-				if (this.suchText.length > 2) {	// Suche durchführen
-					console.log('... durchführen ...');
+				if (this.suchText.length > 1) {	// Suche durchführen
+					Object.keys(this.aTokens).map(function (key, i) {
+						var aToken = this.aTokens[key];
+						var addToken = false;
+						if (aToken.t && aToken.t.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; } else
+						if (aToken.o && aToken.o.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; } else
+						if (aToken.to && aToken.to.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; }
+						if (addToken) {
+							this.suchTokens.push({'id': key});
+						}
+					}, this);
 				}
-				console.log('... ' + this.suchTokens.length + ' gefunden ...');
 				this.suchen = false;
 			}
 		}

@@ -20,6 +20,8 @@
 						<button class="idbtn" title="Eingabe loeschen!" @click="suchText=''"><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>
 					</div>
 				</div>
+				<div v-if="this.suchTokens.length" class="mit10">Gefunden: <b>${ this.suchTokens.length }<b> Token${ ((this.suchTokens.length>1)?'s':'') }</div>
+				<hr>
 			</div>
 			<div class="infgroup" v-if="annotationsTool.aPK>0">
 				{% include "AnnotationsDB/annotationsinfos.html" %}
