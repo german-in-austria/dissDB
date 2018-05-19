@@ -32,6 +32,7 @@ var annotationsTool = new Vue({
 		aEvents: [],
 		tEvents: [],
 		aTokens: {},
+		aTokenReihung: [],
 		aTokenFragmente: {},
 		zeilenTEvents: [],
 		zeilenHeight: 0,
@@ -109,6 +110,7 @@ var annotationsTool = new Vue({
 			this.aEvents = [];
 			this.tEvents = [];
 			this.aTokens = {};
+			this.aTokenReihung = [];
 			this.aTokenFragmente = {};
 			this.zeilenTEvents = [];
 			this.zeilenHeight = 0;
@@ -222,6 +224,11 @@ var annotationsTool = new Vue({
 		/* updateEvent */
 		updateEvent: function (index = 0, values) {
 			if (index === 0) {
+				Object.keys(values.tid).map(function (key) {
+					values.tid[key].forEach(function (val) {
+						this.aTokenReihung.push(val);
+					}, this);
+				}, this);
 				index = this.aEvents.push({}) - 1;
 				this.aEvents[index] = values;
 				this.setRerenderEvent(index);
