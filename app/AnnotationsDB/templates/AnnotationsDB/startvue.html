@@ -12,6 +12,15 @@
 <div id="annotationsTool" v-bind:class="{ loading: loading, bgloading: !annotationsTool.loaded }">
 	<div class="row h100">
 		<div class="col-md-2 h100 mh200px vscroller lmfa">
+			<div class="suchgroup" v-if="annotationsTool.aPK>0&&showSuche">
+				<h4>Suchen:<a href="#" @click="showSuche=false" class="pull-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></h4>
+				<div class="lmfasff">
+					<div class="iwdbtn">
+						<input v-on:keyup="sucheCatchKeyUp" id="suchtext" type="text" size="20" class="lmfasf" placeholder="Suchen ..." v-model="suchText">
+						<button class="idbtn" title="Eingabe loeschen!" @click="suchText=''"><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>
+					</div>
+				</div>
+			</div>
 			<div class="infgroup" v-if="annotationsTool.aPK>0">
 				{% include "AnnotationsDB/annotationsinfos.html" %}
 			</div>
@@ -20,7 +29,7 @@
 			</div>
 		</div>
 		<div class="col-md-10 h100 mh600px" style="border-right:1px solid #eee;padding:0px;padding-bottom:150px;" @click="focusFocusCatch">
-			<input id="focuscatch" v-on:keyup.prevent="focusCatchKeyUp" />
+			<input id="focuscatch" v-on:keyup="focusCatchKeyUp" v-on:keydown="focusCatchKeyDown" />
 			<div id="svgscroller" class="h100 mcon vscroller">
 				{% include "AnnotationsDB/annotationsvg.html" %}
 			</div>

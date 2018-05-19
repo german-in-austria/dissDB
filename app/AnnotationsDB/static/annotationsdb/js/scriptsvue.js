@@ -56,7 +56,11 @@ var annotationsTool = new Vue({
 		eInfTop: 25,
 		zInfWidth: 100,
 		showTransInfo: true,
-		showTokenInfo: true
+		showTokenInfo: true,
+		showSuche: false,
+		suchen: false,
+		suchText: '',
+		suchTokens: []
 	},
 	computed: {
 	},
@@ -70,6 +74,18 @@ var annotationsTool = new Vue({
 				this.d3ZeileSelected = -1;
 				this.d3InfSelected = -1;
 			}
+		},
+		showSuche: function (nVal, oVal) {
+			if (nVal) {
+				this.$nextTick(() => { $('#suchtext').focus(); });
+			} else {
+				this.suchText = '';
+				this.suchTokens = [];
+				this.focusFocusCatch();
+			}
+		},
+		suchText: function (nVal, oVal) {
+			this.debouncedSuche();
 		}
 	},
 	methods: {
@@ -532,14 +548,19 @@ var annotationsTool = new Vue({
 		/* Tastatur */
 		focusCatchKeyUp: function (e) {
 			if (e.keyCode === 39) { // rechts
+				e.preventDefault();
 				this.selectNextToken();
 			} else if (e.keyCode === 37) { // links
+				e.preventDefault();
 				this.selectPrevToken();
 			} else if (e.keyCode === 40) { // unten
+				e.preventDefault();
 				this.selectNextInf();
 			} else if (e.keyCode === 38) { // oben
+				e.preventDefault();
 				this.selectPrevInf();
 			} else if (e.keyCode === 13) { // Enter
+				e.preventDefault();
 				if (this.d3TokenSelected > -1) {
 					this.showaTokenInfos(this.d3TokenSelected, true);
 				}
@@ -547,6 +568,18 @@ var annotationsTool = new Vue({
 				console.log('focusCatchKeyUp: ' + e.keyCode);
 			}
 			e.target.value = '';
+		},
+		focusCatchKeyDown: function (e) {
+			if (e.ctrlKey && e.keyCode === 70) { // Strg + F
+				e.preventDefault();
+				this.showSuche = true;
+			}
+		},
+		sucheCatchKeyUp: function (e) {
+			if (e.keyCode === 27) {
+				this.showSuche = false;
+				e.preventDefault();
+			}
 		},
 		focusFocusCatch: function () {
 			$('#focuscatch').focus();
@@ -775,6 +808,19 @@ var annotationsTool = new Vue({
 				}
 			}, this);
 			return nKey;
+		},
+		/* Suchen: */
+		suche: function () {
+			if (this.showSuche && !this.suchen) {
+				this.suchen = true;
+				this.suchTokens = [];
+				console.log('Suche "' + this.suchText + '" ...');
+				if (this.suchText.length > 2) {	// Suche durchführen
+					console.log('... durchführen ...');
+				}
+				console.log('... ' + this.suchTokens.length + ' gefunden ...');
+				this.suchen = false;
+			}
 		}
 	},
 	mounted: function () {
@@ -791,6 +837,9 @@ var annotationsTool = new Vue({
 			}
 			annotationsTool.focusFocusCatch();
 		});
+	},
+	created: function () {
+		this.debouncedSuche = _.debounce(this.suche, 500);
 	},
 	beforeDestroy: function () {
 		document.getElementById('svgscroller').removeEventListener('scroll', this.scrollRendering);
