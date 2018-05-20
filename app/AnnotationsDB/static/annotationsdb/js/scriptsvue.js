@@ -589,7 +589,7 @@ var annotationsTool = new Vue({
 				this.showSuche = true;
 			} else if (e.keyCode === 114) {
 				e.preventDefault();
-				this.naechsterSuchToken(e.shiftKey);
+				this.naechsterSuchToken(!e.shiftKey);
 			}
 		},
 		sucheCatchKeyUp: function (e) {
@@ -601,7 +601,7 @@ var annotationsTool = new Vue({
 		sucheCatchKeyDown: function (e) {
 			if (e.keyCode === 114) {
 				e.preventDefault();
-				this.naechsterSuchToken(e.shiftKey);
+				this.naechsterSuchToken(!e.shiftKey);
 			}
 		},
 		focusFocusCatch: function () {
@@ -642,7 +642,8 @@ var annotationsTool = new Vue({
 						var nIId = this.getNextPrevValueOfValue(Object.keys(aZAE['eId']), String(aIId), next);
 						if (nIId === false) {
 							nIId = this.getNextPrevValueOfValue(Object.keys(this.aInformanten), String(aIId), next);
-							var aTEvents = this.getNextPrevValuesOfValue(aZTE['eId'], aZAEKey, next);
+							var aTEvents = this.listeNachWert(aZTE['eId'], aZAEKey, next);
+							console.log(aTEvents);
 							aTEvents.some(function (tEKey, tI) {
 								if (this.tEvents[tEKey]['eId'][nIId]) {
 									var tmpAE = this.aEvents[this.tEvents[tEKey]['eId'][nIId]]['tid'][nIId];
@@ -677,20 +678,6 @@ var annotationsTool = new Vue({
 					this.d3TokenSelected = nTokSel;
 				}
 			}
-		},
-		getNextPrevValuesOfValue: function (list, val, next = true) {
-			var nEvG = false;
-			var nVal = [];
-			var xList = ((next) ? list : list.slice().reverse());
-			xList.some(function (v, i) {
-				if (nEvG) {
-					nVal.push(v);
-				}
-				if (v === val) {
-					nEvG = true;
-				}
-			}, this);
-			return nVal;
 		},
 		getNextPrevValueOfValue: function (list, val, next = true) {
 			var nEvG = false;
@@ -793,9 +780,9 @@ var annotationsTool = new Vue({
 				this.suchen = false;
 			}
 		},
-		naechsterSuchToken: function (rev = false) {
+		naechsterSuchToken: function (next = true) {
 			if (this.suchTokens.length > 0) {
-				var aList = this.listeNachWert(this.aTokenReihung, this.d3TokenSelected, rev);
+				var aList = this.listeNachWertLoop(this.aTokenReihung, this.d3TokenSelected, next);
 				aList.some(function (val, index) {
 					if (this.suchTokens.indexOf(val) >= 0) {
 						this.d3TokenSelected = val;
@@ -804,13 +791,20 @@ var annotationsTool = new Vue({
 				}, this);
 			}
 		},
-		listeNachWert: function (liste, nVal, rev = false) {
+		listeNachWert: function (liste, val, next = true) {
 			var aList = _.clone(liste);
-			if (rev) {
-				aList = aList.slice().reverse();
+			aList = ((next) ? aList : aList.slice().reverse());
+			if (aList.indexOf(val) < aList.length) {
+				aList.splice(0, aList.indexOf(val) + 1);
+				return aList;
 			}
-			if (nVal && aList.indexOf(nVal) > 0 && aList.indexOf(nVal) < aList.length - 1) {
-				aList = aList.concat(aList.splice(0, aList.indexOf(nVal) + 1));
+			return [];
+		},
+		listeNachWertLoop: function (liste, val, next = true) {
+			var aList = _.clone(liste);
+			aList = ((next) ? aList : aList.slice().reverse());
+			if (val && aList.indexOf(val) > 0 && aList.indexOf(val) < aList.length - 1) {
+				aList = aList.concat(aList.splice(0, aList.indexOf(val) + 1));
 			}
 			return aList;
 		},
