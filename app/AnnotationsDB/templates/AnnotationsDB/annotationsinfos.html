@@ -6,7 +6,7 @@
 		<b>Update Zeit:</b> ${ aTranskript.ut }<br>
 		<b>Informanten:</b> <span v-for="(aInf, aInfKey) in aInformanten" :title="'Anonym: '+aInf.ka+' - ID: '+aInfKey">${ ((aInf.i)?', ':'')+aInf.k }</span><br>
 		<b>Events:</b> ${ aEvents.length.toLocaleString() }<br>
-		<b>Tokens:</b> ${ Object.keys(aTokens).length.toLocaleString() }
+		<b>Tokens:</b> <span :title="tokenCountByInf(aTokenReihungInf)">${ aTokenReihung.length.toLocaleString() }</span>
 	</div>
 </div>
 <div v-bind:class="{'infpanel': true, 'open': showTokenInfo}" v-if="d3TokenSelected&&aTokens[d3TokenSelected]">

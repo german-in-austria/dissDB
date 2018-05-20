@@ -33,6 +33,7 @@ var annotationsTool = new Vue({
 		tEvents: [],
 		aTokens: {},
 		aTokenReihung: [],
+		aTokenReihungInf: {},
 		aTokenFragmente: {},
 		zeilenTEvents: [],
 		zeilenHeight: 0,
@@ -113,6 +114,7 @@ var annotationsTool = new Vue({
 			this.tEvents = [];
 			this.aTokens = {};
 			this.aTokenReihung = [];
+			this.aTokenReihungInf = {};
 			this.aTokenFragmente = {};
 			this.zeilenTEvents = [];
 			this.zeilenHeight = 0;
@@ -229,6 +231,8 @@ var annotationsTool = new Vue({
 				Object.keys(values.tid).map(function (key) {
 					values.tid[key].forEach(function (val) {
 						this.aTokenReihung.push(val);
+						if (!this.aTokenReihungInf[key]) { this.aTokenReihungInf[key] = []; }
+						this.aTokenReihungInf[key].push(val);
 					}, this);
 				}, this);
 				index = this.aEvents.push({}) - 1;
@@ -738,54 +742,19 @@ var annotationsTool = new Vue({
 		/* Nächster/Vorheriger Token (next = true next else prev) */
 		tokenNextPrev: function (aTId, next = true) {
 			var nTId = -1;
-			var aENr = 0;
+			// var aENr = 0;
 			if (this.tEvents[0]) {
 				if (aTId < 0) {
 					/* Erster/Letzer Token */
-					if (next) {
-						aENr = this.tEvents[0].eId[Object.keys(this.tEvents[0].eId)[0]];
-						nTId = this.aEvents[aENr]['tid'][Object.keys(this.aEvents[aENr]['tid'])[0]][0];
-					} else {
-						var atEM = this.tEvents.length - 1;
-						var eIdKeys = Object.keys(this.tEvents[atEM].eId);
-						aENr = this.tEvents[atEM].eId[eIdKeys[eIdKeys.length - 1]];
-						var tidKeys = Object.keys(this.aEvents[aENr]['tid']);
-						var aTSL = this.aEvents[aENr]['tid'][tidKeys[tidKeys.length - 1]];
-						nTId = aTSL[aTSL.length - 1];
-					}
+					return ((next) ? this.aTokenReihung[0] : this.aTokenReihung[this.aTokenReihung.length - 1]);
 				} else {
 					/* Nächster/Vorheriger Token */
-					aENr = this.searchbypk(this.aTokens[aTId]['e'], this.aEvents);
 					var aIId = this.aTokens[aTId]['i'];
-					if (this.aEvents[aENr]['tid'][aIId]) {
-						this.aEvents[aENr]['tid'][aIId].forEach(function (val, key) {
-							if (val === aTId) {
-								var tSelTok = this.aEvents[aENr]['tid'][aIId][key + ((next) ? 1 : -1)];
-								if (tSelTok) {
-									nTId = tSelTok;
-								}
-							}
-						}, this);
-					}
-					/* Nächsten/Vorherigen Token im nächsten/vorherigen Event suchen */
-					if (nTId < 0) {
-						var tEventsData = ((next) ? this.tEvents : this.tEvents.slice().reverse());
-						var nEvG = false;
-						tEventsData.some(function (val, key) {
-							if (val['eId'][aIId] === aENr) {
-								nEvG = true;
-							} else if (nEvG) {
-								if (val['eId'][aIId] >= 0) {
-									var aEtid = this.aEvents[val['eId'][aIId]]['tid'][aIId];
-									nTId = ((next) ? aEtid[0] : aEtid[aEtid.length - 1]);
-									return true;
-								}
-							}
-						}, this);
-					}
-					if (nTId < 0) {
-						nTId = this.tokenNextPrev(-1, next);
-					}
+					var aTRI = this.aTokenReihungInf[aIId];
+					var aTRIiO = aTRI.indexOf(aTId);
+					return ((next)
+												? ((aTRIiO < aTRI.length - 1) ? aTRI[aTRIiO + 1] : this.tokenNextPrev(-1, next))
+												: ((aTRIiO > 0) ? aTRI[aTRIiO - 1] : this.tokenNextPrev(-1, next)));
 				}
 			}
 			return nTId;
@@ -873,6 +842,13 @@ var annotationsTool = new Vue({
 					}
 				}, this);
 			}
+		},
+		tokenCountByInf: function (aTRI) {
+			var output = '';
+			Object.keys(this.aInformanten).map(function (iKey, iI) {
+				output += this.aInformanten[iKey].k + ': ' + ((aTRI[iKey]) ? aTRI[iKey].length.toLocaleString() : '0') + '\n';
+			}, this);
+			return output;
 		}
 	},
 	mounted: function () {
