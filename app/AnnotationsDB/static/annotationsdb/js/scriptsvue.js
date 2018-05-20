@@ -64,7 +64,9 @@ var annotationsTool = new Vue({
 		suchTokens: [],
 		suchTokensInfo: {},
 		selToken: -1,
-		selTokenBereich: {'v': -1, 'b': -1}
+		selTokenBereich: {'v': -1, 'b': -1},
+		selTokenListe: [],
+		ctrlKS: false
 	},
 	computed: {
 	},
@@ -108,14 +110,31 @@ var annotationsTool = new Vue({
 					this.d3SelTokenList = [];
 					return true;
 				}
+				this.selTokenListe = [];
 				var aList = _.clone(this.aTokenReihungInf[aInf]);
 				var sTBv = this.selTokenBereich.v;
 				var sTBb = this.selTokenBereich.b;
 				if (sTBv > sTBb) { var temp = sTBv; sTBv = sTBb; sTBb = temp; }
 				this.d3SelTokenList = aList.splice(aList.indexOf(sTBv), aList.indexOf(sTBb) + 1 - aList.indexOf(sTBv));
 			} else {
-				this.d3SelTokenList = [];
+				if (this.selTokenListe.length < 1) {
+					this.d3SelTokenList = [];
+				}
 			}
+		},
+		updateSelTokenListe: function (eTok = undefined) {
+			if (eTok !== undefined) {
+				if (this.selTokenListe.indexOf(eTok) > -1) {
+					this.selTokenListe.splice(this.selTokenListe.indexOf(eTok), 1);
+				} else {
+					if (this.selTokenListe.length < 1 || this.aTokens[eTok].i === this.aTokens[this.selTokenListe[0]].i) {
+						this.selTokenListe.push(eTok);
+					} else {
+						this.selTokenListe = [];
+					}
+				}
+			}
+			this.d3SelTokenList = this.selTokenListe;
 		},
 		reset: function () {
 			this.loading = true;
@@ -146,6 +165,7 @@ var annotationsTool = new Vue({
 			this.d3TokenLastView = -1;
 			this.selToken = -1;
 			this.selTokenBereich = {'v': -1, 'b': -1};
+			this.selTokenListe = [];
 			this.audioPos = 0;
 			this.audioDuration = 0;
 			return true;
@@ -494,8 +514,8 @@ var annotationsTool = new Vue({
 		},
 		/* showaTokenInfos */
 		showaTokenInfos: function (eTok, direkt = false, e = undefined) {
-			annotationsTool.aTokens[eTok]['viewed'] = true;
 			if (direkt || this.selToken === eTok) {
+				annotationsTool.aTokens[eTok]['viewed'] = true;
 				this.d3TokenLastView = eTok;
 				this.aTokenInfo = _.clone(this.aTokens[eTok]);
 				this.aTokenInfo['pk'] = eTok;
@@ -511,8 +531,22 @@ var annotationsTool = new Vue({
 					} else {
 						this.selTokenBereich.b = eTok;
 					}
+				} else if (e.ctrlKey) {
+					if (this.selTokenBereich.v > -1 && this.selTokenBereich.b > -1 && this.selTokenListe.length === 0) {
+						var tmpTL = _.clone(this.d3SelTokenList);
+						tmpTL.forEach(function (val) {
+							this.updateSelTokenListe(val);
+						}, this);
+					} else if (this.selTokenListe.length === 0) {
+						this.updateSelTokenListe(this.selToken);
+					}
+					this.updateSelTokenListe(eTok);
+					this.ctrlKS = true;
+					this.selTokenBereich = {'v': -1, 'b': -1};
 				} else {
 					this.selTokenBereich = {'v': -1, 'b': -1};
+					this.selTokenListe = [];
+					this.d3SelTokenList = [];
 				}
 			}
 			this.selToken = eTok;
@@ -598,22 +632,36 @@ var annotationsTool = new Vue({
 				if (e.shiftKey && this.selTokenBereich.v === -1) {
 					this.selTokenBereich.v = this.selToken;
 				}
+				if (e.ctrlKey && !this.ctrlKS) {
+					this.updateSelTokenListe(this.selToken);
+				}
 				this.selectNextToken();
 				if (e.shiftKey) {
 					this.selTokenBereich.b = this.selToken;
 				} else {
 					this.selTokenBereich = {'v': -1, 'b': -1};
 				}
+				if (e.ctrlKey) {
+					this.updateSelTokenListe(this.selToken);
+					this.ctrlKS = true;
+				}
 			} else if (e.keyCode === 37) { // links
 				e.preventDefault();
 				if (e.shiftKey && this.selTokenBereich.v === -1) {
 					this.selTokenBereich.v = this.selToken;
+				}
+				if (e.ctrlKey && !this.ctrlKS) {
+					this.updateSelTokenListe(this.selToken);
 				}
 				this.selectPrevToken();
 				if (e.shiftKey) {
 					this.selTokenBereich.b = this.selToken;
 				} else {
 					this.selTokenBereich = {'v': -1, 'b': -1};
+				}
+				if (e.ctrlKey) {
+					this.updateSelTokenListe(this.selToken);
+					this.ctrlKS = true;
 				}
 			} else if (e.keyCode === 40) { // unten
 				e.preventDefault();
@@ -628,6 +676,11 @@ var annotationsTool = new Vue({
 				if (this.selToken > -1) {
 					this.showaTokenInfos(this.selToken, true);
 				}
+			} else if (e.keyCode === 17) {
+				if (!this.ctrlKS) {
+					this.updateSelTokenListe(this.selToken);
+				}
+				this.ctrlKS = false;
 			} else {
 				console.log('focusCatchKeyUp: ' + e.keyCode);
 			}

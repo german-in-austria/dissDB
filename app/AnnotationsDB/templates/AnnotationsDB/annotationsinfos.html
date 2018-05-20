@@ -17,6 +17,13 @@
 		<b>Ausgewählt:</b> ${ d3SelTokenList.length } Token${ ((d3SelTokenList.length!==1)?'s':'') }<br>
 	</div>
 </div>
+<div v-bind:class="{'infpanel': true, 'open': true, 'selpanel': true}" v-if="this.selTokenListe.length>0">
+	<span><b>Auswahl Liste:</b></span>
+	<div>
+		<b>Ausgewählt:</b> ${ d3SelTokenList.length } Token${ ((selTokenListe.length!==1)?'s':'') }<br>
+		<b>Tokens:</b> <span v-for="(sTL, i) in selTokenListe" :title="'ID: '+sTL">${ ((i)?', ':'')+aTokens[sTL].t }</span>
+	</div>
+</div>
 <div v-bind:class="{'infpanel': true, 'open': showTokenInfo}" v-if="selToken&&aTokens[selToken]">
 	<a href="#" v-on:click.prevent="showTokenInfo=!showTokenInfo"><b>Akutelles Token</b> (ID: ${ selToken })<span :class="'glyphicon glyphicon-' + ((showTokenInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
 	<div v-if="showTokenInfo" v-for="aToken in [aTokens[selToken]]">
