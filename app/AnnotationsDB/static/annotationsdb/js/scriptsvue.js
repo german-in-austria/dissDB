@@ -620,10 +620,17 @@ var annotationsTool = new Vue({
 		},
 		/* Nächsten Informanten/Zeile auswählen */
 		selectNextInf: function () {
+			this.infNextPrev();
+		},
+		/* Vorherigen Informanten/Zeile auswählen */
+		selectPrevInf: function () {
+			this.infNextPrev(false);
+		},
+		infNextPrev: function (next = true) {
 			if (this.tEvents[0]) {
 				var aTId = this.d3TokenSelected;
 				if (aTId < 0) {
-					this.d3TokenSelected = this.tokenNextPrev(-1);
+					this.d3TokenSelected = this.tokenNextPrev(-1, next);
 				} else {
 					var aIId = this.aTokens[aTId]['i'];
 					var aZAEKey = this.getTEventOfAEvent(this.searchbypk(this.aTokens[aTId]['e'], this.aEvents));
@@ -631,81 +638,41 @@ var annotationsTool = new Vue({
 					var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey)];
 					var aInfAv = Object.keys(this.objectKeyFilter(this.aInformanten, aZTE['iId']));
 					var nTokSel = -1;
-					if (String(aInfAv[aInfAv.length - 1]) !== String(aIId)) {
-						var nIId = this.getNextPrevValueOfValue(Object.keys(aZAE['eId']), String(aIId));
+					if (String(aInfAv[((next) ? aInfAv.length - 1 : 0)]) !== String(aIId)) {
+						var nIId = this.getNextPrevValueOfValue(Object.keys(aZAE['eId']), String(aIId), next);
 						if (nIId === false) {
-							nIId = this.getNextPrevValueOfValue(Object.keys(this.aInformanten), String(aIId));
-							var aTEvents = this.getNextPrevValuesOfValue(aZTE['eId'], aZAEKey);
+							nIId = this.getNextPrevValueOfValue(Object.keys(this.aInformanten), String(aIId), next);
+							var aTEvents = this.getNextPrevValuesOfValue(aZTE['eId'], aZAEKey, next);
 							aTEvents.some(function (tEKey, tI) {
 								if (this.tEvents[tEKey]['eId'][nIId]) {
-									nTokSel = this.aEvents[this.tEvents[tEKey]['eId'][nIId]]['tid'][nIId][0];
+									var tmpAE = this.aEvents[this.tEvents[tEKey]['eId'][nIId]]['tid'][nIId];
+									nTokSel = tmpAE[((next) ? 0 : tmpAE.length - 1)];
 									return true;
 								}
 							}, this);
 						} else {
 							nTokSel = this.aEvents[aZAE['eId'][nIId]]['tid'][nIId][0];
-						};
-					}
-					if (nTokSel < 0) {
-						var tmpZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey) + 1];
-						if (tmpZTE) {
-							var tmpZTEeId = tmpZTE['eId'];
-							var tmpTEeId = this.tEvents[tmpZTEeId[0]]['eId'];
-							var tmpAEtid = this.aEvents[tmpTEeId[Object.keys(tmpTEeId)[0]]]['tid'];
-							nTokSel = tmpAEtid[Object.keys(tmpAEtid)[0]][0];
 						}
 					}
 					if (nTokSel < 0) {
-						nTokSel = this.tokenNextPrev(-1, false);
-					}
-					this.d3TokenSelected = nTokSel;
-				}
-			}
-		},
-		/* Vorherigen Informanten/Zeile auswählen */
-		selectPrevInf: function () {
-			if (this.tEvents[0]) {
-				var aTId = this.d3TokenSelected;
-				if (aTId < 0) {
-					this.d3TokenSelected = this.tokenNextPrev(-1, false);
-				} else {
-					var aIId = this.aTokens[aTId]['i'];
-					var aZAEKey = this.getTEventOfAEvent(this.searchbypk(this.aTokens[aTId]['e'], this.aEvents));
-					var aZAE = this.tEvents[aZAEKey];
-					var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey)];
-					var aInfAv = Object.keys(this.objectKeyFilter(this.aInformanten, aZTE['iId']));
-					var nTokSel = -1;
-					if (String(aInfAv[0]) !== String(aIId)) {
-						var nIId = this.getNextPrevValueOfValue(Object.keys(aZAE['eId']), String(aIId), false);
-						if (nIId === false) {
-							nIId = this.getNextPrevValueOfValue(Object.keys(this.aInformanten), String(aIId), false);
-							var aTEvents = this.getNextPrevValuesOfValue(aZTE['eId'], aZAEKey, false);
-							aTEvents.some(function (tEKey, tI) {
-								if (this.tEvents[tEKey]['eId'][nIId]) {
-									var tmpAE = this.aEvents[this.tEvents[tEKey]['eId'][nIId]]['tid'][nIId];
-									nTokSel = tmpAE[tmpAE.length - 1];
-									return true;
-								}
-							}, this);
-						} else {
-							var tmpAE = this.aEvents[aZAE['eId'][nIId]]['tid'][nIId];
-							nTokSel = tmpAE[0];
-						};
-					}
-					if (nTokSel < 0) {
-						var tmpZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey) - 1];
+						var tmpZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey) + ((next) ? 1 : -1)];
 						if (tmpZTE) {
 							var tmpZTEeId = tmpZTE['eId'];
-							var tmpTEeId = this.tEvents[tmpZTEeId[tmpZTEeId.length - 1]]['eId'];
-							var tmpTEeIdK = Object.keys(tmpTEeId);
-							var tmpAEtid = this.aEvents[tmpTEeId[tmpTEeIdK[tmpTEeIdK.length - 1]]]['tid'];
-							var tmpAEtidK = Object.keys(tmpAEtid);
-							var tmpAEtidS = tmpAEtid[tmpAEtidK[tmpAEtidK.length - 1]];
-							nTokSel = tmpAEtidS[tmpAEtidS.length - 1];
+							var tmpTEeId = this.tEvents[tmpZTEeId[((next) ? 0 : tmpZTEeId.length - 1)]]['eId'];
+							if (next) {
+								var tmpAEtid = this.aEvents[tmpTEeId[Object.keys(tmpTEeId)[0]]]['tid'];
+								nTokSel = tmpAEtid[Object.keys(tmpAEtid)[0]][0];
+							} else {
+								var tmpTEeIdK = Object.keys(tmpTEeId);
+								var tmpAEtidR = this.aEvents[tmpTEeId[tmpTEeIdK[tmpTEeIdK.length - 1]]]['tid'];
+								var tmpAEtidK = Object.keys(tmpAEtidR);
+								var tmpAEtidS = tmpAEtidR[tmpAEtidK[tmpAEtidK.length - 1]];
+								nTokSel = tmpAEtidS[tmpAEtidS.length - 1];
+							}
 						}
 					}
 					if (nTokSel < 0) {
-						nTokSel = this.tokenNextPrev(-1);
+						nTokSel = this.tokenNextPrev(-1, next);
 					}
 					this.d3TokenSelected = nTokSel;
 				}
@@ -828,13 +795,7 @@ var annotationsTool = new Vue({
 		},
 		naechsterSuchToken: function (rev = false) {
 			if (this.suchTokens.length > 0) {
-				var aList = _.clone(this.aTokenReihung);
-				if (rev) {
-					aList = aList.slice().reverse();
-				}
-				if (this.d3TokenSelected && aList.indexOf(this.d3TokenSelected) > 0 && aList.indexOf(this.d3TokenSelected) < aList.length - 1) {
-					aList = aList.concat(aList.splice(0, aList.indexOf(this.d3TokenSelected) + 1));
-				}
+				var aList = this.listeNachWert(this.aTokenReihung, this.d3TokenSelected, rev);
 				aList.some(function (val, index) {
 					if (this.suchTokens.indexOf(val) >= 0) {
 						this.d3TokenSelected = val;
@@ -842,6 +803,16 @@ var annotationsTool = new Vue({
 					}
 				}, this);
 			}
+		},
+		listeNachWert: function (liste, nVal, rev = false) {
+			var aList = _.clone(liste);
+			if (rev) {
+				aList = aList.slice().reverse();
+			}
+			if (nVal && aList.indexOf(nVal) > 0 && aList.indexOf(nVal) < aList.length - 1) {
+				aList = aList.concat(aList.splice(0, aList.indexOf(nVal) + 1));
+			}
+			return aList;
 		},
 		tokenCountByInf: function (aTRI) {
 			var output = '';
