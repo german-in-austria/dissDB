@@ -114,6 +114,12 @@ g.eTok.lastview > line.visit {
 g.eTok.selected > line.visit {
 	stroke: #4b4;
 }
+g.eTok.selectlist > line.visit {
+	stroke: #4b4;
+}
+g.eTok.selectlist.selected > line.visit {
+	stroke: #292;
+}
 g.eTok:hover > line.visit {
 	stroke: #9f9;
 }
@@ -191,16 +197,20 @@ g.tEvent > .zeit > line {
 .infpanel {
 	margin-bottom: 10px;
 }
-.infpanel>a {
+.infpanel>a, .infpanel>span {
 	display: block;
 	background: #fff;
 	padding: 2px 10px 3px 7px;
   color: #333;
 	text-decoration: none;
 }
-.infpanel.open>a {
+.infpanel.open>a, .infpanel.open>span {
 	background: #ddd;
 	color: #272C31;
+}
+.infpanel.selpanel>span {
+	background: #292;
+	color: #fff;
 }
 .infpanel>a:hover, .infpanel>a:focus {
 	background: #555;
@@ -214,4 +224,7 @@ g.tEvent > .zeit > line {
   padding: 6px;
   font-size: 14px;
   background: #fff;
+}
+.infpanel.selpanel>div {
+	border-color: #292;
 }

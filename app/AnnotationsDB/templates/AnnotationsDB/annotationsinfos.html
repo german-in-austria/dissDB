@@ -9,9 +9,17 @@
 		<b>Tokens:</b> <span :title="tokenCountByInf(aTokenReihungInf)">${ aTokenReihung.length.toLocaleString() }</span>
 	</div>
 </div>
-<div v-bind:class="{'infpanel': true, 'open': showTokenInfo}" v-if="d3TokenSelected&&aTokens[d3TokenSelected]">
-	<a href="#" v-on:click.prevent="showTokenInfo=!showTokenInfo"><b>Akutelles Token</b> (ID: ${ d3TokenSelected })<span :class="'glyphicon glyphicon-' + ((showTokenInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
-	<div v-if="showTokenInfo" v-for="aToken in [aTokens[d3TokenSelected]]">
+<div v-bind:class="{'infpanel': true, 'open': true, 'selpanel': true}" v-if="(selTokenBereich.v>-1&&selTokenBereich.b>-1)">
+	<span><b>Auswahl Bereich:</b></span>
+	<div>
+		<b>Von Token:</b> <span :title="'ID: '+selTokenBereich.v">${ aTokens[selTokenBereich.v].t }</span><br>
+		<b>Bis Token:</b> <span :title="'ID: '+selTokenBereich.b">${ aTokens[selTokenBereich.b].t }</span><br>
+		<b>Ausgewählt:</b> ${ d3SelTokenList.length } Token${ ((d3SelTokenList.length!==1)?'s':'') }<br>
+	</div>
+</div>
+<div v-bind:class="{'infpanel': true, 'open': showTokenInfo}" v-if="selToken&&aTokens[selToken]">
+	<a href="#" v-on:click.prevent="showTokenInfo=!showTokenInfo"><b>Akutelles Token</b> (ID: ${ selToken })<span :class="'glyphicon glyphicon-' + ((showTokenInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+	<div v-if="showTokenInfo" v-for="aToken in [aTokens[selToken]]">
 		<b>Text:</b> ${ aToken.t }<br>
 		<b>Ortho:</b>  ${ aToken.o }<br>
 		<b title="Text in Ortho:">T. in Or.:</b>  ${ aToken.to }<br>
@@ -20,7 +28,7 @@
 		<template v-if="aToken.s"><b>Satz:</b> <span :title="'ID: '+aToken.s">${ ((aSaetze[aToken.s].t)?aSaetze[aToken.s].t:('ID: '+aToken.s)) }</span><br></template>
 		<template v-if="aToken.s"><b>Satz Reihung:</b> ${ ((aToken.sr)?aToken.sr.toLocaleString():0) }<br></template>
 		<template v-if="aToken.fo"><b title="Fragment von:">Frag. von:</b> <span :title="'ID: '+aToken.fo">${ aTokens[aToken.fo]['t'] }</span><br></template>
-		<template v-if="aTokenFragmente[d3TokenSelected]"><b>Fragmente:</b> <span :title="'ID: '+aToFragKey" v-for="(aToFragKey, aIndex) in aTokenFragmente[d3TokenSelected]">${ ((aIndex)?', ':'')+aTokens[aToFragKey].t }</span><br></template>
+		<template v-if="aTokenFragmente[selToken]"><b>Fragmente:</b> <span :title="'ID: '+aToFragKey" v-for="(aToFragKey, aIndex) in aTokenFragmente[selToken]">${ ((aIndex)?', ':'')+aTokens[aToFragKey].t }</span><br></template>
 	</div>
 </div>
 <hr>
