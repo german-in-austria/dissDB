@@ -1,7 +1,6 @@
 /* global _ $ csrf Vue alert performance */
 
 var preventClose = false;
-
 window.onbeforeunload = function () {
 	if (preventClose) {
 		return 'Wirklich Tool verlassen?';
@@ -328,7 +327,6 @@ var annotationsTool = new Vue({
 		},
 		/* setRerenderEvent */
 		setRerenderEvent: function (key) {
-			this.aEvents[key]['rerender'] = true;
 			this.debouncedPrerenderEvents();
 		},
 		debouncedPrerenderEvents: _.debounce(function () {
@@ -358,17 +356,10 @@ var annotationsTool = new Vue({
 						var aEvent = this.aEvents[this.tEvents[key]['eId'][eKey]];
 						var aTokensIds = aEvent['tid'][iKey];
 						var aW = 0;
-						var tW = 0;
-						var t1W = 0;
-						var t2W = 0;
 						aTokensIds.forEach(function (aTokenId) {
-							t1W = this.getTextWidth(this.getTokenString(aTokenId, 't'), false);
-							t2W = this.getTextWidth(this.getTokenString(aTokenId, 'o', 't'), false);
-							if (t1W > t2W) {
-								tW = t1W + 1.5;
-							} else {
-								tW = t2W + 1.5;
-							}
+							var t1W = this.getTextWidth(this.getTokenString(aTokenId, 't'), false);
+							var t2W = this.getTextWidth(this.getTokenString(aTokenId, 'o', 't'), false);
+							var tW = ((t1W > t2W) ? t1W : t2W) + 1.5;
 							this.aTokens[aTokenId]['svgLeft'] = aW + 2;
 							this.aTokens[aTokenId]['svgWidth'] = tW + 2;
 							aW += tW;
@@ -637,8 +628,6 @@ var annotationsTool = new Vue({
 			return v + ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s.toFixed(fix)).slice(-(3 + fix));
 		},
 		/* Tastatur */
-		keyDown: function (e) {
-		},
 		focusCatchKeyUp: function (e) {
 			if (e.keyCode === 39) { // rechts
 				e.preventDefault();
@@ -704,9 +693,15 @@ var annotationsTool = new Vue({
 				e.preventDefault();
 				this.focusSuchText();
 				this.showSuche = true;
-			} else if (e.keyCode === 114) {
+			} else if (e.keyCode === 114) { // F3
 				e.preventDefault();
 				this.naechsterSuchToken(!e.shiftKey);
+			} else if (e.ctrlKey && e.keyCode === 68) { // Strg + D
+				e.preventDefault();
+				this.ctrlKS = true;
+				this.selTokenBereich = {'v': -1, 'b': -1};
+				this.selTokenListe = [];
+				this.d3SelTokenList = [];
 			}
 		},
 		sucheCatchKeyUp: function (e) {
@@ -927,7 +922,6 @@ var annotationsTool = new Vue({
 	},
 	mounted: function () {
 		document.getElementById('svgscroller').addEventListener('scroll', this.scrollRendering);
-		window.addEventListener('keydown', this.keyDown);
 		this.getMenue();
 		/* Wenn Modal angezeigt wird */
 		$(document).on('shown.bs.modal', '#aTokenInfo', function (e) {
@@ -946,6 +940,5 @@ var annotationsTool = new Vue({
 	},
 	beforeDestroy: function () {
 		document.getElementById('svgscroller').removeEventListener('scroll', this.scrollRendering);
-		window.removeEventListener('keydown', this.keyDown);
 	}
 });
