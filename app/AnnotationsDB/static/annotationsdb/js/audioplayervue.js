@@ -84,7 +84,7 @@ Vue.component('annotationsaudioplayer', {
 			} else if (e.ctrlKey && e.keyCode === 89) { // ctrl+y
 				this.$emit('ctrlkey');
 				this.fastBackward();
-			} else if (e.ctrlKey && e.keyCode === 88) { // ctrl+x'
+			} else if (e.ctrlKey && e.keyCode === 88) { // ctrl+x
 				this.$emit('ctrlkey');
 				this.fastForward();
 			} else if (e.ctrlKey && e.keyCode === 50) { // ctrl+2

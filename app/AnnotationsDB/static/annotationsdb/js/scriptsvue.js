@@ -57,7 +57,7 @@ var annotationsTool = new Vue({
 		tEventInfo: undefined,
 		aTokenInfo: undefined,
 		message: null,
-		mWidth: $('#annotationsvg').width(),
+		mWidth: 0,
 		getCharWidthCach: {},
 		eEventHeight: 40,
 		eInfHeight: 63,
@@ -65,6 +65,7 @@ var annotationsTool = new Vue({
 		zInfWidth: 100,
 		showTransInfo: true,
 		showTokenInfo: true,
+		showAllgeInfo: false,
 		showSuche: false,
 		suchen: false,
 		suchText: '',
@@ -78,9 +79,14 @@ var annotationsTool = new Vue({
 	computed: {
 	},
 	watch: {
+		mWidth: function (nVal, oVal) {
+			if (nVal !== oVal) {
+				this.updateZeilenTEvents();
+			}
+		},
 		selToken: function (nVal, oVal) {
 			if (nVal > -1) {
-				this.d3ZeileSelected = this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchbypk(this.aTokens[this.selToken]['e'], this.aEvents)));
+				this.d3ZeileSelected = this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchByKey(this.aTokens[this.selToken]['e'], 'pk', this.aEvents)));
 				this.d3InfSelected = this.aTokens[this.selToken]['i'];
 				this.scrollToToken(this.selToken);
 			} else {
@@ -374,7 +380,6 @@ var annotationsTool = new Vue({
 		},
 		/* updateZeilenTEvents */
 		updateZeilenTEvents: function () {
-			var mWidth = $('#annotationsvg').width() - 25;
 			var aWidth = this.zInfWidth;
 			this.zeilenTEvents = [{'eId': [], 'eH': 0, 'iId': [], 'eT': 0}];
 			var aZTEv = 0;
@@ -383,7 +388,7 @@ var annotationsTool = new Vue({
 			this.tEvents.forEach(function (val, key) {
 				this.tEvents[key]['svgLeft'] = aWidth - this.zInfWidth;
 				aWidth += val['svgWidth'] + 0.5;
-				if (aWidth < mWidth) {
+				if (aWidth < this.mWidth - 25) {
 					this.zeilenTEvents[aZTEv]['eId'].push(key);
 					Object.keys(val['eId']).map(function (iKey, iI) {
 						if (this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
@@ -521,7 +526,7 @@ var annotationsTool = new Vue({
 				this.d3TokenLastView = eTok;
 				this.aTokenInfo = _.clone(this.aTokens[eTok]);
 				this.aTokenInfo['pk'] = eTok;
-				this.aTokenInfo['e-txt'] = this.aEvents[this.searchbypk(this.aTokens[eTok]['e'], this.aEvents)]['s'];
+				this.aTokenInfo['e-txt'] = this.aEvents[this.searchByKey(this.aTokens[eTok]['e'], 'pk', this.aEvents)]['s'];
 				setTimeout(function () { $('#aTokenInfo').modal('show'); }, 20);
 			} else if (e) {
 				if (e.shiftKey) {
@@ -597,9 +602,9 @@ var annotationsTool = new Vue({
 			}, this);
 			return nObj;
 		},
-		searchbypk: function (nameKey, myArray) {
-			for (var i = 0; i < myArray.length; i++) {
-				if (myArray[i].pk === nameKey) {
+		searchByKey: function (value, key, list) {
+			for (var i = 0; i < list.length; i++) {
+				if (list[i][key] === value) {
 					return i;
 				}
 			}
@@ -745,7 +750,7 @@ var annotationsTool = new Vue({
 					this.selToken = this.tokenNextPrev(-1, next);
 				} else {
 					var aIId = this.aTokens[aTId]['i'];
-					var aZAEKey = this.getTEventOfAEvent(this.searchbypk(this.aTokens[aTId]['e'], this.aEvents));
+					var aZAEKey = this.getTEventOfAEvent(this.searchByKey(this.aTokens[aTId]['e'], 'pk', this.aEvents));
 					var aZAE = this.tEvents[aZAEKey];
 					var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(aZAEKey)];
 					var aInfAv = Object.keys(this.objectKeyFilter(this.aInformanten, aZTE['iId']));
@@ -815,7 +820,7 @@ var annotationsTool = new Vue({
 			var sHeight = $('#svgscroller').height() + 75;
 			var sTop = $('.mcon.vscroller').scrollTop();
 			var sBottom = sTop + sHeight;
-			var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchbypk(this.aTokens[this.selToken]['e'], this.aEvents)))];
+			var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchByKey(this.aTokens[this.selToken]['e'], 'pk', this.aEvents)))];
 			var sTo = 0;
 			if (aZTE['eT'] < sTop) {
 				sTo = aZTE['eT'] - 20;
@@ -918,10 +923,15 @@ var annotationsTool = new Vue({
 				output += this.aInformanten[iKey].k + ': ' + ((aTRI[iKey]) ? aTRI[iKey].length.toLocaleString() : '0') + '\n';
 			}, this);
 			return output;
+		},
+		resizeWindow: function () {
+			this.mWidth = $('#annotationsvg').width();
 		}
 	},
 	mounted: function () {
 		document.getElementById('svgscroller').addEventListener('scroll', this.scrollRendering);
+		window.addEventListener('resize', this.resizeWindow);
+		this.resizeWindow();
 		this.getMenue();
 		/* Wenn Modal angezeigt wird */
 		$(document).on('shown.bs.modal', '#aTokenInfo', function (e) {
@@ -940,5 +950,6 @@ var annotationsTool = new Vue({
 	},
 	beforeDestroy: function () {
 		document.getElementById('svgscroller').removeEventListener('scroll', this.scrollRendering);
+		window.removeEventListener('resize', this.resizeWindow);
 	}
 });

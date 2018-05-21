@@ -2,6 +2,15 @@
   position: relative;
 	height: 100%;
 }
+#annotationsTool > .vueapp {
+	display: none;
+}
+#annotationsTool.vuerunning > .vueapp {
+	display: block;
+}
+#annotationsTool.vuerunning > .vueloading {
+	display: none;
+}
 
 #loading {
 	display:none;
@@ -227,4 +236,12 @@ g.tEvent > .zeit > line {
 }
 .infpanel.selpanel>div {
 	border-color: #292;
+}
+.infpanel dl {
+	margin-top: 5px;
+	margin-left: 9px;
+}
+.infpanel dl>dd {
+	margin-left: 8px;
+	margin-bottom: 2px;
 }

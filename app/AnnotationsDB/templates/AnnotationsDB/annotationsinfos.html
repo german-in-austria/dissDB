@@ -1,8 +1,8 @@
 <h4>Informationen:</h4>
 <div v-bind:class="{'infpanel': true, 'open': showTransInfo}" v-if="aTranskript.pk">
-	<a href="#" v-on:click.prevent="showTransInfo=!showTransInfo"><b>Transkript</b><span :class="'glyphicon glyphicon-' + ((showTransInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+	<a href="#" v-on:click.prevent="showTransInfo=!showTransInfo"><b>Transkript</b> (ID: ${ aTranskript.pk })<span :class="'glyphicon glyphicon-' + ((showTransInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
 	<div v-if="showTransInfo">
-		<b>Name:</b> ${ aTranskript.n } (ID: ${ aTranskript.pk })<br>
+		<b>Name:</b> ${ aTranskript.n }<br>
 		<b>Update Zeit:</b> ${ aTranskript.ut }<br>
 		<b>Informanten:</b> <span v-for="(aInf, aInfKey) in aInformanten" :title="'Anonym: '+aInf.ka+' - ID: '+aInfKey">${ ((aInf.i)?', ':'')+aInf.k }</span><br>
 		<b>Events:</b> ${ aEvents.length.toLocaleString() }<br>
@@ -36,6 +36,34 @@
 		<template v-if="aToken.s"><b>Satz Reihung:</b> ${ ((aToken.sr)?aToken.sr.toLocaleString():0) }<br></template>
 		<template v-if="aToken.fo"><b title="Fragment von:">Frag. von:</b> <span :title="'ID: '+aToken.fo">${ aTokens[aToken.fo]['t'] }</span><br></template>
 		<template v-if="aTokenFragmente[selToken]"><b>Fragmente:</b> <span :title="'ID: '+aToFragKey" v-for="(aToFragKey, aIndex) in aTokenFragmente[selToken]">${ ((aIndex)?', ':'')+aTokens[aToFragKey].t }</span><br></template>
+	</div>
+</div>
+<div v-bind:class="{'infpanel': true, 'open': showAllgeInfo}" v-if="aTranskript.pk">
+	<a href="#" v-on:click.prevent="showAllgeInfo=!showAllgeInfo"><b>Allgemeine Informationen</b><span :class="'glyphicon glyphicon-' + ((showAllgeInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+	<div v-if="showAllgeInfo">
+		<b>Navigation:</b><br>
+		<dl>
+			<dt>Pfeil links/rechts</dt><dd>Vorherigen/Nächsten Token auswählen</dd>
+			<dt>Pfeil hoch/runter</dt><dd>Vorherigen/Nächsten Informanten/Zeile auswählen</dd>
+			<dt>Enter</dt><dd>Aktuellen Token öffnen</dd>
+			<dt></dt><dd></dd>
+		</dl>
+		<b>Auswahl:</b><br>
+		<dl>
+			<dt>Shift</dt><dd>Auswahlbereich</dd>
+			<dt>Strg</dt><dd>Auswahlliste</dd>
+			<dt>Strg + d</dt><dd>Auswahl aufheben</dd>
+		</dl>
+		<b>Audioplayer:</b><br>
+		<dl>
+			<dt>Strg + leer</dt><dd>Abspielen/Pause</dd>
+			<dt>Strg + y</dt><dd>Zum Anfang springen</dd>
+			<dt>Strg + x</dt><dd>Zum Ende springen</dd>
+			<dt>Strg + 2</dt><dd>10 Sekunden weiter</dd>
+			<dt>Strg + 3</dt><dd>10 Sekunden zurück</dd>
+			<dt>Strg + 1</dt><dd>na</dd>
+			<dt>Strg + 4</dt><dd>na</dd>
+		</dl>
 	</div>
 </div>
 <hr>

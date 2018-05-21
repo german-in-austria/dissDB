@@ -9,41 +9,44 @@
 	<link href="{% static "annotationsdb/css/annotationvue.css" %}?{% settings_value "CACH_RANDOM" %}" rel="stylesheet">
 {% endblock %}
 {% block inhalt %}
-<div id="annotationsTool" v-bind:class="{ loading: loading, bgloading: !annotationsTool.loaded }">
-	<div class="row h100">
-		<div class="col-md-2 h100 mh200px vscroller lmfa">
-			<div class="suchgroup" v-if="annotationsTool.aPK>0&&showSuche">
-				<h4>Suchen:<a href="#" v-on:click.prevent="showSuche=false" class="pull-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></h4>
-				<div class="lmfasff">
-					<div class="iwdbtn">
-						<input v-on:keyup="sucheCatchKeyUp" v-on:keydown="sucheCatchKeyDown" id="suchtext" type="text" size="20" class="lmfasf" placeholder="Suchen ..." v-model="suchText">
-						<button class="idbtn" title="Eingabe loeschen!" @click="suchText=''"><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>
+<div id="annotationsTool" v-bind:class="{ loading: loading, bgloading: !annotationsTool.loaded, vuerunning: true }">
+	<div class="h100 vueapp">
+		<div class="row h100">
+			<div class="col-md-2 h100 mh200px vscroller lmfa">
+				<div class="suchgroup" v-if="annotationsTool.aPK>0&&showSuche">
+					<h4>Suchen:<a href="#" v-on:click.prevent="showSuche=false" class="pull-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></h4>
+					<div class="lmfasff">
+						<div class="iwdbtn">
+							<input v-on:keyup="sucheCatchKeyUp" v-on:keydown="sucheCatchKeyDown" id="suchtext" type="text" size="20" class="lmfasf" placeholder="Suchen ..." v-model="suchText">
+							<button class="idbtn" title="Eingabe loeschen!" @click="suchText=''"><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>
+						</div>
 					</div>
+					<div v-if="this.suchTokens.length" class="mit10">Gefunden: <b>${ this.suchTokens.length }</b> Token${ ((this.suchTokens.length>1)?'s':'') }</div>
+					<hr>
 				</div>
-				<div v-if="this.suchTokens.length" class="mit10">Gefunden: <b>${ this.suchTokens.length }<b> Token${ ((this.suchTokens.length>1)?'s':'') }</div>
-				<hr>
+				<div class="infgroup" v-if="annotationsTool.aPK>0">
+					{% include "AnnotationsDB/annotationsinfos.html" %}
+				</div>
+				<div class="selgroup">
+					{% include "AnnotationsDB/annotationsmenue.html" %}
+				</div>
 			</div>
-			<div class="infgroup" v-if="annotationsTool.aPK>0">
-				{% include "AnnotationsDB/annotationsinfos.html" %}
-			</div>
-			<div class="selgroup">
-				{% include "AnnotationsDB/annotationsmenue.html" %}
+			<div class="col-md-10 h100 mh600px" style="border-right:1px solid #eee;padding:0px;padding-bottom:150px;" @click="focusFocusCatch">
+				<input id="focuscatch" v-on:keyup="focusCatchKeyUp" v-on:keydown="focusCatchKeyDown" />
+				<div id="svgscroller" class="h100 mcon vscroller">
+					{% include "AnnotationsDB/annotationsvg.html" %}
+				</div>
+				<svg style="position:absolute;right:0px;bottom:0px;width:1px;height:1px;"><text id="svg-text-textsize" x="-100" y="-100"></text></svg>
+				<div class="audioplayer-at">
+					<annotationsaudioplayer :audiofile="aEinzelErhebung.dp+aEinzelErhebung.af" @audiopos="setAudioPos($event)" @audioduration="setAudioDuration($event)" v-if="aEinzelErhebung.af" @ctrlkey="ctrlKey" />
+				</div>
+				<div id="loadsym"><span class="glyphicon glyphicon-refresh gly-spin" aria-hidden="true"></span><div>${ parseInt(99/aTmNr*annotationsTool.nNr) } %</div></div>
 			</div>
 		</div>
-		<div class="col-md-10 h100 mh600px" style="border-right:1px solid #eee;padding:0px;padding-bottom:150px;" @click="focusFocusCatch">
-			<input id="focuscatch" v-on:keyup="focusCatchKeyUp" v-on:keydown="focusCatchKeyDown" />
-			<div id="svgscroller" class="h100 mcon vscroller">
-				{% include "AnnotationsDB/annotationsvg.html" %}
-			</div>
-			<svg style="position:absolute;right:0px;bottom:0px;width:1px;height:1px;"><text id="svg-text-textsize" x="-100" y="-100"></text></svg>
-			<div class="audioplayer-at">
-				<annotationsaudioplayer :audiofile="aEinzelErhebung.dp+aEinzelErhebung.af" @audiopos="setAudioPos($event)" @audioduration="setAudioDuration($event)" v-if="aEinzelErhebung.af" @ctrlkey="ctrlKey" />
-			</div>
-			<div id="loadsym"><span class="glyphicon glyphicon-refresh gly-spin" aria-hidden="true"></span><div>${ parseInt(99/aTmNr*annotationsTool.nNr) } %</div></div>
-		</div>
+		<div id="loading">Lade ...</div>
+		{% include "AnnotationsDB/annotationsmodale.html" %}
 	</div>
-	<div id="loading">Lade ...</div>
-	{% include "AnnotationsDB/annotationsmodale.html" %}
+	<div class="h100 text-center vueloading"><br><br>VUE wird geladen ... das sollte maximal eine Minute dauern!</div>
 </div>
 
 {% include "AnnotationsDB/audioplayervue.html" %}
