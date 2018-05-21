@@ -45,7 +45,6 @@ var annotationsTool = new Vue({
 		zeilenTEvents: [],
 		zeilenHeight: 0,
 		renderZeilen: [],
-		renderZeilenOld: [],
 		svgTTS: document.getElementById('svg-text-textsize'),
 		d3TokenLastView: -1,
 		d3ZeileSelected: -1,
@@ -58,6 +57,7 @@ var annotationsTool = new Vue({
 		aTokenInfo: undefined,
 		message: null,
 		mWidth: 0,
+		sHeight: 0,
 		getCharWidthCach: {},
 		eEventHeight: 40,
 		eInfHeight: 63,
@@ -105,13 +105,16 @@ var annotationsTool = new Vue({
 				this.$nextTick(() => { this.focusSuchText(); });
 			} else {
 				this.suchText = '';
-				this.suchTokens = [];
-				this.suchTokensInfo = {};
 				this.focusFocusCatch();
 			}
 		},
 		suchText: function (nVal, oVal) {
-			this.debouncedSuche();
+			if (nVal.length > 0) {
+				this.debouncedSuche();
+			} else {
+				this.suchTokens = [];
+				this.suchTokensInfo = {};
+			}
 		}
 	},
 	methods: {
@@ -137,6 +140,7 @@ var annotationsTool = new Vue({
 		},
 		updateSelTokenListe: function (eTok = undefined) {
 			if (eTok !== undefined) {
+				this.selTokenBereich = {'v': -1, 'b': -1};
 				if (this.selTokenListe.indexOf(eTok) > -1) {
 					this.selTokenListe.splice(this.selTokenListe.indexOf(eTok), 1);
 				} else {
@@ -454,9 +458,8 @@ var annotationsTool = new Vue({
 		},
 		/* scrollRendering */
 		scrollRendering: function () {
-			var sHeight = $('#svgscroller').height() + 75;
 			var sPos = $('.mcon.vscroller').scrollTop();
-			var sePos = sPos + sHeight;
+			var sePos = sPos + this.sHeight + 75;
 			var aTop = 0;
 			var aBottom = 0;
 			var cRenderZeilen = [];
@@ -468,9 +471,8 @@ var annotationsTool = new Vue({
 				aTop += val['eH'];
 				return aTop > sePos;
 			}, this);
-			if (this.renderZeilenOld !== cRenderZeilen) {
+			if (this.renderZeilen !== cRenderZeilen) {
 				this.renderZeilen = cRenderZeilen;
-				this.renderZeilenOld = this.renderZeilen;
 			}
 		},
 		/* getMenue: Läd aktuelle Daten für das Menü */
@@ -540,8 +542,7 @@ var annotationsTool = new Vue({
 					}
 				} else if (e.ctrlKey) {
 					if (this.selTokenBereich.v > -1 && this.selTokenBereich.b > -1 && this.selTokenListe.length === 0) {
-						var tmpTL = _.clone(this.d3SelTokenList);
-						tmpTL.forEach(function (val) {
+						(this.d3SelTokenList.slice()).forEach(function (val) {
 							this.updateSelTokenListe(val);
 						}, this);
 					} else if (this.selTokenListe.length === 0) {
@@ -710,15 +711,19 @@ var annotationsTool = new Vue({
 			}
 		},
 		sucheCatchKeyUp: function (e) {
-			if (e.keyCode === 27) {
+			if (e.keyCode === 27) { // ESC
 				e.preventDefault();
 				this.showSuche = false;
+			} else if (e.keyCode === 13) { // Enter
+				e.preventDefault();
+				annotationsTool.focusFocusCatch();
 			}
 		},
 		sucheCatchKeyDown: function (e) {
-			if (e.keyCode === 114) {
+			if (e.keyCode === 114) { // F3
 				e.preventDefault();
 				this.naechsterSuchToken(!e.shiftKey);
+				annotationsTool.focusFocusCatch();
 			}
 		},
 		focusFocusCatch: function () {
@@ -817,9 +822,8 @@ var annotationsTool = new Vue({
 		},
 		/* Zu Token scrollen */
 		scrollToToken: function (tId) {
-			var sHeight = $('#svgscroller').height() + 75;
 			var sTop = $('.mcon.vscroller').scrollTop();
-			var sBottom = sTop + sHeight;
+			var sBottom = sTop + this.sHeight + 75;
 			var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchByKey(this.aTokens[this.selToken]['e'], 'pk', this.aEvents)))];
 			var sTo = 0;
 			if (aZTE['eT'] < sTop) {
@@ -827,7 +831,7 @@ var annotationsTool = new Vue({
 				if (sTo < 0) { sTo = 0; }
 				$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
 			} else if ((aZTE['eT'] + aZTE['eH']) > sBottom) {
-				sTo = (aZTE['eT'] + aZTE['eH'] + 20) - sHeight * 0.8;
+				sTo = (aZTE['eT'] + aZTE['eH'] + 20) - (this.sHeight + 75) * 0.8;
 				if (sTo < 0) { sTo = 0; }
 				$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
 			}
@@ -877,7 +881,6 @@ var annotationsTool = new Vue({
 				}
 				if (this.suchTokens.length > 0) {
 					this.naechsterSuchToken();
-					annotationsTool.focusFocusCatch();
 				}
 				this.suchen = false;
 			}
@@ -894,8 +897,7 @@ var annotationsTool = new Vue({
 			}
 		},
 		listeNachWert: function (liste, val, next = true) {
-			var aList = _.clone(liste);
-			aList = ((next) ? aList : aList.slice().reverse());
+			var aList = ((next) ? liste.slice() : liste.slice().reverse());
 			if (aList.indexOf(val) < aList.length - 1) {
 				aList.splice(0, aList.indexOf(val) + 1);
 				return aList;
@@ -910,8 +912,7 @@ var annotationsTool = new Vue({
 			return undefined;
 		},
 		listeNachWertLoop: function (liste, val, next = true) {
-			var aList = _.clone(liste);
-			aList = ((next) ? aList : aList.slice().reverse());
+			var aList = ((next) ? liste.slice() : liste.slice().reverse());
 			if (val && aList.indexOf(val) > 0 && aList.indexOf(val) < aList.length - 1) {
 				aList = aList.concat(aList.splice(0, aList.indexOf(val) + 1));
 			}
@@ -926,6 +927,7 @@ var annotationsTool = new Vue({
 		},
 		resizeWindow: function () {
 			this.mWidth = $('#annotationsvg').width();
+			this.sHeight = $('#svgscroller').height();
 		}
 	},
 	mounted: function () {
