@@ -75,22 +75,29 @@ Vue.component('annotationsaudioplayer', {
 		keyUp: function (e) {
 			// console.log(e.keyCode);
 			if (e.ctrlKey && e.keyCode === 32) { // ctrl+space
+				this.$emit('ctrlkey');
 				if (this.paused) {
 					this.play();
 				} else {
 					this.pause();
 				}
 			} else if (e.ctrlKey && e.keyCode === 89) { // ctrl+y
+				this.$emit('ctrlkey');
 				this.fastBackward();
 			} else if (e.ctrlKey && e.keyCode === 88) { // ctrl+x'
+				this.$emit('ctrlkey');
 				this.fastForward();
 			} else if (e.ctrlKey && e.keyCode === 50) { // ctrl+2
+				this.$emit('ctrlkey');
 				this.backward();
 			} else if (e.ctrlKey && e.keyCode === 51) { // ctrl+3
+				this.$emit('ctrlkey');
 				this.forward();
 			} else if (e.ctrlKey && e.keyCode === 49) { // ctrl+1
+				this.$emit('ctrlkey');
 				// this.stepBackward();
 			} else if (e.ctrlKey && e.keyCode === 52) { // ctrl+4
+				this.$emit('ctrlkey');
 				// this.stepForward();
 			}
 		},

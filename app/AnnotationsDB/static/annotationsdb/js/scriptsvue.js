@@ -1,5 +1,13 @@
 /* global _ $ csrf Vue alert performance */
 
+var preventClose = false;
+
+window.onbeforeunload = function () {
+	if (preventClose) {
+		return 'Wirklich Tool verlassen?';
+	}
+};
+
 var annotationsTool = new Vue({
 	el: '#annotationsTool',
 	delimiters: ['${', '}'],
@@ -502,6 +510,9 @@ var annotationsTool = new Vue({
 		setAudioDuration: function (aPos) {
 			this.audioDuration = aPos;
 		},
+		ctrlKey: function () {
+			this.ctrlKS = true;
+		},
 		/* showTEventInfos */
 		showTEventInfos: function (tId) {
 			this.tEventInfo = tId;
@@ -626,6 +637,8 @@ var annotationsTool = new Vue({
 			return v + ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s.toFixed(fix)).slice(-(3 + fix));
 		},
 		/* Tastatur */
+		keyDown: function (e) {
+		},
 		focusCatchKeyUp: function (e) {
 			if (e.keyCode === 39) { // rechts
 				e.preventDefault();
@@ -676,7 +689,7 @@ var annotationsTool = new Vue({
 				if (this.selToken > -1) {
 					this.showaTokenInfos(this.selToken, true);
 				}
-			} else if (e.keyCode === 17) {
+			} else if (e.keyCode === 17) { // Strg
 				if (!this.ctrlKS) {
 					this.updateSelTokenListe(this.selToken);
 				}
@@ -914,6 +927,7 @@ var annotationsTool = new Vue({
 	},
 	mounted: function () {
 		document.getElementById('svgscroller').addEventListener('scroll', this.scrollRendering);
+		window.addEventListener('keydown', this.keyDown);
 		this.getMenue();
 		/* Wenn Modal angezeigt wird */
 		$(document).on('shown.bs.modal', '#aTokenInfo', function (e) {
@@ -932,5 +946,6 @@ var annotationsTool = new Vue({
 	},
 	beforeDestroy: function () {
 		document.getElementById('svgscroller').removeEventListener('scroll', this.scrollRendering);
+		window.removeEventListener('keydown', this.keyDown);
 	}
 });

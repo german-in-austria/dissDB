@@ -37,7 +37,7 @@
 			</div>
 			<svg style="position:absolute;right:0px;bottom:0px;width:1px;height:1px;"><text id="svg-text-textsize" x="-100" y="-100"></text></svg>
 			<div class="audioplayer-at">
-				<annotationsaudioplayer :audiofile="aEinzelErhebung.dp+aEinzelErhebung.af" @audiopos="setAudioPos($event)" @audioduration="setAudioDuration($event)" v-if="aEinzelErhebung.af" />
+				<annotationsaudioplayer :audiofile="aEinzelErhebung.dp+aEinzelErhebung.af" @audiopos="setAudioPos($event)" @audioduration="setAudioDuration($event)" v-if="aEinzelErhebung.af" @ctrlkey="ctrlKey" />
 			</div>
 			<div id="loadsym"><span class="glyphicon glyphicon-refresh gly-spin" aria-hidden="true"></span><div>${ parseInt(99/aTmNr*annotationsTool.nNr) } %</div></div>
 		</div>
