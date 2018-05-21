@@ -69,6 +69,7 @@ var annotationsTool = new Vue({
 		showSuche: false,
 		suchen: false,
 		suchText: '',
+		suchInf: 0,
 		suchTokens: [],
 		suchTokensInfo: {},
 		selToken: -1,
@@ -152,6 +153,14 @@ var annotationsTool = new Vue({
 				}
 			}
 			this.d3SelTokenList = this.selTokenListe;
+		},
+		sucheZuAuswahlListe: function () {
+			this.suchTokens.forEach(function (val) {
+				if (this.selTokenListe.indexOf(val) < 0) {
+					this.updateSelTokenListe(val);
+				}
+			}, this);
+			this.focusFocusCatch();
 		},
 		reset: function () {
 			this.loading = true;
@@ -868,18 +877,20 @@ var annotationsTool = new Vue({
 				this.suchTokensInfo = {};
 				if (this.suchText.length > 1) {	// Suche durchführen
 					this.aTokenReihung.forEach(function (key) {
-						var aToken = this.aTokens[key];
-						var addToken = false;
-						if (aToken.t && aToken.t.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; } else
-						if (aToken.o && aToken.o.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; } else
-						if (aToken.to && aToken.to.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; }
-						if (addToken) {
-							this.suchTokens.push(parseInt(key));
-							this.suchTokensInfo[parseInt(key)] = {'z': 0};
+						if (parseInt(this.suchInf) === 0 || this.aTokens[key].i === parseInt(this.suchInf)) {
+							var aToken = this.aTokens[key];
+							var addToken = false;
+							if (aToken.t && aToken.t.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; } else
+							if (aToken.o && aToken.o.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; } else
+							if (aToken.to && aToken.to.toLowerCase().indexOf(this.suchText.toLowerCase()) >= 0) { addToken = true; }
+							if (addToken) {
+								this.suchTokens.push(parseInt(key));
+								this.suchTokensInfo[parseInt(key)] = {'z': 0};
+							}
 						}
 					}, this);
 				}
-				if (this.suchTokens.length > 0) {
+				if (this.suchTokens.length > 0 && this.suchTokens.indexOf(this.selToken) < 0) {
 					this.naechsterSuchToken();
 				}
 				this.suchen = false;
@@ -913,8 +924,12 @@ var annotationsTool = new Vue({
 		},
 		listeNachWertLoop: function (liste, val, next = true) {
 			var aList = ((next) ? liste.slice() : liste.slice().reverse());
-			if (val && aList.indexOf(val) > 0 && aList.indexOf(val) < aList.length - 1) {
-				aList = aList.concat(aList.splice(0, aList.indexOf(val) + 1));
+			if (val && aList.indexOf(val) > -1 && aList.indexOf(val) < aList.length - 1) {
+				if (aList.indexOf(val) > 0) {
+					aList = aList.concat(aList.splice(0, aList.indexOf(val) + 1));
+				} else {
+					aList.splice(0, 1);
+				}
 			}
 			return aList;
 		},

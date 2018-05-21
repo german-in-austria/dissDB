@@ -21,7 +21,14 @@
 							<button class="idbtn" title="Eingabe loeschen!" @click="suchText=''"><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>
 						</div>
 					</div>
-					<div v-if="this.suchTokens.length" class="mit10">Gefunden: <b>${ this.suchTokens.length }</b> Token${ ((this.suchTokens.length>1)?'s':'') }</div>
+					<select size="1" class="form-control" v-model="suchInf" @change="suche()">
+						<option value="0">Alle Informanten</option>
+						<option v-for="(aInf, aInfKey) in aInformanten" :value="aInfKey">${ aInf.k }</option>
+					</select>
+					<div v-if="suchTokens.length" class="mit10">
+						Gefunden: <b>${ suchTokens.length }</b> Token${ ((suchTokens.length>1)?'s':'') }<br>
+						<a href="#" v-on:click.prevent="sucheZuAuswahlListe" v-if="suchInf>0" class="lmfabc text-center">Alle Funde ${ ((selTokenListe.length>0) ? 'in' : 'als') } Auswahl Liste</a>
+					</div>
 					<hr>
 				</div>
 				<div class="infgroup" v-if="annotationsTool.aPK>0">
