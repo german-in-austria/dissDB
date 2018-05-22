@@ -10,18 +10,18 @@
 	</div>
 </div>
 <div v-bind:class="{'infpanel': true, 'open': true, 'selpanel': true}" v-if="(selTokenBereich.v>-1&&selTokenBereich.b>-1)">
-	<span><b>Auswahl Bereich:</b><button @click="selTokenBereich={'v': -1, 'b': -1};" class="close"><span aria-hidden="true">×</span></button></span>
+	<span><b>Auswahl Bereich:</b> ${ d3SelTokenList.length } Token${ ((d3SelTokenList.length!==1)?'s':'') }<button @click="selTokenBereich={'v': -1, 'b': -1};" class="close"><span aria-hidden="true">×</span></button></span>
 	<div>
-		<b>Von Token:</b> <span :title="'ID: '+selTokenBereich.v">${ aTokens[selTokenBereich.v].t }</span><br>
-		<b>Bis Token:</b> <span :title="'ID: '+selTokenBereich.b">${ aTokens[selTokenBereich.b].t }</span><br>
-		<b>Ausgewählt:</b> ${ d3SelTokenList.length } Token${ ((d3SelTokenList.length!==1)?'s':'') }<br>
+		<b>Von Token:</b> <a href="#" v-on:click.prevent="selToken=selTokenBereich.v;focusFocusCatch();" :title="'ID: '+selTokenBereich.v">${ aTokens[selTokenBereich.v].t }</a><br>
+		<b>Bis Token:</b> <a href="#" v-on:click.prevent="selToken=selTokenBereich.b;focusFocusCatch();" :title="'ID: '+selTokenBereich.b">${ aTokens[selTokenBereich.b].t }</a><br>
 	</div>
 </div>
 <div v-bind:class="{'infpanel': true, 'open': true, 'selpanel': true}" v-if="selTokenListe.length>0">
-	<span><b>Auswahl Liste:</b><button @click="selTokenListe=[];d3SelTokenList=[];" class="close"><span aria-hidden="true">×</span></button></span>
+	<span><b>Auswahl Liste:</b> ${ d3SelTokenList.length } Token${ ((selTokenListe.length!==1)?'s':'') }<button @click="selTokenListe=[];d3SelTokenList=[];" class="close"><span aria-hidden="true">×</span></button></span>
 	<div>
-		<b>Ausgewählt:</b> ${ d3SelTokenList.length } Token${ ((selTokenListe.length!==1)?'s':'') }<br>
-		<b>Tokens:</b> <span v-for="(sTL, i) in selTokenListe" :title="'ID: '+sTL">${ ((i)?', ':'')+aTokens[sTL].t }</span>
+		<div class="listtokens">
+			<a href="#" v-on:click.prevent="selToken=sTL;focusFocusCatch();" :class="{selected: selToken===sTL}" v-for="(sTL, i) in selTokenListe" :title="aTokens[sTL].t+' - ID: '+sTL">${ aTokens[sTL].t }</a>
+		</div>
 	</div>
 </div>
 <div v-bind:class="{'infpanel': true, 'open': showTokenInfo}" v-if="selToken&&aTokens[selToken]">

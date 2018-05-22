@@ -532,7 +532,7 @@ var annotationsTool = new Vue({
 		},
 		/* showaTokenInfos */
 		showaTokenInfos: function (eTok, direkt = false, e = undefined) {
-			if (direkt || this.selToken === eTok) {
+			if (direkt || (this.selToken === eTok && (!e || (!e.ctrlKey && e.shiftKey)))) {
 				annotationsTool.aTokens[eTok]['viewed'] = true;
 				this.d3TokenLastView = eTok;
 				this.aTokenInfo = _.clone(this.aTokens[eTok]);
