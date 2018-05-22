@@ -42,6 +42,7 @@ var annotationsTool = new Vue({
 		aTokenReihung: [],
 		aTokenReihungInf: {},
 		aTokenFragmente: {},
+		aTokenSets: {},
 		zeilenTEvents: [],
 		zeilenHeight: 0,
 		renderZeilen: [],
@@ -119,49 +120,6 @@ var annotationsTool = new Vue({
 		}
 	},
 	methods: {
-		checkSelTokenBereich: function () {
-			if (this.selTokenBereich.v >= 0 && this.selTokenBereich.b >= 0) {
-				var aInf = this.aTokens[this.selTokenBereich.v].i;
-				if ((aInf !== this.aTokens[this.selTokenBereich.b].i) || this.selTokenBereich.v === this.selTokenBereich.b) {
-					this.selTokenBereich = {'v': -1, 'b': -1};
-					this.d3SelTokenList = [];
-					return true;
-				}
-				this.selTokenListe = [];
-				var aList = _.clone(this.aTokenReihungInf[aInf]);
-				var sTBv = this.selTokenBereich.v;
-				var sTBb = this.selTokenBereich.b;
-				if (sTBv > sTBb) { var temp = sTBv; sTBv = sTBb; sTBb = temp; }
-				this.d3SelTokenList = aList.splice(aList.indexOf(sTBv), aList.indexOf(sTBb) + 1 - aList.indexOf(sTBv));
-			} else {
-				if (this.selTokenListe.length < 1) {
-					this.d3SelTokenList = [];
-				}
-			}
-		},
-		updateSelTokenListe: function (eTok = undefined) {
-			if (eTok !== undefined) {
-				this.selTokenBereich = {'v': -1, 'b': -1};
-				if (this.selTokenListe.indexOf(eTok) > -1) {
-					this.selTokenListe.splice(this.selTokenListe.indexOf(eTok), 1);
-				} else {
-					if (this.selTokenListe.length < 1 || this.aTokens[eTok].i === this.aTokens[this.selTokenListe[0]].i) {
-						this.selTokenListe.push(eTok);
-					} else {
-						this.selTokenListe = [];
-					}
-				}
-			}
-			this.d3SelTokenList = this.selTokenListe;
-		},
-		sucheZuAuswahlListe: function () {
-			this.suchTokens.forEach(function (val) {
-				if (this.selTokenListe.indexOf(val) < 0) {
-					this.updateSelTokenListe(val);
-				}
-			}, this);
-			this.focusFocusCatch();
-		},
 		reset: function () {
 			this.loading = true;
 			this.aInfInfo = undefined;
@@ -184,6 +142,7 @@ var annotationsTool = new Vue({
 			this.aTokenReihung = [];
 			this.aTokenReihungInf = {};
 			this.aTokenFragmente = {};
+			this.aTokenSets = {};
 			this.zeilenTEvents = [];
 			this.zeilenHeight = 0;
 			this.renderZeilen = [];
@@ -194,6 +153,7 @@ var annotationsTool = new Vue({
 			this.selTokenListe = [];
 			this.audioPos = 0;
 			this.audioDuration = 0;
+			this.showSuche = false;
 			return true;
 		},
 		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
@@ -642,6 +602,12 @@ var annotationsTool = new Vue({
 			var s = sec % 60;
 			return v + ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s.toFixed(fix)).slice(-(3 + fix));
 		},
+		/* Events */
+		/* Fenstergröße */
+		resizeWindow: function () {
+			this.mWidth = $('#annotationsvg').width();
+			this.sHeight = $('#svgscroller').height();
+		},
 		/* Tastatur */
 		focusCatchKeyUp: function (e) {
 			if (e.keyCode === 39) { // rechts
@@ -907,6 +873,49 @@ var annotationsTool = new Vue({
 				}, this);
 			}
 		},
+		checkSelTokenBereich: function () {
+			if (this.selTokenBereich.v >= 0 && this.selTokenBereich.b >= 0) {
+				var aInf = this.aTokens[this.selTokenBereich.v].i;
+				if ((aInf !== this.aTokens[this.selTokenBereich.b].i) || this.selTokenBereich.v === this.selTokenBereich.b) {
+					this.selTokenBereich = {'v': -1, 'b': -1};
+					this.d3SelTokenList = [];
+					return true;
+				}
+				this.selTokenListe = [];
+				var aList = _.clone(this.aTokenReihungInf[aInf]);
+				var sTBv = this.selTokenBereich.v;
+				var sTBb = this.selTokenBereich.b;
+				if (sTBv > sTBb) { var temp = sTBv; sTBv = sTBb; sTBb = temp; }
+				this.d3SelTokenList = aList.splice(aList.indexOf(sTBv), aList.indexOf(sTBb) + 1 - aList.indexOf(sTBv));
+			} else {
+				if (this.selTokenListe.length < 1) {
+					this.d3SelTokenList = [];
+				}
+			}
+		},
+		updateSelTokenListe: function (eTok = undefined) {
+			if (eTok !== undefined) {
+				this.selTokenBereich = {'v': -1, 'b': -1};
+				if (this.selTokenListe.indexOf(eTok) > -1) {
+					this.selTokenListe.splice(this.selTokenListe.indexOf(eTok), 1);
+				} else {
+					if (this.selTokenListe.length < 1 || this.aTokens[eTok].i === this.aTokens[this.selTokenListe[0]].i) {
+						this.selTokenListe.push(eTok);
+					} else {
+						this.selTokenListe = [];
+					}
+				}
+			}
+			this.d3SelTokenList = this.selTokenListe;
+		},
+		sucheZuAuswahlListe: function () {
+			this.suchTokens.forEach(function (val) {
+				if (this.selTokenListe.indexOf(val) < 0) {
+					this.updateSelTokenListe(val);
+				}
+			}, this);
+			this.focusFocusCatch();
+		},
 		listeNachWert: function (liste, val, next = true) {
 			var aList = ((next) ? liste.slice() : liste.slice().reverse());
 			if (aList.indexOf(val) < aList.length - 1) {
@@ -939,10 +948,6 @@ var annotationsTool = new Vue({
 				output += this.aInformanten[iKey].k + ': ' + ((aTRI[iKey]) ? aTRI[iKey].length.toLocaleString() : '0') + '\n';
 			}, this);
 			return output;
-		},
-		resizeWindow: function () {
-			this.mWidth = $('#annotationsvg').width();
-			this.sHeight = $('#svgscroller').height();
 		}
 	},
 	mounted: function () {
