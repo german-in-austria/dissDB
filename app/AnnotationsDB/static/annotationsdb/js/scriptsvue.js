@@ -193,6 +193,7 @@ var annotationsTool = new Vue({
 					if (this.annotationsTool.nNr === response.data['nNr']) {
 						this.annotationsTool.nNr = response.data['nNr'];
 						this.annotationsTool.loaded = true;
+						this.updateATokenSets();
 						console.log('Alle Datensätze geladen.');
 					} else if (this.annotationsTool.loaded === false) {
 						this.annotationsTool.nNr = response.data['nNr'];
@@ -492,7 +493,7 @@ var annotationsTool = new Vue({
 		},
 		/* showaTokenInfos */
 		showaTokenInfos: function (eTok, direkt = false, e = undefined) {
-			if (direkt || (this.selToken === eTok && (!e || (!e.ctrlKey && e.shiftKey)))) {
+			if (direkt || (this.selToken === eTok && (!e || (!e.ctrlKey && !e.shiftKey)))) {
 				annotationsTool.aTokens[eTok]['viewed'] = true;
 				this.d3TokenLastView = eTok;
 				this.aTokenInfo = _.clone(this.aTokens[eTok]);
@@ -880,16 +881,15 @@ var annotationsTool = new Vue({
 				aTokSetId -= 1;
 			}
 			if (this.selTokenBereich.v >= 0 && this.selTokenBereich.b >= 0) {
-				this.aTokenSets[aTokSetId] = {'ivt': this.selTokenBereich.v, 'ibt': this.selTokenBereich.b, 'a': this.newAAntworten()};
-				this.checkATokenSets(aTokSetId);
+				this.aTokenSets[aTokSetId] = {'ivt': this.selTokenBereich.v, 'ibt': this.selTokenBereich.b, 'a': this.newAAntworten(), 'ok': false};
 				this.selTokenBereich = {'v': -1, 'b': -1};
 				this.d3SelTokenList = [];
 			} else if (this.selTokenListe.length > 0) {
-				this.aTokenSets[aTokSetId] = {'t': this.selTokenListe.slice(), 'a': this.newAAntworten()};
-				this.checkATokenSets(aTokSetId);
+				this.aTokenSets[aTokSetId] = {'t': this.selTokenListe.slice(), 'a': this.newAAntworten(), 'ok': false};
 				this.selTokenListe = [];
 				this.d3SelTokenList = [];
 			}
+			this.updateATokenSets();
 			this.focusFocusCatch();
 		},
 		/* Leere Antwort erstellen und negativen Index zurückgeben */
@@ -897,18 +897,27 @@ var annotationsTool = new Vue({
 			/* ToDo !! */
 			return -1;
 		},
-		checkATokenSets: function (aTokSetId) {
-			if (this.aTokenSets[aTokSetId].ivt) {
-				if (this.aTokenSets[aTokSetId].ivt > this.aTokenSets[aTokSetId].ibt) {
-					var temp = this.aTokenSets[aTokSetId].ivt;
-					this.aTokenSets[aTokSetId].ivt = this.aTokenSets[aTokSetId].ibt;
-					this.aTokenSets[aTokSetId].ibt = temp;
+		updateATokenSets: function () {
+			Object.keys(this.aTokenSets).map(function (aTokSetId, iI) {
+				if (!this.aTokenSets[aTokSetId].ok) {
+					if (this.aTokenSets[aTokSetId].ivt) {
+						var aInf = this.aTokens[this.aTokenSets[aTokSetId].ivt].i;
+						if (this.aTokenReihungInf[aInf].indexOf(this.aTokenSets[aTokSetId].ivt >= 0 && this.aTokenReihungInf[aInf].indexOf(this.aTokenSets[aTokSetId].ibt >= 0))) {
+							if (this.aTokenSets[aTokSetId].ivt > this.aTokenSets[aTokSetId].ibt) {
+								var temp = this.aTokenSets[aTokSetId].ivt;
+								this.aTokenSets[aTokSetId].ivt = this.aTokenSets[aTokSetId].ibt;
+								this.aTokenSets[aTokSetId].ibt = temp;
+							}
+							var aList = _.clone(this.aTokenReihungInf[aInf]);
+							this.aTokenSets[aTokSetId].tx = aList.splice(aList.indexOf(this.aTokenSets[aTokSetId].ivt), aList.indexOf(this.aTokenSets[aTokSetId].ibt) + 1 - aList.indexOf(this.aTokenSets[aTokSetId].ivt));
+							this.aTokenSets[aTokSetId].ok = true;
+						}
+					} else if (this.aTokenSets[aTokSetId].t && this.listeWerteInListe(this.aTokenSets[aTokSetId].t, this.aTokenReihung)) {
+						this.aTokenSets[aTokSetId].t = this.sortEventIdListe(this.aTokenSets[aTokSetId].t);
+						this.aTokenSets[aTokSetId].ok = true;
+					}
 				}
-				var aList = _.clone(this.aTokenReihungInf[this.aTokens[this.aTokenSets[aTokSetId].ivt].i]);
-				this.aTokenSets[aTokSetId].tx = aList.splice(aList.indexOf(this.aTokenSets[aTokSetId].ivt), aList.indexOf(this.aTokenSets[aTokSetId].ibt) + 1 - aList.indexOf(this.aTokenSets[aTokSetId].ivt));
-			} else if (this.aTokenSets[aTokSetId].t) {
-				this.aTokenSets[aTokSetId].t = this.sortEventIdListe(this.aTokenSets[aTokSetId].t);
-			}
+			}, this);
 		},
 		checkSelTokenBereich: function () {
 			if (this.selTokenBereich.v >= 0 && this.selTokenBereich.b >= 0) {
@@ -988,6 +997,17 @@ var annotationsTool = new Vue({
 				}
 			}, this);
 			return nEListe;
+		},
+		listeWerteInListe: function (aListe, bListe) {
+			var cListe = aListe.slice();
+			bListe.some(function (val) {
+				var ap = cListe.indexOf(val);
+				if (ap >= 0) {
+					cListe.splice(ap, 1);
+					return (cListe.length === 0);
+				}
+			}, this);
+			return (cListe.length === 0);
 		},
 		tokenCountByInf: function (aTRI) {
 			var output = '';
