@@ -1,4 +1,4 @@
-/* global _ $ csrf Vue alert performance */
+/* global _ $ csrf Vue alert performance confirm */
 
 var preventClose = false;
 window.onbeforeunload = function () {
@@ -29,6 +29,7 @@ var annotationsTool = new Vue({
 			nNr: 0,
 			loaded: true
 		},
+		unsaved: false,
 		aTmNr: 1,
 		aTranskript: {},
 		aEinzelErhebung: {},
@@ -81,6 +82,9 @@ var annotationsTool = new Vue({
 	computed: {
 	},
 	watch: {
+		unsaved: function (nVal, oVal) {
+			preventClose = nVal;
+		},
 		mWidth: function (nVal, oVal) {
 			if (nVal !== oVal) {
 				this.updateZeilenTEvents();
@@ -121,6 +125,7 @@ var annotationsTool = new Vue({
 	},
 	methods: {
 		reset: function () {
+			this.unsaved = false;
 			this.loading = true;
 			this.aInfInfo = undefined;
 			this.tEventInfo = undefined;
@@ -158,59 +163,61 @@ var annotationsTool = new Vue({
 		},
 		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
 		getTranskript: function (aPK, aType = 'start', aNr = 0) {
-			console.log('Lade Datensatz ' + aNr + ' von pk: ' + aPK + ' ...');
-			if (aType === 'start') {
-				$(':focus').blur();
-				$('#annotationsvg').focus();
-				this.reset();
-				this.annotationsTool = {
-					aPK: aPK,
-					nNr: 0,
-					loaded: false
-				};
-			}
-			this.$http.post('',
-				{
-					getTranskript: aPK,
-					aType: aType,
-					aNr: aNr
-				})
-			.then((response) => {
-				if (aPK === this.annotationsTool.aPK) {
-					if (aType === 'start') {
-						this.aTmNr = response.data['aTmNr'];
-						this.aTranskript = response.data['aTranskript'];
-						this.aEinzelErhebung = response.data['aEinzelErhebung'];
-						this.aTokenTypes = response.data['aTokenTypes'];
-						this.setInformanten(response.data['aInformanten']);
-						this.aSaetze = response.data['aSaetze'];
-						this.focusFocusCatch();
-						setTimeout(this.selectNextToken, 200);
-					}
-					this.addTokens(response.data['aTokens']);
-					this.addEvents(response.data['aEvents']);
-					this.loading = false;
-					if (this.annotationsTool.nNr === response.data['nNr']) {
-						this.annotationsTool.nNr = response.data['nNr'];
-						this.annotationsTool.loaded = true;
-						this.updateATokenSets();
-						console.log('Alle Datensätze geladen.');
-					} else if (this.annotationsTool.loaded === false) {
-						this.annotationsTool.nNr = response.data['nNr'];
-						this.getTranskript(this.annotationsTool.aPK, 'next', this.annotationsTool.nNr);
-					}
+			if (aType !== 'start' | (!this.unsaved || confirm('Ungespeicherte Daten! Wirklich verwerfen?'))) {
+				console.log('Lade Datensatz ' + aNr + ' von pk: ' + aPK + ' ...');
+				if (aType === 'start') {
+					$(':focus').blur();
+					$('#annotationsvg').focus();
+					this.reset();
+					this.annotationsTool = {
+						aPK: aPK,
+						nNr: 0,
+						loaded: false
+					};
 				}
-			})
-			.catch((err) => {
-				console.log(err);
-				this.annotationsTool = {
-					aPK: 0,
-					nNr: 0,
-					loaded: false
-				};
-				alert('Fehler!');
-				this.loading = false;
-			});
+				this.$http.post('',
+					{
+						getTranskript: aPK,
+						aType: aType,
+						aNr: aNr
+					})
+				.then((response) => {
+					if (aPK === this.annotationsTool.aPK) {
+						if (aType === 'start') {
+							this.aTmNr = response.data['aTmNr'];
+							this.aTranskript = response.data['aTranskript'];
+							this.aEinzelErhebung = response.data['aEinzelErhebung'];
+							this.aTokenTypes = response.data['aTokenTypes'];
+							this.setInformanten(response.data['aInformanten']);
+							this.aSaetze = response.data['aSaetze'];
+							this.focusFocusCatch();
+							setTimeout(this.selectNextToken, 200);
+						}
+						this.addTokens(response.data['aTokens']);
+						this.addEvents(response.data['aEvents']);
+						this.loading = false;
+						if (this.annotationsTool.nNr === response.data['nNr']) {
+							this.annotationsTool.nNr = response.data['nNr'];
+							this.annotationsTool.loaded = true;
+							this.updateATokenSets();
+							console.log('Alle Datensätze geladen.');
+						} else if (this.annotationsTool.loaded === false) {
+							this.annotationsTool.nNr = response.data['nNr'];
+							this.getTranskript(this.annotationsTool.aPK, 'next', this.annotationsTool.nNr);
+						}
+					}
+				})
+				.catch((err) => {
+					console.log(err);
+					this.annotationsTool = {
+						aPK: 0,
+						nNr: 0,
+						loaded: false
+					};
+					alert('Fehler!');
+					this.loading = false;
+				});
+			}
 		},
 		/* setInformanten: Informanten setzten */
 		setInformanten: function (nInformanten) {
@@ -881,11 +888,13 @@ var annotationsTool = new Vue({
 				aTokSetId -= 1;
 			}
 			if (this.selTokenBereich.v >= 0 && this.selTokenBereich.b >= 0) {
-				this.aTokenSets[aTokSetId] = {'ivt': this.selTokenBereich.v, 'ibt': this.selTokenBereich.b, 'a': this.newAAntworten(), 'ok': false};
+				this.aTokenSets[aTokSetId] = {'ivt': this.selTokenBereich.v, 'ibt': this.selTokenBereich.b, 'a': this.newAAntworten(), 'ok': false, 'saveme': true};
+				this.unsaved = true;
 				this.selTokenBereich = {'v': -1, 'b': -1};
 				this.d3SelTokenList = [];
 			} else if (this.selTokenListe.length > 0) {
-				this.aTokenSets[aTokSetId] = {'t': this.selTokenListe.slice(), 'a': this.newAAntworten(), 'ok': false};
+				this.aTokenSets[aTokSetId] = {'t': this.selTokenListe.slice(), 'a': this.newAAntworten(), 'ok': false, 'saveme': true};
+				this.unsaved = true;
 				this.selTokenListe = [];
 				this.d3SelTokenList = [];
 			}
