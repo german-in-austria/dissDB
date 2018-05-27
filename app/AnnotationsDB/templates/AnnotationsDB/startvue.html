@@ -9,7 +9,7 @@
 	<link href="{% static "annotationsdb/css/annotationvue.css" %}?{% settings_value "CACH_RANDOM" %}" rel="stylesheet">
 {% endblock %}
 {% block inhalt %}
-<div id="annotationsTool" v-bind:class="{ loading: loading, bgloading: !annotationsTool.loaded, vuerunning: true }">
+<div id="annotationsTool" v-bind:class="{ loading: loading, bgloading: !annotationsTool.loaded, unsaved: unsaved, vuerunning: true }">
 	<div class="h100 vueapp">
 		<div class="row h100">
 			<div class="col-md-2 h100 mh200px vscroller lmfa">
@@ -42,6 +42,7 @@
 				<input id="focuscatch" v-on:keyup="focusCatchKeyUp" v-on:keydown="focusCatchKeyDown" />
 				<div id="svgscroller" class="h100 mcon vscroller">
 					{% include "AnnotationsDB/annotationsvg.html" %}
+					<button @click="speichern()" id="saveit" v-bind:class="{ btn: true, 'btn-success': true, disabled: !unsaved }" v-if="annotationsTool.aPK>0"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Speichern</button>
 				</div>
 				<svg style="position:absolute;right:0px;bottom:0px;width:1px;height:1px;"><text id="svg-text-textsize" x="-100" y="-100"></text></svg>
 				<div class="audioplayer-at">

@@ -163,7 +163,7 @@ var annotationsTool = new Vue({
 		},
 		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
 		getTranskript: function (aPK, aType = 'start', aNr = 0) {
-			if (aType !== 'start' | (!this.unsaved || confirm('Ungespeicherte Daten! Wirklich verwerfen?'))) {
+			if (aType !== 'start' || (!this.unsaved || confirm('Ungespeicherte Daten! Wirklich verwerfen?'))) {
 				console.log('Lade Datensatz ' + aNr + ' von pk: ' + aPK + ' ...');
 				if (aType === 'start') {
 					$(':focus').blur();
@@ -218,6 +218,11 @@ var annotationsTool = new Vue({
 					this.loading = false;
 				});
 			}
+		},
+		/* Änderungen speichern */
+		speichern: function () {
+			console.log('Änderungen speichern');
+			/* ToDo !!! */
 		},
 		/* setInformanten: Informanten setzten */
 		setInformanten: function (nInformanten) {
