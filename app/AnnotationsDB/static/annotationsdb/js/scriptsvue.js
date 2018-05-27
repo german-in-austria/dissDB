@@ -873,6 +873,43 @@ var annotationsTool = new Vue({
 				}, this);
 			}
 		},
+		/* Wandelt aktuelle Auswahl in Token Set um */
+		selToTokenSet: function () {
+			var aTokSetId = -1;
+			while (this.aTokenSets[aTokSetId]) {
+				aTokSetId -= 1;
+			}
+			if (this.selTokenBereich.v >= 0 && this.selTokenBereich.b >= 0) {
+				this.aTokenSets[aTokSetId] = {'ivt': this.selTokenBereich.v, 'ibt': this.selTokenBereich.b, 'a': this.newAAntworten()};
+				this.checkATokenSets(aTokSetId);
+				this.selTokenBereich = {'v': -1, 'b': -1};
+				this.d3SelTokenList = [];
+			} else if (this.selTokenListe.length > 0) {
+				this.aTokenSets[aTokSetId] = {'t': this.selTokenListe.slice(), 'a': this.newAAntworten()};
+				this.checkATokenSets(aTokSetId);
+				this.selTokenListe = [];
+				this.d3SelTokenList = [];
+			}
+			this.focusFocusCatch();
+		},
+		/* Leere Antwort erstellen und negativen Index zurückgeben */
+		newAAntworten: function () {
+			/* ToDo !! */
+			return -1;
+		},
+		checkATokenSets: function (aTokSetId) {
+			if (this.aTokenSets[aTokSetId].ivt) {
+				if (this.aTokenSets[aTokSetId].ivt > this.aTokenSets[aTokSetId].ibt) {
+					var temp = this.aTokenSets[aTokSetId].ivt;
+					this.aTokenSets[aTokSetId].ivt = this.aTokenSets[aTokSetId].ibt;
+					this.aTokenSets[aTokSetId].ibt = temp;
+				}
+				var aList = _.clone(this.aTokenReihungInf[this.aTokens[this.aTokenSets[aTokSetId].ivt].i]);
+				this.aTokenSets[aTokSetId].tx = aList.splice(aList.indexOf(this.aTokenSets[aTokSetId].ivt), aList.indexOf(this.aTokenSets[aTokSetId].ibt) + 1 - aList.indexOf(this.aTokenSets[aTokSetId].ivt));
+			} else if (this.aTokenSets[aTokSetId].t) {
+				this.aTokenSets[aTokSetId].t = this.sortEventIdListe(this.aTokenSets[aTokSetId].t);
+			}
+		},
 		checkSelTokenBereich: function () {
 			if (this.selTokenBereich.v >= 0 && this.selTokenBereich.b >= 0) {
 				var aInf = this.aTokens[this.selTokenBereich.v].i;
@@ -941,6 +978,16 @@ var annotationsTool = new Vue({
 				}
 			}
 			return aList;
+		},
+		/* Sortiert und Filtert vorgegebene Liste mit Event IDs chronologisch nach aTokenReihung. */
+		sortEventIdListe: function (aEListe) {
+			var nEListe = [];
+			this.aTokenReihung.forEach(function (val) {
+				if (aEListe.indexOf(val) >= 0) {
+					nEListe.push(val);
+				}
+			}, this);
+			return nEListe;
 		},
 		tokenCountByInf: function (aTRI) {
 			var output = '';

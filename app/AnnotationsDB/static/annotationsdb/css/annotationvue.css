@@ -268,3 +268,13 @@ g.tEvent > .zeit > line {
 	background: #555;
 	color: #ddd;
 }
+button.lmfabc {
+	border: none;
+}
+
+.infpanel .lmfabc {
+	background: #eee;
+}
+.infpanel .lmfabc:hover, .infpanel .lmfabc:focus {
+	background: #555;
+}
