@@ -164,7 +164,7 @@ var annotationsTool = new Vue({
 		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
 		getTranskript: function (aPK, aType = 'start', aNr = 0) {
 			if (aType !== 'start' || (!this.unsaved || confirm('Ungespeicherte Daten! Wirklich verwerfen?'))) {
-				console.log('Lade Datensatz ' + aNr + ' von pk: ' + aPK + ' ...');
+				console.log('Lade Datensatz ' + aNr + '/' + this.aTmNr + ' von Transkript pk: ' + aPK + ' ...');
 				if (aType === 'start') {
 					$(':focus').blur();
 					$('#annotationsvg').focus();
@@ -1037,8 +1037,10 @@ var annotationsTool = new Vue({
 		this.resizeWindow();
 		this.getMenue();
 		/* Wenn Modal angezeigt wird */
-		$(document).on('shown.bs.modal', '#aTokenInfo', function (e) {
-			$('#aTokenText').focus();
+		$(document).on('shown.bs.modal', '.modal', function (e) {
+			if ($(this).data('focus')) {
+				$($(this).data('focus')).focus();
+			}
 		});
 		/* Wenn Modal ausgeblendet wurde */
 		$(document).on('hidden.bs.modal', '.modal', function (e) {
