@@ -67,6 +67,7 @@ var annotationsTool = new Vue({
 		zInfWidth: 100,
 		showTransInfo: true,
 		showTokenInfo: true,
+		showTokenSetInfo: true,
 		showAllgeInfo: false,
 		showSuche: false,
 		suchen: false,
@@ -930,6 +931,17 @@ var annotationsTool = new Vue({
 						this.aTokenSets[aTokSetId].t = this.sortEventIdListe(this.aTokenSets[aTokSetId].t);
 						this.aTokenSets[aTokSetId].ok = true;
 					}
+					var xt = this.aTokenSets[aTokSetId].t || this.aTokenSets[aTokSetId].tx;
+					if (xt) {
+						xt.forEach(function (tId) {
+							if (!this.aTokens[tId].tokenSets) {
+								this.aTokens[tId].tokenSets = [];
+							}
+							if (this.aTokens[tId].tokenSets.indexOf(aTokSetId) < 0) {
+								this.aTokens[tId].tokenSets.push(aTokSetId);
+							}
+						}, this);
+					}
 				}
 			}, this);
 		},
@@ -967,6 +979,11 @@ var annotationsTool = new Vue({
 				}
 			}
 			this.d3SelTokenList = this.selTokenListe;
+		},
+		reRenderSelToken: function () {
+			var tSelToken = this.selToken;
+			this.selToken = -1;
+			this.$nextTick(() => { this.selToken = tSelToken; });
 		},
 		sucheZuAuswahlListe: function () {
 			this.suchTokens.forEach(function (val) {

@@ -248,6 +248,9 @@ g.tEvent > .zeit > line {
 	margin-left: 8px;
 	margin-bottom: 2px;
 }
+.infpanel .tokensets:not(:last-child) {
+  border-bottom: 1px solid #ccc;
+}
 .listtokens>a {
 	background: #fff;
 	margin-right: 3px;

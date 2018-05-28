@@ -42,6 +42,20 @@
 		<template v-if="aTokenFragmente[selToken]"><b>Fragmente:</b> <span :title="'ID: '+aToFragKey" v-for="(aToFragKey, aIndex) in aTokenFragmente[selToken]">${ ((aIndex)?', ':'')+aTokens[aToFragKey].t }</span><br></template>
 	</div>
 </div>
+<div v-bind:class="{'infpanel': true, 'open': showTokenSetInfo}" v-if="selToken&&aTokens[selToken]&&aTokens[selToken].tokenSets">
+	<a href="#" v-on:click.prevent="showTokenSetInfo=!showTokenSetInfo"><b>Akutelle TokenSets</b><span :class="'glyphicon glyphicon-' + ((showTokenSetInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+	<div v-if="showTokenSetInfo">
+		<div v-for="aTokenSet in aTokens[selToken].tokenSets" class="tokensets">
+			<b>ID:</b> ${ aTokenSet+((aTokenSet<0)?' (Neu)':'') }<a href="#" v-on:click.prevent="aTokenSets[aTokenSet].ipshow=((aTokenSets[aTokenSet].ipshow)?false:true);reRenderSelToken();" class="pull-right"><span :class="'glyphicon glyphicon-' + ((aTokenSets[aTokenSet].ipshow)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a><br>
+			<b>Anzahl:</b> ${ (aTokenSets[aTokenSet].t||aTokenSets[aTokenSet].tx||[]).length.toLocaleString() }<br>
+			<template v-if="aTokenSets[aTokenSet].ivt"><b>Von Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[aTokenSet].ivt;focusFocusCatch();" :title="'ID: '+aTokenSets[aTokenSet].ivt">${ aTokens[aTokenSets[aTokenSet].ivt].t }</a><br></template>
+			<template v-if="aTokenSets[aTokenSet].ibt"><b>Bis Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[aTokenSet].ibt;focusFocusCatch();" :title="'ID: '+aTokenSets[aTokenSet].ibt">${ aTokens[aTokenSets[aTokenSet].ibt].t }</a><br></template>
+			<div class="listtokens mit10" v-if="aTokenSets[aTokenSet].ipshow">
+				<a href="#" v-on:click.prevent="selToken=sTL;focusFocusCatch();" :class="{selected: selToken===sTL}" v-for="(sTL, i) in (aTokenSets[aTokenSet].t||aTokenSets[aTokenSet].tx)" :title="aTokens[sTL].t+' - ID: '+sTL">${ aTokens[sTL].t }</a>
+			</div>
+		</div>
+	</div>
+</div>
 <div v-bind:class="{'infpanel': true, 'open': showAllgeInfo}" v-if="aTranskript.pk">
 	<a href="#" v-on:click.prevent="showAllgeInfo=!showAllgeInfo"><b>Allgemeine Informationen</b><span :class="'glyphicon glyphicon-' + ((showAllgeInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
 	<div v-if="showAllgeInfo">
