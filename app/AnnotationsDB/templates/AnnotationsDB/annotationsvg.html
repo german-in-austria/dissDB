@@ -12,7 +12,7 @@
 			<g :class="{eZeile: true, selected: aZeile==d3ZeileSelected}" :transform="'translate(0,'+zeilenTEvents[aZeile]['eT']+')'" v-for="aZeile in renderZeilen">
 				<rect x="0" y="0" :width="mWidth-10" :height="zeilenTEvents[aZeile]['eH']-18" />
 				<g class="zInfs">
-					<g :class="'zInf zInf'+aInfKey+((aInfKey==d3InfSelected)?' selected':'')" v-on:click="showaInfInfos(aInfKey)" :transform="'translate(5, '+((eEventHeight - 25) + eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
+					<g :class="'zInf zInf'+aInfKey+((aInfKey==d3InfSelected)?' selected':'')" v-on:click="showaInfInfos(aInfKey)" :transform="'translate(5, '+((eEventHeight - 25) + eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(objectSubValueFilter(aInformanten,'show',true), zeilenTEvents[aZeile]['iId'])">
 						<rect x="0" y="4.5" :width="zInfWidth" :height="eInfHeight - 9" />
 						<line x1="0" y1="4.5" :x2="zInfWidth" y2="4.5" />
 						<line x1="0" :y1="eInfHeight-4.5" :x2="zInfWidth" :y2="eInfHeight-4.5" />
@@ -22,7 +22,7 @@
 					</g>
 				</g>
 				<g class="tEvent" :transform="'translate('+(zInfWidth + 5 + tEvents[tEventId]['svgLeft'])+','+(eEventHeight-20)+')'" v-for="tEventId in zeilenTEvents[aZeile]['eId']">
-					<g :class="'eInf eInf'+aInfKey" :transform="'translate(0,'+(eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(aInformanten, zeilenTEvents[aZeile]['iId'])">
+					<g :class="'eInf eInf'+aInfKey" :transform="'translate(0,'+(eInfTop + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(objectSubValueFilter(aInformanten,'show',true), zeilenTEvents[aZeile]['iId'])">
 						<rect x="0" y="0" :width="tEvents[tEventId]['svgWidth']+1" :height="eInfHeight-10" />
 						<template v-if="aEvents[tEvents[tEventId].eId[aInfKey]]">
 							<g v-on:click="showaTokenInfos(aTokenId, false, $event)" :class="'eTok eTok' + aTokenId + ' eTokT' + aTokens[aTokenId]['tt'] + ((aTokens[aTokenId]['viewed'])?' viewed':'') + ((d3TokenLastView === aTokenId)?' lastview':'') + ((d3SelTokenList.indexOf(aTokenId)>-1)?' selectlist':'') + ((selToken === aTokenId)?' selected':'') + ((suchTokens.indexOf(aTokenId)>=0)?' found':'')" :transform="'translate('+(aTokens[aTokenId]['svgLeft']-1)+',1)'" v-for="aTokenId in aEvents[tEvents[tEventId].eId[aInfKey]]['tid'][aInfKey]">

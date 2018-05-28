@@ -13,8 +13,19 @@
 	<div class="h100 vueapp">
 		<div class="row h100">
 			<div class="col-md-2 h100 mh200px vscroller lmfa">
+				<div class="btngroup" v-if="annotationsTool.aPK>0">
+					<button @click="showSuche=!showSuche;" v-bind:class="{tfxbtn: true, open: showSuche}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+					<button @click="showFilter=!showFilter;" v-bind:class="{tfxbtn: true, open: showFilter}"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></button>
+				</div>
 				<div class="suchgroup" v-if="annotationsTool.aPK>0&&showSuche">
 					{% include "AnnotationsDB/annotationssuche.html" %}
+				</div>
+				<div class="filtergroup" v-if="annotationsTool.aPK>0&&showFilter">
+					<h4>Filter:<a href="#" v-on:click.prevent="showFilter=false" class="pull-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></h4>
+					<b>Informanten:</b>
+						<label v-for="(aInfVal, aInfKey) in aInformanten">${ ((aInfVal.i)?', ':'') }<input type="checkbox" @click="debouncedUpdateInfShow();focusFocusCatch();" v-model="aInfVal.show">&nbsp;${ aInfVal.k }</label>
+					<br>
+					<hr>
 				</div>
 				<div class="infgroup" v-if="annotationsTool.aPK>0">
 					{% include "AnnotationsDB/annotationsinfos.html" %}

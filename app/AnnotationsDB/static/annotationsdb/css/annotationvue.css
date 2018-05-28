@@ -284,3 +284,22 @@ button.lmfabc {
 .infpanel .lmfabc:hover, .infpanel .lmfabc:focus {
 	background: #555;
 }
+
+.btngroup {
+	margin-top: 5px;
+}
+.tfxbtn {
+	background: #fff;
+	margin: 5px 0px 0px 0px;
+	color: #2B5A84;
+	border: none;
+}
+.tfxbtn.open {
+	background: #ddd;
+	color: #272C31;
+}
+.tfxbtn:hover, .tfxbtn:focus {
+	background: #555;
+	color: #ddd;
+	text-decoration: none;
+}

@@ -63,13 +63,14 @@ var annotationsTool = new Vue({
 		getCharWidthCach: {},
 		eEventHeight: 40,
 		eInfHeight: 63,
-		eInfTop: 25,
+		eInfTop: 35,
 		zInfWidth: 100,
 		showTransInfo: true,
 		showTokenInfo: true,
 		showTokenSetInfo: true,
 		showAllgeInfo: false,
 		showSuche: false,
+		showFilter: false,
 		suchen: false,
 		suchText: '',
 		suchInf: 0,
@@ -113,6 +114,14 @@ var annotationsTool = new Vue({
 			} else {
 				this.suchText = '';
 				this.focusFocusCatch();
+			}
+		},
+		showFilter: function (nVal, oVal) {
+			if (!nVal) {
+				Object.keys(this.aInformanten).map(function (iKey, iI) {
+					this.aInformanten[iKey].show = true;
+				}, this);
+				this.debouncedUpdateInfShow();
 			}
 		},
 		suchText: function (nVal, oVal) {
@@ -160,6 +169,7 @@ var annotationsTool = new Vue({
 			this.audioPos = 0;
 			this.audioDuration = 0;
 			this.showSuche = false;
+			this.showFilter = false;
 			return true;
 		},
 		/* getTranskript: Läd aktuelle Daten des Transkripts für das Annotations Tool */
@@ -231,6 +241,7 @@ var annotationsTool = new Vue({
 			Object.keys(nInformanten).map(function (key, i) {
 				this.aInformanten[key] = nInformanten[key];
 				this.aInformanten[key]['i'] = i;
+				this.aInformanten[key]['show'] = true;
 			}, this);
 			this.aInfLen = Object.keys(nInformanten).length;
 		},
@@ -365,8 +376,13 @@ var annotationsTool = new Vue({
 			}, this);
 			return mW + 2;
 		},
+		updateInfShow: function () {
+			this.updateZeilenTEvents();
+			this.debouncedSVGHeight();
+		},
 		/* updateZeilenTEvents */
 		updateZeilenTEvents: function () {
+			var t0 = performance.now();
 			var aWidth = this.zInfWidth;
 			this.zeilenTEvents = [{'eId': [], 'eH': 0, 'iId': [], 'eT': 0}];
 			var aZTEv = 0;
@@ -378,7 +394,7 @@ var annotationsTool = new Vue({
 				if (aWidth < this.mWidth - 25) {
 					this.zeilenTEvents[aZTEv]['eId'].push(key);
 					Object.keys(val['eId']).map(function (iKey, iI) {
-						if (this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
+						if (this.aInformanten[iKey].show && this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
 							this.zeilenTEvents[aZTEv]['iId'].push(iKey);
 						}
 					}, this);
@@ -393,7 +409,7 @@ var annotationsTool = new Vue({
 					this.tEvents[key]['svgLeft'] = 0;
 					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop};
 					Object.keys(val['eId']).map(function (iKey, iI) {
-						if (this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
+						if (this.aInformanten[iKey].show && this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
 							this.zeilenTEvents[aZTEv]['iId'].push(iKey);
 						}
 					}, this);
@@ -401,6 +417,8 @@ var annotationsTool = new Vue({
 				}
 			}, this);
 			this.zeilenHeight += this.zeilenTEvents[aZTEv]['eH'];
+			var t1 = performance.now();
+			console.log('updateZeilenTEvents: ' + Math.ceil(t1 - t0) + ' ms');
 		},
 		/* getTokenString */
 		getTokenString: function (tId, field, bfield = false) {
@@ -581,6 +599,15 @@ var annotationsTool = new Vue({
 			var nObj = {};
 			Object.keys(obj).map(function (iKey, iI) {
 				if (key.indexOf(iKey) >= 0) {
+					nObj[iKey] = obj[iKey];
+				}
+			}, this);
+			return nObj;
+		},
+		objectSubValueFilter: function (obj, key, value) {
+			var nObj = {};
+			Object.keys(obj).map(function (iKey, iI) {
+				if (obj[iKey][key] === value) {
 					nObj[iKey] = obj[iKey];
 				}
 			}, this);
@@ -1069,6 +1096,7 @@ var annotationsTool = new Vue({
 	},
 	created: function () {
 		this.debouncedSuche = _.debounce(this.suche, 500);
+		this.debouncedUpdateInfShow = _.debounce(this.updateInfShow, 100);
 	},
 	beforeDestroy: function () {
 		document.getElementById('svgscroller').removeEventListener('scroll', this.scrollRendering);
