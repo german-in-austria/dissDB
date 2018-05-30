@@ -233,7 +233,36 @@ var annotationsTool = new Vue({
 		/* Änderungen speichern */
 		speichern: function () {
 			console.log('Änderungen speichern');
+			var sOK = true;
+			var sData = {};
+			/* Token Sets für speichern auslesen */
+			var sATokenSets = {};
+			Object.keys(this.aTokenSets).map(function (key, i) {
+				if (this.aTokenSets[key].saveme) {
+					sATokenSets[key] = this.filterProperties(this.aTokenSets[key], ['a', 'ivt', 'ibt', 't']);
+				}
+			}, this);
+			if (Object.keys(sATokenSets).length > 0) {
+				sData.aTokenSets = sATokenSets;
+			}
 			/* ToDo !!! */
+			console.log(sData);
+			if (sOK) {
+				this.loading = true;
+				this.$http.post('',
+					{
+						speichern: JSON.stringify(sData)
+					})
+				.then((response) => {
+					console.log(response);
+					this.loading = false;
+				})
+				.catch((err) => {
+					console.log(err);
+					alert('Fehler!');
+					this.loading = false;
+				});
+			}
 		},
 		/* setInformanten: Informanten setzten */
 		setInformanten: function (nInformanten) {
@@ -1019,6 +1048,16 @@ var annotationsTool = new Vue({
 				}
 			}, this);
 			this.focusFocusCatch();
+		},
+		/* Properties von Objekt filtern */
+		filterProperties: function (obj, props) {
+			var output = {};
+			Object.keys(obj).map(function (key, i) {
+				if (props.indexOf(key) > -1) {
+					output[key] = obj[key];
+				}
+			}, this);
+			return output;
 		},
 		listeNachWert: function (liste, val, next = true) {
 			var aList = ((next) ? liste.slice() : liste.slice().reverse());

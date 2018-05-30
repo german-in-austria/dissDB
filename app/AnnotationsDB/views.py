@@ -14,7 +14,9 @@ def startvue(request, ipk=0, tpk=0):
 		return redirect('dissdb_login')
 	ipk = int(ipk)
 	tpk = int(tpk)
-
+	if 'speichern' in request.POST:
+		print(request.POST.get('speichern'))
+		return httpOutput('OK')
 	if 'getTranskript' in request.POST:
 		tpk = int(request.POST.get('getTranskript'))
 	if tpk > 0:
