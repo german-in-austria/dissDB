@@ -15,8 +15,34 @@ def startvue(request, ipk=0, tpk=0):
 	ipk = int(ipk)
 	tpk = int(tpk)
 	if 'speichern' in request.POST:
-		print(request.POST.get('speichern'))
-		return httpOutput('OK')
+		sData = json.loads(request.POST.get('speichern'))
+		print(sData)
+		# aAntworten speichern!
+		# ToDo: speichern und ggf. neue Id hinzufügen. Siehe aTokenSets!
+		# aTokenSets speichern
+		if 'aTokenSets' in sData:
+			for key, value in sData['aTokenSets'].items():
+				aId = int(key)
+				if aId > 0:
+					aElement = adbmodels.tbl_tokenset.objects.get(id=aId)
+				else:
+					aElement = adbmodels.tbl_tokenset()
+				setattr(aElement, 'id_von_token_id', (value['ivt'] if 'ivt' in value else None))
+				setattr(aElement, 'id_bis_token_id', (value['ibt'] if 'ibt' in value else None))
+				aElement.save()
+				value['nId'] = aElement.pk
+				if 't' in value:
+					for aTokenId in value['t']:
+						try:
+							aTokenToSet = adbmodels.tbl_tokentoset.objects.get(id_tokenset=value['nId'], id_token=aTokenId)
+						except adbmodels.tbl_tokentoset.DoesNotExist:
+							aTokenToSet = adbmodels.tbl_tokentoset()
+						setattr(aTokenToSet, 'id_tokenset_id', value['nId'])
+						setattr(aTokenToSet, 'id_token_id', aTokenId)
+						aTokenToSet.save()
+		print(sData)
+		return httpOutput(json.dumps({'OK': True, 'gespeichert': sData}), 'application/json')
+
 	if 'getTranskript' in request.POST:
 		tpk = int(request.POST.get('getTranskript'))
 	if tpk > 0:

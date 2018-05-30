@@ -254,7 +254,30 @@ var annotationsTool = new Vue({
 						speichern: JSON.stringify(sData)
 					})
 				.then((response) => {
-					console.log(response);
+					if (response.data['OK']) {
+						console.log(response.data);
+						if (response.data['gespeichert']) {
+							if (response.data['gespeichert']['aTokenSets']) {
+								Object.keys(response.data['gespeichert']['aTokenSets']).map(function (key, i) {
+									var nTokenSet = response.data['gespeichert']['aTokenSets'][key];
+									if (this.aTokenSets[key]) {
+										delete this.aTokenSets[key];
+									}
+									var aKey = ((nTokenSet.nId) ? nTokenSet.nId : key);
+									this.aTokenSets[aKey] = {};
+									this.aTokenSets[aKey].a = nTokenSet.a;
+									if (nTokenSet.ivt) { this.aTokenSets[aKey].ivt = nTokenSet.ivt; };
+									if (nTokenSet.ibt) { this.aTokenSets[aKey].ibt = nTokenSet.ibt; };
+									if (nTokenSet.t) { this.aTokenSets[aKey].t = nTokenSet.t; };
+								}, this);
+								this.updateATokenSets();
+								this.focusFocusCatch();
+							}
+						}
+					} else {
+						alert('Fehler!');
+						console.log(response);
+					}
 					this.loading = false;
 				})
 				.catch((err) => {
