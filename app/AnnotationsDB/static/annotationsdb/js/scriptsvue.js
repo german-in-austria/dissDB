@@ -206,11 +206,11 @@ var annotationsTool = new Vue({
 						}
 						this.addTokens(response.data['aTokens']);
 						this.addEvents(response.data['aEvents']);
+						this.addTokenSets(response.data['aTokenSets']);
 						this.loading = false;
 						if (this.annotationsTool.nNr === response.data['nNr']) {
 							this.annotationsTool.nNr = response.data['nNr'];
 							this.annotationsTool.loaded = true;
-							this.updateATokenSets();
 							console.log('Alle Datensätze geladen.');
 						} else if (this.annotationsTool.loaded === false) {
 							this.annotationsTool.nNr = response.data['nNr'];
@@ -245,7 +245,6 @@ var annotationsTool = new Vue({
 			if (Object.keys(sATokenSets).length > 0) {
 				sData.aTokenSets = sATokenSets;
 			}
-			/* ToDo !!! */
 			console.log(sData);
 			if (sOK) {
 				this.loading = true;
@@ -302,6 +301,13 @@ var annotationsTool = new Vue({
 			Object.keys(nTokens).map(function (key, i) {
 				this.updateToken(key, nTokens[key]);
 			}, this);
+		},
+		/* addTokenSets: TokenSets hinzufügen */
+		addTokenSets: function (nTokenSets) {
+			Object.keys(nTokenSets).map(function (key, i) {
+				this.aTokenSets[key] = nTokenSets[key];
+			}, this);
+			this.debouncedUpdateATokenSets();
 		},
 		/* updateToken */
 		updateToken: function (key, values) {
@@ -1159,6 +1165,7 @@ var annotationsTool = new Vue({
 	created: function () {
 		this.debouncedSuche = _.debounce(this.suche, 500);
 		this.debouncedUpdateInfShow = _.debounce(this.updateInfShow, 100);
+		this.debouncedUpdateATokenSets = _.debounce(this.updateATokenSets, 100);
 	},
 	beforeDestroy: function () {
 		document.getElementById('svgscroller').removeEventListener('scroll', this.scrollRendering);

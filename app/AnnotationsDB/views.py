@@ -85,7 +85,7 @@ def startvue(request, ipk=0, tpk=0):
 				if aEIToken.ID_Inf_id not in aEITokens:
 					aEITokens[aEIToken.ID_Inf_id] = []
 				aEITokens[aEIToken.ID_Inf_id].append(aEIToken.id)
-				aTokenset = {
+				aTokenData = {
 					't': aEIToken.text,
 					'tt': aEIToken.token_type_id_id,
 					'tr': aEIToken.token_reihung,
@@ -94,20 +94,41 @@ def startvue(request, ipk=0, tpk=0):
 					'i': aEIToken.ID_Inf_id,
 				}
 				if aEIToken.ortho:
-					aTokenset['o'] = aEIToken.ortho
+					aTokenData['o'] = aEIToken.ortho
 				if aEIToken.sentence_id_id:
-					aTokenset['s'] = aEIToken.sentence_id_id
+					aTokenData['s'] = aEIToken.sentence_id_id
 				if aEIToken.sequence_in_sentence:
-					aTokenset['sr'] = aEIToken.sequence_in_sentence
+					aTokenData['sr'] = aEIToken.sequence_in_sentence
 				if aEIToken.fragment_of_id:
-					aTokenset['fo'] = aEIToken.fragment_of_id
+					aTokenData['fo'] = aEIToken.fragment_of_id
 				if aEIToken.likely_error:
-					aTokenset['le'] = 1
-				aTokens[aEIToken.pk] = aTokenset
+					aTokenData['le'] = 1
+				aTokens[aEIToken.pk] = aTokenData
 			aEvents.append({'pk': aEvent.pk, 's': str(aEvent.start_time), 'e': str(aEvent.end_time), 'l': str(aEvent.layer if aEvent.layer else 0), 'tid': aEITokens})
 		if len(aEvents) == maxQuerys:
 			nNr += 1
-		dataout.update({'nNr': nNr, 'aEvents': aEvents, 'aTokens': aTokens})
+		aTokenIds = [aTokenId for aTokenId in aTokens]
+		maxVars = 500
+		aTokenSets = {}
+		nTokenSets = []
+		while len(aTokenIds) > 0:
+			nTokenSets += adbmodels.tbl_tokenset.objects.distinct().filter(id_von_token_id__in=aTokenIds[:maxVars])
+			nTokenSets += adbmodels.tbl_tokenset.objects.distinct().filter(tbl_tokentoset__id_token__in=aTokenIds[:maxVars])
+			aTokenIds = aTokenIds[maxVars:]
+		for nTokenSet in nTokenSets:
+			if nTokenSet.pk not in aTokenSets:
+				aTokenSet = {'a': -1}
+				if nTokenSet.id_von_token:
+					aTokenSet['ivt'] = nTokenSet.id_von_token_id
+				if nTokenSet.id_bis_token:
+					aTokenSet['ibt'] = nTokenSet.id_bis_token_id
+				nTokenToSets = []
+				for nTokenToSet in nTokenSet.tbl_tokentoset_set.all():
+					nTokenToSets.append(nTokenToSet.id_token_id)
+				if nTokenToSets:
+					aTokenSet['t'] = nTokenToSets
+				aTokenSets[nTokenSet.pk] = (aTokenSet)
+		dataout.update({'nNr': nNr, 'aEvents': aEvents, 'aTokens': aTokens, 'aTokenSets': aTokenSets})
 		return httpOutput(json.dumps(dataout), 'application/json')
 
 	if 'getMenue' in request.POST:

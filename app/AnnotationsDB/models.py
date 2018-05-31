@@ -69,8 +69,8 @@ class tbl_tokenset(models.Model):
 		ordering = ('id_von_token',)
 
 class tbl_tokentoset(models.Model):
-	id_tokenset			= models.ForeignKey('tbl_tokenset'			, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Tokenset")
-	id_token			= models.ForeignKey('token'					, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Token")
+	id_tokenset			= models.ForeignKey('tbl_tokenset'									, on_delete=models.CASCADE		, verbose_name="Tokenset")
+	id_token			= models.ForeignKey('token'											, on_delete=models.CASCADE		, verbose_name="Token")
 	def __str__(self):
 		return "{} <- {}".format(self.id_tokenset, self.id_token)
 	class Meta:
