@@ -415,10 +415,8 @@ var annotationsTool = new Vue({
 			Object.keys(this.aInformanten).map(function (iKey, iI) {	// Informanten durchzählen
 				Object.keys(this.tEvents[key]['eId']).map(function (eKey, eI) {
 					if (eKey === iKey) {
-						var aEvent = this.aEvents[this.tEvents[key]['eId'][eKey]];
-						var aTokensIds = aEvent['tid'][iKey];
 						var aW = 0;
-						aTokensIds.forEach(function (aTokenId) {
+						this.aEvents[this.tEvents[key]['eId'][eKey]]['tid'][iKey].forEach(function (aTokenId) {
 							var t1W = this.getTextWidth(this.getTokenString(aTokenId, 't'), false);
 							var t2W = this.getTextWidth(this.getTokenString(aTokenId, 'o', 't'), false);
 							var tW = ((t1W > t2W) ? t1W : t2W) + 1.5;
@@ -442,8 +440,9 @@ var annotationsTool = new Vue({
 		updateZeilenTEvents: function () {
 			var t0 = performance.now();
 			var aWidth = this.zInfWidth;
-			this.zeilenTEvents = [{'eId': [], 'eH': 0, 'iId': [], 'eT': 0}];
+			this.zeilenTEvents = [];
 			var aZTEv = 0;
+			this.zeilenTEvents[aZTEv] = {'eId': [], 'eH': 0, 'iId': [], 'eT': 0, 'ts': []};
 			var eTop = 0;
 			this.zeilenHeight = 0;
 			this.tEvents.forEach(function (val, key) {
@@ -451,31 +450,35 @@ var annotationsTool = new Vue({
 				aWidth += val['svgWidth'] + 0.5;
 				if (aWidth < this.mWidth - 25) {
 					this.zeilenTEvents[aZTEv]['eId'].push(key);
-					this.uZTEaddDataUpdate(val, aZTEv);
-					if ((this.eEventHeight + (this.eInfHeight + this.eInfTop) * this.aInfLen) > this.zeilenTEvents[aZTEv]['eH']) {
-						this.zeilenTEvents[aZTEv]['eH'] = (this.eEventHeight + (this.eInfHeight + this.eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length);
-					}
 				} else {
+					this.uzteEndDataUpdate(aZTEv);
 					this.zeilenHeight += this.zeilenTEvents[aZTEv]['eH'];
 					eTop = this.zeilenTEvents[aZTEv]['eT'] + this.zeilenTEvents[aZTEv]['eH'];
 					aWidth = this.zInfWidth + val['svgWidth'];
 					aZTEv++;
 					this.tEvents[key]['svgLeft'] = 0;
-					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop};
-					this.uZTEaddDataUpdate(val, aZTEv);
-					this.zeilenTEvents[aZTEv]['eH'] = this.eEventHeight + (this.eInfHeight + this.eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length;
+					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop, 'ts': []};
 				}
 			}, this);
+			this.uzteEndDataUpdate(aZTEv);
 			this.zeilenHeight += this.zeilenTEvents[aZTEv]['eH'];
 			var t1 = performance.now();
 			console.log('updateZeilenTEvents: ' + Math.ceil(t1 - t0) + ' ms');
 		},
-		uZTEaddDataUpdate: function (val, aZTEv) {
-			Object.keys(val['eId']).map(function (iKey, iI) {
-				if (this.aInformanten[iKey].show && this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
-					this.zeilenTEvents[aZTEv]['iId'].push(iKey);
-				}
+		uzteEndDataUpdate: function (aZTEv) {
+			// console.log(this.zeilenTEvents[aZTEv]);
+			this.zeilenTEvents[aZTEv]['eId'].forEach(function (val, key) {
+				var tEvent = this.tEvents[val];
+				Object.keys(tEvent['eId']).map(function (iKey, iI) {
+					if (this.aInformanten[iKey].show) {
+						if (this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
+							this.zeilenTEvents[aZTEv]['iId'].push(iKey);
+						}
+					}
+				}, this);
 			}, this);
+			// ToDo: Höhe an Token Sets anpassen!
+			this.zeilenTEvents[aZTEv]['eH'] = this.eEventHeight + (this.eInfHeight + this.eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length;
 		},
 		/* getTokenString */
 		getTokenString: function (tId, field, bfield = false) {
