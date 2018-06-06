@@ -61,9 +61,10 @@ var annotationsTool = new Vue({
 		mWidth: 0,
 		sHeight: 0,
 		getCharWidthCach: {},
+		aTokenSetHeight: 20,
 		eEventHeight: 40,
 		eInfHeight: 63,
-		eInfTop: 35,
+		eInfTop: 10,
 		zInfWidth: 100,
 		showTransInfo: true,
 		showTokenInfo: true,
@@ -442,7 +443,7 @@ var annotationsTool = new Vue({
 			var aWidth = this.zInfWidth;
 			this.zeilenTEvents = [];
 			var aZTEv = 0;
-			this.zeilenTEvents[aZTEv] = {'eId': [], 'eH': 0, 'iId': [], 'eT': 0, 'tId': {'all': []}, 'tsId': {'all': []}};
+			this.zeilenTEvents[aZTEv] = {'eId': [], 'eH': 0, 'iId': [], 'eT': 0, 'tId': {'all': []}, 'tsId': {'all': []}, 'tsH': {'all': 0}, 'tsT': {}};
 			var eTop = 0;
 			this.zeilenHeight = 0;
 			this.tEvents.forEach(function (val, key) {
@@ -457,7 +458,7 @@ var annotationsTool = new Vue({
 					aWidth = this.zInfWidth + val['svgWidth'];
 					aZTEv++;
 					this.tEvents[key]['svgLeft'] = 0;
-					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop, 'tId': {'all': []}, 'tsId': {'all': []}};
+					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop, 'tId': {'all': []}, 'tsId': {'all': []}, 'tsH': {'all': 0}, 'tsT': {}};
 				}
 			}, this);
 			this.uzteEndDataUpdate(aZTEv);
@@ -498,8 +499,14 @@ var annotationsTool = new Vue({
 					}
 				}, this);
 			}, this);
-			// ToDo: Höhe an Token Sets anpassen!
-			this.zeilenTEvents[aZTEv]['eH'] = this.eEventHeight + (this.eInfHeight + this.eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length;
+			Object.keys(this.aInformanten).map(function (iKey, iI) {
+				if (this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) > -1) {
+					this.zeilenTEvents[aZTEv]['tsT'][iKey] = this.zeilenTEvents[aZTEv]['tsH']['all'];
+					this.zeilenTEvents[aZTEv]['tsH'][iKey] = ((this.zeilenTEvents[aZTEv]['tsId'][iKey]) ? (this.aTokenSetHeight * this.zeilenTEvents[aZTEv]['tsId'][iKey].length) : 0);
+					this.zeilenTEvents[aZTEv]['tsH']['all'] += this.zeilenTEvents[aZTEv]['tsH'][iKey];
+				}
+			}, this);
+			this.zeilenTEvents[aZTEv]['eH'] = this.eEventHeight + (this.aTokenSetHeight * this.zeilenTEvents[aZTEv]['tsId']['all'].length) + (this.eInfHeight + this.eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length;
 		},
 		/* getTokenString */
 		getTokenString: function (tId, field, bfield = false) {
@@ -1021,6 +1028,16 @@ var annotationsTool = new Vue({
 			return -1;
 		},
 		updateATokenSets: function () {
+			Object.keys(this.aTokens).map(function (tId, iI) {
+				if (this.aTokens[tId].tokenSets) {
+					_.remove(this.aTokens[tId].tokenSets, (n) => {
+						return (!this.aTokenSets[n] || !this.aTokenSets[n].ok);
+					});
+					if (this.aTokens[tId].tokenSets.length < 1) {
+						delete this.aTokens[tId].tokenSets;
+					}
+				}
+			}, this);
 			Object.keys(this.aTokenSets).map(function (aTokSetId, iI) {
 				if (!this.aTokenSets[aTokSetId].ok) {
 					var aTokSetIdInt = parseInt(aTokSetId);
