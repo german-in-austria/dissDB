@@ -451,11 +451,7 @@ var annotationsTool = new Vue({
 				aWidth += val['svgWidth'] + 0.5;
 				if (aWidth < this.mWidth - 25) {
 					this.zeilenTEvents[aZTEv]['eId'].push(key);
-					Object.keys(val['eId']).map(function (iKey, iI) {
-						if (this.aInformanten[iKey].show && this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
-							this.zeilenTEvents[aZTEv]['iId'].push(iKey);
-						}
-					}, this);
+					this.uZTEaddDataUpdate(val, aZTEv);
 					if ((this.eEventHeight + (this.eInfHeight + this.eInfTop) * this.aInfLen) > this.zeilenTEvents[aZTEv]['eH']) {
 						this.zeilenTEvents[aZTEv]['eH'] = (this.eEventHeight + (this.eInfHeight + this.eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length);
 					}
@@ -466,17 +462,20 @@ var annotationsTool = new Vue({
 					aZTEv++;
 					this.tEvents[key]['svgLeft'] = 0;
 					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop};
-					Object.keys(val['eId']).map(function (iKey, iI) {
-						if (this.aInformanten[iKey].show && this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
-							this.zeilenTEvents[aZTEv]['iId'].push(iKey);
-						}
-					}, this);
+					this.uZTEaddDataUpdate(val, aZTEv);
 					this.zeilenTEvents[aZTEv]['eH'] = this.eEventHeight + (this.eInfHeight + this.eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length;
 				}
 			}, this);
 			this.zeilenHeight += this.zeilenTEvents[aZTEv]['eH'];
 			var t1 = performance.now();
 			console.log('updateZeilenTEvents: ' + Math.ceil(t1 - t0) + ' ms');
+		},
+		uZTEaddDataUpdate: function (val, aZTEv) {
+			Object.keys(val['eId']).map(function (iKey, iI) {
+				if (this.aInformanten[iKey].show && this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
+					this.zeilenTEvents[aZTEv]['iId'].push(iKey);
+				}
+			}, this);
 		},
 		/* getTokenString */
 		getTokenString: function (tId, field, bfield = false) {
@@ -1000,6 +999,7 @@ var annotationsTool = new Vue({
 		updateATokenSets: function () {
 			Object.keys(this.aTokenSets).map(function (aTokSetId, iI) {
 				if (!this.aTokenSets[aTokSetId].ok) {
+					var aTokSetIdInt = parseInt(aTokSetId);
 					if (this.aTokenSets[aTokSetId].ivt) {
 						var aInf = this.aTokens[this.aTokenSets[aTokSetId].ivt].i;
 						if (this.aTokenReihungInf[aInf].indexOf(this.aTokenSets[aTokSetId].ivt >= 0 && this.aTokenReihungInf[aInf].indexOf(this.aTokenSets[aTokSetId].ibt >= 0))) {
@@ -1022,8 +1022,8 @@ var annotationsTool = new Vue({
 							if (!this.aTokens[tId].tokenSets) {
 								this.aTokens[tId].tokenSets = [];
 							}
-							if (this.aTokens[tId].tokenSets.indexOf(aTokSetId) < 0) {
-								this.aTokens[tId].tokenSets.push(aTokSetId);
+							if (this.aTokens[tId].tokenSets.indexOf(aTokSetIdInt) < 0) {
+								this.aTokens[tId].tokenSets.push(aTokSetIdInt);
 							}
 						}, this);
 					}
