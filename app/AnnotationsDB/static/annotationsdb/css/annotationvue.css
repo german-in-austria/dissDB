@@ -187,6 +187,14 @@ g.tEvent > .zeit > line {
   stroke-width: 1px;
   stroke: #888;
 }
+g.zTsVB > line {
+	stroke-width: 2;
+	stroke: #333;
+}
+g.zTsTs > line {
+	stroke-width: 1;
+	stroke: #555;
+}
 
 .audioplayer-at {
   position: absolute;

@@ -443,7 +443,7 @@ var annotationsTool = new Vue({
 			var aWidth = this.zInfWidth;
 			this.zeilenTEvents = [];
 			var aZTEv = 0;
-			this.zeilenTEvents[aZTEv] = {'eId': [], 'eH': 0, 'iId': [], 'eT': 0, 'tId': {'all': []}, 'tsId': {'all': []}, 'tsH': {'all': 0}, 'tsT': {}};
+			this.zeilenTEvents[aZTEv] = {'eId': [], 'eH': 0, 'iId': [], 'eT': 0, 'tId': {'all': []}, 'tsId': {'all': []}, 'tsH': {'all': 0}, 'tsT': {}, 'tsIdZ': {}, 'tsZi': {}};
 			var eTop = 0;
 			this.zeilenHeight = 0;
 			this.tEvents.forEach(function (val, key) {
@@ -458,7 +458,7 @@ var annotationsTool = new Vue({
 					aWidth = this.zInfWidth + val['svgWidth'];
 					aZTEv++;
 					this.tEvents[key]['svgLeft'] = 0;
-					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop, 'tId': {'all': []}, 'tsId': {'all': []}, 'tsH': {'all': 0}, 'tsT': {}};
+					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop, 'tId': {'all': []}, 'tsId': {'all': []}, 'tsH': {'all': 0}, 'tsT': {}, 'tsIdZ': {}, 'tsZi': {}};
 				}
 			}, this);
 			this.uzteEndDataUpdate(aZTEv);
@@ -500,13 +500,68 @@ var annotationsTool = new Vue({
 				}, this);
 			}, this);
 			Object.keys(this.aInformanten).map(function (iKey, iI) {
+				var tsIdZp = 0;
 				if (this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) > -1) {
+					var aZteStart = this.aTokenReihung.indexOf(this.zeilenTEvents[aZTEv]['tId'][iKey][0]);
+					var aZteEnde = this.aTokenReihung.indexOf(this.zeilenTEvents[aZTEv]['tId'][iKey][this.zeilenTEvents[aZTEv]['tId'][iKey].length - 1]);
+					if (this.zeilenTEvents[aZTEv]['tsId'][iKey]) {
+						this.zeilenTEvents[aZTEv]['tsIdZ'][iKey] = [];
+						this.zeilenTEvents[aZTEv]['tsZi'][iKey] = {};
+						// TokenSets sortieren:
+						this.zeilenTEvents[aZTEv]['tsId'][iKey].sort((a, b) => {
+							var xa = this.aTokenReihung.indexOf((this.aTokenSets[a].t || this.aTokenSets[a].tx)[0]);
+							var xb = this.aTokenReihung.indexOf((this.aTokenSets[b].t || this.aTokenSets[b].tx)[0]);
+							if (xa > xb) { return 1; }
+							if (xa < xb) { return -1; }
+							return 0;
+						});
+						// TokenSets in Zeilen laden:
+						if (!this.zeilenTEvents[aZTEv]['tsIdZ'][iKey]) {
+							this.zeilenTEvents[aZTEv]['tsIdZ'][iKey] = [];
+							tsIdZp = 0;
+						}
+						tsIdZp = 0;
+						this.zeilenTEvents[aZTEv]['tsId'][iKey].forEach(function (tsId) {
+							if (!this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp]) {
+								this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp] = [];
+							}
+							var aSetT = (this.aTokenSets[tsId].t || this.aTokenSets[tsId].tx);
+							var atSetStart = this.aTokenReihung.indexOf(aSetT[0]);
+							var atSetEnde = this.aTokenReihung.indexOf(aSetT[aSetT.length - 1]);
+							var getHigher = false;
+							this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp].forEach(function (x) {
+								var tSet = (this.aTokenSets[x].t || this.aTokenSets[x].tx);
+								var tSetEnde = this.aTokenReihung.indexOf(tSet[tSet.length - 1]);
+								if (tSetEnde >= atSetStart) {
+									getHigher = true;
+								}
+							}, this);
+							if (getHigher) {
+								tsIdZp += 1;
+								this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp] = [tsId];
+							} else {
+								this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp].push(tsId);
+							}
+							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId] = {};
+							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['sT'] = ((atSetStart < aZteStart) ? undefined : aSetT[0]);
+							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['eT'] = ((atSetEnde > aZteEnde) ? undefined : aSetT[aSetT.length - 1]);
+							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['sX'] = ((atSetStart < aZteStart) ? undefined : (this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[aSetT[0]].e, 'pk', this.aEvents))].svgLeft + this.aTokens[aSetT[0]].svgLeft));
+							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['eX'] = ((atSetEnde > aZteEnde) ? undefined : (this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[aSetT[aSetT.length - 1]].e, 'pk', this.aEvents))].svgLeft + this.aTokens[aSetT[aSetT.length - 1]].svgLeft + this.aTokens[aSetT[aSetT.length - 1]].svgWidth));
+						}, this);
+						tsIdZp += 1;
+					}
 					this.zeilenTEvents[aZTEv]['tsT'][iKey] = this.zeilenTEvents[aZTEv]['tsH']['all'];
-					this.zeilenTEvents[aZTEv]['tsH'][iKey] = ((this.zeilenTEvents[aZTEv]['tsId'][iKey]) ? (this.aTokenSetHeight * this.zeilenTEvents[aZTEv]['tsId'][iKey].length) : 0);
+					this.zeilenTEvents[aZTEv]['tsH'][iKey] = this.aTokenSetHeight * (tsIdZp);
 					this.zeilenTEvents[aZTEv]['tsH']['all'] += this.zeilenTEvents[aZTEv]['tsH'][iKey];
 				}
 			}, this);
-			this.zeilenTEvents[aZTEv]['eH'] = this.eEventHeight + (this.aTokenSetHeight * this.zeilenTEvents[aZTEv]['tsId']['all'].length) + (this.eInfHeight + this.eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length;
+			var tsIdZpA = 0;
+			if (this.zeilenTEvents[aZTEv]['tsIdZ']) {
+				Object.keys(this.zeilenTEvents[aZTEv]['tsIdZ']).map(function (iKey, iI) {
+					tsIdZpA += this.zeilenTEvents[aZTEv]['tsIdZ'][iKey].length;
+				}, this);
+			}
+			this.zeilenTEvents[aZTEv]['eH'] = this.eEventHeight + (this.aTokenSetHeight * tsIdZpA) + (this.eInfHeight + this.eInfTop) * this.zeilenTEvents[aZTEv]['iId'].length;
 		},
 		/* getTokenString */
 		getTokenString: function (tId, field, bfield = false) {
