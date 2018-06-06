@@ -442,7 +442,7 @@ var annotationsTool = new Vue({
 			var aWidth = this.zInfWidth;
 			this.zeilenTEvents = [];
 			var aZTEv = 0;
-			this.zeilenTEvents[aZTEv] = {'eId': [], 'eH': 0, 'iId': [], 'eT': 0, 'ts': []};
+			this.zeilenTEvents[aZTEv] = {'eId': [], 'eH': 0, 'iId': [], 'eT': 0, 'tId': {'all': []}, 'tsId': {'all': []}};
 			var eTop = 0;
 			this.zeilenHeight = 0;
 			this.tEvents.forEach(function (val, key) {
@@ -457,7 +457,7 @@ var annotationsTool = new Vue({
 					aWidth = this.zInfWidth + val['svgWidth'];
 					aZTEv++;
 					this.tEvents[key]['svgLeft'] = 0;
-					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop, 'ts': []};
+					this.zeilenTEvents[aZTEv] = {'eId': [key], 'eH': 0, 'iId': [], 'eT': eTop, 'tId': {'all': []}, 'tsId': {'all': []}};
 				}
 			}, this);
 			this.uzteEndDataUpdate(aZTEv);
@@ -474,6 +474,27 @@ var annotationsTool = new Vue({
 						if (this.zeilenTEvents[aZTEv]['iId'].indexOf(iKey) < 0) {
 							this.zeilenTEvents[aZTEv]['iId'].push(iKey);
 						}
+						var aEvent = this.aEvents[tEvent['eId'][iKey]];
+						aEvent['tid'][iKey].forEach(function (aTokenId, tidKey) {
+							if (!this.zeilenTEvents[aZTEv]['tId'][iKey]) {
+								this.zeilenTEvents[aZTEv]['tId'][iKey] = [];
+							}
+							if (this.zeilenTEvents[aZTEv]['tId']['all'].indexOf(aTokenId) < 0) {
+								this.zeilenTEvents[aZTEv]['tId']['all'].push(aTokenId);
+								this.zeilenTEvents[aZTEv]['tId'][iKey].push(aTokenId);
+								if (this.aTokens[aTokenId]['tokenSets']) {
+									this.aTokens[aTokenId]['tokenSets'].forEach(function (aTokenSetId, tsidKey) {
+										if (this.zeilenTEvents[aZTEv]['tsId']['all'].indexOf(aTokenSetId) < 0) {
+											if (!this.zeilenTEvents[aZTEv]['tsId'][iKey]) {
+												this.zeilenTEvents[aZTEv]['tsId'][iKey] = [];
+											}
+											this.zeilenTEvents[aZTEv]['tsId']['all'].push(aTokenSetId);
+											this.zeilenTEvents[aZTEv]['tsId'][iKey].push(aTokenSetId);
+										}
+									}, this);
+								}
+							}
+						}, this);
 					}
 				}, this);
 			}, this);
@@ -1032,6 +1053,7 @@ var annotationsTool = new Vue({
 					}
 				}
 			}, this);
+			this.updateZeilenTEvents();
 		},
 		checkSelTokenBereich: function () {
 			if (this.selTokenBereich.v >= 0 && this.selTokenBereich.b >= 0) {
