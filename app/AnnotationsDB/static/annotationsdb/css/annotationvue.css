@@ -187,13 +187,18 @@ g.tEvent > .zeit > line {
   stroke-width: 1px;
   stroke: #888;
 }
-g.zTsVB > line {
+g.zTsVB > .zTsVBln > line, g.zTsVB > .zTsVBln > path {
 	stroke-width: 2;
 	stroke: #333;
+	fill:none;
 }
-g.zTsTs > line {
+g.zTsTs > .zTsVBln > line {
 	stroke-width: 1;
 	stroke: #555;
+}
+.zTsVBln.dg0 > line, .zTsVBln.dg0 > path {
+    stroke-width: 4px !important;
+    stroke: #fff !important;
 }
 
 .audioplayer-at {

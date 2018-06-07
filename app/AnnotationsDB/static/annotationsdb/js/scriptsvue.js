@@ -528,15 +528,15 @@ var annotationsTool = new Vue({
 							var aSetT = (this.aTokenSets[tsId].t || this.aTokenSets[tsId].tx);
 							var atSetStart = this.aTokenReihung.indexOf(aSetT[0]);
 							var atSetEnde = this.aTokenReihung.indexOf(aSetT[aSetT.length - 1]);
-							var getHigher = false;
+							var getDeeper = false;
 							this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp].forEach(function (x) {
 								var tSet = (this.aTokenSets[x].t || this.aTokenSets[x].tx);
 								var tSetEnde = this.aTokenReihung.indexOf(tSet[tSet.length - 1]);
 								if (tSetEnde >= atSetStart) {
-									getHigher = true;
+									getDeeper = true;
 								}
 							}, this);
-							if (getHigher) {
+							if (getDeeper) {
 								tsIdZp += 1;
 								this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp] = [tsId];
 							} else {
@@ -545,8 +545,17 @@ var annotationsTool = new Vue({
 							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId] = {};
 							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['sT'] = ((atSetStart < aZteStart) ? undefined : aSetT[0]);
 							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['eT'] = ((atSetEnde > aZteEnde) ? undefined : aSetT[aSetT.length - 1]);
-							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['sX'] = ((atSetStart < aZteStart) ? undefined : (this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[aSetT[0]].e, 'pk', this.aEvents))].svgLeft + this.aTokens[aSetT[0]].svgLeft));
-							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['eX'] = ((atSetEnde > aZteEnde) ? undefined : (this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[aSetT[aSetT.length - 1]].e, 'pk', this.aEvents))].svgLeft + this.aTokens[aSetT[aSetT.length - 1]].svgLeft + this.aTokens[aSetT[aSetT.length - 1]].svgWidth));
+							if (this.aTokenSets[tsId].tx) {
+								this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['sX'] = ((atSetStart < aZteStart) ? undefined : (this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[aSetT[0]].e, 'pk', this.aEvents))].svgLeft + this.aTokens[aSetT[0]].svgLeft));
+								this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['eX'] = ((atSetEnde > aZteEnde) ? undefined : (this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[aSetT[aSetT.length - 1]].e, 'pk', this.aEvents))].svgLeft + this.aTokens[aSetT[aSetT.length - 1]].svgLeft + this.aTokens[aSetT[aSetT.length - 1]].svgWidth));
+							} else {
+								this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['sX'] = ((atSetStart < aZteStart) ? undefined : (this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[aSetT[0]].e, 'pk', this.aEvents))].svgLeft + this.aTokens[aSetT[0]].svgLeft + (this.aTokens[aSetT[0]].svgWidth / 2)));
+								this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['eX'] = ((atSetEnde > aZteEnde) ? undefined : (this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[aSetT[aSetT.length - 1]].e, 'pk', this.aEvents))].svgLeft + this.aTokens[aSetT[aSetT.length - 1]].svgLeft + (this.aTokens[aSetT[aSetT.length - 1]].svgWidth / 2)));
+								this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['tX'] = [];
+								aSetT.forEach(function (val) {
+									this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['tX'].push(this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[val].e, 'pk', this.aEvents))].svgLeft + this.aTokens[val].svgLeft + (this.aTokens[val].svgWidth / 2));
+								}, this);
+							}
 						}, this);
 						tsIdZp += 1;
 					}

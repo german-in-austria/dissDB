@@ -6,6 +6,12 @@
 		<marker id="arrow-green" markerWidth="5" markerHeight="5" refX="3" refY="3" orient="auto" markerUnits="strokeWidth">
 			<path d="M0,1 L0,5 L5,3 z" fill="#0a0"/>
 		</marker>
+		<marker id="arrow-zTsTs0" markerWidth="3" markerHeight="3" refX="1" refY="2" orient="auto" markerUnits="strokeWidth">
+			<path d="M0,1 L0,3 L2,2 z" fill="#fff"/>
+		</marker>
+		<marker id="arrow-zTsTs1" markerWidth="6" markerHeight="8" refX="3" refY="4" orient="auto" markerUnits="strokeWidth">
+			<path d="M0,1 L0,7 L5,4 z" fill="#555"></path>
+		</marker>
 		<filter x="0" y="0" width="1" height="1" id="solid">
       <feFlood flood-color="#ffffffe3"/>
       <feComposite in="SourceGraphic"/>
@@ -27,35 +33,37 @@
 				</g>
 				<g class="zTokenSets" :transform="'translate('+(zInfWidth + 5)+','+(eEventHeight-25 + eInfTop + zeilenTEvents[aZeile]['tsT'][aInfKey] + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(objectSubValueFilter(aInformanten,'show',true), zeilenTEvents[aZeile]['iId'])">
 					<g class="zTokenSetLine" :transform="'translate(0,'+(aTsI*aTokenSetHeight)+')'" v-for="aTokenSetIds, aTsI in zeilenTEvents[aZeile]['tsIdZ'][aInfKey]">
-						<text x="-5" y="15" style="text-anchor:end;">${ aTokenSetIds }</text>
 						<g class="zTokenSet" v-for="aTokenSetId in aTokenSetIds" v-if="zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]">
-							<g class="zTsVB" v-if="aTokenSets[aTokenSetId].tx">
-								<line :x1="((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX'] : 0)"
-								 			:y1="aTokenSetHeight/2"
-											:x2="((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX'] : (mWidth - zInfWidth - 15))"
-											:y2="aTokenSetHeight/2"/>
-								<line :x1="((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX'] : 0)"
-								 			:y1="aTokenSetHeight/2"
-											:x2="((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX'] : 0)"
-											:y2="aTokenSetHeight" v-if="zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX']"/>
-								<line :x1="((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX'] : (mWidth - zInfWidth - 15))"
-								 			:y1="aTokenSetHeight/2"
-											:x2="((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX'] : (mWidth - zInfWidth - 15))"
-											:y2="aTokenSetHeight" v-if="zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX']"/>
-								<text :x="(((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX'] : (mWidth - zInfWidth - 15)) + ((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX'] : 0))/2"
-								 			:y="15"
-											 style="text-anchor:middle;"  filter="url(#solid)">&nbsp;${ aTokenSetId }&nbsp;</text>
+							<template  v-for="zeilenTEvent in [zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]]">
+								<g class="zTsVB" v-if="aTokenSets[aTokenSetId].tx">
+									<g :class="'zTsVBln dg'+dg" v-for="dg in [0,1]">
+										<path :d="'M'+(((zeilenTEvent['sX']) ? zeilenTEvent['sX'] : 0))+' '+((zeilenTEvent['sX']) ? ((zeilenTEvents[aZeile]['tsIdZ'][aInfKey].length-aTsI)*aTokenSetHeight) : (aTokenSetHeight/2))
+														+((zeilenTEvent['sX']) ? ' V'+(aTokenSetHeight/2+6)+ 'a6,6 0 0 1 6,-6 ' : '')
+														+' H'+((zeilenTEvent['eX']) ? zeilenTEvent['eX']-6 : (mWidth - zInfWidth - 15))
+														+((zeilenTEvent['eX'])?'a6,6 0 0 1 6,6 V'+((zeilenTEvents[aZeile]['tsIdZ'][aInfKey].length-aTsI)*aTokenSetHeight):'')"/>
+										<text :x="(((zeilenTEvent['eX']) ? zeilenTEvent['eX'] : (mWidth - zInfWidth - 15)) + ((zeilenTEvent['sX']) ? zeilenTEvent['sX'] : 0))/2"
+										 			:y="15"
+													 style="text-anchor:middle;"  filter="url(#solid)">&nbsp;${ aTokenSetId }&nbsp;</text>
+									</g>
+								</g>
+								<g class="zTsTs" v-else>
+									<g :class="'zTsVBln dg'+dg" v-for="dg in [0,1]">
+										<line :x1="parseInt((zeilenTEvent['sX']) ? zeilenTEvent['sX'] : 0)"
+										 			:y1="aTokenSetHeight/2"
+													:x2="parseInt((zeilenTEvent['eX']) ? zeilenTEvent['eX'] : (mWidth - zInfWidth - 15))"
+													:y2="aTokenSetHeight/2"/>
+										<line :x1="parseInt(tX)"
+										 			:y1="aTokenSetHeight/2"
+													:x2="parseInt(tX)"
+													:y2="(zeilenTEvents[aZeile]['tsIdZ'][aInfKey].length - aTsI) * aTokenSetHeight - 2"
+													v-for="tX in zeilenTEvent['tX']" :marker-end="'url(#arrow-zTsTs'+dg+')'"/>
+										<text :x="(((zeilenTEvent['eX']) ? zeilenTEvent['eX'] : (mWidth - zInfWidth - 15)) + ((zeilenTEvent['sX']) ? zeilenTEvent['sX'] : 0))/2"
+										 			:y="15"
+													 style="text-anchor:middle;"  filter="url(#solid)">&nbsp;${ aTokenSetId }&nbsp;</text>
+									</g>
+								</g>
 							</g>
-							<g class="zTsTs" v-else>
-								<line :x1="((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX'] : 0)"
-								 			:y1="aTokenSetHeight/2"
-											:x2="((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX'] : (mWidth - zInfWidth - 15))"
-											:y2="aTokenSetHeight/2"/>
-								<text :x="(((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['eX'] : (mWidth - zInfWidth - 15)) + ((zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX']) ? zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]['sX'] : 0))/2"
-								 			:y="15"
-											 style="text-anchor:middle;"  filter="url(#solid)">&nbsp;${ aTokenSetId }&nbsp;</text>
-							</g>
-						</g>
+						</template>
 					</g>
 				</g>
 				<g class="tEvent" :transform="'translate('+(zInfWidth + 5 + tEvents[tEventId]['svgLeft'])+','+(eEventHeight-20)+')'" v-for="tEventId in zeilenTEvents[aZeile]['eId']">
