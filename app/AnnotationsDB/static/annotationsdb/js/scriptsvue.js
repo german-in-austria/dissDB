@@ -573,12 +573,13 @@ var annotationsTool = new Vue({
 									var atSetStart = this.aTokenReihung.indexOf(aSetT[0]);
 									var atSetEnde = this.aTokenReihung.indexOf(aSetT[aSetT.length - 1]);
 									var aOk = true;
-									this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][i + 1].forEach(function (nVal, nIndex) {
+									this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][i + 1].some(function (nVal, nIndex) {
 										var nSetT = (this.aTokenSets[nVal].t || this.aTokenSets[nVal].tx);
 										var tSetStart = this.aTokenReihung.indexOf(nSetT[0]);
 										var tSetEnde = this.aTokenReihung.indexOf(nSetT[nSetT.length - 1]);
 										if (atSetStart <= tSetEnde && atSetEnde >= tSetStart) {
 											aOk = false;
+											return true;
 										}
 									}, this);
 									if (aOk) {
@@ -587,7 +588,6 @@ var annotationsTool = new Vue({
 									}
 								}, this);
 							}
-							console.log('dChange: ' + dChange);
 						}
 					}
 					this.zeilenTEvents[aZTEv]['tsT'][iKey] = this.zeilenTEvents[aZTEv]['tsH']['all'];
