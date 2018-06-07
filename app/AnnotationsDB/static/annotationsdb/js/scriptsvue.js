@@ -518,30 +518,31 @@ var annotationsTool = new Vue({
 						// TokenSets in Zeilen laden:
 						if (!this.zeilenTEvents[aZTEv]['tsIdZ'][iKey]) {
 							this.zeilenTEvents[aZTEv]['tsIdZ'][iKey] = [];
-							tsIdZp = 0;
 						}
-						tsIdZp = 0;
 						this.zeilenTEvents[aZTEv]['tsId'][iKey].forEach(function (tsId) {
-							if (!this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp]) {
-								this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp] = [];
-							}
 							var aSetT = (this.aTokenSets[tsId].t || this.aTokenSets[tsId].tx);
 							var atSetStart = this.aTokenReihung.indexOf(aSetT[0]);
 							var atSetEnde = this.aTokenReihung.indexOf(aSetT[aSetT.length - 1]);
-							var getDeeper = false;
-							this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp].forEach(function (x) {
-								var tSet = (this.aTokenSets[x].t || this.aTokenSets[x].tx);
-								var tSetEnde = this.aTokenReihung.indexOf(tSet[tSet.length - 1]);
-								if (tSetEnde >= atSetStart) {
-									getDeeper = true;
+							var aDeep = this.zeilenTEvents[aZTEv]['tsIdZ'][iKey].length;
+							this.zeilenTEvents[aZTEv]['tsIdZ'][iKey].forEach(function (y, yD) {
+								var aOk = true;
+								y.forEach(function (x) {
+									var tSet = (this.aTokenSets[x].t || this.aTokenSets[x].tx);
+									var tSetStart = this.aTokenReihung.indexOf(tSet[0]);
+									var tSetEnde = this.aTokenReihung.indexOf(tSet[tSet.length - 1]);
+									if (atSetStart <= tSetEnde && atSetEnde >= tSetStart) {
+										aOk = false;
+									}
+								}, this);
+								if (aOk) {
+									aDeep = yD;
 								}
 							}, this);
-							if (getDeeper) {
-								tsIdZp += 1;
-								this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp] = [tsId];
-							} else {
-								this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][tsIdZp].push(tsId);
+							if (!this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][aDeep]) {
+								this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][aDeep] = [];
 							}
+							this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][aDeep].push(tsId);
+							// Zusätzliche Daten für SVG Darstellung der Token Sets hinzufügen:
 							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId] = {};
 							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['sT'] = ((atSetStart < aZteStart) ? undefined : aSetT[0]);
 							this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['eT'] = ((atSetEnde > aZteEnde) ? undefined : aSetT[aSetT.length - 1]);
@@ -556,8 +557,10 @@ var annotationsTool = new Vue({
 									this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['tX'].push(this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[val].e, 'pk', this.aEvents))].svgLeft + this.aTokens[val].svgLeft + (this.aTokens[val].svgWidth / 2));
 								}, this);
 							}
+							tsIdZp = this.zeilenTEvents[aZTEv]['tsIdZ'][iKey].length - 1;
 						}, this);
 						tsIdZp += 1;
+						// ToDo: Optimize Sorting
 					}
 					this.zeilenTEvents[aZTEv]['tsT'][iKey] = this.zeilenTEvents[aZTEv]['tsH']['all'];
 					this.zeilenTEvents[aZTEv]['tsH'][iKey] = this.aTokenSetHeight * (tsIdZp);
