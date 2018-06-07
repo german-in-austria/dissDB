@@ -520,6 +520,7 @@ var annotationsTool = new Vue({
 							this.zeilenTEvents[aZTEv]['tsIdZ'][iKey] = [];
 						}
 						this.zeilenTEvents[aZTEv]['tsId'][iKey].forEach(function (tsId) {
+							// TokenSets sortieren:
 							var aSetT = (this.aTokenSets[tsId].t || this.aTokenSets[tsId].tx);
 							var atSetStart = this.aTokenReihung.indexOf(aSetT[0]);
 							var atSetEnde = this.aTokenReihung.indexOf(aSetT[aSetT.length - 1]);
@@ -560,7 +561,32 @@ var annotationsTool = new Vue({
 							tsIdZp = this.zeilenTEvents[aZTEv]['tsIdZ'][iKey].length - 1;
 						}, this);
 						tsIdZp += 1;
-						// ToDo: Optimize Sorting
+						// Sortierung optimieren:
+						var dChange = true;
+						for (var m = 0; (m < 10 && dChange); m++) {
+							dChange = false;
+							for (var i = this.zeilenTEvents[aZTEv]['tsIdZ'][iKey].length - 2; i >= 0; i--) {
+								this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][i].forEach(function (aVal, aIndex) {
+									var aSetT = (this.aTokenSets[aVal].t || this.aTokenSets[aVal].tx);
+									var atSetStart = this.aTokenReihung.indexOf(aSetT[0]);
+									var atSetEnde = this.aTokenReihung.indexOf(aSetT[aSetT.length - 1]);
+									var aOk = true;
+									this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][i + 1].forEach(function (nVal, nIndex) {
+										var nSetT = (this.aTokenSets[nVal].t || this.aTokenSets[nVal].tx);
+										var tSetStart = this.aTokenReihung.indexOf(nSetT[0]);
+										var tSetEnde = this.aTokenReihung.indexOf(nSetT[nSetT.length - 1]);
+										if (atSetStart <= tSetEnde && atSetEnde >= tSetStart) {
+											aOk = false;
+										}
+									}, this);
+									if (aOk) {
+										dChange = true;
+										this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][i + 1].push(this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][i].splice(aIndex, 1)[0]);
+									}
+								}, this);
+							}
+							console.log('dChange: ' + dChange);
+						}
 					}
 					this.zeilenTEvents[aZTEv]['tsT'][iKey] = this.zeilenTEvents[aZTEv]['tsH']['all'];
 					this.zeilenTEvents[aZTEv]['tsH'][iKey] = this.aTokenSetHeight * (tsIdZp);
