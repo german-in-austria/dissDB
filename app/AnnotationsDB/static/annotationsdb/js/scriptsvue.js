@@ -69,6 +69,7 @@ var annotationsTool = new Vue({
 		showTransInfo: true,
 		showTokenInfo: true,
 		showTokenSetInfo: true,
+		showTokenSetInfos: true,
 		showAllgeInfo: false,
 		showSuche: false,
 		showFilter: false,
@@ -80,7 +81,8 @@ var annotationsTool = new Vue({
 		selToken: -1,
 		selTokenBereich: {'v': -1, 'b': -1},
 		selTokenListe: [],
-		ctrlKS: false
+		ctrlKS: false,
+		selTokenSet: 0
 	},
 	computed: {
 	},
@@ -907,6 +909,28 @@ var annotationsTool = new Vue({
 				this.selTokenBereich = {'v': -1, 'b': -1};
 				this.selTokenListe = [];
 				this.d3SelTokenList = [];
+			} else if (e.ctrlKey && e.keyCode === 65) { // Strg + A
+				this.ctrlKS = true;
+				if (this.selToken) {
+					if (this.aTokens[this.selToken].tokenSets && this.aTokens[this.selToken].tokenSets.length > 0) {
+						if (!e.shiftKey) {
+							if (this.aTokens[this.selToken].tokenSets.indexOf(this.selTokenSet) < this.aTokens[this.selToken].tokenSets.length - 1) {
+								this.selTokenSet = this.aTokens[this.selToken].tokenSets[this.aTokens[this.selToken].tokenSets.indexOf(this.selTokenSet) + 1];
+							} else {
+								this.selTokenSet = this.aTokens[this.selToken].tokenSets[0];
+							}
+						} else {
+							if (this.aTokens[this.selToken].tokenSets.indexOf(this.selTokenSet) > 0) {
+								this.selTokenSet = this.aTokens[this.selToken].tokenSets[this.aTokens[this.selToken].tokenSets.indexOf(this.selTokenSet) - 1];
+							} else {
+								this.selTokenSet = this.aTokens[this.selToken].tokenSets[this.aTokens[this.selToken].tokenSets.length - 1];
+							}
+						}
+					}
+				}
+			} else if (e.ctrlKey && e.keyCode === 81) { // Strg + Q
+				this.ctrlKS = true;
+				this.selTokenSet = 0;
 			}
 		},
 		sucheCatchKeyUp: function (e) {
@@ -1161,6 +1185,13 @@ var annotationsTool = new Vue({
 							if (this.aTokens[tId].tokenSets.indexOf(aTokSetIdInt) < 0) {
 								this.aTokens[tId].tokenSets.push(aTokSetIdInt);
 							}
+							this.aTokens[tId].tokenSets.sort((a, b) => {
+								var xa = this.aTokenReihung.indexOf((this.aTokenSets[a].t || this.aTokenSets[a].tx)[0]);
+								var xb = this.aTokenReihung.indexOf((this.aTokenSets[b].t || this.aTokenSets[b].tx)[0]);
+								if (xa > xb) { return 1; }
+								if (xa < xb) { return -1; }
+								return 0;
+							});
 						}, this);
 					}
 				}

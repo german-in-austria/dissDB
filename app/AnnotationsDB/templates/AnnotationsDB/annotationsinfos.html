@@ -42,9 +42,22 @@
 		<template v-if="aTokenFragmente[selToken]"><b>Fragmente:</b> <span :title="'ID: '+aToFragKey" v-for="(aToFragKey, aIndex) in aTokenFragmente[selToken]">${ ((aIndex)?', ':'')+aTokens[aToFragKey].t }</span><br></template>
 	</div>
 </div>
-<div v-bind:class="{'infpanel': true, 'open': showTokenSetInfo}" v-if="selToken&&aTokens[selToken]&&aTokens[selToken].tokenSets">
-	<a href="#" v-on:click.prevent="showTokenSetInfo=!showTokenSetInfo"><b>Akutelle Token Sets</b> (${ aTokens[selToken].tokenSets.length })<span :class="'glyphicon glyphicon-' + ((showTokenSetInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+<div v-bind:class="{'infpanel': true, 'open': showTokenSetInfo}" v-if="selTokenSet!==0">
+	<a href="#" v-on:click.prevent="showTokenSetInfo=!showTokenSetInfo"><b>Akutelles Token Set</b> (${ selTokenSet+((selTokenSet<0)?' (Neu)':'') })<span :class="'glyphicon glyphicon-' + ((showTokenSetInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
 	<div v-if="showTokenSetInfo">
+		<div class="tokensets" v-if="aTokenSets[selTokenSet]">
+			<template v-if="aTokenSets[selTokenSet].ivt"><b>Von Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[selTokenSet].ivt;focusFocusCatch();" :title="'ID: '+aTokenSets[selTokenSet].ivt">${ aTokens[aTokenSets[selTokenSet].ivt].t }</a><br></template>
+			<template v-if="aTokenSets[selTokenSet].ibt"><b>Bis Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[selTokenSet].ibt;focusFocusCatch();" :title="'ID: '+aTokenSets[selTokenSet].ibt">${ aTokens[aTokenSets[selTokenSet].ibt].t }</a><br></template>
+			<b>Tokens:</b> ${ (aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length.toLocaleString() }<br>
+			<div class="listtokens mit10">
+				<a href="#" v-on:click.prevent="selToken=sTL;focusFocusCatch();" :class="{selected: selToken===sTL}" v-for="(sTL, i) in (aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx)" :title="aTokens[sTL].t+' - ID: '+sTL">${ aTokens[sTL].t }</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div v-bind:class="{'infpanel': true, 'open': showTokenSetInfos}" v-if="selToken&&aTokens[selToken]&&aTokens[selToken].tokenSets">
+	<a href="#" v-on:click.prevent="showTokenSetInfos=!showTokenSetInfos"><b>Akutelle Token Sets</b> (${ aTokens[selToken].tokenSets.length })<span :class="'glyphicon glyphicon-' + ((showTokenSetInfos)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+	<div v-if="showTokenSetInfos">
 		<div v-for="aTokenSet in aTokens[selToken].tokenSets" class="tokensets" v-if="aTokenSets[aTokenSet]">
 			<b>ID:</b> ${ aTokenSet+((aTokenSet<0)?' (Neu)':'') }<br>
 			<template v-if="aTokenSets[aTokenSet].ivt"><b>Von Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[aTokenSet].ivt;focusFocusCatch();" :title="'ID: '+aTokenSets[aTokenSet].ivt">${ aTokens[aTokenSets[aTokenSet].ivt].t }</a><br></template>
@@ -64,12 +77,15 @@
 			<dt>Pfeil links/rechts</dt><dd>Vorherigen/Nächsten Token auswählen</dd>
 			<dt>Pfeil hoch/runter</dt><dd>Vorherigen/Nächsten Informanten/Zeile auswählen</dd>
 			<dt>Enter</dt><dd>Aktuellen Token öffnen</dd>
+			<dt>Strg + A</dt><dd>TokenSet durchwählen.</dd>
+			<dt>Strg + Shift + A</dt><dd>TokenSet rückwärts durchwählen.</dd>
+			<dt>Strg + Q</dt><dd>TokenSet Auswahl aufheben.</dd>
 		</dl>
 		<b>Auswahl:</b><br>
 		<dl>
 			<dt>Shift</dt><dd>Auswahlbereich</dd>
 			<dt>Strg</dt><dd>Auswahlliste</dd>
-			<dt>Strg + d</dt><dd>Auswahl aufheben</dd>
+			<dt>Strg + D</dt><dd>Auswahl aufheben</dd>
 		</dl>
 		<b>Suche:</b><br>
 		<dl>
@@ -80,8 +96,8 @@
 		<b>Audioplayer:</b><br>
 		<dl>
 			<dt>Strg + leer</dt><dd>Abspielen/Pause</dd>
-			<dt>Strg + y</dt><dd>Zum Anfang springen</dd>
-			<dt>Strg + x</dt><dd>Zum Ende springen</dd>
+			<dt>Strg + Y</dt><dd>Zum Anfang springen</dd>
+			<dt>Strg + X</dt><dd>Zum Ende springen</dd>
 			<dt>Strg + 2</dt><dd>10 Sekunden weiter</dd>
 			<dt>Strg + 3</dt><dd>10 Sekunden zurück</dd>
 			<dt>Strg + 1</dt><dd>na</dd>

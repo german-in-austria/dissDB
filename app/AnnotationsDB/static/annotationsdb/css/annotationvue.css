@@ -85,7 +85,7 @@ g.eInf > rect {
 g.eInf:hover > rect {
   outline: 1px solid #777;
 }
-g.eTok {
+g.eTok, g.zTsVB, g.zTsTs {
   cursor: pointer;
 }
 g.eTok > rect {
@@ -197,10 +197,27 @@ g.zTsTs > .zTsVBln > line {
 	stroke: #555;
 }
 .zTsVBln.dg0 > line, .zTsVBln.dg0 > path {
-    stroke-width: 4px !important;
-    stroke: #fff !important;
+	stroke-width: 4px !important;
+	stroke: #fff !important;
 }
-
+g.zTokenSet.active .zTsVBln.dg1 > line, g.zTokenSet.active .zTsVBln.dg1 > path {
+	stroke: #99f;
+}
+g.zTokenSet.selected .zTsVBln.dg1 > line, g.zTokenSet.selected .zTsVBln.dg1 > path {
+	stroke: #4b4;
+}
+g.zTokenSet:hover .zTsVBln.dg1 > line, g.zTokenSet:hover .zTsVBln.dg1 > path {
+	stroke: #9f9;
+}
+g.zTokenSet.active  text, g.zTokenSet.active  text {
+	fill: #5858a5;
+}
+g.zTokenSet.selected  text, g.zTokenSet.selected  text {
+	fill: #2e842e;
+}
+g.zTokenSet:hover text, g.zTokenSet:hover text {
+  fill: #4b4;
+}
 .audioplayer-at {
   position: absolute;
   border-top: 1px solid #e7e7e7;
