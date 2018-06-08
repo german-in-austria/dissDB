@@ -321,7 +321,7 @@ var annotationsTool = new Vue({
 			}
 			if (this.aTokens[key]['fo']) {
 				this.updateTokenFragment(key, this.aTokens[key]['fo']);
-			};
+			}
 			if (this.aEvents[this.aTokens[key]['e']]) {
 				this.setRerenderEvent(this.aTokens[key]['e']);
 			}
@@ -511,17 +511,9 @@ var annotationsTool = new Vue({
 						this.zeilenTEvents[aZTEv]['tsIdZ'][iKey] = [];
 						this.zeilenTEvents[aZTEv]['tsZi'][iKey] = {};
 						// TokenSets sortieren:
-						this.zeilenTEvents[aZTEv]['tsId'][iKey].sort((a, b) => {
-							var xa = this.aTokenReihung.indexOf((this.aTokenSets[a].t || this.aTokenSets[a].tx)[0]);
-							var xb = this.aTokenReihung.indexOf((this.aTokenSets[b].t || this.aTokenSets[b].tx)[0]);
-							if (xa > xb) { return 1; }
-							if (xa < xb) { return -1; }
-							return 0;
-						});
+						this.zeilenTEvents[aZTEv]['tsId'][iKey] = this.sortTokenSets(this.zeilenTEvents[aZTEv]['tsId'][iKey]);
 						// TokenSets in Zeilen laden:
-						if (!this.zeilenTEvents[aZTEv]['tsIdZ'][iKey]) {
-							this.zeilenTEvents[aZTEv]['tsIdZ'][iKey] = [];
-						}
+						if (!this.zeilenTEvents[aZTEv]['tsIdZ'][iKey]) { this.zeilenTEvents[aZTEv]['tsIdZ'][iKey] = []; };
 						this.zeilenTEvents[aZTEv]['tsId'][iKey].some(function (tsId) {
 							// TokenSets sortieren:
 							var aSetT = (this.aTokenSets[tsId].t || this.aTokenSets[tsId].tx);
@@ -532,9 +524,7 @@ var annotationsTool = new Vue({
 								var aOk = true;
 								y.forEach(function (x) {
 									var tSet = (this.aTokenSets[x].t || this.aTokenSets[x].tx);
-									var tSetStart = this.aTokenReihung.indexOf(tSet[0]);
-									var tSetEnde = this.aTokenReihung.indexOf(tSet[tSet.length - 1]);
-									if (atSetStart <= tSetEnde && atSetEnde >= tSetStart) {
+									if (atSetStart <= this.aTokenReihung.indexOf(tSet[tSet.length - 1]) && atSetEnde >= this.aTokenReihung.indexOf(tSet[0])) {
 										aOk = false;
 										return true;
 									}
@@ -560,7 +550,10 @@ var annotationsTool = new Vue({
 								this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['eX'] = ((atSetEnde > aZteEnde) ? undefined : (this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[aSetT[aSetT.length - 1]].e, 'pk', this.aEvents))].svgLeft + this.aTokens[aSetT[aSetT.length - 1]].svgLeft + (this.aTokens[aSetT[aSetT.length - 1]].svgWidth / 2)));
 								this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['tX'] = [];
 								aSetT.forEach(function (val) {
-									this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['tX'].push(this.tEvents[this.getTEventOfAEvent(this.searchByKey(this.aTokens[val].e, 'pk', this.aEvents))].svgLeft + this.aTokens[val].svgLeft + (this.aTokens[val].svgWidth / 2));
+									if (this.zeilenTEvents[aZTEv]['tId'][iKey].indexOf(val) > -1) {
+										var aToken = this.aTokens[val];
+										this.zeilenTEvents[aZTEv]['tsZi'][iKey][tsId]['tX'].push(this.tEvents[this.getTEventOfAEvent(this.searchByKey(aToken.e, 'pk', this.aEvents))].svgLeft + aToken.svgLeft + (aToken.svgWidth / 2));
+									}
 								}, this);
 							}
 							tsIdZp = this.zeilenTEvents[aZTEv]['tsIdZ'][iKey].length - 1;
@@ -578,9 +571,7 @@ var annotationsTool = new Vue({
 									var aOk = true;
 									this.zeilenTEvents[aZTEv]['tsIdZ'][iKey][i + 1].some(function (nVal, nIndex) {
 										var nSetT = (this.aTokenSets[nVal].t || this.aTokenSets[nVal].tx);
-										var tSetStart = this.aTokenReihung.indexOf(nSetT[0]);
-										var tSetEnde = this.aTokenReihung.indexOf(nSetT[nSetT.length - 1]);
-										if (atSetStart <= tSetEnde && atSetEnde >= tSetStart) {
+										if (atSetStart <= this.aTokenReihung.indexOf(nSetT[nSetT.length - 1]) && atSetEnde >= this.aTokenReihung.indexOf(nSetT[0])) {
 											aOk = false;
 											return true;
 										}
@@ -608,14 +599,10 @@ var annotationsTool = new Vue({
 		},
 		/* getTokenString */
 		getTokenString: function (tId, field, bfield = false) {
-			var space = '\u00A0';
 			var aTxt = this.getTokenFragment(tId, field, bfield);
-			if ((this.aTokens[tId]['tt'] === 2) || (this.aTokens[tId]['fo'] > 0)) {
-				space = '';
-			}
+			var space = ((this.aTokens[tId]['tt'] === 2) || (this.aTokens[tId]['fo'] > 0 || aTxt[0] === '_') ? '' : '\u00A0');
 			if (aTxt[0] === '_') {
 				aTxt = aTxt.substr(1);
-				space = '';
 			};
 			// if (aTxt[aTxt.length - 1] === '_') {
 			// 	aTxt = aTxt.substr(0, aTxt.length - 1);
@@ -707,6 +694,14 @@ var annotationsTool = new Vue({
 		showaInfInfos: function (iId) {
 			this.aInfInfo = iId;
 			setTimeout(function () { $('#aInformantenInfo').modal('show'); }, 20);
+		},
+		/* showaTokenInfos */
+		showaTokenSetInfos: function (eTokSet, direkt = false, e = undefined) {
+			if (direkt || (this.selTokenSet === eTokSet && (!e || (!e.ctrlKey && !e.shiftKey)))) {
+			} else {
+				this.selTokenSet = ((this.selTokenSet === eTokSet) ? 0 : eTokSet);
+				if (e.ctrlKey) { this.ctrlKS = true; };
+			}
 		},
 		/* showaTokenInfos */
 		showaTokenInfos: function (eTok, direkt = false, e = undefined) {
@@ -816,9 +811,8 @@ var annotationsTool = new Vue({
 				if (a.length > 0) { s += parseFloat(a[a.length - 1]); }
 			} else {
 				s = parseFloat(hms);
-				if (isNaN(s)) { s = 0.0; }
 			}
-			return s;
+			return ((isNaN(s)) ? 0.0 : s);
 		},
 		secondsToDuration: function (sec, fix = 6) {
 			var v = '';
@@ -1027,13 +1021,10 @@ var annotationsTool = new Vue({
 		/* Nächster/Vorheriger Token (next = true next else prev) */
 		tokenNextPrev: function (aTId, next = true) {
 			var nTId = -1;
-			// var aENr = 0;
 			if (this.tEvents[0]) {
-				if (aTId < 0) {
-					/* Erster/Letzer Token */
+				if (aTId < 0) {	// Erster/Letzer Token
 					return ((next) ? this.aTokenReihung[0] : this.aTokenReihung[this.aTokenReihung.length - 1]);
-				} else {
-					/* Nächster/Vorheriger Token */
+				} else {	// Nächster/Vorheriger Token
 					var aIId = this.aTokens[aTId]['i'];
 					var aTRI = this.aTokenReihungInf[aIId];
 					var aTRIiO = aTRI.indexOf(aTId);
@@ -1148,6 +1139,7 @@ var annotationsTool = new Vue({
 			return -1;
 		},
 		updateATokenSets: function () {
+			console.log('updateATokenSets');
 			Object.keys(this.aTokens).map(function (tId, iI) {
 				if (this.aTokens[tId].tokenSets) {
 					_.remove(this.aTokens[tId].tokenSets, (n) => {
@@ -1186,13 +1178,7 @@ var annotationsTool = new Vue({
 							if (this.aTokens[tId].tokenSets.indexOf(aTokSetIdInt) < 0) {
 								this.aTokens[tId].tokenSets.push(aTokSetIdInt);
 							}
-							this.aTokens[tId].tokenSets.sort((a, b) => {
-								var xa = this.aTokenReihung.indexOf((this.aTokenSets[a].t || this.aTokenSets[a].tx)[0]);
-								var xb = this.aTokenReihung.indexOf((this.aTokenSets[b].t || this.aTokenSets[b].tx)[0]);
-								if (xa > xb) { return 1; }
-								if (xa < xb) { return -1; }
-								return 0;
-							});
+							this.aTokens[tId].tokenSets = this.sortTokenSets(this.aTokens[tId].tokenSets);
 						}, this);
 					}
 				}
@@ -1310,6 +1296,13 @@ var annotationsTool = new Vue({
 				output += this.aInformanten[iKey].k + ': ' + ((aTRI[iKey]) ? aTRI[iKey].length.toLocaleString() : '0') + '\n';
 			}, this);
 			return output;
+		},
+		sortTokenSets: function (tokSets) {
+			return tokSets.slice().sort((a, b) => {
+				var xa = this.aTokenReihung.indexOf((this.aTokenSets[a].t || this.aTokenSets[a].tx)[0]);
+				var xb = this.aTokenReihung.indexOf((this.aTokenSets[b].t || this.aTokenSets[b].tx)[0]);
+				return ((xa > xb) ? 1 : ((xa < xb) ? -1 : 0));
+			});
 		}
 	},
 	mounted: function () {
@@ -1335,6 +1328,7 @@ var annotationsTool = new Vue({
 		this.debouncedSuche = _.debounce(this.suche, 500);
 		this.debouncedUpdateInfShow = _.debounce(this.updateInfShow, 100);
 		this.debouncedUpdateATokenSets = _.debounce(this.updateATokenSets, 100);
+		this.debouncedupdateZeilenTEvents = _.debounce(this.updateZeilenTEvents, 50);
 	},
 	beforeDestroy: function () {
 		document.getElementById('svgscroller').removeEventListener('scroll', this.scrollRendering);

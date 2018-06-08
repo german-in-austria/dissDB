@@ -33,7 +33,7 @@
 				</g>
 				<g class="zTokenSets" :transform="'translate('+(zInfWidth + 5)+','+(eEventHeight-25 + eInfTop + zeilenTEvents[aZeile]['tsT'][aInfKey] + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(objectSubValueFilter(aInformanten,'show',true), zeilenTEvents[aZeile]['iId'])">
 					<g class="zTokenSetLine" :transform="'translate(0,'+(aTsI*aTokenSetHeight)+')'" v-for="aTokenSetIds, aTsI in zeilenTEvents[aZeile]['tsIdZ'][aInfKey]">
-						<g @click="selTokenSet=((selTokenSet===aTokenSetId) ? 0 : aTokenSetId)" :class="'zTokenSet'+((aTokenSetId===selTokenSet)?' selected':'')+((selToken > 0 && aTokens[selToken].tokenSets && aTokens[selToken].tokenSets.indexOf(aTokenSetId) > -1)?' active':'')" v-for="aTokenSetId in aTokenSetIds" v-if="zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]">
+						<g @click="showaTokenSetInfos(aTokenSetId, false, $event)" :class="'zTokenSet'+((aTokenSetId===selTokenSet)?' selected':'')+((selToken > 0 && aTokens[selToken].tokenSets && aTokens[selToken].tokenSets.indexOf(aTokenSetId) > -1)?' active':'')" v-for="aTokenSetId in aTokenSetIds" v-if="zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]">
 							<template  v-for="zeilenTEvent in [zeilenTEvents[aZeile]['tsZi'][aInfKey][aTokenSetId]]">
 								<g class="zTsVB" v-if="aTokenSets[aTokenSetId].tx">
 									<g :class="'zTsVBln dg'+dg" v-for="dg in [0,1]">
