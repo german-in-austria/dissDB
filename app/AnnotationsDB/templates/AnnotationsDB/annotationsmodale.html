@@ -87,3 +87,28 @@
 		</div>
 	</div>
 </div>
+
+<!-- Informationen zu Token Set anzeigen -->
+<div id="aTokenSetInfo" class="modal fade" tabindex="-1" role="dialog" data-unset="aInfInfo" v-if="aTokenSetInfo >= 0 && aTokenSets[aTokenSetInfo]">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Schließen"><span aria-hidden="true">×</span></button>
+				<h4 class="modal-title">Token Set</h4>
+			</div>
+			<div class="modal-body">
+				<div class="form-horizontal">
+					<div class="form-group"><label class="col-sm-3 control-label">ID</label><div class="col-sm-9"><p class="form-control-static">${ aTokenSetInfo }</p></div></div>
+					<div class="form-group" v-if="aTokenSets[aTokenSetInfo].ivt"><label class="col-sm-3 control-label">von Token</label><div class="col-sm-9"><p class="form-control-static">${ aTokenSets[aTokenSetInfo].ivt }</p></div></div>
+					<div class="form-group" v-if="aTokenSets[aTokenSetInfo].ibt"><label class="col-sm-3 control-label">bis Token</label><div class="col-sm-9"><p class="form-control-static">${ aTokenSets[aTokenSetInfo].ibt }</p></div></div>
+					<div class="form-group" v-if="aTokenSets[aTokenSetInfo].t"><label class="col-sm-3 control-label">Token to Set</label><div class="col-sm-9">
+						<div class="form-control-static listtokens">
+							<a href="#" v-on:click.prevent="" :class="{selected: selToken===sTL}" v-for="(sTL, i) in aTokenSets[aTokenSetInfo].t" :title="aTokens[sTL].t+' - ID: '+sTL">${ aTokens[sTL].t }</a>
+						</div>
+					</div></div>
+				</div>
+			</div>
+			<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>
+		</div>
+	</div>
+</div>

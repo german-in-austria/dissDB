@@ -57,6 +57,7 @@ var annotationsTool = new Vue({
 		aInfInfo: undefined,
 		tEventInfo: undefined,
 		aTokenInfo: undefined,
+		aTokenSetInfo: undefined,
 		message: null,
 		mWidth: 0,
 		sHeight: 0,
@@ -144,6 +145,7 @@ var annotationsTool = new Vue({
 			this.aInfInfo = undefined;
 			this.tEventInfo = undefined;
 			this.aTokenInfo = undefined;
+			this.aTokenSetInfo = undefined;
 			this.annotationsTool = {
 				aPK: 0,
 				nNr: 0,
@@ -698,7 +700,8 @@ var annotationsTool = new Vue({
 		/* showaTokenInfos */
 		showaTokenSetInfos: function (eTokSet, direkt = false, e = undefined) {
 			if (direkt || (this.selTokenSet === eTokSet && (!e || (!e.ctrlKey && !e.shiftKey)))) {
-
+				this.aTokenSetInfo = eTokSet;
+				setTimeout(function () { $('#aTokenSetInfo').modal('show'); }, 20);
 			} else {
 				this.selTokenSet = ((this.selTokenSet === eTokSet) ? 0 : eTokSet);
 				if (e.ctrlKey) { this.ctrlKS = true; };
@@ -876,6 +879,11 @@ var annotationsTool = new Vue({
 				e.preventDefault();
 				this.selTokenBereich = {'v': -1, 'b': -1};
 				this.selectPrevInf();
+			} else if (e.ctrlKey && e.keyCode === 13) { // Enter
+				if (this.selTokenSet !== 0) {
+					this.ctrlKS = true;
+					this.showaTokenSetInfos(this.selTokenSet, true);
+				}
 			} else if (e.keyCode === 13) { // Enter
 				e.preventDefault();
 				if (this.selToken > -1) {

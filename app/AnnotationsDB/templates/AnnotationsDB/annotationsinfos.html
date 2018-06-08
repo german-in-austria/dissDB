@@ -48,7 +48,7 @@
 		<div class="tokensets" v-if="aTokenSets[selTokenSet]">
 			<template v-if="aTokenSets[selTokenSet].ivt"><b>Von Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[selTokenSet].ivt;focusFocusCatch();" :title="'ID: '+aTokenSets[selTokenSet].ivt">${ aTokens[aTokenSets[selTokenSet].ivt].t }</a><br></template>
 			<template v-if="aTokenSets[selTokenSet].ibt"><b>Bis Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[selTokenSet].ibt;focusFocusCatch();" :title="'ID: '+aTokenSets[selTokenSet].ibt">${ aTokens[aTokenSets[selTokenSet].ibt].t }</a><br></template>
-			<b>Tokens:</b> ${ (aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length.toLocaleString() } <a href="#" v-on:click.prevent="aTokenSets[selTokenSet].ipshow2=((aTokenSets[selTokenSet].ipshow2 || (aTokenSets[selTokenSet].ipshow2===undefined&&(aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length<=selTokenSetSTMax))?false:true);reRenderSelToken();" class="pull-right"><span :class="'glyphicon glyphicon-' + ((aTokenSets[selTokenSet].ipshow2 || (aTokenSets[selTokenSet].ipshow2===undefined&&(aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length<=selTokenSetSTMax))?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a><br>
+			<b>Tokens:</b> ${ (aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length.toLocaleString() } <a href="#" v-on:click.prevent="aTokenSets[selTokenSet].ipshow2=((aTokenSets[selTokenSet].ipshow2 || (aTokenSets[selTokenSet].ipshow2===undefined&&(aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length<=selTokenSetSTMax))?false:true);reRenderSelToken();" class="pull-right"><span :class="'glyphicon glyphicon-' + ((aTokenSets[selTokenSet].ipshow2 || (aTokenSets[selTokenSet].ipshow2===undefined&&(aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length<=selTokenSetSTMax))?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a> <a href="#" v-on:click.prevent="showaTokenSetInfos(selTokenSet, true);" class="pull-right mir5"><span class="glyphicon glyphicon-pencil pull-right" aria-hidden="true"></span></a><br>
 			<div class="listtokens mit10" v-if="aTokenSets[selTokenSet].ipshow2 || (aTokenSets[selTokenSet].ipshow2===undefined&&(aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length<=selTokenSetSTMax)">
 				<a href="#" v-on:click.prevent="selToken=sTL;focusFocusCatch();" :class="{selected: selToken===sTL}" v-for="(sTL, i) in (aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx)" :title="aTokens[sTL].t+' - ID: '+sTL">${ aTokens[sTL].t }</a>
 			</div>
@@ -80,6 +80,7 @@
 			<dt>Strg + A</dt><dd>TokenSet durchwählen.</dd>
 			<dt>Strg + Shift + A</dt><dd>TokenSet rückwärts durchwählen.</dd>
 			<dt>Strg + Q</dt><dd>TokenSet Auswahl aufheben.</dd>
+			<dt>Strg + Enter</dt><dd>Aktuelles TokenSet öffnen</dd>
 		</dl>
 		<b>Auswahl:</b><br>
 		<dl>
