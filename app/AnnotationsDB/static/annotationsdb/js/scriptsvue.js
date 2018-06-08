@@ -48,10 +48,10 @@ var annotationsTool = new Vue({
 		zeilenHeight: 0,
 		renderZeilen: [],
 		svgTTS: document.getElementById('svg-text-textsize'),
-		d3TokenLastView: -1,
-		d3ZeileSelected: -1,
-		d3InfSelected: -1,
-		d3SelTokenList: [],
+		svgTokenLastView: -1,
+		svgZeileSelected: -1,
+		svgInfSelected: -1,
+		svgSelTokenList: [],
 		audioPos: 0,
 		audioDuration: 0,
 		aInfInfo: undefined,
@@ -98,12 +98,12 @@ var annotationsTool = new Vue({
 		},
 		selToken: function (nVal, oVal) {
 			if (nVal > -1) {
-				this.d3ZeileSelected = this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchByKey(this.aTokens[this.selToken]['e'], 'pk', this.aEvents)));
-				this.d3InfSelected = this.aTokens[this.selToken]['i'];
+				this.svgZeileSelected = this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchByKey(this.aTokens[this.selToken]['e'], 'pk', this.aEvents)));
+				this.svgInfSelected = this.aTokens[this.selToken]['i'];
 				this.scrollToToken(this.selToken);
 			} else {
-				this.d3ZeileSelected = -1;
-				this.d3InfSelected = -1;
+				this.svgZeileSelected = -1;
+				this.svgInfSelected = -1;
 			}
 		},
 		'selTokenBereich.v': function (nVal, oVal) {
@@ -166,7 +166,7 @@ var annotationsTool = new Vue({
 			this.zeilenHeight = 0;
 			this.renderZeilen = [];
 			this.svgTTS = document.getElementById('svg-text-textsize');
-			this.d3TokenLastView = -1;
+			this.svgTokenLastView = -1;
 			this.selToken = -1;
 			this.selTokenBereich = {'v': -1, 'b': -1};
 			this.selTokenListe = [];
@@ -698,6 +698,7 @@ var annotationsTool = new Vue({
 		/* showaTokenInfos */
 		showaTokenSetInfos: function (eTokSet, direkt = false, e = undefined) {
 			if (direkt || (this.selTokenSet === eTokSet && (!e || (!e.ctrlKey && !e.shiftKey)))) {
+
 			} else {
 				this.selTokenSet = ((this.selTokenSet === eTokSet) ? 0 : eTokSet);
 				if (e.ctrlKey) { this.ctrlKS = true; };
@@ -706,8 +707,8 @@ var annotationsTool = new Vue({
 		/* showaTokenInfos */
 		showaTokenInfos: function (eTok, direkt = false, e = undefined) {
 			if (direkt || (this.selToken === eTok && (!e || (!e.ctrlKey && !e.shiftKey)))) {
-				annotationsTool.aTokens[eTok]['viewed'] = true;
-				this.d3TokenLastView = eTok;
+				this.aTokens[eTok]['viewed'] = true;
+				this.svgTokenLastView = eTok;
 				this.aTokenInfo = _.clone(this.aTokens[eTok]);
 				this.aTokenInfo['pk'] = eTok;
 				this.aTokenInfo['e-txt'] = this.aEvents[this.searchByKey(this.aTokens[eTok]['e'], 'pk', this.aEvents)]['s'];
@@ -724,7 +725,7 @@ var annotationsTool = new Vue({
 					}
 				} else if (e.ctrlKey) {
 					if (this.selTokenBereich.v > -1 && this.selTokenBereich.b > -1 && this.selTokenListe.length === 0) {
-						(this.d3SelTokenList.slice()).forEach(function (val) {
+						(this.svgSelTokenList.slice()).forEach(function (val) {
 							this.updateSelTokenListe(val);
 						}, this);
 					} else if (this.selTokenListe.length === 0) {
@@ -736,7 +737,7 @@ var annotationsTool = new Vue({
 				} else {
 					this.selTokenBereich = {'v': -1, 'b': -1};
 					this.selTokenListe = [];
-					this.d3SelTokenList = [];
+					this.svgSelTokenList = [];
 				}
 			}
 			this.selToken = eTok;
@@ -903,7 +904,7 @@ var annotationsTool = new Vue({
 				this.ctrlKS = true;
 				this.selTokenBereich = {'v': -1, 'b': -1};
 				this.selTokenListe = [];
-				this.d3SelTokenList = [];
+				this.svgSelTokenList = [];
 			} else if (e.ctrlKey && e.keyCode === 65) { // Strg + A
 				this.ctrlKS = true;
 				if (this.selToken) {
@@ -1123,12 +1124,12 @@ var annotationsTool = new Vue({
 				this.aTokenSets[aTokSetId] = {'ivt': this.selTokenBereich.v, 'ibt': this.selTokenBereich.b, 'a': this.newAAntworten(), 'ok': false, 'saveme': true};
 				this.unsaved = true;
 				this.selTokenBereich = {'v': -1, 'b': -1};
-				this.d3SelTokenList = [];
+				this.svgSelTokenList = [];
 			} else if (this.selTokenListe.length > 0) {
 				this.aTokenSets[aTokSetId] = {'t': this.selTokenListe.slice(), 'a': this.newAAntworten(), 'ok': false, 'saveme': true};
 				this.unsaved = true;
 				this.selTokenListe = [];
-				this.d3SelTokenList = [];
+				this.svgSelTokenList = [];
 			}
 			this.updateATokenSets();
 			this.focusFocusCatch();
@@ -1190,7 +1191,7 @@ var annotationsTool = new Vue({
 				var aInf = this.aTokens[this.selTokenBereich.v].i;
 				if ((aInf !== this.aTokens[this.selTokenBereich.b].i) || this.selTokenBereich.v === this.selTokenBereich.b) {
 					this.selTokenBereich = {'v': -1, 'b': -1};
-					this.d3SelTokenList = [];
+					this.svgSelTokenList = [];
 					return true;
 				}
 				this.selTokenListe = [];
@@ -1198,10 +1199,10 @@ var annotationsTool = new Vue({
 				var sTBv = this.selTokenBereich.v;
 				var sTBb = this.selTokenBereich.b;
 				if (sTBv > sTBb) { var temp = sTBv; sTBv = sTBb; sTBb = temp; }
-				this.d3SelTokenList = aList.splice(aList.indexOf(sTBv), aList.indexOf(sTBb) + 1 - aList.indexOf(sTBv));
+				this.svgSelTokenList = aList.splice(aList.indexOf(sTBv), aList.indexOf(sTBb) + 1 - aList.indexOf(sTBv));
 			} else {
 				if (this.selTokenListe.length < 1) {
-					this.d3SelTokenList = [];
+					this.svgSelTokenList = [];
 				}
 			}
 		},
@@ -1218,7 +1219,7 @@ var annotationsTool = new Vue({
 					}
 				}
 			}
-			this.d3SelTokenList = this.selTokenListe;
+			this.svgSelTokenList = this.selTokenListe;
 		},
 		reRenderSelToken: function () {
 			var tSelToken = this.selToken;
