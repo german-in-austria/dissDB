@@ -82,7 +82,8 @@ var annotationsTool = new Vue({
 		selTokenBereich: {'v': -1, 'b': -1},
 		selTokenListe: [],
 		ctrlKS: false,
-		selTokenSet: 0
+		selTokenSet: 0,
+		selTokenSetSTMax: 15
 	},
 	computed: {
 	},
