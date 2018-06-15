@@ -170,6 +170,7 @@ var annotationsTool = new Vue({
 			this.svgTTS = document.getElementById('svg-text-textsize');
 			this.svgTokenLastView = -1;
 			this.selToken = -1;
+			this.selTokenSet = -1;
 			this.selTokenBereich = {'v': -1, 'b': -1};
 			this.selTokenListe = [];
 			this.audioPos = 0;
@@ -213,6 +214,9 @@ var annotationsTool = new Vue({
 						this.addTokens(response.data['aTokens']);
 						this.addEvents(response.data['aEvents']);
 						this.addTokenSets(response.data['aTokenSets']);
+						// ToDo: Antworten!
+						console.log(response.data['aAntworten']);
+						// this.addAntworten(response.data['aAntworten']);
 						this.loading = false;
 						if (this.annotationsTool.nNr === response.data['nNr']) {
 							this.annotationsTool.nNr = response.data['nNr'];
@@ -318,7 +322,7 @@ var annotationsTool = new Vue({
 		/* updateToken */
 		updateToken: function (key, values) {
 			this.aTokens[key] = values;
-			// ToDo: antworten / tags
+			// ToDo: antworten / tags ?!?
 			// if (!this.aTokens[key]['tags']) {
 			// 	this.aTokens[key]['tags'] = undefined;
 			// }
@@ -1147,6 +1151,33 @@ var annotationsTool = new Vue({
 		newAAntworten: function () {
 			/* ToDo !! */
 			return -1;
+		},
+		/* TokenSet Bereich neu setzen */
+		setATokenSetBereich: function (aTokenSetId, aTokenId, feld, direkt = false) {
+			if (feld === 'ivt') {
+				if (this.aTokenReihung.indexOf(this.aTokenSets[aTokenSetId].ibt) <= this.aTokenReihung.indexOf(aTokenId)) {
+					alert('Der "Von Token" muss vor dem "Bis Token" liegen!');
+					return;
+				} else {
+					if (direkt || confirm('Den "Von Token" wirklich neu setzen?')) {
+						this.aTokenSets[aTokenSetId].ivt = aTokenId;
+					} else { return; };
+				}
+			} else if (feld === 'ibt') {
+				if (this.aTokenReihung.indexOf(this.aTokenSets[aTokenSetId].ivt) >= this.aTokenReihung.indexOf(aTokenId)) {
+					alert('Der "Bis Token" muss nach dem "Von Token" liegen!');
+					return;
+				} else {
+					if (direkt || confirm('Den "Bis Token" wirklich neu setzen?')) {
+						this.aTokenSets[aTokenSetId].ibt = aTokenId;
+					} else { return; };
+				}
+			}
+			this.aTokenSets[aTokenSetId].ok = false;
+			this.aTokenSets[aTokenSetId].saveme = true;
+			this.unsaved = true;
+			this.updateATokenSets();
+			this.focusFocusCatch();
 		},
 		updateATokenSets: function () {
 			console.log('updateATokenSets');

@@ -43,11 +43,19 @@
 	</div>
 </div>
 <div v-bind:class="{'infpanel': true, 'open': showTokenSetInfo}" v-if="selTokenSet!==0">
-	<a href="#" v-on:click.prevent="showTokenSetInfo=!showTokenSetInfo"><b>Akutelles Token Set</b> (${ selTokenSet+((selTokenSet<0)?' (Neu)':'') })<span :class="'glyphicon glyphicon-' + ((showTokenSetInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
+	<a href="#" v-on:click.prevent="showTokenSetInfo=!showTokenSetInfo"><b>Akutelles Token Set</b> (ID: ${ selTokenSet+((selTokenSet<0)?' (Neu)':'') })<span :class="'glyphicon glyphicon-' + ((showTokenSetInfo)?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a>
 	<div v-if="showTokenSetInfo">
 		<div class="tokensets" v-if="aTokenSets[selTokenSet]">
-			<template v-if="aTokenSets[selTokenSet].ivt"><b>Von Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[selTokenSet].ivt;focusFocusCatch();" :title="'ID: '+aTokenSets[selTokenSet].ivt">${ aTokens[aTokenSets[selTokenSet].ivt].t }</a><br></template>
-			<template v-if="aTokenSets[selTokenSet].ibt"><b>Bis Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[selTokenSet].ibt;focusFocusCatch();" :title="'ID: '+aTokenSets[selTokenSet].ibt">${ aTokens[aTokenSets[selTokenSet].ibt].t }</a><br></template>
+			<template v-if="aTokenSets[selTokenSet].ivt">
+				<b>Von Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[selTokenSet].ivt;focusFocusCatch();" :title="'ID: '+aTokenSets[selTokenSet].ivt">${ aTokens[aTokenSets[selTokenSet].ivt].t }</a>
+				<a href="#" v-on:click.prevent="setATokenSetBereich(selTokenSet,selToken,'ivt')" class="pull-right" title="Ersetzen durch ausgewähltes Token." v-if="selToken && aTokens[selToken] && aTokens[selToken].i === aTokens[aTokenSets[selTokenSet].ivt].i && aTokenReihung.indexOf(aTokenSets[selTokenSet].ibt) > aTokenReihung.indexOf(selToken)"><span class="glyphicon glyphicon-screenshot pull-right" aria-hidden="true"></span></a>
+				<br>
+			</template>
+			<template v-if="aTokenSets[selTokenSet].ibt">
+				<b>Bis Token:</b> <a href="#" v-on:click.prevent="selToken=aTokenSets[selTokenSet].ibt;focusFocusCatch();" :title="'ID: '+aTokenSets[selTokenSet].ibt">${ aTokens[aTokenSets[selTokenSet].ibt].t }</a>
+				<a href="#" v-on:click.prevent="setATokenSetBereich(selTokenSet,selToken,'ibt')" class="pull-right" title="Ersetzen durch ausgewähltes Token." v-if="selToken && aTokens[selToken] && aTokens[selToken].i === aTokens[aTokenSets[selTokenSet].ibt].i && aTokenReihung.indexOf(aTokenSets[selTokenSet].ivt) < aTokenReihung.indexOf(selToken)"><span class="glyphicon glyphicon-screenshot pull-right" aria-hidden="true"></span></a>
+				<br>
+			</template>
 			<b>Tokens:</b> ${ (aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length.toLocaleString() } <a href="#" v-on:click.prevent="aTokenSets[selTokenSet].ipshow2=((aTokenSets[selTokenSet].ipshow2 || (aTokenSets[selTokenSet].ipshow2===undefined&&(aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length<=selTokenSetSTMax))?false:true);reRenderSelToken();" class="pull-right"><span :class="'glyphicon glyphicon-' + ((aTokenSets[selTokenSet].ipshow2 || (aTokenSets[selTokenSet].ipshow2===undefined&&(aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length<=selTokenSetSTMax))?'eye-open':'eye-close') + ' pull-right'" aria-hidden="true"></span></a> <a href="#" v-on:click.prevent="showaTokenSetInfos(selTokenSet, true);" class="pull-right mir5"><span class="glyphicon glyphicon-pencil pull-right" aria-hidden="true"></span></a><br>
 			<div class="listtokens mit10" v-if="aTokenSets[selTokenSet].ipshow2 || (aTokenSets[selTokenSet].ipshow2===undefined&&(aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx||[]).length<=selTokenSetSTMax)">
 				<a href="#" v-on:click.prevent="selToken=sTL;focusFocusCatch();" :class="{selected: selToken===sTL}" v-for="(sTL, i) in (aTokenSets[selTokenSet].t||aTokenSets[selTokenSet].tx)" :title="aTokens[sTL].t+' - ID: '+sTL">${ aTokens[sTL].t }</a>

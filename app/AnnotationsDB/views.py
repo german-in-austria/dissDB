@@ -22,6 +22,7 @@ def startvue(request, ipk=0, tpk=0):
 		# aTokenSets speichern:
 		if 'aTokenSets' in sData:
 			for key, value in sData['aTokenSets'].items():
+				# ToDo: Löschen!
 				aId = int(key)
 				if aId > 0:
 					aElement = adbmodels.tbl_tokenset.objects.get(id=aId)
@@ -43,6 +44,7 @@ def startvue(request, ipk=0, tpk=0):
 		# aAntworten speichern:
 		if 'aAntworten' in sData:
 			for key, value in sData['aAntworten'].items():
+				# ToDo: Löschen!
 				aId = int(key)
 				if aId > 0:
 					aElement = dbmodels.Antworten.objects.get(id=aId)
@@ -197,7 +199,7 @@ def startvue(request, ipk=0, tpk=0):
 		aAntwortenTags = {}
 		nAntwortenTags = []
 		aAntwortIdsTemp = deepcopy(aAntwortIds)
-		# Todo !!!
+		# Todo: AntwortenTags laden ...
 		dataout.update({'nNr': nNr, 'aEvents': aEvents, 'aTokens': aTokens, 'aTokenSets': aTokenSets, 'aAntworten': aAntworten})
 		return httpOutput(json.dumps(dataout), 'application/json')
 	# Menü laden:
