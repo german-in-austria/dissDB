@@ -19,9 +19,7 @@ def startvue(request, ipk=0, tpk=0):
 	if 'speichern' in request.POST:
 		sData = json.loads(request.POST.get('speichern'))
 		print(sData)
-		# aAntworten speichern!
-		# ToDo: speichern und ggf. neue Id hinzufügen. Siehe aTokenSets!
-		# aTokenSets speichern
+		# aTokenSets speichern:
 		if 'aTokenSets' in sData:
 			for key, value in sData['aTokenSets'].items():
 				aId = int(key)
@@ -42,7 +40,35 @@ def startvue(request, ipk=0, tpk=0):
 						setattr(aTokenToSet, 'id_tokenset_id', value['nId'])
 						setattr(aTokenToSet, 'id_token_id', aTokenId)
 						aTokenToSet.save()
-		print(sData)
+		# aAntworten speichern:
+		if 'aAntworten' in sData:
+			for key, value in sData['aAntworten'].items():
+				aId = int(key)
+				if aId > 0:
+					aElement = dbmodels.Antworten.objects.get(id=aId)
+				else:
+					aElement = dbmodels.Antworten()
+				setattr(aElement, 'von_Inf_id', (value['za'] if 'vi' in value else None))
+				if 'inat' in value:
+					setattr(aElement, 'ist_nat', value['inat'])
+				if 'is' in value:
+					setattr(aElement, 'ist_Satz_id', value['is'])
+				if 'ibfl' in value:
+					setattr(aElement, 'ist_bfl', value['ibfl'])
+				if 'it' in value:
+					setattr(aElement, 'ist_token_id', sData['aTokens'][value['it']]['nId'] if ('aTokens' in sData and value['it'] in sData['aTokenSets'] and 'nId' in sData['aTokenSets'][value['it']]) else value['it'])
+				if 'its' in value:
+					setattr(aElement, 'ist_tokenset_id', sData['aTokenSets'][value['its']]['nId'] if ('aTokenSets' in sData and value['its'] in sData['aTokenSets'] and 'nId' in sData['aTokenSets'][value['its']]) else value['its'])
+				if 'bds' in value:
+					setattr(aElement, 'bfl_durch_S', value['bds'])
+				if 'sa' in value:
+					setattr(aElement, 'start_Antwort', value['sa'])
+				if 'ea' in value:
+					setattr(aElement, 'stop_Antwort', value['ea'])
+				if 'k' in value:
+					setattr(aElement, 'Kommentar', value['k'])
+				# aElement.save()
+				value['nId'] = aElement.pk
 		return httpOutput(json.dumps({'OK': True, 'gespeichert': sData}), 'application/json')
 	# Transkript:
 	if 'getTranskript' in request.POST:
@@ -150,12 +176,6 @@ def startvue(request, ipk=0, tpk=0):
 		for nAntwort in nAntworten:
 			if nTokenSet.pk not in aAntworten:
 				aAntwort = {'vi': nAntwort.von_Inf_id}
-				if nAntwort.zu_Aufgabe:
-					aAntwort['za'] = nAntwort.zu_Aufgabe_id
-				aAntwort['r'] = nAntwort.Reihung
-				if nAntwort.ist_am:
-					aAntwort['iam'] = nAntwort.ist_am
-				aAntwort['ig'] = nAntwort.ist_gewaehlt
 				aAntwort['inat'] = nAntwort.ist_nat
 				if nAntwort.ist_Satz:
 					aAntwort['is'] = nAntwort.ist_Satz_id
