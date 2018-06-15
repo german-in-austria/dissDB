@@ -1154,12 +1154,16 @@ var annotationsTool = new Vue({
 		},
 		/* TokenSet Bereich neu setzen */
 		setATokenSetBereich: function (aTokenSetId, aTokenId, feld, direkt = false) {
+			if (this.aTokens[aTokenId].i !== this.aTokens[this.aTokenSets[aTokenSetId].ivt].i) {
+				alert('Der Token muss den selben Informanten haben!');
+				return;
+			}
 			if (feld === 'ivt') {
 				if (this.aTokenReihung.indexOf(this.aTokenSets[aTokenSetId].ibt) <= this.aTokenReihung.indexOf(aTokenId)) {
 					alert('Der "Von Token" muss vor dem "Bis Token" liegen!');
 					return;
 				} else {
-					if (direkt || confirm('Den "Von Token" wirklich neu setzen?')) {
+					if (direkt || confirm('Den "Von Token" von Token Set ID ' + aTokenSetId + ' wirklich neu setzen?')) {
 						this.aTokenSets[aTokenSetId].ivt = aTokenId;
 					} else { return; };
 				}
@@ -1168,7 +1172,7 @@ var annotationsTool = new Vue({
 					alert('Der "Bis Token" muss nach dem "Von Token" liegen!');
 					return;
 				} else {
-					if (direkt || confirm('Den "Bis Token" wirklich neu setzen?')) {
+					if (direkt || confirm('Den "Bis Token" von Token Set ID ' + aTokenSetId + ' wirklich neu setzen?')) {
 						this.aTokenSets[aTokenSetId].ibt = aTokenId;
 					} else { return; };
 				}
