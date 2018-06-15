@@ -41,6 +41,11 @@ def startvue(request, ipk=0, tpk=0):
 						setattr(aTokenToSet, 'id_tokenset_id', value['nId'])
 						setattr(aTokenToSet, 'id_token_id', aTokenId)
 						aTokenToSet.save()
+					# tbl_tokentoset löschen wenn nicht mehr vorhanden:
+					aTokenToSets = adbmodels.tbl_tokentoset.objects.filter(id_tokenset=value['nId'])
+					for aTokenToSet in aTokenToSets:
+						if aTokenToSet.id_token_id not in value['t']:
+							aTokenToSet.delete()
 		# aAntworten speichern:
 		if 'aAntworten' in sData:
 			for key, value in sData['aAntworten'].items():

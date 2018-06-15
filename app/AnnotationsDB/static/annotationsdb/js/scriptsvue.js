@@ -1183,6 +1183,31 @@ var annotationsTool = new Vue({
 			this.updateATokenSets();
 			this.focusFocusCatch();
 		},
+		/* TokenSet Liste Token hinzufügen/entfernen */
+		toggleATokenSetListe: function (aTokenSetId, aTokenId, direkt = false) {
+			if (this.aTokens[aTokenId].i !== this.aTokens[this.aTokenSets[aTokenSetId].t[0]].i) {
+				alert('Der Token muss den selben Informanten haben!');
+				return;
+			}
+			if (this.aTokenSets[aTokenSetId].t.indexOf(aTokenId) > -1) {
+				if (this.aTokenSets[aTokenSetId].t.length < 2) {
+					alert('TokenSets müssen mindestens einen Token enthalten!');
+					return;
+				}
+				if (direkt || confirm('Den Token "' + this.aTokens[aTokenId].t + '" ID ' + aTokenId + ' aus Token Set ID ' + aTokenSetId + ' wirklich löschen?')) {
+					this.aTokenSets[aTokenSetId].t.splice(this.aTokenSets[aTokenSetId].t.indexOf(aTokenId), 1);
+				} else { return; };
+			} else {
+				if (direkt || confirm('Den Token "' + this.aTokens[aTokenId].t + '" ID ' + aTokenId + ' zu Token Set ID ' + aTokenSetId + ' hinzufügen?')) {
+					this.aTokenSets[aTokenSetId].t.push(aTokenId);
+				} else { return; };
+			}
+			this.aTokenSets[aTokenSetId].ok = false;
+			this.aTokenSets[aTokenSetId].saveme = true;
+			this.unsaved = true;
+			this.updateATokenSets();
+			this.focusFocusCatch();
+		},
 		updateATokenSets: function () {
 			console.log('updateATokenSets');
 			Object.keys(this.aTokens).map(function (tId, iI) {
