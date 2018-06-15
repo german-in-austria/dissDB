@@ -318,9 +318,10 @@ var annotationsTool = new Vue({
 		/* updateToken */
 		updateToken: function (key, values) {
 			this.aTokens[key] = values;
-			if (!this.aTokens[key]['tags']) {
-				this.aTokens[key]['tags'] = undefined;
-			}
+			// ToDo: antworten / tags
+			// if (!this.aTokens[key]['tags']) {
+			// 	this.aTokens[key]['tags'] = undefined;
+			// }
 			if (this.aTokens[key]['fo']) {
 				this.updateTokenFragment(key, this.aTokens[key]['fo']);
 			}
@@ -881,9 +882,9 @@ var annotationsTool = new Vue({
 				this.selectPrevInf();
 			} else if (e.ctrlKey && e.keyCode === 13) { // Enter
 				if (this.selTokenSet !== 0) {
-					this.ctrlKS = true;
 					this.showaTokenSetInfos(this.selTokenSet, true);
 				}
+				this.ctrlKS = true;
 			} else if (e.keyCode === 13) { // Enter
 				e.preventDefault();
 				if (this.selToken > -1) {

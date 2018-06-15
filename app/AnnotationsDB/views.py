@@ -14,6 +14,7 @@ def startvue(request, ipk=0, tpk=0):
 		return redirect('dissdb_login')
 	ipk = int(ipk)
 	tpk = int(tpk)
+	# Speichern:
 	if 'speichern' in request.POST:
 		sData = json.loads(request.POST.get('speichern'))
 		print(sData)
@@ -42,12 +43,13 @@ def startvue(request, ipk=0, tpk=0):
 						aTokenToSet.save()
 		print(sData)
 		return httpOutput(json.dumps({'OK': True, 'gespeichert': sData}), 'application/json')
-
+	# Transkript:
 	if 'getTranskript' in request.POST:
 		tpk = int(request.POST.get('getTranskript'))
 	if tpk > 0:
 		maxQuerys = 250
 		dataout = {}
+		# Startinformationen laden: (transcript, EinzelErhebung, Informanten, Saetze)
 		if 'aType' in request.POST and request.POST.get('aType') == 'start':
 			aTranskriptData = adbmodels.transcript.objects.get(pk=tpk)
 			aTranskript = {'pk': aTranskriptData.pk, 'ut': aTranskriptData.update_time.strftime("%d.%m.%Y- %H:%M"), 'n': aTranskriptData.name}
@@ -71,6 +73,7 @@ def startvue(request, ipk=0, tpk=0):
 				aSaetze[aSatz.pk] = {'t': aSatz.Transkript, 's': aSatz.Standardorth, 'k': aSatz.Kommentar}
 			aTmNr = int(adbmodels.event.objects.prefetch_related('rn_token_event_id').filter(rn_token_event_id__transcript_id_id=tpk).distinct().order_by('start_time').count() / maxQuerys)
 			dataout.update({'aTranskript': aTranskript, 'aEinzelErhebung': aEinzelErhebung, 'aTokenTypes': aTokenTypes, 'aInformanten': aInformanten, 'aSaetze': aSaetze, 'aTmNr': aTmNr})
+		# Events laden:
 		aNr = 0
 		aEvents = []
 		aTokens = {}
@@ -111,6 +114,7 @@ def startvue(request, ipk=0, tpk=0):
 		maxVars = 500
 		aTokenSets = {}
 		nTokenSets = []
+		# Token Sets zu Events laden:
 		while len(aTokenIds) > 0:
 			nTokenSets += adbmodels.tbl_tokenset.objects.distinct().filter(id_von_token_id__in=aTokenIds[:maxVars])
 			nTokenSets += adbmodels.tbl_tokenset.objects.distinct().filter(tbl_tokentoset__id_token__in=aTokenIds[:maxVars])
@@ -130,7 +134,7 @@ def startvue(request, ipk=0, tpk=0):
 				aTokenSets[nTokenSet.pk] = (aTokenSet)
 		dataout.update({'nNr': nNr, 'aEvents': aEvents, 'aTokens': aTokens, 'aTokenSets': aTokenSets})
 		return httpOutput(json.dumps(dataout), 'application/json')
-
+	# Menü laden:
 	if 'getMenue' in request.POST:
 		if 'ainformant' in request.POST:
 			ipk = int(request.POST.get('ainformant'))
