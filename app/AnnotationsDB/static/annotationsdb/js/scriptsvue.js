@@ -45,6 +45,7 @@ var annotationsTool = new Vue({
 		aTokenFragmente: {},
 		aTokenSets: {},
 		delTokenSets: {},
+		aAntworten: {},
 		zeilenTEvents: [],
 		zeilenHeight: 0,
 		renderZeilen: [],
@@ -165,6 +166,7 @@ var annotationsTool = new Vue({
 			this.aTokenReihungInf = {};
 			this.aTokenFragmente = {};
 			this.aTokenSets = {};
+			this.aAntworten = {};
 			this.zeilenTEvents = [];
 			this.zeilenHeight = 0;
 			this.renderZeilen = [];
@@ -215,9 +217,7 @@ var annotationsTool = new Vue({
 						this.addTokens(response.data['aTokens']);
 						this.addEvents(response.data['aEvents']);
 						this.addTokenSets(response.data['aTokenSets']);
-						// ToDo: Antworten!
-						console.log(response.data['aAntworten']);
-						// this.addAntworten(response.data['aAntworten']);
+						this.addAntworten(response.data['aAntworten']);
 						this.loading = false;
 						if (this.annotationsTool.nNr === response.data['nNr']) {
 							this.annotationsTool.nNr = response.data['nNr'];
@@ -333,6 +333,39 @@ var annotationsTool = new Vue({
 			}, this);
 			this.debouncedUpdateATokenSets();
 		},
+		/* addAntworten: Antworten hinzufügen */
+		addAntworten: function (nAntworten) {
+			Object.keys(nAntworten).map(function (key, i) {
+				this.setAAntwort(key, nAntworten[key]);
+			}, this);
+		},
+		setAAntwort: function (key, val = undefined) {
+			if (val === undefined) { // Antwort Löschen
+				if (this.aAntworten[key]['its'] && this.aTokenSets[this.aAntworten[key]['its']]) {
+					delete this.aTokenSets[this.aAntworten[key]['its']].aId;
+				}
+				if (this.aAntworten[key]['it'] && this.aTokens[this.aAntworten[key]['it']]) {
+					delete this.aTokens[this.aAntworten[key]['its']].aId;
+				}
+				this.delAntworten[key] = this.aAntworten[key];
+				delete this.aAntworten[key];
+			} else { // Antwort setzen
+				if (key === 0) { // Neue Antwort
+					key = -1;
+					while (this.aAntworten[key]) {
+						key -= 1;
+					}
+				}
+				this.aAntworten[key] = val;
+				if (this.aAntworten[key]['its'] && this.aTokenSets[this.aAntworten[key]['its']]) {
+					this.aTokenSets[this.aAntworten[key]['its']].aId = parseInt(key);
+				}
+				if (this.aAntworten[key]['it'] && this.aTokens[this.aAntworten[key]['it']]) {
+					this.aTokens[this.aAntworten[key]['its']].aId = parseInt(key);
+				}
+			}
+			return key;
+		},
 		/* deleteATokenSet: TokenSet löschen */
 		deleteATokenSet: function (delTokenSetID, direkt = false) {
 			if (direkt || confirm('Soll das TokenSet ID ' + delTokenSetID + ' gelöscht werden?')) {
@@ -349,10 +382,6 @@ var annotationsTool = new Vue({
 		/* updateToken */
 		updateToken: function (key, values) {
 			this.aTokens[key] = values;
-			// ToDo: antworten / tags ?!?
-			// if (!this.aTokens[key]['tags']) {
-			// 	this.aTokens[key]['tags'] = undefined;
-			// }
 			if (this.aTokens[key]['fo']) {
 				this.updateTokenFragment(key, this.aTokens[key]['fo']);
 			}
@@ -712,6 +741,9 @@ var annotationsTool = new Vue({
 		},
 		setATokenInfo: function (aVal, aKey) {
 			this.aTokenInfo[aKey] = aVal;
+		},
+		setATokenSetInfo: function (aVal, aKey) {
+			this.aTokenSetInfo[aKey] = aVal;
 		},
 		setAudioDuration: function (aPos) {
 			this.audioDuration = aPos;
@@ -1162,23 +1194,18 @@ var annotationsTool = new Vue({
 				aTokSetId -= 1;
 			}
 			if (this.selTokenBereich.v >= 0 && this.selTokenBereich.b >= 0) {
-				this.aTokenSets[aTokSetId] = {'ivt': this.selTokenBereich.v, 'ibt': this.selTokenBereich.b, 'a': this.newAAntworten(), 'ok': false, 'saveme': true};
+				this.aTokenSets[aTokSetId] = {'ivt': this.selTokenBereich.v, 'ibt': this.selTokenBereich.b, 'ok': false, 'saveme': true};
 				this.unsaved = true;
 				this.selTokenBereich = {'v': -1, 'b': -1};
 				this.svgSelTokenList = [];
 			} else if (this.selTokenListe.length > 0) {
-				this.aTokenSets[aTokSetId] = {'t': this.selTokenListe.slice(), 'a': this.newAAntworten(), 'ok': false, 'saveme': true};
+				this.aTokenSets[aTokSetId] = {'t': this.selTokenListe.slice(), 'ok': false, 'saveme': true};
 				this.unsaved = true;
 				this.selTokenListe = [];
 				this.svgSelTokenList = [];
 			}
 			this.updateATokenSets();
 			this.focusFocusCatch();
-		},
-		/* Leere Antwort erstellen und negativen Index zurückgeben */
-		newAAntworten: function () {
-			/* ToDo !! */
-			return -1;
 		},
 		/* TokenSet Bereich neu setzen */
 		setATokenSetBereich: function (aTokenSetId, aTokenId, feld, direkt = false) {

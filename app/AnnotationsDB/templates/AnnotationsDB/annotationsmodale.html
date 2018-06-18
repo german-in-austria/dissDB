@@ -79,9 +79,15 @@
 					<div class="form-group" v-if="aTokenFragmente[aTokenInfo['pk']]"><label class="col-sm-3 control-label">Fragmente</label><div class="col-sm-9"><ul class="form-control-static hflist">
 							<li v-for="aToFragKey in aTokenFragmente[aTokenInfo['pk']]">${ aTokens[aToFragKey]['t'] } (${ aToFragKey })</li>
 					</ul></div></div>
+					<div class="form-group"><label class="col-sm-3 control-label">Antwort</label><div class="col-sm-9">
+						<p class="form-control-static" v-if="aTokenInfo.aId">${ aTokenInfo.aId }</p>
+						<button type="button" @click="$set(aTokenInfo, 'aId', '? - Neu');" class="btn btn-primary" v-else>Antwort erstellen</button>
+					</div></div>
 				</div>
-				<hr>
-				<tagsystem cols="3" :tags="aTokenInfo['tags']" @tags="setATokenInfo($event, 'tags')" />
+				<template v-if="aTokenInfo.aId">
+					<hr>
+					<tagsystem cols="3" :tags="aTokenInfo['tags']" @tags="setATokenInfo($event, 'tags')" />
+				</template>
 			</div>
 			<div class="modal-footer"><button type="button" class="btn btn-danger" tabindex="9999" disabled>Löschen</button><button type="button" class="btn btn-primary" id="saveToken" disabled>Ändern</button><button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>
 		</div>
@@ -106,7 +112,15 @@
 							<a href="#" v-on:click.prevent="" :class="{selected: selToken===sTL}" v-for="(sTL, i) in aTokenSetInfo.t" :title="aTokens[sTL].t+' - ID: '+sTL">${ aTokens[sTL].t }</a>
 						</div>
 					</div></div>
+					<div class="form-group"><label class="col-sm-3 control-label">Antwort</label><div class="col-sm-9">
+						<p class="form-control-static" v-if="aTokenSetInfo.aId">${ aTokenSetInfo.aId }</p>
+						<button type="button" @click="$set(aTokenSetInfo, 'aId', '? - Neu');" class="btn btn-primary" v-else>Antwort erstellen</button>
+					</div></div>
 				</div>
+				<template v-if="aTokenSetInfo.aId">
+					<hr>
+					<tagsystem cols="3" :tags="aTokenSetInfo['tags']" @tags="setATokenSetInfo($event, 'tags')" />
+				</template>
 			</div>
 			<div class="modal-footer"><button type="button" @click="deleteATokenSet(aTokenSetInfo.pk)" class="btn btn-danger" tabindex="9999">Löschen</button><button type="button" class="btn btn-primary" id="saveToken" disabled>Ändern</button><button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>
 		</div>
