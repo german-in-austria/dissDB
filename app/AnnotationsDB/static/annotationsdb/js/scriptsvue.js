@@ -44,6 +44,7 @@ var annotationsTool = new Vue({
 		aTokenReihungInf: {},
 		aTokenFragmente: {},
 		aTokenSets: {},
+		delTokenSets: {},
 		zeilenTEvents: [],
 		zeilenHeight: 0,
 		renderZeilen: [],
@@ -170,7 +171,7 @@ var annotationsTool = new Vue({
 			this.svgTTS = document.getElementById('svg-text-textsize');
 			this.svgTokenLastView = -1;
 			this.selToken = -1;
-			this.selTokenSet = -1;
+			this.selTokenSet = 0;
 			this.selTokenBereich = {'v': -1, 'b': -1};
 			this.selTokenListe = [];
 			this.audioPos = 0;
@@ -255,6 +256,9 @@ var annotationsTool = new Vue({
 			if (Object.keys(sATokenSets).length > 0) {
 				sData.aTokenSets = sATokenSets;
 			}
+			if (Object.keys(this.delTokenSets).length > 0) {
+				sData.dTokenSets = this.delTokenSets;
+			}
 			console.log(sData);
 			if (sOK) {
 				this.loading = true;
@@ -266,6 +270,16 @@ var annotationsTool = new Vue({
 					if (response.data['OK']) {
 						console.log(response.data);
 						if (response.data['gespeichert']) {
+							if (response.data['gespeichert']['dTokenSets']) {
+								Object.keys(response.data['gespeichert']['dTokenSets']).map(function (key, i) {
+									if (this.aTokenSets[key]) {
+										delete this.aTokenSets[key];
+									}
+									if (this.delTokenSets[key]) {
+										delete this.delTokenSets[key];
+									}
+								}, this);
+							}
 							if (response.data['gespeichert']['aTokenSets']) {
 								Object.keys(response.data['gespeichert']['aTokenSets']).map(function (key, i) {
 									var nTokenSet = response.data['gespeichert']['aTokenSets'][key];
@@ -279,9 +293,9 @@ var annotationsTool = new Vue({
 									if (nTokenSet.ibt) { this.aTokenSets[aKey].ibt = nTokenSet.ibt; };
 									if (nTokenSet.t) { this.aTokenSets[aKey].t = nTokenSet.t; };
 								}, this);
-								this.updateATokenSets();
-								this.focusFocusCatch();
 							}
+							this.updateATokenSets();
+							this.focusFocusCatch();
 						}
 					} else {
 						alert('Fehler!');
@@ -318,6 +332,19 @@ var annotationsTool = new Vue({
 				this.aTokenSets[key] = nTokenSets[key];
 			}, this);
 			this.debouncedUpdateATokenSets();
+		},
+		/* deleteATokenSet: TokenSet löschen */
+		deleteATokenSet: function (delTokenSetID, direkt = false) {
+			if (direkt || confirm('Soll das TokenSet ID ' + delTokenSetID + ' gelöscht werden?')) {
+				$('#aTokenSetInfo').modal('hide');
+				this.delTokenSets[delTokenSetID] = this.aTokenSets[delTokenSetID];
+				delete this.aTokenSets[delTokenSetID];
+				this.unsaved = true;
+				this.aTokenSetInfo = 0;
+				this.updateATokenSets();
+				this.focusFocusCatch();
+				console.log('TokenSet ID ' + delTokenSetID + ' gelöscht!');
+			}
 		},
 		/* updateToken */
 		updateToken: function (key, values) {

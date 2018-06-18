@@ -19,10 +19,16 @@ def startvue(request, ipk=0, tpk=0):
 	if 'speichern' in request.POST:
 		sData = json.loads(request.POST.get('speichern'))
 		print(sData)
+		# dTokenSets löschen:
+		if 'dTokenSets' in sData:
+			for key, value in sData['dTokenSets'].items():
+				aId = int(key)
+				if aId > 0:
+					aElement = adbmodels.tbl_tokenset.objects.get(id=aId)
+					aElement.delete()
 		# aTokenSets speichern:
 		if 'aTokenSets' in sData:
 			for key, value in sData['aTokenSets'].items():
-				# ToDo: Löschen!
 				aId = int(key)
 				if aId > 0:
 					aElement = adbmodels.tbl_tokenset.objects.get(id=aId)
