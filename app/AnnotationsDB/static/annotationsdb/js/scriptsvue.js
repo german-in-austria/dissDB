@@ -340,7 +340,7 @@ var annotationsTool = new Vue({
 				this.delTokenSets[delTokenSetID] = this.aTokenSets[delTokenSetID];
 				delete this.aTokenSets[delTokenSetID];
 				this.unsaved = true;
-				this.aTokenSetInfo = 0;
+				this.aTokenSetInfo = undefined;
 				this.updateATokenSets();
 				this.focusFocusCatch();
 				console.log('TokenSet ID ' + delTokenSetID + ' gelöscht!');
@@ -732,7 +732,8 @@ var annotationsTool = new Vue({
 		/* showaTokenInfos */
 		showaTokenSetInfos: function (eTokSet, direkt = false, e = undefined) {
 			if (direkt || (this.selTokenSet === eTokSet && (!e || (!e.ctrlKey && !e.shiftKey)))) {
-				this.aTokenSetInfo = eTokSet;
+				this.aTokenSetInfo = _.clone(this.aTokenSets[eTokSet]);
+				this.aTokenSetInfo['pk'] = eTokSet;
 				setTimeout(function () { $('#aTokenSetInfo').modal('show'); }, 20);
 			} else {
 				this.selTokenSet = ((this.selTokenSet === eTokSet) ? 0 : eTokSet);
