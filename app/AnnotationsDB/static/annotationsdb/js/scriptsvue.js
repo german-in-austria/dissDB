@@ -1398,7 +1398,17 @@ var annotationsTool = new Vue({
 			return tokSets.slice().sort((a, b) => {
 				var xa = this.aTokenReihung.indexOf((this.aTokenSets[a].t || this.aTokenSets[a].tx)[0]);
 				var xb = this.aTokenReihung.indexOf((this.aTokenSets[b].t || this.aTokenSets[b].tx)[0]);
-				return ((xa > xb) ? 1 : ((xa < xb) ? -1 : 0));
+				if (xa > xb) { return 1; }
+				if (xa < xb) { return -1; }
+				var aTSa = this.aTokenSets[a].t || this.aTokenSets[a].tx;
+				var aTSb = this.aTokenSets[b].t || this.aTokenSets[b].tx;
+				xa = this.aTokenReihung.indexOf(aTSa[aTSa.length - 1]);
+				xb = this.aTokenReihung.indexOf(aTSb[aTSb.length - 1]);
+				if (xa < xb) { return 1; }
+				if (xa > xb) { return -1; }
+				if (this.aTokenSets[a].t && this.aTokenSets[b].tx) { return 1; }
+				if (this.aTokenSets[a].tx && this.aTokenSets[b].t) { return -1; }
+				return 0;
 			});
 		}
 	},
