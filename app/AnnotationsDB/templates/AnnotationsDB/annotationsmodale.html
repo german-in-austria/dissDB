@@ -89,13 +89,16 @@
 					<tagsystem cols="3" :tags="aTokenInfo['tags']" @tags="setATokenInfo($event, 'tags')" />
 				</template>
 			</div>
-			<div class="modal-footer"><button type="button" class="btn btn-danger" tabindex="9999" disabled>Löschen</button><button type="button" class="btn btn-primary" id="saveToken" disabled>Ändern</button><button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" tabindex="9999">Löschen</button>
+				<button type="button" class="btn btn-primary" id="saveToken" :disabled="!aTokenInfo.changed">Ändern</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">${ ((aTokenInfo.changed) ? 'Verwerfen' : 'Schließen') }</button></div>
 		</div>
 	</div>
 </div>
 
 <!-- Informationen zu Token Set anzeigen -->
-<div id="aTokenSetInfo" class="modal fade" tabindex="-1" role="dialog" data-unset="aInfInfo" v-if="aTokenSetInfo && aTokenSetInfo['pk']">
+<div id="aTokenSetInfo" class="modal fade" tabindex="-1" role="dialog" data-unset="aTokenSetInfo" v-if="aTokenSetInfo && aTokenSetInfo['pk']">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -122,7 +125,11 @@
 					<tagsystem cols="3" :tags="aTokenSetInfo['tags']" @tags="setATokenSetInfo($event, 'tags')" />
 				</template>
 			</div>
-			<div class="modal-footer"><button type="button" @click="deleteATokenSet(aTokenSetInfo.pk)" class="btn btn-danger" tabindex="9999">Löschen</button><button type="button" class="btn btn-primary" id="saveToken" disabled>Ändern</button><button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button></div>
+			<div class="modal-footer">
+				<button type="button" @click="deleteATokenSet(aTokenSetInfo.pk)" class="btn btn-danger" tabindex="9999">Löschen</button>
+				<button type="button" class="btn btn-primary" :disabled="!aTokenSetInfo.changed">Ändern</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">${ ((aTokenSetInfo.changed) ? 'Verwerfen' : 'Schließen') }</button>
+			</div>
 		</div>
 	</div>
 </div>

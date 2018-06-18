@@ -138,6 +138,21 @@ var annotationsTool = new Vue({
 				this.suchTokens = [];
 				this.suchTokensInfo = {};
 			}
+		},
+		aTokenInfo: function (nVal, oVal) { this.aTokenInfoChange(nVal, oVal); },
+		'aTokenInfo.t': function (nVal, oVal) { this.aTokenInfoChange(nVal, oVal); },
+		'aTokenInfo.tt': function (nVal, oVal) { this.aTokenInfoChange(nVal, oVal); },
+		'aTokenInfo.o': function (nVal, oVal) { this.aTokenInfoChange(nVal, oVal); },
+		'aTokenInfo.le': function (nVal, oVal) { this.aTokenInfoChange(nVal, oVal); },
+		'aTokenInfo.to': function (nVal, oVal) { this.aTokenInfoChange(nVal, oVal); },
+		'aTokenInfo.changed': function (nVal, oVal) {
+			this.modalSperren('#aTokenInfo');
+		},
+		aTokenSetInfo: function (nVal, oVal) {
+			if (this.aTokenSetInfo && oVal) { this.$set(this.aTokenSetInfo, 'changed', true); };
+		},
+		'aTokenSetInfo.changed': function (nVal, oVal) {
+			this.modalSperren('#aTokenSetInfo');
 		}
 	},
 	methods: {
@@ -374,6 +389,7 @@ var annotationsTool = new Vue({
 				delete this.aTokenSets[delTokenSetID];
 				this.unsaved = true;
 				this.aTokenSetInfo = undefined;
+				this.selTokenSet = 0;
 				this.updateATokenSets();
 				this.focusFocusCatch();
 				console.log('TokenSet ID ' + delTokenSetID + ' gelöscht!');
@@ -741,9 +757,11 @@ var annotationsTool = new Vue({
 		},
 		setATokenInfo: function (aVal, aKey) {
 			this.aTokenInfo[aKey] = aVal;
+			this.$set(this.aTokenInfo, 'changed', true);
 		},
 		setATokenSetInfo: function (aVal, aKey) {
 			this.aTokenSetInfo[aKey] = aVal;
+			this.$set(this.aTokenSetInfo, 'changed', true);
 		},
 		setAudioDuration: function (aPos) {
 			this.audioDuration = aPos;
@@ -809,6 +827,12 @@ var annotationsTool = new Vue({
 				}
 			}
 			this.selToken = eTok;
+		},
+		modalSperren: function (modalID) {
+			$(modalID).off('keyup.dismiss.bs.modal');
+			$(modalID).off('keydown.dismiss.bs.modal');
+			$(modalID).data('bs.modal').options.backdrop = 'static';
+			$(modalID + ' button.close').hide();
 		},
 		/* Funktion zur ermittlung der Breite von Buchstaben im SVG-Element */
 		getCharWidth: function (zeichen) {
@@ -1438,6 +1462,9 @@ var annotationsTool = new Vue({
 				if (this.aTokenSets[a].tx && this.aTokenSets[b].t) { return -1; }
 				return 0;
 			});
+		},
+		aTokenInfoChange: function (nVal, oVal) {
+			if (this.aTokenInfo && oVal) { this.$set(this.aTokenInfo, 'changed', true); };
 		}
 	},
 	mounted: function () {
