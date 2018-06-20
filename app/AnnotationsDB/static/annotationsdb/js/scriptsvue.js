@@ -46,6 +46,7 @@ var annotationsTool = new Vue({
 		aTokenSets: {},
 		delTokenSets: {},
 		aAntworten: {},
+		delAntworten: {},
 		zeilenTEvents: [],
 		zeilenHeight: 0,
 		renderZeilen: [],
@@ -285,7 +286,18 @@ var annotationsTool = new Vue({
 				sData.dTokenSets = this.delTokenSets;
 			}
 			/* Antworten für speichern auslesen */
-			/* ToDo ... */
+			var sAAntworten = {};
+			Object.keys(this.aAntworten).map(function (key, i) {
+				if (this.aAntworten[key].saveme) {
+					sAAntworten[key] = this.filterProperties(this.aAntworten[key], ['vi', 'inat', 'is', 'ibfl', 'it', 'its', 'bds', 'sa', 'ea', 'k']);
+				}
+			}, this);
+			if (Object.keys(sAAntworten).length > 0) {
+				sData.aAntworten = sAAntworten;
+			}
+			if (Object.keys(this.delAntworten).length > 0) {
+				sData.dAntworten = this.delAntworten;
+			}
 			console.log(sData);
 			if (sOK) {
 				this.loading = true;
@@ -336,6 +348,35 @@ var annotationsTool = new Vue({
 								}, this);
 							}
 							/* Antworten */
+							if (response.data['gespeichert']['aAntworten']) {
+								Object.keys(response.data['gespeichert']['aAntworten']).map(function (key, i) {
+									var nAntworten = response.data['gespeichert']['aAntworten'][key];
+									if (this.aAntworten[key]) {
+										if (this.aAntworten[key]['its'] && this.aTokenSets[this.aAntworten[key]['its']]) {
+											delete this.aTokenSets[this.aAntworten[key]['its']].aId;
+										}
+										if (this.aAntworten[key]['it'] && this.aTokens[this.aAntworten[key]['it']]) {
+											delete this.aTokens[this.aAntworten[key]['its']].aId;
+										}
+										delete this.aAntworten[key];
+									}
+									var aKey = ((nAntworten.nId) ? nAntworten.nId : key);
+									if (nAntworten.nId) {
+										delete nAntworten.nId;
+									}
+									this.setAAntwort(aKey, nAntworten);
+								}, this);
+							}
+							if (response.data['gespeichert']['dAntworten']) {
+								Object.keys(response.data['gespeichert']['dAntworten']).map(function (key, i) {
+									if (this.aAntworten[key]) {
+										delete this.aAntworten[key];
+									}
+									if (this.delAntworten[key]) {
+										delete this.delAntworten[key];
+									}
+								}, this);
+							}
 							this.updateATokenSets();
 							this.updateZeilenTEvents();
 							this.focusFocusCatch();
@@ -386,9 +427,13 @@ var annotationsTool = new Vue({
 			if (val === undefined) { // Antwort Löschen
 				if (this.aAntworten[key]['its'] && this.aTokenSets[this.aAntworten[key]['its']]) {
 					delete this.aTokenSets[this.aAntworten[key]['its']].aId;
+					this.delAntworten[key] = this.aAntworten[key];
+					delete this.aAntworten[key];
 				}
 				if (this.aAntworten[key]['it'] && this.aTokens[this.aAntworten[key]['it']]) {
 					delete this.aTokens[this.aAntworten[key]['its']].aId;
+					this.delAntworten[key] = this.aAntworten[key];
+					delete this.aAntworten[key];
 				}
 				this.delAntworten[key] = this.aAntworten[key];
 				delete this.aAntworten[key];
@@ -398,6 +443,7 @@ var annotationsTool = new Vue({
 					while (this.aAntworten[key]) {
 						key -= 1;
 					}
+					val.saveme = true;
 				}
 				this.aAntworten[key] = val;
 				if (this.aAntworten[key]['its'] && this.aTokenSets[this.aAntworten[key]['its']]) {
