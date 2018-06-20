@@ -17,7 +17,7 @@
       <feComposite in="SourceGraphic"/>
     </filter>
 	</defs>
-	<g id="svg-g-transcript">
+	<g id="svg-g-transcript" v-if="annotationsTool.aPK > 0 && (annotationsTool.nNr > 1 || annotationsTool.loaded)">
 		<g id="svg-g-events" transform="translate(5,5)">
 			<g :class="{eZeile: true, selected: aZeile==svgZeileSelected}" :transform="'translate(0,'+zeilenTEvents[aZeile]['eT']+')'" v-for="aZeile in renderZeilen">
 				<rect x="0" y="0" :width="mWidth-10" :height="zeilenTEvents[aZeile]['eH']-18" />

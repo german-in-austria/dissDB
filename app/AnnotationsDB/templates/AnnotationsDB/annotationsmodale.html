@@ -80,7 +80,7 @@
 							<li v-for="aToFragKey in aTokenFragmente[aTokenInfo['pk']]">${ aTokens[aToFragKey]['t'] } (${ aToFragKey })</li>
 					</ul></div></div>
 					<div class="form-group"><label class="col-sm-3 control-label">Antwort</label><div class="col-sm-9">
-						<p class="form-control-static" v-if="aTokenInfo.aId">${ aTokenInfo.aId }</p>
+						<p class="form-control-static" v-if="aTokenInfo.aId">${ aTokenInfo.aId+((aTokenInfo.aId<0)?' - Neu':'') }</p>
 						<button type="button" @click="$set(aTokenInfo, 'aId', '? - Neu');" class="btn btn-primary" v-else>Antwort erstellen</button>
 					</div></div>
 				</div>
@@ -91,7 +91,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" tabindex="9999">Löschen</button>
-				<button type="button" class="btn btn-primary" id="saveToken" :disabled="!aTokenInfo.changed">Ändern</button>
+				<button type="button" class="btn btn-primary" :disabled="!aTokenInfo.changed" @click="updateTokenData">Ändern</button>
 				<button type="button" class="btn btn-default" data-dismiss="modal">${ ((aTokenInfo.changed) ? 'Verwerfen' : 'Schließen') }</button></div>
 		</div>
 	</div>
@@ -116,7 +116,7 @@
 						</div>
 					</div></div>
 					<div class="form-group"><label class="col-sm-3 control-label">Antwort</label><div class="col-sm-9">
-						<p class="form-control-static" v-if="aTokenSetInfo.aId">${ aTokenSetInfo.aId }</p>
+						<p class="form-control-static" v-if="aTokenSetInfo.aId">${ aTokenSetInfo.aId+((aTokenSetInfo.aId<0)?' - Neu':'') }</p>
 						<button type="button" @click="$set(aTokenSetInfo, 'aId', '? - Neu');" class="btn btn-primary" v-else>Antwort erstellen</button>
 					</div></div>
 				</div>
@@ -127,7 +127,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" @click="deleteATokenSet(aTokenSetInfo.pk)" class="btn btn-danger" tabindex="9999">Löschen</button>
-				<button type="button" class="btn btn-primary" :disabled="!aTokenSetInfo.changed">Ändern</button>
+				<button type="button" class="btn btn-primary" :disabled="!aTokenSetInfo.changed" @click="updateTokenSetData">Ändern</button>
 				<button type="button" class="btn btn-default" data-dismiss="modal">${ ((aTokenSetInfo.changed) ? 'Verwerfen' : 'Schließen') }</button>
 			</div>
 		</div>

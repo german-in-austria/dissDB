@@ -235,11 +235,11 @@ var annotationsTool = new Vue({
 						this.addAntworten(response.data['aAntworten']);
 						this.loading = false;
 						if (this.annotationsTool.nNr === response.data['nNr']) {
-							this.annotationsTool.nNr = response.data['nNr'];
+							this.$set(this.annotationsTool, 'nNr', response.data['nNr']);
 							this.annotationsTool.loaded = true;
 							console.log('Alle Datensätze geladen.');
 						} else if (this.annotationsTool.loaded === false) {
-							this.annotationsTool.nNr = response.data['nNr'];
+							this.$set(this.annotationsTool, 'nNr', response.data['nNr']);
 							this.getTranskript(this.annotationsTool.aPK, 'next', this.annotationsTool.nNr);
 						}
 					}
@@ -365,7 +365,7 @@ var annotationsTool = new Vue({
 				this.delAntworten[key] = this.aAntworten[key];
 				delete this.aAntworten[key];
 			} else { // Antwort setzen
-				if (key === 0) { // Neue Antwort
+				if (key === 0 || isNaN(key)) { // Neue Antwort
 					key = -1;
 					while (this.aAntworten[key]) {
 						key -= 1;
@@ -394,6 +394,37 @@ var annotationsTool = new Vue({
 				this.focusFocusCatch();
 				console.log('TokenSet ID ' + delTokenSetID + ' gelöscht!');
 			}
+		},
+		/* updateTokenSetData: TokenSet ändern */
+		updateTokenSetData: function () {
+			var aTSPK = this.aTokenSetInfo['pk'];
+			$('#aTokenSetInfo').modal('hide');
+			if (this.aTokenSetInfo.aId) {
+				this.aTokenSets[aTSPK].aId = this.setAAntwort(parseInt(this.aTokenSetInfo.aId), {'its': aTSPK, 'vi': this.aTokens[(this.aTokenSetInfo.t || this.aTokenSetInfo.tx)[0]].i, 'tags': (this.aTokenSetInfo.tags || undefined)});
+			}
+			this.unsaved = true;
+			this.updateATokenSets();
+			this.aTokenSetInfo = undefined;
+			console.log('TokenSet ID ' + aTSPK + ' geändert!');
+		},
+		/* updateTokenData: Token ändern */
+		updateTokenData: function () {
+			var aTSPK = this.aTokenInfo['pk'];
+			$('#aTokenInfo').modal('hide');
+			this.aTokens[aTSPK].t = this.aTokenInfo.t;
+			this.aTokens[aTSPK].tt = this.aTokenInfo.tt;
+			this.aTokens[aTSPK].o = this.aTokenInfo.o;
+			this.aTokens[aTSPK].le = this.aTokenInfo.le;
+			this.aTokens[aTSPK].to = this.aTokenInfo.to;
+			if (this.aTokenInfo.aId) {
+				this.aTokens[aTSPK].aId = this.setAAntwort(parseInt(this.aTokenInfo.aId), {'its': aTSPK, 'vi': this.aTokenInfo.i, 'tags': (this.aTokenInfo.tags || undefined)});
+			}
+			this.unsaved = true;
+			// ToDo update!
+			this.preRenderTEvent(this.getTEventOfAEvent(this.searchByKey(this.aTokenInfo.e, 'pk', this.aEvents)), true);
+			this.updateZeilenTEvents();
+			this.aTokenInfo = undefined;
+			console.log('TokenSet ID ' + aTSPK + ' geändert!');
 		},
 		/* updateToken */
 		updateToken: function (key, values) {
@@ -487,8 +518,8 @@ var annotationsTool = new Vue({
 		debouncedSVGHeight: _.debounce(function () {
 			this.scrollRendering();
 		}, 50),
-		preRenderTEvent: function (key) {
-			if (this.tEvents[key]['rerender']) {
+		preRenderTEvent: function (key, rerender = false) {
+			if (rerender || this.tEvents[key]['rerender']) {
 				this.tEvents[key]['svgWidth'] = this.sizeTEvent(key);
 				this.tEvents[key]['rerender'] = false;
 			}
@@ -545,6 +576,7 @@ var annotationsTool = new Vue({
 			}, this);
 			this.uzteEndDataUpdate(aZTEv);
 			this.zeilenHeight += this.zeilenTEvents[aZTEv]['eH'];
+			this.scrollRendering();
 			var t1 = performance.now();
 			console.log('updateZeilenTEvents: ' + Math.ceil(t1 - t0) + ' ms');
 		},
@@ -783,6 +815,9 @@ var annotationsTool = new Vue({
 		showaTokenSetInfos: function (eTokSet, direkt = false, e = undefined) {
 			if (direkt || (this.selTokenSet === eTokSet && (!e || (!e.ctrlKey && !e.shiftKey)))) {
 				this.aTokenSetInfo = _.clone(this.aTokenSets[eTokSet]);
+				if (this.aTokenSetInfo.aId && this.aAntworten[this.aTokenSetInfo.aId].tags) {
+					this.aTokenSetInfo.tags = this.aAntworten[this.aTokenSetInfo.aId].tags;
+				}
 				this.aTokenSetInfo['pk'] = eTokSet;
 				setTimeout(function () { $('#aTokenSetInfo').modal('show'); }, 20);
 			} else {
@@ -1464,7 +1499,7 @@ var annotationsTool = new Vue({
 			});
 		},
 		aTokenInfoChange: function (nVal, oVal) {
-			if (this.aTokenInfo && oVal) { this.$set(this.aTokenInfo, 'changed', true); };
+			if (this.aTokenInfo && oVal !== undefined) { this.$set(this.aTokenInfo, 'changed', true); };
 		}
 	},
 	mounted: function () {
