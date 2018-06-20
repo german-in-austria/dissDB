@@ -26,6 +26,26 @@ def startvue(request, ipk=0, tpk=0):
 				if aId > 0:
 					aElement = adbmodels.tbl_tokenset.objects.get(id=aId)
 					aElement.delete()
+		# aTokens speichern:
+		if 'aTokens' in sData:
+			for key, value in sData['aTokens'].items():
+				aId = int(key)
+				if aId > 0:
+					aElement = adbmodels.token.objects.get(id=aId)
+				else:
+					aElement = adbmodels.token()
+				setattr(aElement, 'text', (value['t'] if 't' in value else None))
+				setattr(aElement, 'token_type_id_id', (value['tt'] if 'tt' in value else None))
+				setattr(aElement, 'token_reihung', (value['tr'] if 'tr' in value else None))
+				setattr(aElement, 'event_id_id', (value['e'] if 'e' in value else None))
+				setattr(aElement, 'text_in_ortho', (value['to'] if 'to' in value else None))
+				setattr(aElement, 'ID_Inf_id', (value['i'] if 'i' in value else None))
+				setattr(aElement, 'ortho', (value['o'] if 'o' in value else None))
+				setattr(aElement, 'sentence_id_id', (value['s'] if 's' in value else None))
+				setattr(aElement, 'sequence_in_sentence', (value['sr'] if 'sr' in value else None))
+				setattr(aElement, 'fragment_of_id', (value['fo'] if 'fo' in value else None))
+				setattr(aElement, 'likely_error', (value['le'] if 'le' in value else False))
+				aElement.save()
 		# aTokenSets speichern:
 		if 'aTokenSets' in sData:
 			for key, value in sData['aTokenSets'].items():
@@ -80,6 +100,7 @@ def startvue(request, ipk=0, tpk=0):
 					setattr(aElement, 'stop_Antwort', value['ea'])
 				if 'k' in value:
 					setattr(aElement, 'Kommentar', value['k'])
+				# ToDo: Tags !
 				# aElement.save()
 				value['nId'] = aElement.pk
 		return httpOutput(json.dumps({'OK': True, 'gespeichert': sData}), 'application/json')

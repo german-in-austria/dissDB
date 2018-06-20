@@ -261,6 +261,16 @@ var annotationsTool = new Vue({
 			console.log('Änderungen speichern');
 			var sOK = true;
 			var sData = {};
+			/* Token für speichern auslesen */
+			var sATokens = {};
+			Object.keys(this.aTokens).map(function (key, i) {
+				if (this.aTokens[key].saveme) {
+					sATokens[key] = this.filterProperties(this.aTokens[key], ['a', 't', 'tt', 'tr', 'e', 'to', 'i', 'o', 's', 'sr', 'fo', 'le']);
+				}
+			}, this);
+			if (Object.keys(sATokens).length > 0) {
+				sData.aTokens = sATokens;
+			}
 			/* Token Sets für speichern auslesen */
 			var sATokenSets = {};
 			Object.keys(this.aTokenSets).map(function (key, i) {
@@ -274,6 +284,8 @@ var annotationsTool = new Vue({
 			if (Object.keys(this.delTokenSets).length > 0) {
 				sData.dTokenSets = this.delTokenSets;
 			}
+			/* Antworten für speichern auslesen */
+			/* ToDo ... */
 			console.log(sData);
 			if (sOK) {
 				this.loading = true;
@@ -285,16 +297,20 @@ var annotationsTool = new Vue({
 					if (response.data['OK']) {
 						console.log(response.data);
 						if (response.data['gespeichert']) {
-							if (response.data['gespeichert']['dTokenSets']) {
-								Object.keys(response.data['gespeichert']['dTokenSets']).map(function (key, i) {
-									if (this.aTokenSets[key]) {
-										delete this.aTokenSets[key];
+							/* Tokens */
+							if (response.data['gespeichert']['aTokens']) {
+								Object.keys(response.data['gespeichert']['aTokens']).map(function (key, i) {
+									var nToken = response.data['gespeichert']['aTokens'][key];
+									if (this.aTokens[key]) {
+										delete this.aTokens[key];
 									}
-									if (this.delTokenSets[key]) {
-										delete this.delTokenSets[key];
-									}
+									var aKey = ((nToken.nId) ? nToken.nId : key);
+									if (nToken.nId) { delete nToken.nId; };
+									this.updateToken(aKey, nToken);
+									this.preRenderTEvent(this.getTEventOfAEvent(this.searchByKey(nToken.e, 'pk', this.aEvents)), true);
 								}, this);
 							}
+							/* Token Sets */
 							if (response.data['gespeichert']['aTokenSets']) {
 								Object.keys(response.data['gespeichert']['aTokenSets']).map(function (key, i) {
 									var nTokenSet = response.data['gespeichert']['aTokenSets'][key];
@@ -309,7 +325,19 @@ var annotationsTool = new Vue({
 									if (nTokenSet.t) { this.aTokenSets[aKey].t = nTokenSet.t; };
 								}, this);
 							}
+							if (response.data['gespeichert']['dTokenSets']) {
+								Object.keys(response.data['gespeichert']['dTokenSets']).map(function (key, i) {
+									if (this.aTokenSets[key]) {
+										delete this.aTokenSets[key];
+									}
+									if (this.delTokenSets[key]) {
+										delete this.delTokenSets[key];
+									}
+								}, this);
+							}
+							/* Antworten */
 							this.updateATokenSets();
+							this.updateZeilenTEvents();
 							this.focusFocusCatch();
 						}
 					} else {
@@ -401,6 +429,7 @@ var annotationsTool = new Vue({
 			$('#aTokenSetInfo').modal('hide');
 			if (this.aTokenSetInfo.aId) {
 				this.aTokenSets[aTSPK].aId = this.setAAntwort(parseInt(this.aTokenSetInfo.aId), {'its': aTSPK, 'vi': this.aTokens[(this.aTokenSetInfo.t || this.aTokenSetInfo.tx)[0]].i, 'tags': (this.aTokenSetInfo.tags || undefined)});
+				this.aAntworten[this.aTokenSets[aTSPK].aId].saveme = true;
 			}
 			this.unsaved = true;
 			this.updateATokenSets();
@@ -409,22 +438,23 @@ var annotationsTool = new Vue({
 		},
 		/* updateTokenData: Token ändern */
 		updateTokenData: function () {
-			var aTSPK = this.aTokenInfo['pk'];
+			var aTPK = this.aTokenInfo['pk'];
 			$('#aTokenInfo').modal('hide');
-			this.aTokens[aTSPK].t = this.aTokenInfo.t;
-			this.aTokens[aTSPK].tt = this.aTokenInfo.tt;
-			this.aTokens[aTSPK].o = this.aTokenInfo.o;
-			this.aTokens[aTSPK].le = this.aTokenInfo.le;
-			this.aTokens[aTSPK].to = this.aTokenInfo.to;
+			this.aTokens[aTPK].t = this.aTokenInfo.t;
+			this.aTokens[aTPK].tt = this.aTokenInfo.tt;
+			this.aTokens[aTPK].o = this.aTokenInfo.o;
+			this.aTokens[aTPK].le = this.aTokenInfo.le;
+			this.aTokens[aTPK].to = this.aTokenInfo.to;
 			if (this.aTokenInfo.aId) {
-				this.aTokens[aTSPK].aId = this.setAAntwort(parseInt(this.aTokenInfo.aId), {'its': aTSPK, 'vi': this.aTokenInfo.i, 'tags': (this.aTokenInfo.tags || undefined)});
+				this.aTokens[aTPK].aId = this.setAAntwort(parseInt(this.aTokenInfo.aId), {'its': aTPK, 'vi': this.aTokenInfo.i, 'tags': (this.aTokenInfo.tags || undefined)});
+				this.aAntworten[this.aTokens[aTPK].aId].saveme = true;
 			}
+			this.aTokens[aTPK].saveme = true;
 			this.unsaved = true;
-			// ToDo update!
 			this.preRenderTEvent(this.getTEventOfAEvent(this.searchByKey(this.aTokenInfo.e, 'pk', this.aEvents)), true);
 			this.updateZeilenTEvents();
 			this.aTokenInfo = undefined;
-			console.log('TokenSet ID ' + aTSPK + ' geändert!');
+			console.log('TokenSet ID ' + aTPK + ' geändert!');
 		},
 		/* updateToken */
 		updateToken: function (key, values) {
