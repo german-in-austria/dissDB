@@ -420,8 +420,34 @@ var annotationsTool = new Vue({
 		/* addAntworten: Antworten hinzufügen */
 		addAntworten: function (nAntworten) {
 			Object.keys(nAntworten).map(function (key, i) {
+				if (nAntworten[key].pt) {
+					nAntworten[key].tags = [];
+					nAntworten[key].pt.forEach(function (val) {
+						nAntworten[key].tags.push({'e': val.e, 'tags': this.processTags(val.t).tags});
+					}, this);
+					delete nAntworten[key].pt;
+				}
 				this.setAAntwort(key, nAntworten[key]);
 			}, this);
+		},
+		processTags: function (pTags, pPos = 0, gen = 0) {
+			var xTags = [];
+			var xPos = pPos;
+			var xClose = 0;
+			while (xPos < pTags.length && xClose < 1) {
+				if (pTags[xPos].c > 0) {
+					xClose = pTags[xPos].c;
+					pTags[xPos].c -= 1;
+					xPos = xPos - 1;
+				} else {
+					var prData = this.processTags(pTags, xPos + 1);
+					var zTags = prData.tags;
+					var zPos = prData.pos;
+					xTags.push({'id': pTags[xPos].i, 'tag': pTags[xPos].t, 'tags': zTags});
+					xPos = zPos + 1;
+				}
+			}
+			return {'tags': xTags, 'pos': xPos};
 		},
 		setAAntwort: function (key, val = undefined) {
 			if (val === undefined) { // Antwort Löschen

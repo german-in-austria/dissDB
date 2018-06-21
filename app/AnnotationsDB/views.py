@@ -238,14 +238,13 @@ def startvue(request, ipk=0, tpk=0):
 				if nAntwort.stop_Antwort:
 					aAntwort['ea'] = str(nAntwort.stop_Antwort)
 				aAntwort['k'] = nAntwort.Kommentar
+				# AntwortenTags laden:
+				nAntTags = []
+				for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=nAntwort.pk).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
+					nAntTags.append({'e': xval['id_TagEbene'], 't': getTagFamilie(dbmodels.AntwortenTags.objects.filter(id_Antwort=nAntwort.pk, id_TagEbene=xval['id_TagEbene']).order_by('Reihung'))})
+				if nAntTags:
+					aAntwort['pt'] = nAntTags
 				aAntworten[nAntwort.pk] = (aAntwort)
-		# AntwortenTags laden:
-		aAntwortIds = [aAntwortId for aAntwortId in aAntworten]
-		maxVars = 500
-		aAntwortenTags = {}
-		nAntwortenTags = []
-		aAntwortIdsTemp = deepcopy(aAntwortIds)
-		# Todo: AntwortenTags laden ...
 		dataout.update({'nNr': nNr, 'aEvents': aEvents, 'aTokens': aTokens, 'aTokenSets': aTokenSets, 'aAntworten': aAntworten})
 		return httpOutput(json.dumps(dataout), 'application/json')
 	# Menü laden:
@@ -266,3 +265,19 @@ def startvue(request, ipk=0, tpk=0):
 		return httpOutput(json.dumps({'informantenMitTranskripte': informantenMitTranskripte, 'aInformant': ipk, 'aTranskripte': aTranskripte}), 'application/json')
 
 	return render_to_response('AnnotationsDB/startvue.html', RequestContext(request))
+
+
+def getTagFamilie(Tags):
+	afam = []
+	oTags = []
+	for value in Tags:
+		pClose = 0
+		try:
+			while not value.id_Tag.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
+				pClose += 1
+				del afam[-1]
+		except:
+			pass
+		oTags.append({'t': value.id_Tag_id, 'i': value.pk, 'c': pClose})
+		afam.append(value.id_Tag)
+	return oTags
