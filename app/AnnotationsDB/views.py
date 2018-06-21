@@ -97,11 +97,7 @@ def startvue(request, ipk=0, tpk=0):
 				if 'ibfl' in value:
 					setattr(aElement, 'ist_bfl', value['ibfl'])
 				if 'it' in value:
-					if ('aTokens' in sData and str(value['it']) in sData['aTokenSets'] and 'nId' in sData['aTokenSets'][str(value['it'])]):
-						setattr(aElement, 'ist_token_id', sData['aTokens'][str(value['it'])]['nId'])
-						sData['aAntworten'][key]['it'] = sData['aTokens'][str(value['it'])]['nId']
-					else:
-						setattr(aElement, 'ist_token_id', value['it'])
+					setattr(aElement, 'ist_token_id', value['it'])
 				if 'its' in value:
 					if ('aTokenSets' in sData and str(value['its']) in sData['aTokenSets'] and 'nId' in sData['aTokenSets'][str(value['its'])]):
 						setattr(aElement, 'ist_tokenset_id', sData['aTokenSets'][str(value['its'])]['nId'])
