@@ -46,8 +46,8 @@ Vue.component('tagsystem', {
 						getBase: 1
 					})
 				.then((response) => {
-					this.loadingBase = false;
 					this.cache.baseCache = response.data;
+					this.loadingBase = false;
 					this.getTags();
 				})
 				.catch((err) => {
@@ -68,8 +68,8 @@ Vue.component('tagsystem', {
 						getTags: 1
 					})
 				.then((response) => {
-					this.loadingTags = false;
 					this.cache.tagsCache = response.data['tags'];
+					this.loadingTags = false;
 				})
 				.catch((err) => {
 					console.log(err);
@@ -268,7 +268,7 @@ Vue.component('tagsystemselecttag', {
 					this.aTags.tags = [];
 				}
 			} else {
-				this.aTags.push({'tag': tagId, 'tags': []});
+				this.aTags.push({'id': 0, 'tag': tagId, 'tags': []});
 			}
 			this.$emit('changetag', this.aTags, this.tagindex);
 			this.$emit('closePtagsbtn');

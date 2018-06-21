@@ -19,7 +19,6 @@ def startvue(request, ipk=0, tpk=0):
 	# Speichern:
 	if 'speichern' in request.POST:
 		sData = json.loads(request.POST.get('speichern'))
-		print(sData)
 		# dTokenSets löschen:
 		if 'dTokenSets' in sData:
 			for key, value in sData['dTokenSets'].items():
@@ -83,7 +82,6 @@ def startvue(request, ipk=0, tpk=0):
 		# aAntworten speichern:
 		if 'aAntworten' in sData:
 			for key, value in sData['aAntworten'].items():
-				# ToDo: Löschen!
 				aId = int(key)
 				if aId > 0:
 					aElement = dbmodels.Antworten.objects.get(id=aId)
@@ -110,9 +108,38 @@ def startvue(request, ipk=0, tpk=0):
 				setattr(aElement, 'stop_Antwort', datetime.timedelta(microseconds=int(value['ea'] if 'ea' in value else 0)))
 				if 'k' in value:
 					setattr(aElement, 'Kommentar', value['k'])
-				# ToDo: Tags !
 				aElement.save()
 				value['nId'] = aElement.pk
+				# AntwortenTags speichern
+				if 'tags' in value:
+					for eValue in value['tags']:
+						aEbene = eValue['e']
+						for antwortenTag in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=aEbene):
+							delIt = True
+							for tValue in eValue['t']:
+								if int(tValue['i']) == antwortenTag.pk:
+									delIt = False
+							if delIt:
+								antwortenTag.delete();
+						reihung = 0
+						for tValue in eValue['t']:
+							tagId = int(tValue['i'])
+							if tagId > 0:
+								aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
+							else:
+								aElement = dbmodels.AntwortenTags()
+							setattr(aElement, 'id_Antwort_id', value['nId'])
+							setattr(aElement, 'id_Tag_id', tValue['t'])
+							setattr(aElement, 'id_TagEbene_id', aEbene)
+							setattr(aElement, 'Reihung', reihung)
+							reihung += 1
+							aElement.save()
+					# Aktuelle AntwortenTags laden
+					nAntTags = []
+					for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId']).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
+						nAntTags.append({'e': xval['id_TagEbene'], 't': getTagFamilie(dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=xval['id_TagEbene']).order_by('Reihung'))})
+					del sData['aAntworten'][key]['tags']
+					sData['aAntworten'][key]['pt'] = nAntTags
 		return httpOutput(json.dumps({'OK': True, 'gespeichert': sData}), 'application/json')
 	# Transkript:
 	if 'getTranskript' in request.POST:

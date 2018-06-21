@@ -290,6 +290,9 @@ var annotationsTool = new Vue({
 			Object.keys(this.aAntworten).map(function (key, i) {
 				if (this.aAntworten[key].saveme) {
 					sAAntworten[key] = this.filterProperties(this.aAntworten[key], ['vi', 'inat', 'is', 'ibfl', 'it', 'its', 'bds', 'sa', 'ea', 'k']);
+					if (this.aAntworten[key].tags) {
+						sAAntworten[key].tags = this.getFlatTags(this.aAntworten[key].tags);
+					}
 				}
 			}, this);
 			if (Object.keys(sAAntworten).length > 0) {
@@ -350,7 +353,7 @@ var annotationsTool = new Vue({
 							/* Antworten */
 							if (response.data['gespeichert']['aAntworten']) {
 								Object.keys(response.data['gespeichert']['aAntworten']).map(function (key, i) {
-									var nAntworten = response.data['gespeichert']['aAntworten'][key];
+									var nAntwort = response.data['gespeichert']['aAntworten'][key];
 									if (this.aAntworten[key]) {
 										if (this.aAntworten[key]['its'] && this.aTokenSets[this.aAntworten[key]['its']]) {
 											delete this.aTokenSets[this.aAntworten[key]['its']].aId;
@@ -360,11 +363,18 @@ var annotationsTool = new Vue({
 										}
 										delete this.aAntworten[key];
 									}
-									var aKey = ((nAntworten.nId) ? nAntworten.nId : key);
-									if (nAntworten.nId) {
-										delete nAntworten.nId;
+									var aKey = ((nAntwort.nId) ? nAntwort.nId : key);
+									if (nAntwort.nId) {
+										delete nAntwort.nId;
 									}
-									this.setAAntwort(aKey, nAntworten);
+									if (nAntwort.pt) {
+										nAntwort.tags = [];
+										nAntwort.pt.forEach(function (val) {
+											nAntwort.tags.push({'e': val.e, 'tags': this.processTags(val.t).tags});
+										}, this);
+										delete nAntwort.pt;
+									}
+									this.setAAntwort(aKey, nAntwort);
 								}, this);
 							}
 							if (response.data['gespeichert']['dAntworten']) {
@@ -393,6 +403,26 @@ var annotationsTool = new Vue({
 					this.loading = false;
 				});
 			}
+		},
+		getFlatTags: function (aTags) {
+			var fTags = [];
+			aTags.forEach(function (val) {
+				fTags.push({'e': val.e, 't': this.getFlatTagsX(val.tags)});
+			}, this);
+			return fTags;
+		},
+		getFlatTagsX: function (aTags) {
+			var fTags = [];
+			aTags.forEach(function (val) {
+				var aTag = {'i': val.id, 't': val.tag};
+				fTags.push(aTag);
+				if (val.tags) {
+					this.getFlatTagsX(val.tags).forEach(function (sval) {
+						fTags.push(sval);
+					}, this);
+				}
+			}, this);
+			return fTags;
 		},
 		/* setInformanten: Informanten setzten */
 		setInformanten: function (nInformanten) {

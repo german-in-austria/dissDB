@@ -1,6 +1,6 @@
 <script type="text/x-template" id="tagsystem-template">
 	<div v-bind:class="{ 'form-horizontal': true, 'tag-forms': true, tagsystem: true }">
-		<template v-if="!(loadingTags && loadingBase) && !reRender">
+		<template v-if="!(loadingTags || loadingBase) && !reRender">
 			<div class="form-group tag-line" v-for="(aEbene, aEbeneIndex) in aTags">
 				<label :class="'col-sm-'+colLeft+' control-label'">
 					<select class="tagebene w100" v-model="aEbene['e']">
