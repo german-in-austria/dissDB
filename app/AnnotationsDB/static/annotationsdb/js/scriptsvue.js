@@ -427,13 +427,9 @@ var annotationsTool = new Vue({
 			if (val === undefined) { // Antwort Löschen
 				if (this.aAntworten[key]['its'] && this.aTokenSets[this.aAntworten[key]['its']]) {
 					delete this.aTokenSets[this.aAntworten[key]['its']].aId;
-					this.delAntworten[key] = this.aAntworten[key];
-					delete this.aAntworten[key];
 				}
 				if (this.aAntworten[key]['it'] && this.aTokens[this.aAntworten[key]['it']]) {
 					delete this.aTokens[this.aAntworten[key]['its']].aId;
-					this.delAntworten[key] = this.aAntworten[key];
-					delete this.aAntworten[key];
 				}
 				this.delAntworten[key] = this.aAntworten[key];
 				delete this.aAntworten[key];
@@ -456,9 +452,12 @@ var annotationsTool = new Vue({
 			return key;
 		},
 		/* deleteATokenSet: TokenSet löschen */
-		deleteATokenSet: function (delTokenSetID, direkt = false) {
+		deleteATokenSet: function (delTokenSetID, direkt = false, aDirekt = false) {
 			if (direkt || confirm('Soll das TokenSet ID ' + delTokenSetID + ' gelöscht werden?')) {
 				$('#aTokenSetInfo').modal('hide');
+				if (this.aTokenSets[delTokenSetID].aId && ((aDirekt) || confirm('Soll die dazugehörige Antwort auch gelöscht werden?'))) {
+					this.setAAntwort(this.aTokenSets[delTokenSetID].aId);
+				}
 				this.delTokenSets[delTokenSetID] = this.aTokenSets[delTokenSetID];
 				delete this.aTokenSets[delTokenSetID];
 				this.unsaved = true;

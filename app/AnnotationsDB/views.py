@@ -73,6 +73,13 @@ def startvue(request, ipk=0, tpk=0):
 					for aTokenToSet in aTokenToSets:
 						if aTokenToSet.id_token_id not in value['t']:
 							aTokenToSet.delete()
+		# dAntworten löschen:
+		if 'dAntworten' in sData:
+			for key, value in sData['dAntworten'].items():
+				aId = int(key)
+				if aId > 0:
+					aElement = dbmodels.Antworten.objects.get(id=aId)
+					aElement.delete()
 		# aAntworten speichern:
 		if 'aAntworten' in sData:
 			for key, value in sData['aAntworten'].items():
