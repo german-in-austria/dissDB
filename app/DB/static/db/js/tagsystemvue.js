@@ -1,7 +1,77 @@
-/* global _ Vue csrf alert confirm */
+/* global _ $ Vue csrf alert confirm */
 
 /* Cache für Tags und Presets */
-const tagsystemCache = new Vue({data: { baseCache: undefined, tagsCache: undefined, presetsCache: undefined }});
+const tagsystemCache = new Vue({
+	data: {
+		baseCache: undefined,
+		tagsCache: undefined,
+		presetsCache: undefined
+	},
+	watch: {
+		presetsCache: function (nVal, oVal) {
+			if (nVal) {
+				nVal.forEach(function (val, key) {
+					nVal[key].tags = this.processTags(val.tf).tags;
+					nVal[key].tokenText = this.tagsText(nVal[key].tags);
+					nVal[key].ze = [];
+					nVal[key].tf.forEach(function (tVal) {
+						if (this.tagsCache.tags[tVal.t].tezt) {
+							this.tagsCache.tags[tVal.t].tezt.forEach(function (eVal) {
+								if (nVal[key].ze.indexOf(eVal) < 0) {
+									nVal[key].ze.push(eVal);
+									this.$set(this.baseCache.tagebenen[eVal], 'hasPresets', true);
+								}
+							}, this);
+						}
+					}, this);
+				}, this);
+			}
+			return nVal;
+		}
+	},
+	methods: {
+		reset: function () {
+			this.baseCache = undefined;
+			this.tagsCache = undefined;
+			this.presetsCache = undefined;
+		},
+		tagsText: function (aTags) {
+			var aText = '';
+			var aDg = 0;
+			if (aTags) {
+				aTags.forEach(function (val) {
+					if (val.tag) {
+						var sTags = this.tagsText(val.tags);
+						aText += ((aDg === 0) ? ((aText.slice(-1) === ')') ? ' ' : '') : ', ') + this.tagsCache.tags[val.tag].t + ((sTags) ? '(' + sTags + ')' : '');
+						aDg += 1;
+					} else {
+						aText += this.tagsText(val.tags);
+					}
+				}, this);
+			}
+			return aText;
+		},
+		processTags: function (pTags, pPos = 0, gen = 0) {
+			var xTags = [];
+			var xPos = pPos;
+			var xClose = 0;
+			while (xPos < pTags.length && xClose < 1) {
+				if (pTags[xPos].c > 0) {
+					xClose = pTags[xPos].c;
+					pTags[xPos].c -= 1;
+					xPos = xPos - 1;
+				} else {
+					var prData = this.processTags(pTags, xPos + 1);
+					var zTags = prData.tags;
+					var zPos = prData.pos;
+					xTags.push({'id': 0, 'tag': pTags[xPos].t, 'tags': zTags});
+					xPos = zPos + 1;
+				}
+			}
+			return {'tags': xTags, 'pos': xPos};
+		}
+	}
+});
 
 /* Komponente für Tagsystem */
 Vue.component('tagsystem', {
@@ -23,6 +93,7 @@ Vue.component('tagsystem', {
 			loadingTags: true,
 			loadingPresets: true,
 			aTags: this.tags || [],
+			showPresets: false,
 			reRender: false
 		};
 	},
@@ -34,7 +105,11 @@ Vue.component('tagsystem', {
 	watch: {
 		tags: function (nVal, oVal) {
 			this.getBase();
-			this.getPresets();
+		},
+		showPresets: function (nVal, oVal) {
+			if (nVal) {
+				this.$nextTick(() => $('.pretagsbtn:first-child').focus());
+			}
 		}
 	},
 	methods: {
@@ -70,6 +145,7 @@ Vue.component('tagsystem', {
 				.then((response) => {
 					this.cache.tagsCache = response.data['tags'];
 					this.loadingTags = false;
+					this.getPresets();
 				})
 				.catch((err) => {
 					console.log(err);
@@ -78,6 +154,7 @@ Vue.component('tagsystem', {
 			} else {
 				console.log('Tags aus Cache ...');
 				this.loadingTags = false;
+				this.getPresets();
 			}
 		},
 		getPresets: function () {
@@ -105,10 +182,9 @@ Vue.component('tagsystem', {
 			this.$emit('tags', this.aTags);
 		},
 		changeTag: function (aTags, tagIndex) {
-			Vue.set(this.aTags[tagIndex].tags, _.clone(aTags));
+			Vue.set(this.aTags[tagIndex].tags, JSON.parse(JSON.stringify(aTags)));
 			this.$emit('tags', this.aTags);
-			this.reRender = true;
-			this.$nextTick(() => { this.reRender = false; });
+			this.reRenderIt();
 		},
 		/* Sonsitge Funktionen: */
 		ebeneVorhanden: function (eId) {
@@ -120,12 +196,28 @@ Vue.component('tagsystem', {
 				}
 			}, this);
 			return vorhanden;
+		},
+		selPresetBlur: function (e) {
+			this.$nextTick(function () {
+				if (document.activeElement.className.indexOf('pretagsbtn')) {
+					this.showPresets = false;
+				}
+			});
+		},
+		addPreset: function (ebene, preset) {
+			JSON.parse(JSON.stringify(this.cache.presetsCache[preset].tags)).forEach(function (val) {
+				this.aTags[ebene].tags.push(val);
+			}, this);
+			this.changeTag(this.aTags[ebene].tags, ebene);
+		},
+		reRenderIt: function () {
+			this.reRender = true;
+			this.$nextTick(() => { this.reRender = false; });
 		}
 	},
 	mounted: function () {
 		console.log('Tagsystem mounted ...');
 		this.getBase();
-		this.getPresets();
 	}
 });
 
@@ -147,7 +239,7 @@ Vue.component('tagsystemtags', {
 	},
 	methods: {
 		changeTag: function (aTags, tagIndex) {
-			Vue.set(this.aTags[tagIndex].tags, _.clone(aTags));
+			Vue.set(this.aTags[tagIndex].tags, JSON.parse(JSON.stringify(aTags)));
 			this.$emit('changetag', this.aTags, this.tagindex);
 		},
 		movetag: function (tagIndex, aDir) {

@@ -327,8 +327,25 @@ def tagsystemvue(request):
 				pass
 		output['tags'] = {'tags': tags, 'tagsReihung': tagsReihung}
 	if 'getPresets' in request.POST:
-		# import bearbeiten.models as bmodels
-		presets = {}
-		# ToDo
-		output['presets'] = presets
+		import bearbeiten.models as bmodels
+		aPresetTags = []
+		# for val in bmodels.PresetTags.objects.filter(Q(presettagszuaufgabe__id_Aufgabe__pk=apk) | Q(presettagszuaufgabe=None)):
+		for val in bmodels.PresetTags.objects.all():
+			aPresetTags.append({'tf': getTagFamiliePT(val.id_Tags.all())})
+		output['presets'] = aPresetTags
 	return httpOutput(json.dumps(output), mimetype='application/json')
+
+def getTagFamiliePT(Tags):
+	afam = []
+	oTags = []
+	for value in Tags:
+		pClose = 0
+		try:
+			while not value.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
+				pClose += 1
+				del afam[-1]
+		except:
+			pass
+		oTags.append({'t': value.pk, 'c': pClose})
+		afam.append(value)
+	return oTags
