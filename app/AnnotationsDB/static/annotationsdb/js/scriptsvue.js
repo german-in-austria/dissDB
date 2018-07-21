@@ -390,6 +390,7 @@ var annotationsTool = new Vue({
 							this.updateATokenSets();
 							this.updateZeilenTEvents();
 							this.focusFocusCatch();
+							this.unsaved = false;
 						}
 					} else {
 						alert('Fehler!');
@@ -933,9 +934,16 @@ var annotationsTool = new Vue({
 			this.ctrlKS = true;
 		},
 		/* showTEventInfos */
-		showTEventInfos: function (tId) {
-			this.tEventInfo = tId;
-			setTimeout(function () { $('#tEventInfo').modal('show'); }, 20);
+		showTEventInfos: function (event, tId) {
+			if (event.ctrlKey) {
+				var rect = event.target.getBoundingClientRect();
+				console.log(this.$refs.audioplayer)
+				this.$refs.audioplayer.setAudioPosBySec(this.tEvents[tId].as + ((this.tEvents[tId].ae - this.tEvents[tId].as) / rect.width * (event.clientX - rect.left)));
+				this.ctrlKS = true;
+			} else {
+				this.tEventInfo = tId;
+				setTimeout(function () { $('#tEventInfo').modal('show'); }, 20);
+			}
 		},
 		/* showaInfInfos */
 		showaInfInfos: function (iId) {

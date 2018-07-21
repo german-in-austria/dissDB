@@ -13,6 +13,7 @@ class event(models.Model):
 		verbose_name_plural = "Events"
 		ordering = ('start_time',)
 
+
 class token(models.Model):
 	text				= models.CharField(max_length=511																	, verbose_name="Das aktuelle Token")
 	token_type_id		= models.ForeignKey('token_type'			, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Token Type")
@@ -36,6 +37,7 @@ class token(models.Model):
 		verbose_name_plural = "Tokens"
 		ordering = ('sentence_id', 'token_reihung',)
 
+
 class token_type(models.Model):
 	token_type_name		= models.CharField(max_length=511																	, verbose_name="Token Typ Name")
 	def __str__(self):
@@ -45,6 +47,7 @@ class token_type(models.Model):
 		verbose_name = "Token Typ"
 		verbose_name_plural = "Token Typen"
 		ordering = ('id',)
+
 
 class transcript(models.Model):
 	name				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Name")
@@ -57,6 +60,7 @@ class transcript(models.Model):
 		verbose_name_plural = "Transcripte"
 		ordering = ('id',)
 
+
 class tbl_tokenset(models.Model):
 	id_von_token		= models.ForeignKey('token', related_name='rn_id_von_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Von Token ID")
 	id_bis_token		= models.ForeignKey('token', related_name='rn_id_bis_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Bis Token ID")
@@ -67,6 +71,7 @@ class tbl_tokenset(models.Model):
 		verbose_name = "Token Set"
 		verbose_name_plural = "Token Sets"
 		ordering = ('id_von_token',)
+
 
 class tbl_tokentoset(models.Model):
 	id_tokenset			= models.ForeignKey('tbl_tokenset'									, on_delete=models.CASCADE		, verbose_name="Tokenset")

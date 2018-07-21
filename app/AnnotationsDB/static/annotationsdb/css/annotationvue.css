@@ -53,6 +53,9 @@
 #svg-g-events rect.ibg {
 	fill: #fbfbfb;
 }
+test.bold {
+	font-weight: bold;
+}
 
 #loadsym {
   position: absolute;

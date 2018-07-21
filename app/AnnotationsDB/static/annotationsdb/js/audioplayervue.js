@@ -55,6 +55,9 @@ Vue.component('annotationsaudioplayer', {
 			var seekPos = (e.clientX - pos.left) / pos.width;
 			this.audio.currentTime = this.duration * seekPos;
 		},
+		setAudioPosBySec: function (sec) {
+			this.audio.currentTime = sec;
+		},
 		fastForward: function () {
 			if (!this.loaded) return;
 			this.audio.currentTime = this.duration;
