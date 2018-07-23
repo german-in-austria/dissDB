@@ -14,7 +14,7 @@
 							<tagsystemtags :ebene="aEbene['e']" generation=0 :tags="aEbene['tags']" :parents="[]" :tagindex="aEbeneIndex" @changetag="changeTag" />
 							<tagsystemselecttags :ebene="aEbene['e']" generation=0 :tags="aEbene['tags']" tagindex="-1" :parents="[]" :tagindex="aEbeneIndex" @changetag="changeTag" />
 						</div>
-						<div class="iblock prel" v-if="cache.baseCache.tagebenen[aEbene.e].hasPresets">
+						<div class="iblock prel" v-if="cache && cache.baseCache && cache.baseCache.tagebenen && cache.baseCache.tagebenen[aEbene.e] && cache.baseCache.tagebenen[aEbene.e].hasPresets">
 							<button class="ant-ctag" :disabled="loadingPresets" @click="showPresets=!showPresets"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></button>
 							<div class="tags seltags open" v-if="!loadingPresets && showPresets">
 								<button v-for="(preset, pIndex) in cache.presetsCache" v-if="(preset.tf.length > 0) && (!preset.ze || (preset.ze && preset.ze.indexOf(aEbene['e']) > -1))" @click="addPreset(aEbeneIndex, pIndex)" v-on:blur="selPresetBlur" class="pretagsbtn" :title="(pIndex + 1) + '. ' + preset.tokenText">${ (pIndex + 1) + '. ' + preset.tokenText }</button>

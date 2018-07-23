@@ -245,7 +245,7 @@ def startvue(request, ipk=0, tpk=0):
 			nAntworten += dbmodels.Antworten.objects.distinct().filter(ist_tokenset_id__in=aTokenSetIdsTemp[:maxVars])
 			aTokenSetIdsTemp = aTokenSetIdsTemp[maxVars:]
 		for nAntwort in nAntworten:
-			if nTokenSet.pk not in aAntworten:
+			if nAntwort.pk not in aAntworten:
 				aAntwort = {'vi': nAntwort.von_Inf_id}
 				aAntwort['inat'] = nAntwort.ist_nat
 				if nAntwort.ist_Satz:
