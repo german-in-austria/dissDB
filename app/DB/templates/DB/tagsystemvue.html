@@ -3,8 +3,8 @@
 		<template v-if="!(loadingTags || loadingBase) && !reRender">
 			<div class="form-group tag-line" v-for="(aEbene, aEbeneIndex) in aTags">
 				<label :class="'col-sm-'+colLeft+' control-label'">
-					<select class="tagebene w100" v-model="aEbene['e']">
-						<option value="0">Ebene auswählen (Löschen)</option>
+					<select class="tagebene w100" v-model="aEbene['e']" @change="changeEbene()">
+						<option :value="0">Ebene auswählen (Löschen)</option>
 						<option v-for="tagebene in cache.baseCache.tagebenen" :value="tagebene.pk" :disabled="(aEbene['e']!==tagebene.pk) && ebeneVorhanden(tagebene.pk)">${tagebene.t}</option>
 					</select>
 				</label>

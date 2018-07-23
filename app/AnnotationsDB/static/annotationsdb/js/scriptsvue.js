@@ -461,6 +461,11 @@ var annotationsTool = new Vue({
 				this.setAAntwort(key, nAntworten[key]);
 			}, this);
 		},
+		delAntwort: function (dAntwort) {
+			if (dAntwort > 0) {
+				this.setAAntwort(dAntwort);
+			}
+		},
 		processTags: function (pTags, pPos = 0, gen = 0) {
 			var xTags = [];
 			var xPos = pPos;
@@ -486,7 +491,7 @@ var annotationsTool = new Vue({
 					delete this.aTokenSets[this.aAntworten[key]['its']].aId;
 				}
 				if (this.aAntworten[key]['it'] && this.aTokens[this.aAntworten[key]['it']]) {
-					delete this.aTokens[this.aAntworten[key]['its']].aId;
+					delete this.aTokens[this.aAntworten[key]['it']].aId;
 				}
 				this.delAntworten[key] = this.aAntworten[key];
 				delete this.aAntworten[key];
@@ -530,8 +535,11 @@ var annotationsTool = new Vue({
 			var aTSPK = this.aTokenSetInfo['pk'];
 			$('#aTokenSetInfo').modal('hide');
 			if (this.aTokenSetInfo.aId) {
-				this.aTokenSets[aTSPK].aId = this.setAAntwort(parseInt(this.aTokenSetInfo.aId), {'its': aTSPK, 'vi': this.aTokens[(this.aTokenSetInfo.t || this.aTokenSetInfo.tx)[0]].i, 'tags': JSON.parse(JSON.stringify(this.aTokenSetInfo.tags || undefined))});
+				this.aTokenSets[aTSPK].aId = this.setAAntwort(parseInt(this.aTokenSetInfo.aId), {'its': aTSPK, 'vi': this.aTokens[(this.aTokenSetInfo.t || this.aTokenSetInfo.tx)[0]].i, 'tags': ((this.aTokenSetInfo.tags) ? JSON.parse(JSON.stringify(this.aTokenSetInfo.tags)) : undefined)});
 				this.aAntworten[this.aTokenSets[aTSPK].aId].saveme = true;
+			}
+			if (this.aTokenSetInfo.delAntwort && this.aTokenSetInfo.aId > 0) {
+				this.delAntwort(this.aTokenSetInfo.aId);
 			}
 			this.unsaved = true;
 			this.updateATokenSets();
@@ -548,8 +556,11 @@ var annotationsTool = new Vue({
 			this.aTokens[aTPK].le = this.aTokenInfo.le;
 			this.aTokens[aTPK].to = this.aTokenInfo.to;
 			if (this.aTokenInfo.aId) {
-				this.aTokens[aTPK].aId = this.setAAntwort(parseInt(this.aTokenInfo.aId), {'it': aTPK, 'vi': this.aTokenInfo.i, 'tags': JSON.parse(JSON.stringify(this.aTokenInfo.tags || []))});
+				this.aTokens[aTPK].aId = this.setAAntwort(parseInt(this.aTokenInfo.aId), {'it': aTPK, 'vi': this.aTokenInfo.i, 'tags': ((this.aTokenInfo.tags) ? JSON.parse(JSON.stringify(this.aTokenInfo.tags)) : undefined)});
 				this.aAntworten[this.aTokens[aTPK].aId].saveme = true;
+			}
+			if (this.aTokenInfo.delAntwort && this.aTokenInfo.aId > 0) {
+				this.delAntwort(this.aTokenInfo.aId);
 			}
 			this.aTokens[aTPK].saveme = true;
 			this.unsaved = true;
@@ -920,10 +931,12 @@ var annotationsTool = new Vue({
 			this.audioPos = aPos;
 		},
 		setATokenInfo: function (aVal, aKey) {
+			console.log('setATokenInfo', aKey, aVal);
 			this.aTokenInfo[aKey] = aVal;
 			this.$set(this.aTokenInfo, 'changed', true);
 		},
 		setATokenSetInfo: function (aVal, aKey) {
+			console.log('setATokenSetInfo', aKey, aVal);
 			this.aTokenSetInfo[aKey] = aVal;
 			this.$set(this.aTokenSetInfo, 'changed', true);
 		},

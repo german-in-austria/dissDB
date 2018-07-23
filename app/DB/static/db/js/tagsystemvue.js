@@ -113,6 +113,9 @@ Vue.component('tagsystem', {
 		}
 	},
 	methods: {
+		changeEbene: function () {
+			this.$emit('tags', this.aTags);
+		},
 		getBase: function () {
 			if (!this.cache.baseCache) {
 				console.log('Base laden ...');

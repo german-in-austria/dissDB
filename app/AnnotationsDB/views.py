@@ -77,6 +77,9 @@ def startvue(request, ipk=0, tpk=0):
 			for key, value in sData['dAntworten'].items():
 				aId = int(key)
 				if aId > 0:
+					print(key)
+					print(aId)
+					print('---')
 					aElement = dbmodels.Antworten.objects.get(id=aId)
 					aElement.delete()
 		# aAntworten speichern:
@@ -114,26 +117,34 @@ def startvue(request, ipk=0, tpk=0):
 				if 'tags' in value:
 					for eValue in value['tags']:
 						aEbene = eValue['e']
-						for antwortenTag in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=aEbene):
-							delIt = True
-							for tValue in eValue['t']:
-								if int(tValue['i']) == antwortenTag.pk:
-									delIt = False
-							if delIt:
-								antwortenTag.delete();
+						if aEbene > 0:
+							for antwortenTag in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=aEbene):
+								delIt = True
+								for tValue in eValue['t']:
+									if int(tValue['i']) == antwortenTag.pk:
+										delIt = False
+								if delIt:
+									antwortenTag.delete()
 						reihung = 0
-						for tValue in eValue['t']:
-							tagId = int(tValue['i'])
-							if tagId > 0:
-								aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
-							else:
-								aElement = dbmodels.AntwortenTags()
-							setattr(aElement, 'id_Antwort_id', value['nId'])
-							setattr(aElement, 'id_Tag_id', tValue['t'])
-							setattr(aElement, 'id_TagEbene_id', aEbene)
-							setattr(aElement, 'Reihung', reihung)
-							reihung += 1
-							aElement.save()
+						if aEbene > 0:
+							for tValue in eValue['t']:
+								tagId = int(tValue['i'])
+								if tagId > 0:
+									aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
+								else:
+									aElement = dbmodels.AntwortenTags()
+								setattr(aElement, 'id_Antwort_id', value['nId'])
+								setattr(aElement, 'id_Tag_id', tValue['t'])
+								setattr(aElement, 'id_TagEbene_id', aEbene)
+								setattr(aElement, 'Reihung', reihung)
+								reihung += 1
+								aElement.save()
+						else:
+							for tValue in eValue['t']:
+								tagId = int(tValue['i'])
+								if tagId > 0:
+									aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
+									aElement.delete()
 					# Aktuelle AntwortenTags laden
 					nAntTags = []
 					for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId']).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
