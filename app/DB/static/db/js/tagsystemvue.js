@@ -1,4 +1,4 @@
-/* global _ $ Vue csrf alert confirm */
+/* global $ Vue csrf alert confirm */
 
 /* Cache für Tags und Presets */
 const tagsystemCache = new Vue({
@@ -19,7 +19,11 @@ const tagsystemCache = new Vue({
 							this.tagsCache.tags[tVal.t].tezt.forEach(function (eVal) {
 								if (nVal[key].ze.indexOf(eVal) < 0) {
 									nVal[key].ze.push(eVal);
-									this.$set(this.baseCache.tagebenen[eVal], 'hasPresets', true);
+									if (this.baseCache.tagebenen && this.baseCache.tagebenen[eVal]) {
+										this.$set(this.baseCache.tagebenen[eVal], 'hasPresets', true);
+									} else {
+										console.log('Tagebenen Fehler!', eVal);
+									}
 								}
 							}, this);
 						}

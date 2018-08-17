@@ -350,3 +350,12 @@ button.lmfabc {
 	color: #ddd;
 	text-decoration: none;
 }
+
+.satzview {
+	padding-left: 50px;
+	padding-right: 50px;
+}
+
+.satzview span.before, .satzview span.after {
+	color: #888;
+}

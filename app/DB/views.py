@@ -331,7 +331,9 @@ def tagsystemvue(request):
 		aPresetTags = []
 		# for val in bmodels.PresetTags.objects.filter(Q(presettagszuaufgabe__id_Aufgabe__pk=apk) | Q(presettagszuaufgabe=None)):
 		for val in bmodels.PresetTags.objects.all():
-			aPresetTags.append({'tf': getTagFamiliePT(val.id_Tags.all())})
+			tfVal = getTagFamiliePT(val.id_Tags.all())
+			if tfVal:
+				aPresetTags.append({'tf': tfVal})
 		output['presets'] = aPresetTags
 	return httpOutput(json.dumps(output), mimetype='application/json')
 

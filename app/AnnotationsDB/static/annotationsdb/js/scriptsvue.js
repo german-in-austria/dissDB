@@ -950,7 +950,7 @@ var annotationsTool = new Vue({
 		showTEventInfos: function (event, tId) {
 			if (event.ctrlKey) {
 				var rect = event.target.getBoundingClientRect();
-				console.log(this.$refs.audioplayer)
+				console.log(this.$refs.audioplayer);
 				this.$refs.audioplayer.setAudioPosBySec(this.tEvents[tId].as + ((this.tEvents[tId].ae - this.tEvents[tId].as) / rect.width * (event.clientX - rect.left)));
 				this.ctrlKS = true;
 			} else {
@@ -963,7 +963,7 @@ var annotationsTool = new Vue({
 			this.aInfInfo = iId;
 			setTimeout(function () { $('#aInformantenInfo').modal('show'); }, 20);
 		},
-		/* showaTokenInfos */
+		/* showaTokenSetInfos */
 		showaTokenSetInfos: function (eTokSet, direkt = false, e = undefined) {
 			if (direkt || (this.selTokenSet === eTokSet && (!e || (!e.ctrlKey && !e.shiftKey)))) {
 				this.aTokenSetInfo = JSON.parse(JSON.stringify(this.aTokenSets[eTokSet]));
@@ -971,6 +971,116 @@ var annotationsTool = new Vue({
 					this.aTokenSetInfo.tags = JSON.parse(JSON.stringify(this.aAntworten[this.aTokenSetInfo.aId].tags));
 				}
 				this.aTokenSetInfo['pk'] = eTokSet;
+				let aVToken;
+				let aBToken;
+				let aVTokenOrg;
+				let aBTokenOrg;
+				if (this.aTokenSetInfo.ivt) {
+					aVToken = this.aTokenSetInfo.ivt;
+				}
+				if (this.aTokenSetInfo.ibt) {
+					aBToken = this.aTokenSetInfo.ibt;
+				}
+				if (this.aTokenSetInfo.t) {
+					aVToken = this.aTokenSetInfo.t[0];
+					aBToken = this.aTokenSetInfo.t[this.aTokenSetInfo.t.length - 1];
+				}
+				if (aVToken) {
+					this.aTokenSetInfo['satzView'] = [];
+					if (!aBToken) { aBToken = aVToken; };
+					aVTokenOrg = aVToken;
+					aBTokenOrg = aBToken;
+					// this.aTokenSetInfo['satzView'].push({text: aVToken + ' - ' + aBToken, class: 'test'});
+					// Satzanfang und -ende ermitteln
+					if (this.aTokens[aVToken].s) {
+						let aTokPos = this.aTokenReihungInf[this.aTokens[aVToken].i].indexOf(aVToken);
+						if (aTokPos > -1) {
+							while (aTokPos > 0 && this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPos]] && this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPos]].s === this.aTokens[aVToken].s) {
+								aTokPos -= 1;
+							}
+							if (this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPos + 1]]) {
+								aVToken = this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPos + 1];
+							}
+						}
+					}
+					if (this.aTokens[aBToken].s) {
+						let aTokPos = this.aTokenReihungInf[this.aTokens[aBToken].i].indexOf(aBToken);
+						if (aTokPos > -1) {
+							while (aTokPos < this.aTokenReihungInf[this.aTokens[aBToken].i].length && this.aTokens[this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos]] && this.aTokens[this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos]].s === this.aTokens[aBToken].s) {
+								aTokPos += 1;
+							}
+							if (this.aTokens[this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos - 1]]) {
+								aBToken = this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos - 1];
+							}
+						}
+					}
+					// this.aTokenSetInfo['satzView'].push({text: aVToken + ' - ' + aBToken, class: 'test'});
+					let aTokPosV = this.aTokenReihungInf[this.aTokens[aVToken].i].indexOf(aVToken);
+					if (aTokPosV > -1) {
+						aTokPosV -= 10;
+						if (aTokPosV < 0) { aTokPosV = 0; };
+						if (this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPosV]]) {
+							aVToken = this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPosV];
+						}
+					}
+					let aTokPosB = this.aTokenReihungInf[this.aTokens[aBToken].i].indexOf(aBToken);
+					if (aTokPosB > -1) {
+						aTokPosB += 10;
+						if (aTokPosB > this.aTokenReihungInf[this.aTokens[aBToken].i].length - 1) { aTokPosB = this.aTokenReihungInf[this.aTokens[aBToken].i].length - 1; };
+						if (this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPosB]]) {
+							aBToken = this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPosB];
+						}
+					}
+					// this.aTokenSetInfo['satzView'].push({text: aVToken + ' - ' + aBToken, class: 'test'});
+					if (aVTokenOrg !== aVToken) {
+						let aTokPos = this.aTokenReihungInf[this.aTokens[aVTokenOrg].i].indexOf(aVToken);
+						let aText = '';
+						let aOrtho = '';
+						while (aTokPos < this.aTokenReihungInf[this.aTokens[aVTokenOrg].i].length && this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos] !== aVTokenOrg) {
+							let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos]];
+							aText += ' ' + aTok.t;
+							aOrtho += ' ' + aTok.o || aTok.t;
+							aTokPos += 1;
+						}
+						this.aTokenSetInfo['satzView'].push({text: aText, ortho: aOrtho, class: 'before'});
+					}
+					if (aVTokenOrg && aBTokenOrg) {
+						let aTokPos = this.aTokenReihungInf[this.aTokens[aVTokenOrg].i].indexOf(aVTokenOrg);
+						let aText = '';
+						let aOrtho = '';
+						while (aTokPos < this.aTokenReihungInf[this.aTokens[aVTokenOrg].i].length && this.aTokenReihungInf[this.aTokens[aVTokenOrg].i][aTokPos] !== aBTokenOrg) {
+							let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aVTokenOrg].i][aTokPos]];
+							aText += ' ' + aTok.t;
+							aOrtho += ' ' + aTok.o || aTok.t;
+							aTokPos += 1;
+						}
+						if (this.aTokenReihungInf[this.aTokens[aVTokenOrg].i][aTokPos] === aBTokenOrg) {
+							let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aVTokenOrg].i][aTokPos]];
+							aText += ' ' + aTok.t;
+							aOrtho += ' ' + aTok.o || aTok.t;
+						}
+						this.aTokenSetInfo['satzView'].push({text: aText, ortho: aOrtho, class: 'active'});
+					}
+					console.log(aVToken + ' - ' + aBToken);
+				}
+				if (aBTokenOrg !== aBToken) {
+					let aTokPos = this.aTokenReihungInf[this.aTokens[aBTokenOrg].i].indexOf(aBTokenOrg) + 1;
+					let aText = '';
+					let aOrtho = '';
+					while (aTokPos < this.aTokenReihungInf[this.aTokens[aBTokenOrg].i].length && this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos] !== aBToken) {
+						let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aBTokenOrg].i][aTokPos]];
+						aText += ' ' + aTok.t;
+						aOrtho += ' ' + aTok.o || aTok.t;
+						aTokPos += 1;
+					}
+					if (this.aTokenReihungInf[this.aTokens[aBTokenOrg].i][aTokPos] === aBToken) {
+						let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aBTokenOrg].i][aTokPos]];
+						aText += ' ' + aTok.t;
+						aOrtho += ' ' + aTok.o || aTok.t;
+					}
+					this.aTokenSetInfo['satzView'].push({text: aText, ortho: aOrtho, class: 'after'});
+				}
+				// this.aTokenSetInfo['satzView'] = [{text: 'test', ortho: 'test Ortho', class: 'test'}];
 				setTimeout(function () { $('#aTokenSetInfo').modal('show'); }, 20);
 			} else {
 				this.selTokenSet = ((this.selTokenSet === eTokSet) ? 0 : eTokSet);
@@ -980,6 +1090,7 @@ var annotationsTool = new Vue({
 		/* showaTokenInfos */
 		showaTokenInfos: function (eTok, direkt = false, e = undefined) {
 			if (direkt || (this.selToken === eTok && (!e || (!e.ctrlKey && !e.shiftKey)))) {
+				// console.log('Token auswählen', eTok, direkt, e);
 				this.aTokens[eTok]['viewed'] = true;
 				this.svgTokenLastView = eTok;
 				this.aTokenInfo = JSON.parse(JSON.stringify(this.aTokens[eTok]));
@@ -988,6 +1099,106 @@ var annotationsTool = new Vue({
 				}
 				this.aTokenInfo['pk'] = eTok;
 				this.aTokenInfo['e-txt'] = this.aEvents[this.searchByKey(this.aTokens[eTok]['e'], 'pk', this.aEvents)]['s'];
+				let aVToken = eTok;
+				let aBToken = eTok;
+				let aVTokenOrg;
+				let aBTokenOrg;
+				if (aVToken) {
+					this.aTokenInfo['satzView'] = [];
+					if (!aBToken) { aBToken = aVToken; };
+					aVTokenOrg = aVToken;
+					aBTokenOrg = aBToken;
+					// this.aTokenInfo['satzView'].push({text: aVToken + ' - ' + aBToken, class: 'test'});
+					// Satzanfang und -ende ermitteln
+					if (this.aTokens[aVToken].s) {
+						let aTokPos = this.aTokenReihungInf[this.aTokens[aVToken].i].indexOf(aVToken);
+						if (aTokPos > -1) {
+							while (aTokPos > 0 && this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPos]] && this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPos]].s === this.aTokens[aVToken].s) {
+								aTokPos -= 1;
+							}
+							if (this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPos + 1]]) {
+								aVToken = this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPos + 1];
+							}
+						}
+					}
+					if (this.aTokens[aBToken].s) {
+						let aTokPos = this.aTokenReihungInf[this.aTokens[aBToken].i].indexOf(aBToken);
+						if (aTokPos > -1) {
+							while (aTokPos < this.aTokenReihungInf[this.aTokens[aBToken].i].length && this.aTokens[this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos]] && this.aTokens[this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos]].s === this.aTokens[aBToken].s) {
+								aTokPos += 1;
+							}
+							if (this.aTokens[this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos - 1]]) {
+								aBToken = this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos - 1];
+							}
+						}
+					}
+					// this.aTokenInfo['satzView'].push({text: aVToken + ' - ' + aBToken, class: 'test'});
+					let aTokPosV = this.aTokenReihungInf[this.aTokens[aVToken].i].indexOf(aVToken);
+					if (aTokPosV > -1) {
+						aTokPosV -= 10;
+						if (aTokPosV < 0) { aTokPosV = 0; };
+						if (this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPosV]]) {
+							aVToken = this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPosV];
+						}
+					}
+					let aTokPosB = this.aTokenReihungInf[this.aTokens[aBToken].i].indexOf(aBToken);
+					if (aTokPosB > -1) {
+						aTokPosB += 10;
+						if (aTokPosB > this.aTokenReihungInf[this.aTokens[aBToken].i].length - 1) { aTokPosB = this.aTokenReihungInf[this.aTokens[aBToken].i].length - 1; };
+						if (this.aTokens[this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPosB]]) {
+							aBToken = this.aTokenReihungInf[this.aTokens[aVToken].i][aTokPosB];
+						}
+					}
+					// this.aTokenInfo['satzView'].push({text: aVToken + ' - ' + aBToken, class: 'test'});
+					if (aVTokenOrg !== aVToken) {
+						let aTokPos = this.aTokenReihungInf[this.aTokens[aVTokenOrg].i].indexOf(aVToken);
+						let aText = '';
+						let aOrtho = '';
+						while (aTokPos < this.aTokenReihungInf[this.aTokens[aVTokenOrg].i].length && this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos] !== aVTokenOrg) {
+							let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos]];
+							aText += ' ' + aTok.t;
+							aOrtho += ' ' + aTok.o || aTok.t;
+							aTokPos += 1;
+						}
+						this.aTokenInfo['satzView'].push({text: aText, ortho: aOrtho, class: 'before'});
+					}
+					if (aVTokenOrg && aBTokenOrg) {
+						let aTokPos = this.aTokenReihungInf[this.aTokens[aVTokenOrg].i].indexOf(aVTokenOrg);
+						let aText = '';
+						let aOrtho = '';
+						while (aTokPos < this.aTokenReihungInf[this.aTokens[aVTokenOrg].i].length && this.aTokenReihungInf[this.aTokens[aVTokenOrg].i][aTokPos] !== aBTokenOrg) {
+							let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aVTokenOrg].i][aTokPos]];
+							aText += ' ' + aTok.t;
+							aOrtho += ' ' + aTok.o || aTok.t;
+							aTokPos += 1;
+						}
+						if (this.aTokenReihungInf[this.aTokens[aVTokenOrg].i][aTokPos] === aBTokenOrg) {
+							let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aVTokenOrg].i][aTokPos]];
+							aText += ' ' + aTok.t;
+							aOrtho += ' ' + aTok.o || aTok.t;
+						}
+						this.aTokenInfo['satzView'].push({text: aText, ortho: aOrtho, class: 'active'});
+					}
+					console.log(aVToken + ' - ' + aBToken);
+				}
+				if (aBTokenOrg !== aBToken) {
+					let aTokPos = this.aTokenReihungInf[this.aTokens[aBTokenOrg].i].indexOf(aBTokenOrg) + 1;
+					let aText = '';
+					let aOrtho = '';
+					while (aTokPos < this.aTokenReihungInf[this.aTokens[aBTokenOrg].i].length && this.aTokenReihungInf[this.aTokens[aBToken].i][aTokPos] !== aBToken) {
+						let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aBTokenOrg].i][aTokPos]];
+						aText += ' ' + aTok.t;
+						aOrtho += ' ' + aTok.o || aTok.t;
+						aTokPos += 1;
+					}
+					if (this.aTokenReihungInf[this.aTokens[aBTokenOrg].i][aTokPos] === aBToken) {
+						let aTok = this.aTokens[this.aTokenReihungInf[this.aTokens[aBTokenOrg].i][aTokPos]];
+						aText += ' ' + aTok.t;
+						aOrtho += ' ' + aTok.o || aTok.t;
+					}
+					this.aTokenInfo['satzView'].push({text: aText, ortho: aOrtho, class: 'after'});
+				}
+				// this.aTokenInfo['satzView'] = [{text: 'test', ortho: 'test Ortho', class: 'test'}];
 				setTimeout(function () { $('#aTokenInfo').modal('show'); }, 20);
 			} else if (e) {
 				if (e.shiftKey) {

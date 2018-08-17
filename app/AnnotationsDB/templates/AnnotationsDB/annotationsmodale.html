@@ -89,6 +89,12 @@
 						<button type="button" @click="$set(aTokenInfo, 'aId', '? - Neu');" class="btn btn-primary" v-else>Antwort erstellen</button>
 					</div></div>
 				</div>
+				<template v-if="aTokenInfo['satzView']">
+					<hr/>
+					<div class="satzview">
+						<span :class="sv.class" v-for="sv in aTokenInfo['satzView']">${ sv.text }</span>
+					</div>
+				</template>
 				<template v-if="aTokenInfo.aId && !aTokenInfo.delAntwort">
 					<hr>
 					<tagsystem cols="3" :tags="aTokenInfo['tags']" @tags="setATokenInfo($event, 'tags')" />
@@ -130,8 +136,14 @@
 						<button type="button" @click="$set(aTokenSetInfo, 'aId', '? - Neu');" class="btn btn-primary" v-else>Antwort erstellen</button>
 					</div></div>
 				</div>
+				<template v-if="aTokenSetInfo['satzView']">
+					<hr/>
+					<div class="satzview">
+						<span :class="sv.class" v-for="sv in aTokenSetInfo['satzView']">${ sv.text }</span>
+					</div>
+				</template>
 				<template v-if="aTokenSetInfo.aId && !aTokenSetInfo.delAntwort">
-					<hr>
+					<hr/>
 					<tagsystem cols="3" :tags="aTokenSetInfo['tags']" @tags="setATokenSetInfo($event, 'tags')" />
 				</template>
 			</div>
