@@ -1,4 +1,4 @@
-/* global _ $ csrf Vue alert performance confirm stdfunctions loadingsaving svgfunctions searchfilter tokensets */
+/* global _ $ csrf Vue performance stdfunctions loadingsaving svgfunctions searchfilter tokensets tagsystemCache */
 
 var preventClose = false;
 window.onbeforeunload = function () {
@@ -885,6 +885,7 @@ var annotationsTool = new Vue({
 		window.addEventListener('resize', this.resizeWindow);
 		this.resizeWindow();
 		this.getMenue();
+		tagsystemCache.getBase();
 		/* Wenn Modal angezeigt wird */
 		$(document).on('shown.bs.modal', '.modal', function (e) {
 			if ($(this).data('focus')) {

@@ -2,10 +2,20 @@
 
 /* Cache für Tags und Presets */
 const tagsystemCache = new Vue({
+	http: {
+		root: '/db/tagsystemvue',
+		headers: {
+			'X-CSRFToken': csrf
+		},
+		emulateJSON: true
+	},
 	data: {
 		baseCache: undefined,
 		tagsCache: undefined,
-		presetsCache: undefined
+		presetsCache: undefined,
+		loadingBase: true,
+		loadingTags: true,
+		loadingPresets: true
 	},
 	watch: {
 		presetsCache: function (nVal, oVal) {
@@ -73,62 +83,16 @@ const tagsystemCache = new Vue({
 				}
 			}
 			return {'tags': xTags, 'pos': xPos};
-		}
-	}
-});
-
-/* Komponente für Tagsystem */
-Vue.component('tagsystem', {
-	delimiters: ['${', '}'],
-	template: '#tagsystem-template',
-	props: ['cols', 'tags'],
-	http: {
-		root: '/db/tagsystemvue',
-		headers: {
-			'X-CSRFToken': csrf
-		},
-		emulateJSON: true
-	},
-	data: function () {
-		return {
-			colLeft: this.cols || 2,
-			cache: tagsystemCache,
-			loadingBase: true,
-			loadingTags: true,
-			loadingPresets: true,
-			aTags: this.tags || [],
-			showPresets: false,
-			reRender: false
-		};
-	},
-	computed: {
-		colRight: function () {
-			return 12 - this.colLeft;
-		}
-	},
-	watch: {
-		tags: function (nVal, oVal) {
-			this.getBase();
-		},
-		showPresets: function (nVal, oVal) {
-			if (nVal) {
-				this.$nextTick(() => $('.pretagsbtn:first-child').focus());
-			}
-		}
-	},
-	methods: {
-		changeEbene: function () {
-			this.$emit('tags', this.aTags);
 		},
 		getBase: function () {
-			if (!this.cache.baseCache) {
+			if (!this.baseCache) {
 				console.log('Base laden ...');
 				this.$http.post('',
 					{
 						getBase: 1
 					})
 				.then((response) => {
-					this.cache.baseCache = response.data;
+					this.baseCache = response.data;
 					this.loadingBase = false;
 					this.getTags();
 				})
@@ -143,14 +107,14 @@ Vue.component('tagsystem', {
 			}
 		},
 		getTags: function () {
-			if (!this.cache.tagsCache) {
+			if (!this.tagsCache) {
 				console.log('Tags laden ...');
 				this.$http.post('',
 					{
 						getTags: 1
 					})
 				.then((response) => {
-					this.cache.tagsCache = response.data['tags'];
+					this.tagsCache = response.data['tags'];
 					this.loadingTags = false;
 					this.getPresets();
 				})
@@ -165,7 +129,7 @@ Vue.component('tagsystem', {
 			}
 		},
 		getPresets: function () {
-			if (!this.cache.presetsCache) {
+			if (!this.presetsCache) {
 				console.log('Presets laden ...');
 				this.$http.post('',
 					{
@@ -173,7 +137,7 @@ Vue.component('tagsystem', {
 					})
 				.then((response) => {
 					this.loadingPresets = false;
-					this.cache.presetsCache = response.data['presets'];
+					this.presetsCache = response.data['presets'];
 				})
 				.catch((err) => {
 					console.log(err);
@@ -183,6 +147,51 @@ Vue.component('tagsystem', {
 				console.log('Presets aus Cache ...');
 				this.loadingPresets = false;
 			}
+		}
+	}
+});
+
+/* Komponente für Tagsystem */
+Vue.component('tagsystem', {
+	delimiters: ['${', '}'],
+	template: '#tagsystem-template',
+	props: ['cols', 'tags'],
+	data: function () {
+		return {
+			colLeft: this.cols || 2,
+			cache: tagsystemCache,
+			aTags: this.tags || [],
+			showPresets: false,
+			reRender: false
+		};
+	},
+	computed: {
+		colRight: function () {
+			return 12 - this.colLeft;
+		},
+		loadingBase: function () {
+			return this.cache.loadingBase;
+		},
+		loadingTags: function () {
+			return this.cache.loadingTags;
+		},
+		loadingPresets: function () {
+			return this.cache.loadingPresets;
+		}
+	},
+	watch: {
+		tags: function (nVal, oVal) {
+			tagsystemCache.getBase();
+		},
+		showPresets: function (nVal, oVal) {
+			if (nVal) {
+				this.$nextTick(() => $('.pretagsbtn:first-child').focus());
+			}
+		}
+	},
+	methods: {
+		changeEbene: function () {
+			this.$emit('tags', this.aTags);
 		},
 		addEbene: function () {
 			this.aTags.push({'e': 0, 'tags': []});
@@ -224,7 +233,7 @@ Vue.component('tagsystem', {
 	},
 	mounted: function () {
 		console.log('Tagsystem mounted ...');
-		this.getBase();
+		tagsystemCache.getBase();
 	}
 });
 
