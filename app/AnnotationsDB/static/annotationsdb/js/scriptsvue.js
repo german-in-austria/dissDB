@@ -19,6 +19,7 @@ var annotationsTool = new Vue({
 	},
 	data: {
 		loading: true,
+		tagCache: tagsystemCache,
 		menue: {
 			informantenMitTranskripte: [],
 			aInformant: 0,
@@ -77,6 +78,8 @@ var annotationsTool = new Vue({
 		showAllgeInfo: false,
 		showSuche: false,
 		showFilter: false,
+		showTagEbene: false,
+		previewTagEbene: 0,
 		suchen: false,
 		suchText: '',
 		suchInf: 0,
@@ -582,6 +585,7 @@ var annotationsTool = new Vue({
 		objectKeyFilter: stdfunctions.objectKeyFilter,
 		objectSubValueFilter: stdfunctions.objectSubValueFilter,
 		searchByKey: stdfunctions.searchByKey,
+		getFirstObjectOfValueInPropertyOfArray: stdfunctions.getFirstObjectOfValueInPropertyOfArray,
 		/* Zeit umrechnen */
 		durationToSeconds: stdfunctions.durationToSeconds,
 		secondsToDuration: stdfunctions.secondsToDuration,

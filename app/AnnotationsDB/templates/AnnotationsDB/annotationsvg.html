@@ -44,9 +44,16 @@
 									</g>
 									<text :x="(((zeilenTEvent['eX']) ? zeilenTEvent['eX'] : (mWidth - zInfWidth - 15)) + ((zeilenTEvent['sX']) ? zeilenTEvent['sX'] : 0))/2"
 												:y="15"
-												 style="text-anchor:middle;"  filter="url(#solid)"
-												 :text-decoration="((aTokenSets[aTokenSetId] && aTokenSets[aTokenSetId].aId && aAntworten[aTokenSets[aTokenSetId].aId] && aAntworten[aTokenSets[aTokenSetId].aId].tags && aAntworten[aTokenSets[aTokenSetId].aId].tags.length > 0) ? 'underline' : '')"
-												 :class="{'bold': (aTokenSets[aTokenSetId] && aTokenSets[aTokenSetId].aId && aAntworten[aTokenSets[aTokenSetId].aId] && aAntworten[aTokenSets[aTokenSetId].aId].tags && aAntworten[aTokenSets[aTokenSetId].aId].tags.length > 0)}">&nbsp;${ aTokenSetId }&nbsp;</text>
+												style="text-anchor:middle;"  filter="url(#solid)"
+												:text-decoration="((aTokenSets[aTokenSetId] && aTokenSets[aTokenSetId].aId && aAntworten[aTokenSets[aTokenSetId].aId] && aAntworten[aTokenSets[aTokenSetId].aId].tags && aAntworten[aTokenSets[aTokenSetId].aId].tags.length > 0) ? 'underline' : '')"
+												:class="{'bold': (aTokenSets[aTokenSetId] && aTokenSets[aTokenSetId].aId && aAntworten[aTokenSets[aTokenSetId].aId] && aAntworten[aTokenSets[aTokenSetId].aId].tags && aAntworten[aTokenSets[aTokenSetId].aId].tags.length > 0)}">&nbsp;
+												 	${
+														aTokenSetId
+														+ ((showTagEbene && previewTagEbene > 0 && (aTokenSets[aTokenSetId] && aTokenSets[aTokenSetId].aId && aAntworten[aTokenSets[aTokenSetId].aId] && aAntworten[aTokenSets[aTokenSetId].aId].tags && aAntworten[aTokenSets[aTokenSetId].aId].tags.length > 0 && getFirstObjectOfValueInPropertyOfArray(aAntworten[aTokenSets[aTokenSetId].aId].tags, 'e', previewTagEbene))) ?
+														 ': ' + tagCache.tagsText(getFirstObjectOfValueInPropertyOfArray(aAntworten[aTokenSets[aTokenSetId].aId].tags, 'e', previewTagEbene).tags)
+														: '')
+													}
+												&nbsp;</text>
 								</g>
 								<g class="zTsTs" v-else>
 									<g :class="'zTsVBln dg'+dg" v-for="dg in [0,1]">
@@ -62,9 +69,13 @@
 									</g>
 									<text :x="(((zeilenTEvent['eX']) ? zeilenTEvent['eX'] : (mWidth - zInfWidth - 15)) + ((zeilenTEvent['sX']) ? zeilenTEvent['sX'] : 0))/2"
 												:y="15"
-												 style="text-anchor:middle;"  filter="url(#solid)"
-												 :text-decoration="((aTokenSets[aTokenSetId] && aTokenSets[aTokenSetId].aId && aAntworten[aTokenSets[aTokenSetId].aId] && aAntworten[aTokenSets[aTokenSetId].aId].tags && aAntworten[aTokenSets[aTokenSetId].aId].tags.length > 0) ? 'underline' : '')"
-												 :class="{'bold': (aTokenSets[aTokenSetId] && aTokenSets[aTokenSetId].aId && aAntworten[aTokenSets[aTokenSetId].aId] && aAntworten[aTokenSets[aTokenSetId].aId].tags && aAntworten[aTokenSets[aTokenSetId].aId].tags.length > 0)}">&nbsp;${ aTokenSetId }&nbsp;</text>
+												style="text-anchor:middle;"  filter="url(#solid)"
+												:text-decoration="((aTokenSets[aTokenSetId] && aTokenSets[aTokenSetId].aId && aAntworten[aTokenSets[aTokenSetId].aId] && aAntworten[aTokenSets[aTokenSetId].aId].tags && aAntworten[aTokenSets[aTokenSetId].aId].tags.length > 0) ? 'underline' : '')"
+												:class="{'bold': (aTokenSets[aTokenSetId] && aTokenSets[aTokenSetId].aId && aAntworten[aTokenSets[aTokenSetId].aId] && aAntworten[aTokenSets[aTokenSetId].aId].tags && aAntworten[aTokenSets[aTokenSetId].aId].tags.length > 0)}">&nbsp;
+												 	${
+														aTokenSetId
+													}
+												&nbsp;</text>
 								</g>
 							</g>
 						</template>
