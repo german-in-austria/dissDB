@@ -356,6 +356,10 @@ button.lmfabc {
 	padding-right: 50px;
 }
 
+.satzview span.active {
+	font-weight: bold;
+}
+
 .satzview span.before, .satzview span.after {
 	color: #888;
 }

@@ -16,4 +16,5 @@ urlpatterns = [
 	url(r'^sysstatus/{0,1}$', Startseite_views.sysStatusView, name='sysstatus'),
 	url(r'^private-media/', include(private_storage.urls)),
 	url(r'^annotationsdb/', include('AnnotationsDB.urls', namespace='AnnotationsDB')),
+	url(r'^routes/', include('routes.urls', namespace='routes')),
 ]
