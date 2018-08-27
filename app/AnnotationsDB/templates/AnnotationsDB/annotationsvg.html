@@ -88,8 +88,22 @@
 					<g :class="'eInf eInf'+aInfKey" :transform="'translate(0,'+(eInfTop + zeilenTEvents[aZeile]['tsT'][aInfKey] + zeilenTEvents[aZeile]['tsH'][aInfKey] + aInfIndex * (eInfHeight + eInfTop))+')'" v-for="(aInfVal, aInfKey, aInfIndex) in objectKeyFilter(objectSubValueFilter(aInformanten,'show',true), zeilenTEvents[aZeile]['iId'])">
 						<rect x="0" y="0" :width="tEvents[tEventId]['svgWidth']+1" :height="eInfHeight-10" />
 						<template v-if="aEvents[tEvents[tEventId].eId[aInfKey]]">
-							<g v-on:click="showaTokenInfos(aTokenId, false, $event)" :class="'eTok eTok' + aTokenId + ' eTokT' + aTokens[aTokenId]['tt'] + ((aTokens[aTokenId]['viewed'])?' viewed':'') + ((svgTokenLastView === aTokenId)?' lastview':'') + ((svgSelTokenList.indexOf(aTokenId)>-1)?' selectlist':'') + ((selToken === aTokenId)?' selected':'') + ((suchTokens.indexOf(aTokenId)>=0)?' found':'')" :transform="'translate('+(aTokens[aTokenId]['svgLeft']-1)+',1)'" v-for="aTokenId in aEvents[tEvents[tEventId].eId[aInfKey]]['tid'][aInfKey]">
-								<rect x="-0.5" y="0" :width="aTokens[aTokenId]['svgWidth']" :height="eInfHeight - 12" />
+							<g v-on:click="showaTokenInfos(aTokenId, false, $event)"
+								:class="{
+									'eTok': true,
+									['eTok' + aTokenId]: true,
+									['eTokT' + aTokens[aTokenId]['tt']]: true,
+									'viewed': aTokens[aTokenId]['viewed'],
+									'lastview': svgTokenLastView === aTokenId,
+									'selectlist': svgSelTokenList.indexOf(aTokenId) > -1,
+									'selected': selToken === aTokenId,
+									'found': suchTokens.indexOf(aTokenId) >= 0,
+									'hastags': (aTokens[aTokenId] && aTokens[aTokenId].aId && aAntworten[aTokens[aTokenId].aId] && aAntworten[aTokens[aTokenId].aId].tags && aAntworten[aTokens[aTokenId].aId].tags.length > 0)
+								}"
+								:transform="'translate('+(aTokens[aTokenId]['svgLeft']-1)+',1)'"
+								v-for="aTokenId in aEvents[tEvents[tEventId].eId[aInfKey]]['tid'][aInfKey]">
+								<rect x="-0.5" y="0" :width="aTokens[aTokenId]['svgWidth']" :height="eInfHeight - 12" class="bg" />
+								<rect x="-0.5" y="0" :width="aTokens[aTokenId]['svgWidth'] - 3" :height="eInfHeight - 12" class="fx" />
 								<text x="0" y="18" :text-decoration="((aTokens[aTokenId] && aTokens[aTokenId].aId && aAntworten[aTokens[aTokenId].aId] && aAntworten[aTokens[aTokenId].aId].tags && aAntworten[aTokens[aTokenId].aId].tags.length > 0) ? 'underline' : '')">${ getTokenString(aTokenId, 't') }</text>
 								<text x="0" y="43" :text-decoration="((aTokens[aTokenId] && aTokens[aTokenId].aId && aAntworten[aTokens[aTokenId].aId] && aAntworten[aTokens[aTokenId].aId].tags && aAntworten[aTokens[aTokenId].aId].tags.length > 0) ? 'underline' : '')">${ getTokenString(aTokenId, 'o', 't') }</text>
 								<line x1="2" :y1="eInfHeight-4" :x2="aTokens[aTokenId]['svgWidth']-5" :y2="eInfHeight-4" class="visit" />

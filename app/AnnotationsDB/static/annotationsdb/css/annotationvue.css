@@ -91,28 +91,35 @@ g.eInf:hover > rect {
 g.eTok, g.zTsVB, g.zTsTs {
   cursor: pointer;
 }
-g.eTok > rect {
+g.eTok > rect.bg {
   fill: #fff;
 }
-g.eTok.found > rect {
-	fill: #ccf !important;
-}
-g.eTok.eTokT3 > rect, g.eTok.eTokT5 > rect {
+g.eTok.eTokT3 > rect.bg, g.eTok.eTokT5 > rect.bg {
 	fill: #fafaff;
 }
-g.eTok.eTokT4 > rect {
+g.eTok.eTokT4 > rect.bg {
 	fill: #fffcfa;
 }
-g.eTok.eTokT7 > rect {
+g.eTok.eTokT7 > rect.bg {
 	fill: #fffafa;
 }
-g.eTok>line {
+g.eTok.found > rect.bg {
+	fill: #ccf !important;
+}
+g.eTok > rect.fx {
+  fill: none;
+}
+g.eTok.hastags > rect.fx {
+  stroke-width: 2px;
+  stroke: #ccf;
+}
+g.eTok > line {
   stroke-width: 2;
 }
-g.eTok>line.blue {
+g.eTok > line.blue {
   stroke: #00a;
 }
-g.eTok>line.green {
+g.eTok > line.green {
   stroke: #0a0;
 }
 g.eTok > line.visit {
