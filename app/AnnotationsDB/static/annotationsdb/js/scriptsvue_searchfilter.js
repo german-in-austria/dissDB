@@ -48,7 +48,7 @@ const searchfilter = {
 			this.suchen = true;
 			this.suchTokens = [];
 			this.suchTokensInfo = {};
-			if (this.suchText.length > 1) {	// Suche durchführen
+			if (this.suchText.trim().length > 1) {	// Suche durchführen
 				var t0 = performance.now();
 				if (this.suchModus === 'volltext') {
 					if (!this.aTokenTextInf) {
@@ -57,24 +57,33 @@ const searchfilter = {
 					if (this.aTokenTextInf) {
 						let sTxt = this.suchText.toLowerCase().replace(String.fromCharCode(160), ' ').trim();
 						let sTxtLen = sTxt.length;
+						if (this.suchModusWild) {
+							sTxt = new RegExp('\\b' + sTxt.replace(/[|\\{}()[\]^$+?.]/g, '\\$&').split(/\*+/).join('[a-zäöüß]*') + '\\b', 'ig');
+						}
 						Object.keys(this.aTokenTextInf).forEach(function (aInfKey) {
 							if (parseInt(this.suchInf) === 0 || aInfKey === parseInt(this.suchInf)) {
 								[{'prop': 'text', 'opt': 'suchOptText'}, {'prop': 'ortho', 'opt': 'suchOptOrtho'}, {'prop': 'text_in_ortho', 'opt': 'suchOptTextInOrtho'}].forEach(function (aField) {
 									if (this[aField.opt]) {
-										let aTxt = this.aTokenTextInf[aInfKey][aField.prop].toLowerCase();
-										let sTxtPos = aTxt.indexOf(sTxt, 0);
 										let fPos = [];
-										while (sTxtPos > -1) {
-											fPos.push(sTxtPos);
-											sTxtPos = aTxt.indexOf(sTxt, sTxtPos + sTxtLen - 1);
+										let aTxt = this.aTokenTextInf[aInfKey][aField.prop].toLowerCase();
+										if (this.suchModusWild) {
+											let aMatch;
+											while ((aMatch = sTxt.exec(aTxt)) !== null) {
+												fPos.push({'v': aMatch.index, 'b': aMatch.index + aMatch[0].length - 1});
+											}
+										} else {
+											let sTxtPos = aTxt.indexOf(sTxt, 0);
+											while (sTxtPos > -1) {
+												fPos.push({'v': sTxtPos, 'b': sTxtPos + sTxtLen - 1});
+												sTxtPos = aTxt.indexOf(sTxt, sTxtPos + sTxtLen - 1);
+											}
 										}
 										if (fPos.length > 0) {
 											Object.keys(this.aTokenTextInf[aInfKey].tokens).forEach(function (aTokenId) {
 												if (this.suchTokens.indexOf(parseInt(aTokenId)) === -1) {
 													let aToken = this.aTokenTextInf[aInfKey].tokens[aTokenId][aField.prop];
-													fPos.forEach(function (vPos) {
-														let bPos = vPos + sTxtLen - 1;
-														if ((vPos <= aToken.b && bPos >= aToken.v)) {
+													fPos.forEach(function (aPos) {
+														if ((aPos.v <= aToken.b && aPos.b >= aToken.v)) {
 															this.suchTokens.push(parseInt(aTokenId));
 															this.suchTokensInfo[parseInt(aTokenId)] = {'z': 0};
 														}

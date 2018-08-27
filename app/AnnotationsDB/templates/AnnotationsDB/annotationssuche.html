@@ -16,6 +16,7 @@
 	<label for="suchetoken">Token</label>&nbsp;
 	<input type="radio" id="suchevolltext" value="volltext" v-model="suchModus" @change="suche()">
 	<label for="suchevolltext">Volltext</label>&nbsp;
+	<label><input type="checkbox" v-model="suchModusWild" @change="suche()" :disabled="suchModus !== 'volltext'">&nbsp;Wild</label>
 </div>
 <select size="1" class="form-control" v-model="suchInf" @change="suche()">
 	<option value="0">Alle Informanten</option>

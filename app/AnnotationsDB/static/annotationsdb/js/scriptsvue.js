@@ -90,6 +90,7 @@ var annotationsTool = new Vue({
 		suchOptOrtho: true,
 		suchOptTextInOrtho: false,
 		suchModus: 'token',
+		suchModusWild: false,
 		selToken: -1,
 		selTokenBereich: {'v': -1, 'b': -1},
 		selTokenListe: [],
