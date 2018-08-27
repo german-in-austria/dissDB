@@ -97,5 +97,29 @@ const stdfunctions = {
 			});
 		}
 		return rObj;
+	},
+	hasSubProp (obj, propertys, retVal = false) {		// Ermitten ob Property in einem verschachtelten Objekt existiert
+		var out = null;
+		if ((typeof propertys === 'string') && (propertys !== null) && propertys.length > 0) {
+			var aObj = obj;
+			propertys.split('.').some(function (property) {
+				if ((typeof aObj === 'object') && (aObj !== null)) {
+					if (aObj.hasOwnProperty(property)) {
+						out = true;
+						aObj = aObj[property];
+					} else {
+						out = null;
+						return true;
+					}
+				} else {
+					out = null;
+					return true;
+				}
+			});
+		}
+		return ((retVal) ? ((out) ? aObj : null) : out);
+	},
+	getValOfSubProp (obj, propertys) {		// Gibt Wert eines Property eines verschachtelten Objekts zurück
+		return this.hasSubProp(obj, propertys, true);
 	}
 };

@@ -882,7 +882,9 @@ var annotationsTool = new Vue({
 		sortTokenSets: tokensets.sortTokenSets,
 		aTokenInfoChange: function (nVal, oVal) {
 			if (this.aTokenInfo && oVal !== undefined) { this.$set(this.aTokenInfo, 'changed', true); };
-		}
+		},
+		hasSubProp: stdfunctions.hasSubProp,
+		getValOfSubProp: stdfunctions.getValOfSubProp
 	},
 	mounted: function () {
 		document.getElementById('svgscroller').addEventListener('scroll', this.scrollRendering);
