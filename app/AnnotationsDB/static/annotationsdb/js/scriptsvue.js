@@ -43,6 +43,7 @@ var annotationsTool = new Vue({
 		aTokens: {},
 		aTokenReihung: [],
 		aTokenReihungInf: {},
+		aTokenTextInf: null,
 		aTokenFragmente: {},
 		aTokenSets: {},
 		delTokenSets: {},
@@ -85,6 +86,10 @@ var annotationsTool = new Vue({
 		suchInf: 0,
 		suchTokens: [],
 		suchTokensInfo: {},
+		suchOptText: true,
+		suchOptOrtho: true,
+		suchOptTextInOrtho: false,
+		suchModus: 'token',
 		selToken: -1,
 		selTokenBereich: {'v': -1, 'b': -1},
 		selTokenListe: [],
@@ -570,6 +575,33 @@ var annotationsTool = new Vue({
 				}
 			}
 			this.selToken = eTok;
+		},
+		/* aTokenTextInf erstellen/updaten */
+		updateATokenTextInf: function () {
+			this.aTokenTextInf = null;
+			if (this.aTokenReihungInf) {
+				var t0 = performance.now();
+				this.aTokenTextInf = {};
+				Object.keys(this.aTokenReihungInf).forEach(function (aInfKey) {
+					if (!this.aTokenTextInf[aInfKey]) {
+						this.aTokenTextInf[aInfKey] = {'text': '', 'ortho': '', 'text_in_ortho': '', 'tokens': {}};
+					}
+					this.aTokenReihungInf[aInfKey].forEach(function (aTokenId) {
+						[{'prop': 'text', 'o1': 't', 'o2': false}, {'prop': 'ortho', 'o1': 'o', 'o2': 't'}, {'prop': 'text_in_ortho', 'o1': 'to', 'o2': false}].forEach(function (aField) {
+							let vPos = this.aTokenTextInf[aInfKey][aField.prop].length;
+							let aTxt = this.getTokenString(aTokenId, aField.o1, aField.o2).replace(String.fromCharCode(160), ' ');
+							let bPos = vPos + aTxt.length - 1;
+							this.aTokenTextInf[aInfKey][aField.prop] += aTxt;
+							if (!this.aTokenTextInf[aInfKey].tokens[aTokenId]) {
+								this.aTokenTextInf[aInfKey].tokens[aTokenId] = {};
+							}
+							this.aTokenTextInf[aInfKey].tokens[aTokenId][aField.prop] = {'v': vPos, 'b': bPos};
+						}, this);
+					}, this);
+				}, this);
+				console.log('updateATokenTextInf: ' + Math.ceil(performance.now() - t0) + ' ms');
+			}
+			console.log(this.aTokenTextInf);
 		},
 		modalSperren: function (modalID) {
 			$(modalID).off('keyup.dismiss.bs.modal');

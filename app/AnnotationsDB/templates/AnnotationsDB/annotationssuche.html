@@ -5,6 +5,18 @@
 		<button class="idbtn" title="Eingabe loeschen!" @click="suchText=''"><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>
 	</div>
 </div>
+<div>
+	<label><input type="checkbox" v-model="suchOptText" @change="suche()">&nbsp;Text</label>
+	<label><input type="checkbox" v-model="suchOptOrtho" @change="suche()">&nbsp;Ortho</label>
+	<label><input type="checkbox" v-model="suchOptTextInOrtho" @change="suche()">&nbsp;Text in Ortho</label>
+</div>
+<div>
+	<b>Art:</b>&nbsp;
+	<input type="radio" id="suchetoken" value="token" v-model="suchModus" @change="suche()">
+	<label for="suchetoken">Token</label>&nbsp;
+	<input type="radio" id="suchevolltext" value="volltext" v-model="suchModus" @change="suche()">
+	<label for="suchevolltext">Volltext</label>&nbsp;
+</div>
 <select size="1" class="form-control" v-model="suchInf" @change="suche()">
 	<option value="0">Alle Informanten</option>
 	<option v-for="(aInf, aInfKey) in aInformanten" :value="aInfKey">${ aInf.k }</option>

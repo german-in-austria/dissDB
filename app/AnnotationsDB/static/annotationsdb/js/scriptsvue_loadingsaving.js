@@ -24,6 +24,7 @@ const loadingsaving = {
 		this.aTokens = {};
 		this.aTokenReihung = [];
 		this.aTokenReihungInf = {};
+		this.aTokenTextInf = null;
 		this.aTokenFragmente = {};
 		this.aTokenSets = {};
 		this.aAntworten = {};
@@ -88,6 +89,7 @@ const loadingsaving = {
 						this.$set(this.annotationsTool, 'nNr', response.data['nNr']);
 						this.getTranskript(this.annotationsTool.aPK, 'next', this.annotationsTool.nNr);
 					}
+					this.aTokenTextInf = null;
 				}
 			})
 			.catch((err) => {
