@@ -826,25 +826,7 @@ var annotationsTool = new Vue({
 			return nTId;
 		},
 		/* Zu Token scrollen */
-		scrollToToken: function (tId) {
-			var sTop = $('.mcon.vscroller').scrollTop();
-			var sBottom = sTop + this.sHeight + 75;
-			var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchByKey(this.aTokens[this.selToken]['e'], 'pk', this.aEvents)))];
-			var sTo = 0;
-			if (aZTE) {
-				if (aZTE['eT'] < sTop) {
-					sTo = aZTE['eT'] - 20;
-					if (sTo < 0) { sTo = 0; }
-					$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
-				} else if ((aZTE['eT'] + aZTE['eH']) > sBottom) {
-					sTo = (aZTE['eT'] + aZTE['eH'] + 20) - (this.sHeight + 75) * 0.8;
-					if (sTo < 0) { sTo = 0; }
-					$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
-				}
-			} else {
-				console.log(tId, this.selToken, this.aTokens[this.selToken]['e']);
-			}
-		},
+		scrollToToken: svgfunctions.scrollToToken,
 		/* Funktionen für Tokenauswahl */
 		getTEventOfAEvent: function (aEId) {
 			var nKey = -1;
@@ -898,17 +880,7 @@ var annotationsTool = new Vue({
 			}, this);
 			return nEListe;
 		},
-		listeWerteInListe: function (aListe, bListe) {
-			var cListe = aListe.slice();
-			bListe.some(function (val) {
-				var ap = cListe.indexOf(val);
-				if (ap >= 0) {
-					cListe.splice(ap, 1);
-					return (cListe.length === 0);
-				}
-			}, this);
-			return (cListe.length === 0);
-		},
+		listeWerteInListe: stdfunctions.listeWerteInListe,
 		tokenCountByInf: function (aTRI) {
 			var output = '';
 			Object.keys(this.aInformanten).map(function (iKey, iI) {

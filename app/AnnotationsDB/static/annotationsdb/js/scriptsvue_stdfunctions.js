@@ -121,5 +121,16 @@ const stdfunctions = {
 	},
 	getValOfSubProp (obj, propertys) {		// Gibt Wert eines Property eines verschachtelten Objekts zurück
 		return this.hasSubProp(obj, propertys, true);
+	},
+	listeWerteInListe: function (aListe, bListe) {
+		var cListe = aListe.slice();
+		bListe.some(function (val) {
+			var ap = cListe.indexOf(val);
+			if (ap >= 0) {
+				cListe.splice(ap, 1);
+				return (cListe.length === 0);
+			}
+		}, this);
+		return (cListe.length === 0);
 	}
 };
