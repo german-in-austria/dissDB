@@ -61,7 +61,7 @@ const searchfilter = {
 							sTxt = new RegExp('\\b' + sTxt.replace(/[|\\{}()[\]^$+?.]/g, '\\$&').split(/\*+/).join('[a-zäöüß]*') + '\\b', 'ig');
 						}
 						Object.keys(this.aTokenTextInf).forEach(function (aInfKey) {
-							if (parseInt(this.suchInf) === 0 || aInfKey === parseInt(this.suchInf)) {
+							if (parseInt(this.suchInf) === 0 || parseInt(this.suchInf) === parseInt(aInfKey)) {
 								[{'prop': 'text', 'opt': 'suchOptText'}, {'prop': 'ortho', 'opt': 'suchOptOrtho'}, {'prop': 'text_in_ortho', 'opt': 'suchOptTextInOrtho'}].forEach(function (aField) {
 									if (this[aField.opt]) {
 										let fPos = [];

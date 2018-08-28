@@ -831,14 +831,18 @@ var annotationsTool = new Vue({
 			var sBottom = sTop + this.sHeight + 75;
 			var aZTE = this.zeilenTEvents[this.getZeileOfTEvent(this.getTEventOfAEvent(this.searchByKey(this.aTokens[this.selToken]['e'], 'pk', this.aEvents)))];
 			var sTo = 0;
-			if (aZTE['eT'] < sTop) {
-				sTo = aZTE['eT'] - 20;
-				if (sTo < 0) { sTo = 0; }
-				$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
-			} else if ((aZTE['eT'] + aZTE['eH']) > sBottom) {
-				sTo = (aZTE['eT'] + aZTE['eH'] + 20) - (this.sHeight + 75) * 0.8;
-				if (sTo < 0) { sTo = 0; }
-				$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
+			if (aZTE) {
+				if (aZTE['eT'] < sTop) {
+					sTo = aZTE['eT'] - 20;
+					if (sTo < 0) { sTo = 0; }
+					$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
+				} else if ((aZTE['eT'] + aZTE['eH']) > sBottom) {
+					sTo = (aZTE['eT'] + aZTE['eH'] + 20) - (this.sHeight + 75) * 0.8;
+					if (sTo < 0) { sTo = 0; }
+					$('.mcon.vscroller').stop().animate({scrollTop: sTo}, 250);
+				}
+			} else {
+				console.log(tId, this.selToken, this.aTokens[this.selToken]['e']);
 			}
 		},
 		/* Funktionen für Tokenauswahl */
