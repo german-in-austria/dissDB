@@ -1,4 +1,4 @@
-/* global $ Vue csrf alert confirm */
+/* global $ Vue csrf alert confirm stdfunctions */
 
 /* Cache für Tags und Presets */
 const tagsystemCache = new Vue({
@@ -29,11 +29,7 @@ const tagsystemCache = new Vue({
 							this.tagsCache.tags[tVal.t].tezt.forEach(function (eVal) {
 								if (nVal[key].ze.indexOf(eVal) < 0) {
 									nVal[key].ze.push(eVal);
-									if (this.baseCache.tagebenen && this.baseCache.tagebenen[eVal]) {
-										this.$set(this.baseCache.tagebenen[eVal], 'hasPresets', true);
-									} else {
-										console.log('Tagebenen Fehler!', eVal);
-									}
+									this.$set(stdfunctions.getFirstObjectOfValueInPropertyOfArray(this.baseCache.tagebenen, 'pk', eVal), 'hasPresets', true);
 								}
 							}, this);
 						}
@@ -161,7 +157,7 @@ Vue.component('tagsystem', {
 			colLeft: this.cols || 2,
 			cache: tagsystemCache,
 			aTags: this.tags || [],
-			showPresets: false,
+			showPresets: {},
 			reRender: false
 		};
 	},
@@ -182,14 +178,13 @@ Vue.component('tagsystem', {
 	watch: {
 		tags: function (nVal, oVal) {
 			tagsystemCache.getBase();
-		},
-		showPresets: function (nVal, oVal) {
-			if (nVal) {
-				this.$nextTick(() => $('.pretagsbtn:first-child').focus());
-			}
 		}
 	},
 	methods: {
+		togglePreset: function (aEbeneIndex) {
+			this.$set(this.showPresets, aEbeneIndex, !this.showPresets[aEbeneIndex]);
+			this.$nextTick(() => $('.pretagsbtn:first-child').focus());
+		},
 		changeEbene: function () {
 			this.$emit('tags', this.aTags);
 		},
@@ -216,7 +211,8 @@ Vue.component('tagsystem', {
 		selPresetBlur: function (e) {
 			this.$nextTick(function () {
 				if (document.activeElement.className.indexOf('pretagsbtn')) {
-					this.showPresets = false;
+					console.log('XXX');
+					this.showPresets = {};
 				}
 			});
 		},
@@ -229,7 +225,8 @@ Vue.component('tagsystem', {
 		reRenderIt: function () {
 			this.reRender = true;
 			this.$nextTick(() => { this.reRender = false; });
-		}
+		},
+		getFirstObjectOfValueInPropertyOfArray: stdfunctions.getFirstObjectOfValueInPropertyOfArray
 	},
 	mounted: function () {
 		console.log('Tagsystem mounted ...');

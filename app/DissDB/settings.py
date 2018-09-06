@@ -57,7 +57,7 @@ else:
 
 ALLOWED_HOSTS = []
 
-ALLOWED_SETTINGS_IN_TEMPLATES = ("AUDIO_URL","CACH_RANDOM")
+ALLOWED_SETTINGS_IN_TEMPLATES = ("AUDIO_URL", "CACH_RANDOM")
 
 CACH_RANDOM = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for i in range(8))
 

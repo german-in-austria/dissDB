@@ -376,6 +376,7 @@ select.tagebene {
   z-index: 100;
   overflow-y: scroll;
   max-height: 300px;
+	margin-bottom: 20px;
 }
 .r-tag-familie {
   display: inline-block;
