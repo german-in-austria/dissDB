@@ -9,46 +9,50 @@
 {% block inhalt %}
 <div style="overflow-x: auto">
 	<br>
-	<select onchange="javascript:location.href = '/annotationsdb/auswertung/' + this.value;">
+	<select onchange="javascript:location.href = '/annotationsdb/auswertung/' + this.value + '/0';">
 		<option value="0"{% if aTagEbene == 0 %} selected{% endif %}>Ebene auswählen</option>
 		{% for value in tagEbenen %}
 			<option value="{{ value.pk }}"{% if aTagEbene == value.pk %} selected{% endif %}>{{ value.title }} - {{ value.count }}</option>
 		{% endfor %}
 	</select>
 	<br>
-	<br>
-	<b>Treffer: {{ aCount }}</b><br>
-	<br>
-	<table class="table table-bordered" style="width: auto; max-width: inherit; min-width: 100%; white-space: nowrap;">
-		<thead>
-			<tr>
-				<th>#</th>
-				<th>Transkript</th>
-				<th>Informant</th>
-				<th>xxx</th>
-				<th>Sätze</th>
-				<th>{{ aAntTagsTitle }}</th>
-				{% for nATT in nAntTagsTitle %}
-					<th>{{ nATT.t }}</th>
-				{% endfor %}
-			</tr>
-		</thead>
-		<tbody>
-		{% for auswertung in aAuswertungen %}
-			<tr>
-				<td>{{ forloop.counter }}</td>
-				<td>{{ auswertung.aTrans }}</td>
-				<td>{{ auswertung.aInf }}</td>
-				<td>{{ auswertung.xxx }}</td>
-				<td>{{ auswertung.aSaetze }}</td>
-				<td>{{ auswertung.aAntTags.t }}</td>
-				{% for nATT in nAntTagsTitle %}
-					<td>{% if nATT.i in auswertung.nAntTags %}{{ auswertung.nAntTags|get_item:nATT.i|get_item:'t' }}{% endif %}</td>
-				{% endfor %}
-			</tr>
-		{% endfor %}
-		</tbody>
-	</table>
+	{% if aAuswertungen %}
+		<br>
+		<b>Treffer: {{ aCount }}</b> - {% if prev > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=prev %}">Zurück</a>{% else %}Zurück{% endif %} - {% if next > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=next %}">Weiter</a>{% else %}Weiter{% endif %}<br>
+		<br>
+		<table class="table table-bordered" style="width: auto; max-width: inherit; min-width: 100%; white-space: nowrap;">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Transkript</th>
+					<th>Informant</th>
+					<th>vorheriger Satz</th>
+					<th>Sätze</th>
+					<th>nächster Satz</th>
+					<th>{{ aAntTagsTitle }}</th>
+					{% for nATT in nAntTagsTitle %}
+						<th>{{ nATT.t }}</th>
+					{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+			{% for auswertung in aAuswertungen %}
+				<tr>
+					<td>{{ auswertung.aNr }}</td>
+					<td>{{ auswertung.aTrans }}</td>
+					<td>{{ auswertung.aInf }}</td>
+					<td>{{ auswertung.vSatz }}</td>
+					<td>{{ auswertung.aSaetze }}</td>
+					<td>{{ auswertung.nSatz }}</td>
+					<td>{{ auswertung.aAntTags.t }}</td>
+					{% for nATT in nAntTagsTitle %}
+						<td>{% if nATT.i in auswertung.nAntTags %}{{ auswertung.nAntTags|get_item:nATT.i|get_item:'t' }}{% endif %}</td>
+					{% endfor %}
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	{% endif %}
 </div>
 {% endblock %}
 {% block sitejs %}

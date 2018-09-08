@@ -10,12 +10,13 @@ from copy import deepcopy
 import datetime
 
 
-def auswertung(request, aTagEbene):
+def auswertung(request, aTagEbene, aSeite):
 	if not request.user.is_authenticated():
 		return redirect('dissdb_login')
 	maxVars = 500
 	nTagEbenen = {}
 	aTagEbene = int(aTagEbene)
+	aSeite = int(aSeite)
 	aTagEbenen = []
 	for aTE in dbmodels.TagEbene.objects.all():
 		nTagEbenen[aTE.pk] = str(aTE)
@@ -24,8 +25,13 @@ def auswertung(request, aTagEbene):
 			antwortentags__id_TagEbene_id=aTE.pk).distinct().count()}
 		)
 	aAuswertungen = []
+	aAntTagsTitle = None
+	nAntTagsTitle = None
+	prev = -1
+	next = -1
 	aCount = 0
 	if aTagEbene > 0:
+		maxPerPage = 15
 		# Tags
 		nTags = {x.pk: x.Tag for x in dbmodels.Tags.objects.all()}
 		# Antworten
@@ -34,9 +40,17 @@ def auswertung(request, aTagEbene):
 			antwortentags__id_TagEbene_id=aTagEbene
 		).distinct()
 		aCount = aAntwortenM.count()
+		# Seiten
+		if aSeite > 0:
+			prev = aSeite - 1
+		if aCount > (aSeite + 1) * maxPerPage:
+			next = aSeite + 1
+		# Antworten ... weiter
 		aAntTagsTitle = nTagEbenen[aTagEbene]
 		nAntTagsTitle = []
-		for aAntwort in aAntwortenM[:15]:
+		aNr = aSeite * maxPerPage
+		for aAntwort in aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
+			aNr += 1
 			# Tag Ebene mit Tags
 			nAntTags = {}
 			aAntTags = None
@@ -53,10 +67,10 @@ def auswertung(request, aTagEbene):
 			if aAntwort.ist_token:
 				aTokens.append(aAntwort.ist_token_id)
 			if aAntwort.ist_tokenset:
-				if aAntwort.ist_tokenset.id_von_token is None:
+				if aAntwort.ist_tokenset.id_von_token is None:		# ToDo: Optimieren
 					for aToken in aAntwort.ist_tokenset.tbl_tokentoset_set.all().values('id_token_id').order_by('id_token__token_reihung'):
 						aTokens.append(aToken['id_token_id'])
-				else:
+				else:		# ToDo: Optimieren
 					for aToken in adbmodels.token.objects.filter(
 						ID_Inf_id=aAntwort.ist_tokenset.id_von_token.ID_Inf_id,
 						transcript_id=aAntwort.ist_tokenset.id_von_token.transcript_id,
@@ -67,20 +81,41 @@ def auswertung(request, aTagEbene):
 			# Transcript
 			transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
 			# Sätze erfassen
-			aSaetzePK = []
-			aSaetze = []
-			aTokensTemp = deepcopy(aTokens)
-			while len(aTokensTemp) > 0:
-				for aSatz in dbmodels.Saetze.objects.filter(token__in=aTokensTemp[:maxVars]).order_by('token__token_reihung').distinct():
-					if aSatz.pk not in aSaetzePK:
-						aSaetzePK.append(aSatz.pk)
-						aSaetze.append(''.join([(' ' if x.token_type_id_id != 2 else '') + x.text for x in aSatz.token_set.all().order_by('token_reihung')]))
-				aTokensTemp = aTokensTemp[maxVars:]
-			print(aSaetze)
+			[fToken, lToken, aSaetze] = getSatzFromTokenList(aTokens)
+			try:
+				[nix, nix, vSatz] = getSatzFromTokenList([adbmodels.token.objects.filter(
+					ID_Inf_id=fToken.ID_Inf_id,
+					transcript_id=fToken.transcript_id,
+					token_reihung__lt=fToken.token_reihung
+				).values('pk').order_by('-token_reihung')[0]['pk']])
+			except IndexError:
+				vSatz = ''
+			try:
+				[nix, nix, nSatz] = getSatzFromTokenList([adbmodels.token.objects.filter(
+					ID_Inf_id=lToken.ID_Inf_id,
+					transcript_id=lToken.transcript_id,
+					token_reihung__gt=lToken.token_reihung
+				).values('pk').order_by('token_reihung')[0]['pk']])
+			except IndexError:
+				nSatz = ''
 			# Datensatz
-			aAuswertungen.append({'aTrans': transName, 'aInf': aAntwort.von_Inf.Kuerzel, 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aSaetze': ' | '.join(aSaetze), 'xxx': {}})
-	return render_to_response('AnnotationsDB/auswertungstart.html', RequestContext(request, {'aTagEbene': aTagEbene, 'tagEbenen': aTagEbenen, 'aAuswertungen': aAuswertungen, 'aAntTagsTitle': aAntTagsTitle, 'nAntTagsTitle': nAntTagsTitle, 'aCount': aCount}))
+			aAuswertungen.append({'aNr': aNr, 'aTrans': transName, 'aInf': aAntwort.von_Inf.Kuerzel, 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+	return render_to_response('AnnotationsDB/auswertungstart.html', RequestContext(request, {'aTagEbene': aTagEbene, 'prev': prev, 'next': next, 'tagEbenen': aTagEbenen, 'aAuswertungen': aAuswertungen, 'aAntTagsTitle': aAntTagsTitle, 'nAntTagsTitle': nAntTagsTitle, 'aCount': aCount}))
 
+
+def getSatzFromTokenList(aTokens):
+	fToken = dbmodels.Saetze.objects.filter(token__id=aTokens[0])[0].token_set.all().order_by('token_reihung')[0]
+	lToken = dbmodels.Saetze.objects.filter(token__id=aTokens[len(aTokens) - 1])[0].token_set.all().order_by('token_reihung')
+	lToken = lToken[len(lToken) - 1]
+	text = ''
+	for aToken in adbmodels.token.objects.filter(
+		ID_Inf_id=fToken.ID_Inf_id,
+		transcript_id=fToken.transcript_id,
+		token_reihung__gte=fToken.token_reihung,
+		token_reihung__lte=lToken.token_reihung
+	).values('text', 'token_type_id_id').order_by('token_reihung'):
+		text += (' ' if aToken['token_type_id_id'] != 2 else '') + aToken['text']
+	return [fToken, lToken, text]
 
 def startvue(request, ipk=0, tpk=0):
 	# Ist der User Angemeldet?
@@ -149,9 +184,6 @@ def startvue(request, ipk=0, tpk=0):
 			for key, value in sData['dAntworten'].items():
 				aId = int(key)
 				if aId > 0:
-					print(key)
-					print(aId)
-					print('---')
 					aElement = dbmodels.Antworten.objects.get(id=aId)
 					aElement.delete()
 		# aAntworten speichern:
