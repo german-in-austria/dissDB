@@ -32,9 +32,10 @@ var annotationsTool = new Vue({
 		},
 		unsaved: false,
 		aTmNr: 1,
-		aTranskript: {},
-		aEinzelErhebung: {},
-		aTokenTypes: {},
+		// Annotations Daten - Start
+		aTranskript: {},				// Transkript Informationen - {"n":"01_LE_V2","pk":3,"ut":"10.12.2017- 16:30"}
+		aEinzelErhebung: {},		// EinzelErhebung - {"lf":"","e":1,"o":"","pk":65,"af":"1124_173725","b":"","dp":"\\Interviews\\01_LE\\","d":"24.11.2014- 00:00","k":"","trId":3}
+		aTokenTypes: {},				// TokenTypes - id: {"n":"word"}
 		aInformanten: {},
 		aInfLen: 0,
 		aSaetze: {},
@@ -48,6 +49,7 @@ var annotationsTool = new Vue({
 		aTokenSets: {},
 		delTokenSets: {},
 		aAntworten: {},
+		// Annotations Daten - Ende
 		delAntworten: {},
 		zeilenTEvents: [],
 		zeilenHeight: 0,

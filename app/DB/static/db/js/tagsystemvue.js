@@ -211,7 +211,6 @@ Vue.component('tagsystem', {
 		selPresetBlur: function (e) {
 			this.$nextTick(function () {
 				if (document.activeElement.className.indexOf('pretagsbtn')) {
-					console.log('XXX');
 					this.showPresets = {};
 				}
 			});

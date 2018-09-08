@@ -71,3 +71,8 @@ def settings_value(name):
 	if name in getattr(settings, 'ALLOWED_SETTINGS_IN_TEMPLATES', ''):
 		return getattr(settings, name, '')
 	return ''
+
+# {{ mydict|get_item:item.NAME }}
+@register.filter
+def get_item(dictionary, key):
+	return dictionary.get(key)

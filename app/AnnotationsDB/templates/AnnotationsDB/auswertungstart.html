@@ -1,0 +1,55 @@
+{% extends 'main/basis.html' %}
+{% load staticfiles %}
+{% load dioeTags %}
+{% load crispy_forms_tags %}
+{% block title %} - Annotation{% endblock %}
+{% block ueberschrift %} - Annotation{% endblock %}
+{% block sitecss %}
+{% endblock %}
+{% block inhalt %}
+<div style="overflow-x: auto">
+	<br>
+	<select onchange="javascript:location.href = '/annotationsdb/auswertung/' + this.value;">
+		<option value="0"{% if aTagEbene == 0 %} selected{% endif %}>Ebene auswählen</option>
+		{% for value in tagEbenen %}
+			<option value="{{ value.pk }}"{% if aTagEbene == value.pk %} selected{% endif %}>{{ value.title }} - {{ value.count }}</option>
+		{% endfor %}
+	</select>
+	<br>
+	<br>
+	<b>Treffer: {{ aCount }}</b><br>
+	<br>
+	<table class="table table-bordered" style="width: auto; max-width: inherit; min-width: 100%; white-space: nowrap;">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Transkript</th>
+				<th>Informant</th>
+				<th>xxx</th>
+				<th>Sätze</th>
+				<th>{{ aAntTagsTitle }}</th>
+				{% for nATT in nAntTagsTitle %}
+					<th>{{ nATT.t }}</th>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+		{% for auswertung in aAuswertungen %}
+			<tr>
+				<td>{{ forloop.counter }}</td>
+				<td>{{ auswertung.aTrans }}</td>
+				<td>{{ auswertung.aInf }}</td>
+				<td>{{ auswertung.xxx }}</td>
+				<td>{{ auswertung.aSaetze }}</td>
+				<td>{{ auswertung.aAntTags.t }}</td>
+				{% for nATT in nAntTagsTitle %}
+					<td>{% if nATT.i in auswertung.nAntTags %}{{ auswertung.nAntTags|get_item:nATT.i|get_item:'t' }}{% endif %}</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}
+{% block sitejs %}
+{% endblock %}

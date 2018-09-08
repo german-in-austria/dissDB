@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from django.db.models import Count
+from django.db.models import Count, Q
 import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import json
@@ -8,6 +8,78 @@ from DB.funktionenDB import httpOutput
 import operator
 from copy import deepcopy
 import datetime
+
+
+def auswertung(request, aTagEbene):
+	if not request.user.is_authenticated():
+		return redirect('dissdb_login')
+	maxVars = 500
+	nTagEbenen = {}
+	aTagEbene = int(aTagEbene)
+	aTagEbenen = []
+	for aTE in dbmodels.TagEbene.objects.all():
+		nTagEbenen[aTE.pk] = str(aTE)
+		aTagEbenen.append({'pk': aTE.pk, 'title': str(aTE), 'count': dbmodels.Antworten.objects.filter(
+			Q(ist_token__isnull=False) | Q(ist_tokenset__isnull=False),
+			antwortentags__id_TagEbene_id=aTE.pk).distinct().count()}
+		)
+	aAuswertungen = []
+	aCount = 0
+	if aTagEbene > 0:
+		# Tags
+		nTags = {x.pk: x.Tag for x in dbmodels.Tags.objects.all()}
+		# Antworten
+		aAntwortenM = dbmodels.Antworten.objects.filter(
+			Q(ist_token__isnull=False) | Q(ist_tokenset__isnull=False),
+			antwortentags__id_TagEbene_id=aTagEbene
+		).distinct()
+		aCount = aAntwortenM.count()
+		aAntTagsTitle = nTagEbenen[aTagEbene]
+		nAntTagsTitle = []
+		for aAntwort in aAntwortenM[:15]:
+			# Tag Ebene mit Tags
+			nAntTags = {}
+			aAntTags = None
+			for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=aAntwort.pk).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
+				xDat = {'e': {'t': nTagEbenen[xval['id_TagEbene']], 'i': xval['id_TagEbene']}, 't': ', '.join([nTags[x['id_Tag_id']] for x in dbmodels.AntwortenTags.objects.filter(id_Antwort=aAntwort.pk, id_TagEbene=xval['id_TagEbene']).values('id_Tag_id').order_by('Reihung')])}
+				if xval['id_TagEbene'] == aTagEbene:
+					aAntTags = xDat
+				else:
+					nAntTags[xDat['e']['i']] = xDat
+					if xDat['e']['i'] not in nAntTagsTitle:
+						nAntTagsTitle.append(xDat['e'])
+			# Tokens
+			aTokens = []
+			if aAntwort.ist_token:
+				aTokens.append(aAntwort.ist_token_id)
+			if aAntwort.ist_tokenset:
+				if aAntwort.ist_tokenset.id_von_token is None:
+					for aToken in aAntwort.ist_tokenset.tbl_tokentoset_set.all().values('id_token_id').order_by('id_token__token_reihung'):
+						aTokens.append(aToken['id_token_id'])
+				else:
+					for aToken in adbmodels.token.objects.filter(
+						ID_Inf_id=aAntwort.ist_tokenset.id_von_token.ID_Inf_id,
+						transcript_id=aAntwort.ist_tokenset.id_von_token.transcript_id,
+						token_reihung__gte=aAntwort.ist_tokenset.id_von_token.token_reihung,
+						token_reihung__lte=aAntwort.ist_tokenset.id_bis_token.token_reihung
+					).values('pk').order_by('token_reihung'):
+						aTokens.append(aToken['pk'])
+			# Transcript
+			transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
+			# Sätze erfassen
+			aSaetzePK = []
+			aSaetze = []
+			aTokensTemp = deepcopy(aTokens)
+			while len(aTokensTemp) > 0:
+				for aSatz in dbmodels.Saetze.objects.filter(token__in=aTokensTemp[:maxVars]).order_by('token__token_reihung').distinct():
+					if aSatz.pk not in aSaetzePK:
+						aSaetzePK.append(aSatz.pk)
+						aSaetze.append(''.join([(' ' if x.token_type_id_id != 2 else '') + x.text for x in aSatz.token_set.all().order_by('token_reihung')]))
+				aTokensTemp = aTokensTemp[maxVars:]
+			print(aSaetze)
+			# Datensatz
+			aAuswertungen.append({'aTrans': transName, 'aInf': aAntwort.von_Inf.Kuerzel, 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aSaetze': ' | '.join(aSaetze), 'xxx': {}})
+	return render_to_response('AnnotationsDB/auswertungstart.html', RequestContext(request, {'aTagEbene': aTagEbene, 'tagEbenen': aTagEbenen, 'aAuswertungen': aAuswertungen, 'aAntTagsTitle': aAntTagsTitle, 'nAntTagsTitle': nAntTagsTitle, 'aCount': aCount}))
 
 
 def startvue(request, ipk=0, tpk=0):
