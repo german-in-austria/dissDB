@@ -14,9 +14,9 @@ import datetime
 def auswertung(request, aTagEbene, aSeite):
 	if not request.user.is_authenticated():
 		return redirect('dissdb_login')
-	getXml = False
-	if 'get' in request.GET and request.GET.get('get') == 'xml':
-		getXml = True
+	getXls = False
+	if 'get' in request.GET and request.GET.get('get') == 'xls':
+		getXls = True
 	maxVars = 500
 	nTagEbenen = {}
 	aTagEbene = int(aTagEbene)
@@ -53,7 +53,7 @@ def auswertung(request, aTagEbene, aSeite):
 		aAntTagsTitle = nTagEbenen[aTagEbene]
 		nAntTagsTitle = []
 		aNr = aSeite * maxPerPage
-		for aAntwort in aAntwortenM if getXml else aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
+		for aAntwort in aAntwortenM if getXls else aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
 			aNr += 1
 			# Tag Ebene mit Tags
 			nAntTags = {}
@@ -84,10 +84,11 @@ def auswertung(request, aTagEbene, aSeite):
 						aTokens.append(aToken['pk'])
 			# Transcript
 			transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
+			aTransId = adbmodels.transcript.objects.filter(token=aTokens[0])[0].pk
 			# Sätze erfassen
-			[fToken, lToken, aSaetze] = getSatzFromTokenList(aTokens)
+			[fSatz, fToken, lSatz, lToken, aSaetze] = getSatzFromTokenList(aTokens)
 			try:
-				[nix, nix, vSatz] = getSatzFromTokenList([adbmodels.token.objects.filter(
+				[nix, nix, nix, nix, vSatz] = getSatzFromTokenList([adbmodels.token.objects.filter(
 					ID_Inf_id=fToken.ID_Inf_id,
 					transcript_id=fToken.transcript_id,
 					token_reihung__lt=fToken.token_reihung
@@ -95,7 +96,7 @@ def auswertung(request, aTagEbene, aSeite):
 			except IndexError:
 				vSatz = ''
 			try:
-				[nix, nix, nSatz] = getSatzFromTokenList([adbmodels.token.objects.filter(
+				[nix, nix, nix, nix, nSatz] = getSatzFromTokenList([adbmodels.token.objects.filter(
 					ID_Inf_id=lToken.ID_Inf_id,
 					transcript_id=lToken.transcript_id,
 					token_reihung__gt=lToken.token_reihung
@@ -103,8 +104,8 @@ def auswertung(request, aTagEbene, aSeite):
 			except IndexError:
 				nSatz = ''
 			# Datensatz
-			aAuswertungen.append({'aNr': aNr, 'aTrans': transName, 'aInf': aAntwort.von_Inf.Kuerzel, 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
-		if getXml:
+			aAuswertungen.append({'aNr': aNr, 'fSatzId': str(fSatz.pk), 'lSatzId': str(lSatz.pk), 'aTrans': transName, 'aTransId': aTransId, 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+		if getXls:
 			import xlwt
 			response = HttpResponse(content_type='text/ms-excel')
 			response['Content-Disposition'] = 'attachment; filename="tagebene_' + str(aTagEbene) + '_' + datetime.date.today().strftime('%Y%m%d') + '.xls"'
@@ -113,11 +114,16 @@ def auswertung(request, aTagEbene, aSeite):
 			row_num = 0
 			columns = []
 			columns.append(('Nr', 2000))
-			columns.append(('Transkript', 6000))
+			columns.append(('Transkript', 2000))
+			columns.append(('tId', 2000))
 			columns.append(('Informant', 2000))
+			columns.append(('iId', 2000))
 			columns.append(('vorheriger Satz', 2000))
 			columns.append(('Sätze', 2000))
 			columns.append(('nächster Satz', 2000))
+			columns.append(('von sId', 2000))
+			columns.append(('bis sId', 2000))
+			columns.append(('Ausgewählte Tokens (Id)', 2000))
 			columns.append((aAntTagsTitle, 2000))
 			for nATT in nAntTagsTitle:
 				columns.append((nATT['t'], 2000))
@@ -130,16 +136,21 @@ def auswertung(request, aTagEbene, aSeite):
 				row_num += 1
 				ws.write(row_num, 0, obj['aNr'], font_style)
 				ws.write(row_num, 1, obj['aTrans'], font_style)
-				ws.write(row_num, 2, obj['aInf'], font_style)
-				ws.write(row_num, 3, obj['vSatz'], font_style)
-				ws.write(row_num, 4, obj['aSaetze'], font_style)
-				ws.write(row_num, 5, obj['nSatz'], font_style)
+				ws.write(row_num, 2, obj['aTransId'], font_style)
+				ws.write(row_num, 3, obj['aInf'], font_style)
+				ws.write(row_num, 4, obj['aInfId'], font_style)
+				ws.write(row_num, 5, obj['vSatz'], font_style)
+				ws.write(row_num, 6, obj['aSaetze'], font_style)
+				ws.write(row_num, 7, obj['nSatz'], font_style)
+				ws.write(row_num, 8, obj['fSatzId'], font_style)
+				ws.write(row_num, 9, obj['lSatzId'], font_style)
+				ws.write(row_num, 10, obj['aTokens'], font_style)
 				if obj['aAntTags']:
-					ws.write(row_num, 6, obj['aAntTags']['t'], font_style)
+					ws.write(row_num, 11, obj['aAntTags']['t'], font_style)
 				dg = 0
 				for nATT in nAntTagsTitle:
 					if nATT['i'] in obj['nAntTags']:
-						ws.write(row_num, 7 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
+						ws.write(row_num, 12 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
 					dg += 1
 			wb.save(response)
 			return response
@@ -147,8 +158,10 @@ def auswertung(request, aTagEbene, aSeite):
 
 
 def getSatzFromTokenList(aTokens):
-	fToken = dbmodels.Saetze.objects.filter(token__id=aTokens[0])[0].token_set.all().order_by('token_reihung')[0]
-	lToken = dbmodels.Saetze.objects.filter(token__id=aTokens[len(aTokens) - 1])[0].token_set.all().order_by('token_reihung')
+	fSatz = dbmodels.Saetze.objects.filter(token__id=aTokens[0])[0]
+	fToken = fSatz.token_set.all().order_by('token_reihung')[0]
+	lSatz = dbmodels.Saetze.objects.filter(token__id=aTokens[len(aTokens) - 1])[0]
+	lToken = lSatz.token_set.all().order_by('token_reihung')
 	lToken = lToken[len(lToken) - 1]
 	text = ''
 	for aToken in adbmodels.token.objects.filter(
@@ -158,7 +171,7 @@ def getSatzFromTokenList(aTokens):
 		token_reihung__lte=lToken.token_reihung
 	).values('text', 'token_type_id_id').order_by('token_reihung'):
 		text += (' ' if aToken['token_type_id_id'] != 2 else '') + aToken['text']
-	return [fToken, lToken, text]
+	return [fSatz, fToken, lSatz, lToken, text]
 
 def startvue(request, ipk=0, tpk=0):
 	# Ist der User Angemeldet?

@@ -18,17 +18,22 @@
 	<br>
 	{% if aAuswertungen %}
 		<br>
-		<b>Treffer: {{ aCount }}</b> - {% if prev > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=prev %}">Zurück</a>{% else %}Zurück{% endif %} - {% if next > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=next %}">Weiter</a>{% else %}Weiter{% endif %} - <a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=0 %}?get=xml">XML</a><br>
+		<b>Treffer: {{ aCount }}</b> - {% if prev > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=prev %}">Zurück</a>{% else %}Zurück{% endif %} - {% if next > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=next %}">Weiter</a>{% else %}Weiter{% endif %} - <a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=0 %}?get=xls">XLS</a><br>
 		<br>
 		<table class="table table-bordered" style="width: auto; max-width: inherit; min-width: 100%; white-space: nowrap;">
 			<thead>
 				<tr>
 					<th>#</th>
 					<th>Transkript</th>
+					<th>tId</th>
 					<th>Informant</th>
+					<th>iId</th>
 					<th>vorheriger Satz</th>
 					<th>Sätze</th>
 					<th>nächster Satz</th>
+					<th>von sId</th>
+					<th>bis sId</th>
+					<th>Ausgewählte Tokens (Id)</th>
 					<th>{{ aAntTagsTitle }}</th>
 					{% for nATT in nAntTagsTitle %}
 						<th>{{ nATT.t }}</th>
@@ -40,10 +45,15 @@
 				<tr>
 					<td>{{ auswertung.aNr }}</td>
 					<td>{{ auswertung.aTrans }}</td>
+					<td>{{ auswertung.aTransId }}</td>
 					<td>{{ auswertung.aInf }}</td>
+					<td>{{ auswertung.aInfId }}</td>
 					<td>{{ auswertung.vSatz }}</td>
 					<td>{{ auswertung.aSaetze }}</td>
 					<td>{{ auswertung.nSatz }}</td>
+					<td>{{ auswertung.fSatzId }}</td>
+					<td>{{ auswertung.lSatzId }}</td>
+					<td>{{ auswertung.aTokens }}</td>
 					<td>{{ auswertung.aAntTags.t }}</td>
 					{% for nATT in nAntTagsTitle %}
 						<td>{% if nATT.i in auswertung.nAntTags %}{{ auswertung.nAntTags|get_item:nATT.i|get_item:'t' }}{% endif %}</td>
