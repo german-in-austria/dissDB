@@ -1,4 +1,5 @@
 from django.shortcuts import render_to_response, redirect
+from django.http import HttpResponse
 from django.template import RequestContext
 from django.db.models import Count, Q
 import Datenbank.models as dbmodels
@@ -13,6 +14,9 @@ import datetime
 def auswertung(request, aTagEbene, aSeite):
 	if not request.user.is_authenticated():
 		return redirect('dissdb_login')
+	getXml = False
+	if 'get' in request.GET and request.GET.get('get') == 'xml':
+		getXml = True
 	maxVars = 500
 	nTagEbenen = {}
 	aTagEbene = int(aTagEbene)
@@ -49,7 +53,7 @@ def auswertung(request, aTagEbene, aSeite):
 		aAntTagsTitle = nTagEbenen[aTagEbene]
 		nAntTagsTitle = []
 		aNr = aSeite * maxPerPage
-		for aAntwort in aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
+		for aAntwort in aAntwortenM if getXml else aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
 			aNr += 1
 			# Tag Ebene mit Tags
 			nAntTags = {}
@@ -60,7 +64,7 @@ def auswertung(request, aTagEbene, aSeite):
 					aAntTags = xDat
 				else:
 					nAntTags[xDat['e']['i']] = xDat
-					if xDat['e']['i'] not in nAntTagsTitle:
+					if xDat['e'] not in nAntTagsTitle:
 						nAntTagsTitle.append(xDat['e'])
 			# Tokens
 			aTokens = []
@@ -100,6 +104,45 @@ def auswertung(request, aTagEbene, aSeite):
 				nSatz = ''
 			# Datensatz
 			aAuswertungen.append({'aNr': aNr, 'aTrans': transName, 'aInf': aAntwort.von_Inf.Kuerzel, 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+		if getXml:
+			import xlwt
+			response = HttpResponse(content_type='text/ms-excel')
+			response['Content-Disposition'] = 'attachment; filename="tagebene_' + str(aTagEbene) + '_' + datetime.date.today().strftime('%Y%m%d') + '.xls"'
+			wb = xlwt.Workbook(encoding='utf-8')
+			ws = wb.add_sheet(aAntTagsTitle)
+			row_num = 0
+			columns = []
+			columns.append(('Nr', 2000))
+			columns.append(('Transkript', 6000))
+			columns.append(('Informant', 2000))
+			columns.append(('vorheriger Satz', 2000))
+			columns.append(('Sätze', 2000))
+			columns.append(('nächster Satz', 2000))
+			columns.append((aAntTagsTitle, 2000))
+			for nATT in nAntTagsTitle:
+				columns.append((nATT['t'], 2000))
+			font_style = xlwt.XFStyle()
+			font_style.font.bold = True
+			for col_num in range(len(columns)):
+				ws.write(row_num, col_num, columns[col_num][0], font_style)
+			font_style = xlwt.XFStyle()
+			for obj in aAuswertungen:
+				row_num += 1
+				ws.write(row_num, 0, obj['aNr'], font_style)
+				ws.write(row_num, 1, obj['aTrans'], font_style)
+				ws.write(row_num, 2, obj['aInf'], font_style)
+				ws.write(row_num, 3, obj['vSatz'], font_style)
+				ws.write(row_num, 4, obj['aSaetze'], font_style)
+				ws.write(row_num, 5, obj['nSatz'], font_style)
+				if obj['aAntTags']:
+					ws.write(row_num, 6, obj['aAntTags']['t'], font_style)
+				dg = 0
+				for nATT in nAntTagsTitle:
+					if nATT['i'] in obj['nAntTags']:
+						ws.write(row_num, 7 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
+					dg += 1
+			wb.save(response)
+			return response
 	return render_to_response('AnnotationsDB/auswertungstart.html', RequestContext(request, {'aTagEbene': aTagEbene, 'prev': prev, 'next': next, 'tagEbenen': aTagEbenen, 'aAuswertungen': aAuswertungen, 'aAntTagsTitle': aAntTagsTitle, 'nAntTagsTitle': nAntTagsTitle, 'aCount': aCount}))
 
 

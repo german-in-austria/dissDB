@@ -18,7 +18,7 @@
 	<br>
 	{% if aAuswertungen %}
 		<br>
-		<b>Treffer: {{ aCount }}</b> - {% if prev > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=prev %}">Zurück</a>{% else %}Zurück{% endif %} - {% if next > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=next %}">Weiter</a>{% else %}Weiter{% endif %}<br>
+		<b>Treffer: {{ aCount }}</b> - {% if prev > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=prev %}">Zurück</a>{% else %}Zurück{% endif %} - {% if next > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=next %}">Weiter</a>{% else %}Weiter{% endif %} - <a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=0 %}?get=xml">XML</a><br>
 		<br>
 		<table class="table table-bordered" style="width: auto; max-width: inherit; min-width: 100%; white-space: nowrap;">
 			<thead>
