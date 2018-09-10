@@ -104,7 +104,7 @@ def auswertung(request, aTagEbene, aSeite):
 			except IndexError:
 				nSatz = ''
 			# Datensatz
-			aAuswertungen.append({'aNr': aNr, 'fSatzId': str(fSatz.pk), 'lSatzId': str(lSatz.pk), 'aTrans': transName, 'aTransId': aTransId, 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+			aAuswertungen.append({'aNr': aNr, 'fSatzId': str(fSatz.pk), 'lSatzId': str(lSatz.pk), 'aTrans': transName, 'aTransId': aTransId, 'aAntwortId': str(aAntwort.pk), 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
 		if getXls:
 			import xlwt
 			response = HttpResponse(content_type='text/ms-excel')
@@ -118,6 +118,7 @@ def auswertung(request, aTagEbene, aSeite):
 			columns.append(('tId', 2000))
 			columns.append(('Informant', 2000))
 			columns.append(('iId', 2000))
+			columns.append(('aId', 2000))
 			columns.append(('vorheriger Satz', 2000))
 			columns.append(('Sätze', 2000))
 			columns.append(('nächster Satz', 2000))
@@ -140,19 +141,20 @@ def auswertung(request, aTagEbene, aSeite):
 				ws.write(row_num, 2, obj['aTransId'], font_style)
 				ws.write(row_num, 3, obj['aInf'], font_style)
 				ws.write(row_num, 4, obj['aInfId'], font_style)
-				ws.write(row_num, 5, obj['vSatz'], font_style)
-				ws.write(row_num, 6, obj['aSaetze'], font_style)
-				ws.write(row_num, 7, obj['nSatz'], font_style)
-				ws.write(row_num, 8, obj['aOrtho'], font_style)
-				ws.write(row_num, 9, obj['fSatzId'], font_style)
-				ws.write(row_num, 10, obj['lSatzId'], font_style)
-				ws.write(row_num, 11, obj['aTokens'], font_style)
+				ws.write(row_num, 5, int(obj['aAntwortId']), font_style)
+				ws.write(row_num, 6, obj['vSatz'], font_style)
+				ws.write(row_num, 7, obj['aSaetze'], font_style)
+				ws.write(row_num, 8, obj['nSatz'], font_style)
+				ws.write(row_num, 9, obj['aOrtho'], font_style)
+				ws.write(row_num, 10, int(obj['fSatzId']), font_style)
+				ws.write(row_num, 11, int(obj['lSatzId']), font_style)
+				ws.write(row_num, 12, obj['aTokens'], font_style)
 				if obj['aAntTags']:
-					ws.write(row_num, 12, obj['aAntTags']['t'], font_style)
+					ws.write(row_num, 13, obj['aAntTags']['t'], font_style)
 				dg = 0
 				for nATT in nAntTagsTitle:
 					if nATT['i'] in obj['nAntTags']:
-						ws.write(row_num, 13 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
+						ws.write(row_num, 14 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
 					dg += 1
 			wb.save(response)
 			return response
