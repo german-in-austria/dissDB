@@ -86,9 +86,9 @@ def auswertung(request, aTagEbene, aSeite):
 			transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
 			aTransId = adbmodels.transcript.objects.filter(token=aTokens[0])[0].pk
 			# Sätze erfassen
-			[fSatz, fToken, lSatz, lToken, aSaetze] = getSatzFromTokenList(aTokens)
+			[fSatz, fToken, lSatz, lToken, aSaetze, aOrtho] = getSatzFromTokenList(aTokens)
 			try:
-				[nix, nix, nix, nix, vSatz] = getSatzFromTokenList([adbmodels.token.objects.filter(
+				[nix, nix, nix, nix, vSatz, nix] = getSatzFromTokenList([adbmodels.token.objects.filter(
 					ID_Inf_id=fToken.ID_Inf_id,
 					transcript_id=fToken.transcript_id,
 					token_reihung__lt=fToken.token_reihung
@@ -96,7 +96,7 @@ def auswertung(request, aTagEbene, aSeite):
 			except IndexError:
 				vSatz = ''
 			try:
-				[nix, nix, nix, nix, nSatz] = getSatzFromTokenList([adbmodels.token.objects.filter(
+				[nix, nix, nix, nix, nSatz, nix] = getSatzFromTokenList([adbmodels.token.objects.filter(
 					ID_Inf_id=lToken.ID_Inf_id,
 					transcript_id=lToken.transcript_id,
 					token_reihung__gt=lToken.token_reihung
@@ -104,7 +104,7 @@ def auswertung(request, aTagEbene, aSeite):
 			except IndexError:
 				nSatz = ''
 			# Datensatz
-			aAuswertungen.append({'aNr': aNr, 'fSatzId': str(fSatz.pk), 'lSatzId': str(lSatz.pk), 'aTrans': transName, 'aTransId': aTransId, 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+			aAuswertungen.append({'aNr': aNr, 'fSatzId': str(fSatz.pk), 'lSatzId': str(lSatz.pk), 'aTrans': transName, 'aTransId': aTransId, 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
 		if getXls:
 			import xlwt
 			response = HttpResponse(content_type='text/ms-excel')
@@ -121,6 +121,7 @@ def auswertung(request, aTagEbene, aSeite):
 			columns.append(('vorheriger Satz', 2000))
 			columns.append(('Sätze', 2000))
 			columns.append(('nächster Satz', 2000))
+			columns.append(('Sätze in Ortho', 2000))
 			columns.append(('von sId', 2000))
 			columns.append(('bis sId', 2000))
 			columns.append(('Ausgewählte Tokens (Id)', 2000))
@@ -142,15 +143,16 @@ def auswertung(request, aTagEbene, aSeite):
 				ws.write(row_num, 5, obj['vSatz'], font_style)
 				ws.write(row_num, 6, obj['aSaetze'], font_style)
 				ws.write(row_num, 7, obj['nSatz'], font_style)
-				ws.write(row_num, 8, obj['fSatzId'], font_style)
-				ws.write(row_num, 9, obj['lSatzId'], font_style)
-				ws.write(row_num, 10, obj['aTokens'], font_style)
+				ws.write(row_num, 8, obj['aOrtho'], font_style)
+				ws.write(row_num, 9, obj['fSatzId'], font_style)
+				ws.write(row_num, 10, obj['lSatzId'], font_style)
+				ws.write(row_num, 11, obj['aTokens'], font_style)
 				if obj['aAntTags']:
-					ws.write(row_num, 11, obj['aAntTags']['t'], font_style)
+					ws.write(row_num, 12, obj['aAntTags']['t'], font_style)
 				dg = 0
 				for nATT in nAntTagsTitle:
 					if nATT['i'] in obj['nAntTags']:
-						ws.write(row_num, 12 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
+						ws.write(row_num, 13 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
 					dg += 1
 			wb.save(response)
 			return response
@@ -164,14 +166,17 @@ def getSatzFromTokenList(aTokens):
 	lToken = lSatz.token_set.all().order_by('token_reihung')
 	lToken = lToken[len(lToken) - 1]
 	text = ''
+	ortho = ''
 	for aToken in adbmodels.token.objects.filter(
 		ID_Inf_id=fToken.ID_Inf_id,
 		transcript_id=fToken.transcript_id,
 		token_reihung__gte=fToken.token_reihung,
 		token_reihung__lte=lToken.token_reihung
-	).values('text', 'token_type_id_id').order_by('token_reihung'):
+	).values('text', 'ortho', 'token_type_id_id').order_by('token_reihung'):
 		text += (' ' if aToken['token_type_id_id'] != 2 else '') + aToken['text']
-	return [fSatz, fToken, lSatz, lToken, text]
+		ortho += (' ' if aToken['token_type_id_id'] != 2 else '') + (aToken['ortho'] if aToken['ortho'] else aToken['text'])
+	return [fSatz, fToken, lSatz, lToken, text, ortho]
+
 
 def startvue(request, ipk=0, tpk=0):
 	# Ist der User Angemeldet?
