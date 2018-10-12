@@ -97,7 +97,9 @@ MIDDLEWARE_CLASSES = (
 	'corsheaders.middleware.CorsMiddleware',
 )
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = ('localhost:8080', 'transcrbe.dioe.at', 'dissdb.dioe.at')
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'DissDB.urls'
 
