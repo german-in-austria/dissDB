@@ -5,4 +5,6 @@ docker_builder:
     DOCKER_PASSWORD: ENCRYPTED[4faa4afd1cff430d438cd9cfb74814f9911e669e988b3601565c6c6d8e550d28eb79464409c06957e32dc0a48f0e4c4e]
   build_script: docker build --cache-from dioe/diss-db:latest --tag dioe/diss-db .
   login_script: docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
-  push_script: docker push dioe/diss-db && curl -i -X POST -H 'Content-Type: application/json' -d '{"text": "Cirrus CI built and pushed dioe/diss-db\n details: https://cirrus-ci.com/task/'$CIRRUS_TASK_ID'"}' https://mm.dioe.at/hooks/9xkct75bzpbn3cm1kiut3jx1ur
+  push_script: >
+    docker push dioe/diss-db &&
+    curl -i -X POST -H "Content-Type\: application/json" -d '{"text": "Cirrus CI built and pushed dioe/diss-db\n details: https://cirrus-ci.com/task/'$CIRRUS_TASK_ID'"}' https://mm.dioe.at/hooks/9xkct75bzpbn3cm1kiut3jx1ur
