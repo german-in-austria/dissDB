@@ -5,5 +5,4 @@ docker_builder:
     DOCKER_USERNAME: "ENCRYPTED[bc413d5d5d87b88b9fb08b2ab41e7b4dc86c47b062496627f145828c40085730e4e031d24a671f31ef225c6371b1c90d]"
   build_script: "docker build --cache-from dioe/diss-db:latest --tag dioe/diss-db ."
   login_script: "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD"
-  only_if: "$CIRRUS_BRANCH == \"cirrus-build\""
   push_script: "docker push dioe/diss-db && curl -i -X POST -H \"Content-Type: application/json\" -d '{\"text\": \"Cirrus CI built and pushed dioe/diss-db\\n details: https://cirrus-ci.com/task/'$CIRRUS_TASK_ID'\"}' https://mm.dioe.at/hooks/9xkct75bzpbn3cm1kiut3jx1ur\n"
