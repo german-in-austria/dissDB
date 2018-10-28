@@ -275,15 +275,15 @@ const tokensets = {
 						}
 						var aList = JSON.parse(JSON.stringify(this.aTokenReihungInf[aInf]));
 						this.aTokenSets[aTokSetId].tx = aList.splice(aList.indexOf(this.aTokenSets[aTokSetId].ivt), aList.indexOf(this.aTokenSets[aTokSetId].ibt) + 1 - aList.indexOf(this.aTokenSets[aTokSetId].ivt));
-						this.aTokenSets[aTokSetId].ok = true;
+						this.aTokenSets[aTokSetId].ok = this.aTokenSets[aTokSetId].tx.length > 0;
 					}
 				} else if (this.aTokenSets[aTokSetId].t && this.listeWerteInListe(this.aTokenSets[aTokSetId].t, this.aTokenReihung)) {
 					this.aTokenSets[aTokSetId].t = this.sortEventIdListe(this.aTokenSets[aTokSetId].t);
-					this.aTokenSets[aTokSetId].ok = true;
+					this.aTokenSets[aTokSetId].ok = this.aTokenSets[aTokSetId].t.length > 0;
 				}
 				// Verwendeten Tokens aktuelles TokenSet zuweisen
 				var xt = this.aTokenSets[aTokSetId].t || this.aTokenSets[aTokSetId].tx;
-				if (xt) {
+				if (xt && this.aTokenSets[aTokSetId].ok) {
 					xt.forEach(function (tId) {
 						if (!this.aTokens[tId].tokenSets) {
 							this.aTokens[tId].tokenSets = [];
