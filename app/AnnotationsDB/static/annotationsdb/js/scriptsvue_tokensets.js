@@ -8,6 +8,7 @@ const tokensets = {
 		}, this);
 		this.debouncedUpdateATokenSets();
 	},
+
 	/* deleteATokenSet: TokenSet löschen */
 	deleteATokenSet: function (delTokenSetID, direkt = false, aDirekt = false) {
 		if (direkt || confirm('Soll das TokenSet ID ' + delTokenSetID + ' gelöscht werden?')) {
@@ -25,6 +26,7 @@ const tokensets = {
 			console.log('TokenSet ID ' + delTokenSetID + ' gelöscht!');
 		}
 	},
+
 	/* updateTokenSetData: TokenSet ändern */
 	updateTokenSetData: function () {
 		var aTSPK = this.aTokenSetInfo['pk'];
@@ -187,6 +189,7 @@ const tokensets = {
 		this.updateATokenSets();
 		this.focusFocusCatch();
 	},
+
 	/* TokenSet Bereich neu setzen */
 	setATokenSetBereich: function (aTokenSetId, aTokenId, feld, direkt = false) {
 		if (this.aTokens[aTokenId].i !== this.aTokens[this.aTokenSets[aTokenSetId].ivt].i) {
@@ -218,6 +221,7 @@ const tokensets = {
 		this.updateATokenSets();
 		this.focusFocusCatch();
 	},
+
 	/* TokenSet Liste Token hinzufügen/entfernen */
 	toggleATokenSetListe: function (aTokenSetId, aTokenId, direkt = false) {
 		if (this.aTokens[aTokenId].i !== this.aTokens[this.aTokenSets[aTokenSetId].t[0]].i) {
@@ -243,8 +247,10 @@ const tokensets = {
 		this.updateATokenSets();
 		this.focusFocusCatch();
 	},
+
 	updateATokenSets: function () {
 		console.log('updateATokenSets');
+		// Verbindung bei Tokens zu TokenSets überprüfen ob die Tokens noch verwendet werden
 		Object.keys(this.aTokens).map(function (tId, iI) {
 			if (this.aTokens[tId].tokenSets) {
 				_.remove(this.aTokens[tId].tokenSets, (n) => {
@@ -255,6 +261,7 @@ const tokensets = {
 				}
 			}
 		}, this);
+		// TokenSets aktuallisieren/berechnen
 		Object.keys(this.aTokenSets).map(function (aTokSetId, iI) {
 			if (!this.aTokenSets[aTokSetId].ok) {
 				var aTokSetIdInt = parseInt(aTokSetId);
@@ -268,14 +275,15 @@ const tokensets = {
 						}
 						var aList = JSON.parse(JSON.stringify(this.aTokenReihungInf[aInf]));
 						this.aTokenSets[aTokSetId].tx = aList.splice(aList.indexOf(this.aTokenSets[aTokSetId].ivt), aList.indexOf(this.aTokenSets[aTokSetId].ibt) + 1 - aList.indexOf(this.aTokenSets[aTokSetId].ivt));
-						this.aTokenSets[aTokSetId].ok = true;
+						this.aTokenSets[aTokSetId].ok = this.aTokenSets[aTokSetId].tx.length > 0;
 					}
 				} else if (this.aTokenSets[aTokSetId].t && this.listeWerteInListe(this.aTokenSets[aTokSetId].t, this.aTokenReihung)) {
 					this.aTokenSets[aTokSetId].t = this.sortEventIdListe(this.aTokenSets[aTokSetId].t);
-					this.aTokenSets[aTokSetId].ok = true;
+					this.aTokenSets[aTokSetId].ok = this.aTokenSets[aTokSetId].t.length > 0;
 				}
+				// Verwendeten Tokens aktuelles TokenSet zuweisen
 				var xt = this.aTokenSets[aTokSetId].t || this.aTokenSets[aTokSetId].tx;
-				if (xt) {
+				if (xt && this.aTokenSets[aTokSetId].ok) {
 					xt.forEach(function (tId) {
 						if (!this.aTokens[tId].tokenSets) {
 							this.aTokens[tId].tokenSets = [];
@@ -326,6 +334,7 @@ const tokensets = {
 		}
 		this.svgSelTokenList = this.selTokenListe;
 	},
+
 	reRenderSelToken: function () {
 		var tSelToken = this.selToken;
 		this.selToken = -1;
