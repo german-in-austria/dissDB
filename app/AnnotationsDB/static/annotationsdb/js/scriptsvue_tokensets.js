@@ -8,6 +8,7 @@ const tokensets = {
 		}, this);
 		this.debouncedUpdateATokenSets();
 	},
+
 	/* deleteATokenSet: TokenSet löschen */
 	deleteATokenSet: function (delTokenSetID, direkt = false, aDirekt = false) {
 		if (direkt || confirm('Soll das TokenSet ID ' + delTokenSetID + ' gelöscht werden?')) {
@@ -25,6 +26,7 @@ const tokensets = {
 			console.log('TokenSet ID ' + delTokenSetID + ' gelöscht!');
 		}
 	},
+
 	/* updateTokenSetData: TokenSet ändern */
 	updateTokenSetData: function () {
 		var aTSPK = this.aTokenSetInfo['pk'];
@@ -187,6 +189,7 @@ const tokensets = {
 		this.updateATokenSets();
 		this.focusFocusCatch();
 	},
+
 	/* TokenSet Bereich neu setzen */
 	setATokenSetBereich: function (aTokenSetId, aTokenId, feld, direkt = false) {
 		if (this.aTokens[aTokenId].i !== this.aTokens[this.aTokenSets[aTokenSetId].ivt].i) {
@@ -218,6 +221,7 @@ const tokensets = {
 		this.updateATokenSets();
 		this.focusFocusCatch();
 	},
+
 	/* TokenSet Liste Token hinzufügen/entfernen */
 	toggleATokenSetListe: function (aTokenSetId, aTokenId, direkt = false) {
 		if (this.aTokens[aTokenId].i !== this.aTokens[this.aTokenSets[aTokenSetId].t[0]].i) {
@@ -243,6 +247,7 @@ const tokensets = {
 		this.updateATokenSets();
 		this.focusFocusCatch();
 	},
+
 	updateATokenSets: function () {
 		console.log('updateATokenSets');
 		Object.keys(this.aTokens).map(function (tId, iI) {
@@ -326,6 +331,7 @@ const tokensets = {
 		}
 		this.svgSelTokenList = this.selTokenListe;
 	},
+
 	reRenderSelToken: function () {
 		var tSelToken = this.selToken;
 		this.selToken = -1;
