@@ -250,6 +250,7 @@ const tokensets = {
 
 	updateATokenSets: function () {
 		console.log('updateATokenSets');
+		// Verbindung bei Tokens zu TokenSets überprüfen ob die Tokens noch verwendet werden
 		Object.keys(this.aTokens).map(function (tId, iI) {
 			if (this.aTokens[tId].tokenSets) {
 				_.remove(this.aTokens[tId].tokenSets, (n) => {
@@ -260,6 +261,7 @@ const tokensets = {
 				}
 			}
 		}, this);
+		// TokenSets aktuallisieren/berechnen
 		Object.keys(this.aTokenSets).map(function (aTokSetId, iI) {
 			if (!this.aTokenSets[aTokSetId].ok) {
 				var aTokSetIdInt = parseInt(aTokSetId);
@@ -279,6 +281,7 @@ const tokensets = {
 					this.aTokenSets[aTokSetId].t = this.sortEventIdListe(this.aTokenSets[aTokSetId].t);
 					this.aTokenSets[aTokSetId].ok = true;
 				}
+				// Verwendeten Tokens aktuelles TokenSet zuweisen
 				var xt = this.aTokenSets[aTokSetId].t || this.aTokenSets[aTokSetId].tx;
 				if (xt) {
 					xt.forEach(function (tId) {
