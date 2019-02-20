@@ -40,6 +40,7 @@ class Saetze(models.Model):
 	Transkript			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Transkript")
 	Standardorth		= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Standardorth")
 	Kommentar			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Kommentar")
+	svgfilename			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Displacy SVG Filename")
 	def __str__(self):
 		return "{}, {} ({})".format(self.Transkript,self.Standardorth,self.Kommentar)
 	class Meta:

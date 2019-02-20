@@ -32,6 +32,12 @@ class token(models.Model):
 	ttpos				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="TreeTagger POS")
 	ttlemma				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="TreeTagger Lemma")
 	ttcheckword			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="TreeTagger Checkword")
+	sppos				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy POS")
+	sptag				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Tag")
+	splemma				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Lemma")
+	spdep				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Dependency Relation")
+	sphead				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Dependency Relation")
+	spenttype			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Named Entity Type")
 	def __str__(self):
 		return "\"{}\"".format(self.text)
 	class Meta:
