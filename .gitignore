@@ -95,3 +95,4 @@ app/**/migrations/*.py
 # Sonstiges
 /*.bat
 app/*.sqlite3
+webpack_src/**/

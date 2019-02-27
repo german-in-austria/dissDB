@@ -9,6 +9,7 @@ RUN echo "deb-src http://in.archive.ubuntu.com/ubuntu/ precise-updates main rest
 RUN apt-get update
 RUN apt-get install -y software-properties-common
 RUN add-apt-repository ppa:fkrull/deadsnakes
+RUN apt-get update -yq && apt-get install -y curl gnupg && curl -sL https://deb.nodesource.com/setup_8.x | bash && apt-get install -y nodejs
 RUN apt-get update
 RUN apt-get install -y git
 RUN apt-get install -y python3.5
@@ -38,6 +39,11 @@ COPY supervisor-app.conf /etc/supervisor/conf.d/
 COPY app/requirements.txt /home/docker/code/app/
 RUN pip3 install -r /home/docker/code/app/requirements.txt
 RUN pip3 install psycopg2
+
+# Webpacks
+RUN mkdir /home/docker/webpack_src/
+RUN git clone https://github.com/german-in-austria/annotationsDB-frontend /home/docker/webpack_src/annotationsDB --branch v0.0
+RUN cd /home/docker/webpack_src/annotationsDB && npm install && npm run build
 
 # ADD (THE REST OF) OUR CODE
 COPY . /home/docker/code/
