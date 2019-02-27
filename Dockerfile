@@ -41,9 +41,9 @@ RUN pip3 install -r /home/docker/code/app/requirements.txt
 RUN pip3 install psycopg2
 
 # Webpacks
-RUN mkdir /home/docker/webpack_src/
-RUN git clone https://github.com/german-in-austria/annotationsDB-frontend /home/docker/webpack_src/annotationsDB --branch v0.0
-RUN cd /home/docker/webpack_src/annotationsDB && npm install && npm run build
+RUN mkdir /home/docker/code/webpack_src/
+RUN git clone https://github.com/german-in-austria/annotationsDB-frontend /home/docker/code/webpack_src/annotationsDB --branch v0.0
+RUN cd /home/docker/code/webpack_src/annotationsDB && npm install && npm run build
 
 # ADD (THE REST OF) OUR CODE
 COPY . /home/docker/code/
