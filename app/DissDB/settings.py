@@ -72,6 +72,7 @@ INSTALLED_APPS = (
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
+	'webpack_loader',
 	'corsheaders',
 	'crispy_forms',
 	'private_storage',
@@ -229,4 +230,13 @@ STATICFILES_DIRS = (
 	os.path.join(BASE_DIR, 'DB', 'static'),
 	os.path.join(BASE_DIR, 'tags', 'static'),
 	os.path.join(BASE_DIR, 'AnnotationsDB', 'static'),
+	os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'dist')),
 )
+
+print(os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'dist')))
+
+WEBPACK_LOADER = {
+	'annotationsDB': {
+		'STATS_FILE': os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'webpack-stats.json')),
+	}
+}

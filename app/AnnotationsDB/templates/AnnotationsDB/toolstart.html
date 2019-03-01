@@ -1,0 +1,22 @@
+{% extends 'main/basis.html' %}
+{% load render_bundle from webpack_loader %}
+{% load staticfiles %}
+{% load dioeTags %}
+{% load crispy_forms_tags %}
+{% block title %} - Annotations Tool{% endblock %}
+{% block ueberschrift %} - Annotations Tool{% endblock %}
+{% block sitecss %}
+	{% render_bundle 'app' 'css' 'annotationsDB' %}
+{% endblock %}
+{% block inhalt %}
+	<div id="app"></div>
+{% endblock %}
+{% block sitejs %}
+	<script>
+		var csrf='{{ csrf_token }}';
+		var audiodir = '{% settings_value "AUDIO_URL" %}';
+	</script>
+	{% render_bundle 'manifest' 'js' 'annotationsDB' %}
+	{% render_bundle 'vendor' 'js' 'annotationsDB' %}
+	{% render_bundle 'app' 'js' 'annotationsDB' %}
+{% endblock %}

@@ -6,6 +6,9 @@ from operator import itemgetter
 from django.template.defaultfilters import stringfilter
 from django.template import Context
 from Startseite.views import sysstatus
+from webpack_loader import utils
+from webpack_loader.exceptions import WebpackBundleLookupError
+from django.utils.safestring import mark_safe
 import json
 
 register = template.Library()
@@ -13,10 +16,10 @@ register = template.Library()
 
 # Genus > {{ value|genus:"maskulin,feminin,neutrum" }} Als Value wird 'm' oder 'f' erwartet sonst wird das Neutrum verwendet.
 @register.filter(name='genus')
-def genus(value,arg):
-	if value=='m':
+def genus(value, arg):
+	if value == 'm':
 		return arg.split(',')[0]
-	if value=='f':
+	if value == 'f':
 		return arg.split(',')[1]
 	return arg.split(',')[2]
 
@@ -25,12 +28,13 @@ def genus(value,arg):
 @register.assignment_tag(takes_context=True)
 def navbarMaker(context):
 	anavbar = []
-	for value in settings.INSTALLED_APPS: # Alle Installierten Apps durchgehen und nach navbar.py suchen.
+	for value in settings.INSTALLED_APPS:  # Alle Installierten Apps durchgehen und nach navbar.py suchen.
 		try:
 			anavbar.extend(import_module("%s.navbar" % value).navbar(context.request))
 		except ImportError:
 			pass
-	return sorted(anavbar,key=itemgetter('sort'))
+	return sorted(anavbar, key=itemgetter('sort'))
+
 
 # Systemstatus #
 @register.assignment_tag(takes_context=True)
@@ -39,19 +43,22 @@ def getSysStatus(context):
 	asysstatus['json'] = json.dumps(asysstatus)
 	return asysstatus
 
+
 @register.assignment_tag
 def to_list(*args):
 	return args
 
+
 @register.assignment_tag
-def add_to_list(alist,add):
+def add_to_list(alist, add):
 	if alist:
 		return alist + [add]
 	else:
 		return [add]
 
+
 @register.simple_tag
-def getFeldVal(alist,val):
+def getFeldVal(alist, val):
 	if alist:
 		for aDict in alist:
 			if 'name' in aDict and aDict['name'] == val:
@@ -61,9 +68,11 @@ def getFeldVal(alist,val):
 					return
 	return
 
+
 @register.simple_tag(takes_context=True)
-def render(context,value):
+def render(context, value):
 	return template.engines['django'].from_string(value).render(context)
+
 
 # settings value
 @register.simple_tag
@@ -72,7 +81,17 @@ def settings_value(name):
 		return getattr(settings, name, '')
 	return ''
 
+
 # {{ mydict|get_item:item.NAME }}
 @register.filter
 def get_item(dictionary, key):
 	return dictionary.get(key)
+
+
+@register.simple_tag
+def render_bundle(bundle_name, extension=None, config='DEFAULT', attrs=''):
+	try:
+		tags = utils.get_as_tags(bundle_name, extension=extension, config=config, attrs=attrs)
+	except WebpackBundleLookupError as e:
+		return''
+	return mark_safe('\n'.join(tags))

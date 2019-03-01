@@ -468,6 +468,11 @@ def startvue(request, ipk=0, tpk=0):
 	return render_to_response('AnnotationsDB/startvue.html', RequestContext(request))
 
 
+def tool(request):
+	from webpack_loader import utils
+	return render_to_response('AnnotationsDB/toolstart.html', RequestContext(request))
+
+
 def getTagFamilie(Tags):
 	afam = []
 	oTags = []
