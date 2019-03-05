@@ -159,7 +159,7 @@ def transcriptSave(request, aPk):
 		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
 	tpk = int(aPk)
 	if tpk > 0:
-		sData = json.loads(request.POST.get('saveData'))
+		sData = json.loads(request.body)
 		if 'aEvents' in sData:
 			for key, aEvent in enumerate(sData['aEvents']):
 				try:
