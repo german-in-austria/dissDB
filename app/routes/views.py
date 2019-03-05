@@ -154,6 +154,43 @@ def transcript(request, aPk, aNr):
 	return httpOutput(json.dumps({'error': 'Fehlerhafte PK'}), 'application/json')
 
 
+def transcriptSave(request, aPk):
+	if not request.user.is_authenticated():
+		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
+	tpk = int(aPk)
+	if tpk > 0:
+		sData = json.loads(request.POST.get('saveData'))
+		if 'aEvents' in sData:
+			for key, aEvent in enumerate(sData['aEvents']):
+				try:
+					if aEvent['status'] == 'delete':
+						sData['aEvents'][key]['newStatus'] == 'deleted'
+					elif aEvent['pk'] < 1:
+						sData['aEvents'][key]['newPk'] = 10000000 + -aEvent['pk']
+						sData['aEvents'][key]['newStatus'] = 'inserted'
+					else:
+						sData['aEvents'][key]['newStatus'] = 'updated'
+				except Exception as e:
+					sData['aEvents'][key]['newStatus'] = 'error'
+					sData['aEvents'][key]['error'] = str(type(e)) + ' - ' + str(e)
+		if 'aTokens' in sData:
+			for key, aToken in sData['aTokens'].items():
+				try:
+					aId = int(key)
+					if aToken['status'] == 'delete':
+						sData['aTokens'][key]['newStatus'] == 'deleted'
+					elif aId < 1:
+						sData['aTokens'][key]['newPk'] = 10000000 + -aId
+						sData['aTokens'][key]['newStatus'] = 'inserted'
+					else:
+						sData['aTokens'][key]['newStatus'] = 'updated'
+				except Exception as e:
+					sData['aEvents'][key]['newStatus'] = 'error'
+					sData['aEvents'][key]['error'] = str(type(e)) + ' - ' + str(e)
+		return httpOutput(json.dumps(sData), 'application/json')
+	return httpOutput(json.dumps({'error': 'Fehlerhafte PK'}), 'application/json')
+
+
 def getTagFamilie(Tags):
 	afam = []
 	oTags = []
