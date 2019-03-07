@@ -8,6 +8,7 @@ from DB.funktionenDB import httpOutput
 import operator
 from copy import deepcopy
 import datetime
+from django.views.decorators.csrf import csrf_exempt
 
 
 def transcripts(request):
@@ -154,6 +155,7 @@ def transcript(request, aPk, aNr):
 	return httpOutput(json.dumps({'error': 'Fehlerhafte PK'}), 'application/json')
 
 
+@csrf_exempt
 def transcriptSave(request, aPk):
 	if not request.user.is_authenticated():
 		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
