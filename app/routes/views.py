@@ -180,15 +180,15 @@ def transcriptSave(request, aPk):
 				aId = int(key)
 				try:
 					if aToken['status'] == 'delete':
-						sData['aTokens'][key]['newStatus'] = 'deleted'
+						sData['aTokens'][aId]['newStatus'] = 'deleted'
 					elif aId < 1:
-						sData['aTokens'][key]['newPk'] = 10000000 + -aId
-						sData['aTokens'][key]['newStatus'] = 'inserted'
+						sData['aTokens'][aId]['newPk'] = 10000000 + -aId
+						sData['aTokens'][aId]['newStatus'] = 'inserted'
 					else:
-						sData['aTokens'][key]['newStatus'] = 'updated'
+						sData['aTokens'][aId]['newStatus'] = 'updated'
 				except Exception as e:
-					sData['aEvents'][key]['newStatus'] = 'error'
-					sData['aEvents'][key]['error'] = str(type(e)) + ' - ' + str(e)
+					sData['aEvents'][aId]['newStatus'] = 'error'
+					sData['aEvents'][aId]['error'] = str(type(e)) + ' - ' + str(e)
 		return httpOutput(json.dumps(sData), 'application/json')
 	return httpOutput(json.dumps({'error': 'Fehlerhafte PK'}), 'application/json')
 
