@@ -177,8 +177,8 @@ def transcriptSave(request, aPk):
 					sData['aEvents'][key]['error'] = str(type(e)) + ' - ' + str(e)
 		if 'aTokens' in sData:
 			for key, aToken in sData['aTokens'].items():
+				aId = int(key)
 				try:
-					aId = int(key)
 					if aToken['status'] == 'delete':
 						sData['aTokens'][key]['newStatus'] = 'deleted'
 					elif aId < 1:
