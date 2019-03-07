@@ -166,7 +166,7 @@ def transcriptSave(request, aPk):
 			for key, aEvent in enumerate(sData['aEvents']):
 				try:
 					if aEvent['status'] == 'delete':
-						sData['aEvents'][key]['newStatus'] == 'deleted'
+						sData['aEvents'][key]['newStatus'] = 'deleted'
 					elif aEvent['pk'] < 1:
 						sData['aEvents'][key]['newPk'] = 10000000 + -aEvent['pk']
 						sData['aEvents'][key]['newStatus'] = 'inserted'
@@ -180,7 +180,7 @@ def transcriptSave(request, aPk):
 				try:
 					aId = int(key)
 					if aToken['status'] == 'delete':
-						sData['aTokens'][key]['newStatus'] == 'deleted'
+						sData['aTokens'][key]['newStatus'] = 'deleted'
 					elif aId < 1:
 						sData['aTokens'][key]['newPk'] = 10000000 + -aId
 						sData['aTokens'][key]['newStatus'] = 'inserted'
