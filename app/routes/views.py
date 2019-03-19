@@ -9,6 +9,7 @@ import operator
 from copy import deepcopy
 import datetime
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.dateparse import parse_duration
 
 
 def transcripts(request):
@@ -160,21 +161,43 @@ def transcriptSave(request, aPk):
 	if not request.user.is_authenticated():
 		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
 	tpk = int(aPk)
+	# Testen: $.post( "/routes/transcript/save/1/", '{"aTokens": {"6061": {"e": -3,"i": 2,"s": 15010,"sr": 2,"t": "tich","to": "","tr": 6061,"tt": 1,"fo": 6060,"status": "update"},"-5": {"e": 1479,"i": 2,"s": -1,"sr": -1,"t": ",","to": "","tr": 6069,"tt": 2,"status": "insert"}}}').always(function(x) { console.log(x); });
 	if tpk > 0:
 		sData = json.loads(request.body.decode('utf-8'))
+		eventPkChanges = {}
 		if 'aEvents' in sData:
 			for key, aEvent in enumerate(sData['aEvents']):
 				try:
 					if aEvent['status'] == 'delete':
+						aElement = adbmodels.event.objects.get(id=sData['aEvents'][key]['pk'])
+						aElement.delete()
 						sData['aEvents'][key]['newStatus'] = 'deleted'
-					elif aEvent['pk'] < 1:
-						sData['aEvents'][key]['newPk'] = 10000000 + -aEvent['pk']
-						sData['aEvents'][key]['newStatus'] = 'inserted'
+						print('event', key, 'deleted')
 					else:
-						sData['aEvents'][key]['newStatus'] = 'updated'
+						if aEvent['pk'] < 1:
+							aElement = adbmodels.event()
+						else:
+							aElement = adbmodels.event.objects.get(id=sData['aEvents'][key]['pk'])
+						# Daten setzen
+						aElement.start_time = parse_duration(sData['aEvents'][key]['s'])
+						aElement.end_time = parse_duration(sData['aEvents'][key]['e'])
+						aElement.layer = sData['aEvents'][key]['l'] if sData['aEvents'][key]['l'] > 0 else None
+						aElement.save()
+						sData['aEvents'][key]['s'] = str(aElement.start_time)  # "0:01:35.098000"
+						sData['aEvents'][key]['e'] = str(aElement.end_time)
+						sData['aEvents'][key]['l'] = str(aElement.layer if aElement.layer else 0)
+						if aEvent['pk'] < 1:
+							sData['aEvents'][key]['newPk'] = aElement.pk
+							eventPkChanges[sData['aEvents'][key]['pk']] = aElement.pk
+							sData['aEvents'][key]['newStatus'] = 'inserted'
+							print('event', key, 'inserted')
+						else:
+							sData['aEvents'][key]['newStatus'] = 'updated'
+							print('event', key, 'updated')
 				except Exception as e:
 					sData['aEvents'][key]['newStatus'] = 'error'
 					sData['aEvents'][key]['error'] = str(type(e)) + ' - ' + str(e)
+					print('event', key, 'error', sData['aEvents'][key]['error'])
 		if 'aTokens' in sData:
 			for key, aToken in sData['aTokens'].items():
 				aId = int(key)
