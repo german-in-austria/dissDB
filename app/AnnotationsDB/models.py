@@ -2,8 +2,8 @@ from django.db import models
 
 
 class event(models.Model):
-	start_time			= models.DurationField(																				  verbose_name="Start Zeit")
-	end_time			= models.DurationField(																				  verbose_name="End Zeit")
+	start_time			= models.DurationField(						  null=True												, verbose_name="Start Zeit")
+	end_time			= models.DurationField(						  null=True												, verbose_name="End Zeit")
 	layer				= models.IntegerField(						  null=True												, verbose_name="Layer")
 	def __str__(self):
 		return "{} - {} bis {}".format(self.layer, self.start_time, self.end_time)
@@ -22,8 +22,8 @@ class token(models.Model):
 	fragment_of			= models.ForeignKey('token', related_name='rn_token_fragment_of', blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Fragment von")
 	token_reihung		= models.IntegerField(						  null=True												, verbose_name="Token Reihung")
 	event_id			= models.ForeignKey('event', related_name='rn_token_event_id', blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Event ID")
-	start_timepoint		= models.DurationField(																				  verbose_name="Start Zeitpunkt")
-	end_timepoint		= models.DurationField(																				  verbose_name="End Zeitpunkt")
+	start_timepoint		= models.DurationField(						  null=True												, verbose_name="Start Zeitpunkt")
+	end_timepoint		= models.DurationField(						  null=True												, verbose_name="End Zeitpunkt")
 	transcript_id		= models.ForeignKey('transcript'			, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Transcript ID")
 	likely_error		= models.BooleanField(default=False																	, verbose_name="Eventueller Fehler")
 	sentence_id			= models.ForeignKey('Datenbank.Saetze'		, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Sentence ID")
