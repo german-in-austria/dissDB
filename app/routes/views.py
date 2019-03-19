@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.dateparse import parse_duration
 import time
 import sys
+from django.db import transaction
 
 
 def transcripts(request):
@@ -171,42 +172,43 @@ def transcriptSave(request, aPk):
 		starttime = time.time()
 		sData['sys_timer'] = {}
 		if 'aEvents' in sData:
-			for key, aEvent in enumerate(sData['aEvents']):
-				try:
-					aEventKey[sData['aEvents'][key]['pk']] = key
-					if aEvent['status'] == 'delete':
-						aElement = adbmodels.event.objects.get(id=sData['aEvents'][key]['pk'])
-						aElement.delete()
-						sData['aEvents'][key]['newStatus'] = 'deleted'
-						# print('event', key, 'deleted')
-					else:
-						if aEvent['pk'] < 1:
-							aElement = adbmodels.event()
-						else:
+			with transaction.atomic():
+				for key, aEvent in enumerate(sData['aEvents']):
+					try:
+						aEventKey[sData['aEvents'][key]['pk']] = key
+						if aEvent['status'] == 'delete':
 							aElement = adbmodels.event.objects.get(id=sData['aEvents'][key]['pk'])
-						# Daten setzen
-						aElement.start_time = parse_duration(sData['aEvents'][key]['s'])
-						aElement.end_time = parse_duration(sData['aEvents'][key]['e'])
-						aElement.layer = sData['aEvents'][key]['l'] if sData['aEvents'][key]['l'] > 0 else None
-						# Speichern
-						aElement.save()
-						# Erneut einlesen
-						sData['aEvents'][key]['s'] = str(aElement.start_time)  # "0:01:35.098000"
-						sData['aEvents'][key]['e'] = str(aElement.end_time)
-						sData['aEvents'][key]['l'] = str(aElement.layer if aElement.layer else 0)
-						if aEvent['pk'] < 1:
-							sData['aEvents'][key]['newPk'] = aElement.pk
-							eventPkChanges[sData['aEvents'][key]['pk']] = aElement.pk
-							sData['aEvents'][key]['newStatus'] = 'inserted'
-							# print('event', key, 'inserted')
+							aElement.delete()
+							sData['aEvents'][key]['newStatus'] = 'deleted'
+							# print('event', key, 'deleted')
 						else:
-							sData['aEvents'][key]['newStatus'] = 'updated'
-							# print('event', key, 'updated')
-				except Exception as e:
-					exc_type, exc_obj, exc_tb = sys.exc_info()
-					sData['aEvents'][key]['newStatus'] = 'error'
-					sData['aEvents'][key]['error'] = str(exc_tb.tb_lineno) + ' | ' + str(type(e)) + ' - ' + str(e)
-					print('event', key, 'error', sData['aEvents'][key]['error'])
+							if aEvent['pk'] < 1:
+								aElement = adbmodels.event()
+							else:
+								aElement = adbmodels.event.objects.get(id=sData['aEvents'][key]['pk'])
+							# Daten setzen
+							aElement.start_time = parse_duration(sData['aEvents'][key]['s'])
+							aElement.end_time = parse_duration(sData['aEvents'][key]['e'])
+							aElement.layer = sData['aEvents'][key]['l'] if sData['aEvents'][key]['l'] > 0 else None
+							# Speichern
+							aElement.save()
+							# Erneut einlesen
+							sData['aEvents'][key]['s'] = str(aElement.start_time)  # "0:01:35.098000"
+							sData['aEvents'][key]['e'] = str(aElement.end_time)
+							sData['aEvents'][key]['l'] = str(aElement.layer if aElement.layer else 0)
+							if aEvent['pk'] < 1:
+								sData['aEvents'][key]['newPk'] = aElement.pk
+								eventPkChanges[sData['aEvents'][key]['pk']] = aElement.pk
+								sData['aEvents'][key]['newStatus'] = 'inserted'
+								# print('event', key, 'inserted')
+							else:
+								sData['aEvents'][key]['newStatus'] = 'updated'
+								# print('event', key, 'updated')
+					except Exception as e:
+						exc_type, exc_obj, exc_tb = sys.exc_info()
+						sData['aEvents'][key]['newStatus'] = 'error'
+						sData['aEvents'][key]['error'] = str(exc_tb.tb_lineno) + ' | ' + str(type(e)) + ' - ' + str(e)
+						print('event', key, 'error', sData['aEvents'][key]['error'])
 		sData['sys_timer']['aEvents'] = time.time() - starttime
 		print('aEvents', sData['sys_timer']['aEvents'], 'sec.')
 		starttime = time.time()
@@ -214,81 +216,82 @@ def transcriptSave(request, aPk):
 			dg = 0
 			xdg = 0
 			aLen = len(sData['aTokens'])
-			for key, aToken in sData['aTokens'].items():
-				aId = int(key)
-				dg = dg + 1
-				xdg = xdg + 1
-				if dg > 99:
-					dg = 0
-					print(xdg, '/', aLen)
-				try:
-					if aToken['status'] == 'delete':
-						aElement = adbmodels.token.objects.get(id=aId)
-						aElement.delete()
-						sData['aTokens'][key]['newStatus'] = 'deleted'
-						# print('token', key, 'deleted')
-					else:
-						aEventPk = sData['aTokens'][key]['e']
-						if sData['aTokens'][key]['e'] in aEventKey:
-							if 'newPk' in sData['aEvents'][aEventKey[sData['aTokens'][key]['e']]]:
-								aEventPk = sData['aEvents'][aEventKey[sData['aTokens'][key]['e']]]['newPk']
-						if aId < 1:
-							aElement = adbmodels.token()
-						else:
+			with transaction.atomic():
+				for key, aToken in sData['aTokens'].items():
+					aId = int(key)
+					dg = dg + 1
+					xdg = xdg + 1
+					if dg > 99:
+						dg = 0
+						print(xdg, '/', aLen)
+					try:
+						if aToken['status'] == 'delete':
 							aElement = adbmodels.token.objects.get(id=aId)
-						# Daten setzen
-						aElement.text = sData['aTokens'][key]['t']
-						aElement.token_type_id_id = sData['aTokens'][key]['tt']
-						aElement.token_reihung = sData['aTokens'][key]['tr']
-						aElement.event_id_id = aEventPk
-						aElement.text_in_ortho = sData['aTokens'][key]['to']
-						aElement.ID_Inf_id = sData['aTokens'][key]['i']
-						aElement.ortho = sData['aTokens'][key]['o'] if 'o' in sData['aTokens'][key] else None
-						aElement.sentence_id_id = sData['aTokens'][key]['s'] if 's' in sData['aTokens'][key] and sData['aTokens'][key]['s'] > 0 else None
-						aElement.sequence_in_sentence = sData['aTokens'][key]['sr'] if 'sr' in sData['aTokens'][key] and sData['aTokens'][key]['sr'] > 0 else None
-						aElement.fragment_of_id = sData['aTokens'][key]['fo'] if 'fo' in sData['aTokens'][key] and sData['aTokens'][key]['fo'] > 0 else None
-						aElement.likely_error = True if 'le' in sData['aTokens'][key] and sData['aTokens'][key]['le'] > 0 else False
-						# Speichern
-						aElement.save()
-						# Erneut einlesen
-						sData['aTokens'][key]['t'] = aElement.text
-						sData['aTokens'][key]['tt'] = aElement.token_type_id_id
-						sData['aTokens'][key]['tr'] = aElement.token_reihung
-						sData['aTokens'][key]['e'] = aElement.event_id_id
-						sData['aTokens'][key]['to'] = aElement.text_in_ortho
-						sData['aTokens'][key]['i'] = aElement.ID_Inf_id
-						if aElement.ortho:
-							sData['aTokens'][key]['o'] = aElement.ortho
-						elif 'o' in sData['aTokens'][key]:
-							del sData['aTokens'][key]['o']
-						if aElement.sentence_id_id:
-							sData['aTokens'][key]['s'] = aElement.sentence_id_id
-						elif 's' in sData['aTokens'][key]:
-							del sData['aTokens'][key]['s']
-						if aElement.sequence_in_sentence:
-							sData['aTokens'][key]['sr'] = aElement.sequence_in_sentence
-						elif 'sr' in sData['aTokens'][key]:
-							del sData['aTokens'][key]['sr']
-						if aElement.fragment_of_id:
-							sData['aTokens'][key]['fo'] = aElement.fragment_of_id
-						elif 'fo' in sData['aTokens'][key]:
-							del sData['aTokens'][key]['fo']
-						if aElement.likely_error:
-							sData['aTokens'][key]['le'] = 1
-						elif 'le' in sData['aTokens'][key]:
-							del sData['aTokens'][key]['le']
-						if aId < 1:
-							sData['aTokens'][key]['newPk'] = aElement.pk
-							sData['aTokens'][key]['newStatus'] = 'inserted'
-							print('token', aId, 'inserted', sData['aTokens'][key]['newPk'], 'in event', aEventPk)
+							aElement.delete()
+							sData['aTokens'][key]['newStatus'] = 'deleted'
+							# print('token', key, 'deleted')
 						else:
-							sData['aTokens'][key]['newStatus'] = 'updated'
-							# print('token', key, 'updated')
-				except Exception as e:
-					exc_type, exc_obj, exc_tb = sys.exc_info()
-					sData['aTokens'][key]['newStatus'] = 'error'
-					sData['aTokens'][key]['error'] = str(exc_tb.tb_lineno) + ' | ' + str(type(e)) + ' - ' + str(e)
-					print('token:', key, 'error:', sData['aTokens'][key]['error'], sData['aTokens'][key])
+							aEventPk = sData['aTokens'][key]['e']
+							if sData['aTokens'][key]['e'] in aEventKey:
+								if 'newPk' in sData['aEvents'][aEventKey[sData['aTokens'][key]['e']]]:
+									aEventPk = sData['aEvents'][aEventKey[sData['aTokens'][key]['e']]]['newPk']
+							if aId < 1:
+								aElement = adbmodels.token()
+							else:
+								aElement = adbmodels.token.objects.get(id=aId)
+							# Daten setzen
+							aElement.text = sData['aTokens'][key]['t']
+							aElement.token_type_id_id = sData['aTokens'][key]['tt']
+							aElement.token_reihung = sData['aTokens'][key]['tr']
+							aElement.event_id_id = aEventPk
+							aElement.text_in_ortho = sData['aTokens'][key]['to']
+							aElement.ID_Inf_id = sData['aTokens'][key]['i']
+							aElement.ortho = sData['aTokens'][key]['o'] if 'o' in sData['aTokens'][key] else None
+							aElement.sentence_id_id = sData['aTokens'][key]['s'] if 's' in sData['aTokens'][key] and sData['aTokens'][key]['s'] > 0 else None
+							aElement.sequence_in_sentence = sData['aTokens'][key]['sr'] if 'sr' in sData['aTokens'][key] and sData['aTokens'][key]['sr'] > 0 else None
+							aElement.fragment_of_id = sData['aTokens'][key]['fo'] if 'fo' in sData['aTokens'][key] and sData['aTokens'][key]['fo'] > 0 else None
+							aElement.likely_error = True if 'le' in sData['aTokens'][key] and sData['aTokens'][key]['le'] > 0 else False
+							# Speichern
+							aElement.save()
+							# Erneut einlesen
+							sData['aTokens'][key]['t'] = aElement.text
+							sData['aTokens'][key]['tt'] = aElement.token_type_id_id
+							sData['aTokens'][key]['tr'] = aElement.token_reihung
+							sData['aTokens'][key]['e'] = aElement.event_id_id
+							sData['aTokens'][key]['to'] = aElement.text_in_ortho
+							sData['aTokens'][key]['i'] = aElement.ID_Inf_id
+							if aElement.ortho:
+								sData['aTokens'][key]['o'] = aElement.ortho
+							elif 'o' in sData['aTokens'][key]:
+								del sData['aTokens'][key]['o']
+							if aElement.sentence_id_id:
+								sData['aTokens'][key]['s'] = aElement.sentence_id_id
+							elif 's' in sData['aTokens'][key]:
+								del sData['aTokens'][key]['s']
+							if aElement.sequence_in_sentence:
+								sData['aTokens'][key]['sr'] = aElement.sequence_in_sentence
+							elif 'sr' in sData['aTokens'][key]:
+								del sData['aTokens'][key]['sr']
+							if aElement.fragment_of_id:
+								sData['aTokens'][key]['fo'] = aElement.fragment_of_id
+							elif 'fo' in sData['aTokens'][key]:
+								del sData['aTokens'][key]['fo']
+							if aElement.likely_error:
+								sData['aTokens'][key]['le'] = 1
+							elif 'le' in sData['aTokens'][key]:
+								del sData['aTokens'][key]['le']
+							if aId < 1:
+								sData['aTokens'][key]['newPk'] = aElement.pk
+								sData['aTokens'][key]['newStatus'] = 'inserted'
+								print('token', aId, 'inserted', sData['aTokens'][key]['newPk'], 'in event', aEventPk)
+							else:
+								sData['aTokens'][key]['newStatus'] = 'updated'
+								# print('token', key, 'updated')
+					except Exception as e:
+						exc_type, exc_obj, exc_tb = sys.exc_info()
+						sData['aTokens'][key]['newStatus'] = 'error'
+						sData['aTokens'][key]['error'] = str(exc_tb.tb_lineno) + ' | ' + str(type(e)) + ' - ' + str(e)
+						print('token:', key, 'error:', sData['aTokens'][key]['error'], sData['aTokens'][key])
 		sData['sys_timer']['aTokens'] = time.time() - starttime
 		print('aTokens', sData['sys_timer']['aTokens'], 'sec.')
 		starttime = time.time()
