@@ -208,9 +208,9 @@ def transcriptSave(request, aPk):
 						exc_type, exc_obj, exc_tb = sys.exc_info()
 						sData['aEvents'][key]['newStatus'] = 'error'
 						sData['aEvents'][key]['error'] = str(exc_tb.tb_lineno) + ' | ' + str(type(e)) + ' - ' + str(e)
-						print('event', key, 'error', sData['aEvents'][key]['error'])
+						# print('event', key, 'error', sData['aEvents'][key]['error'])
 		sData['sys_timer']['aEvents'] = time.time() - starttime
-		print('aEvents', sData['sys_timer']['aEvents'], 'sec.')
+		# print('aEvents', sData['sys_timer']['aEvents'], 'sec.')
 		starttime = time.time()
 		if 'aTokens' in sData:
 			dg = 0
@@ -223,7 +223,7 @@ def transcriptSave(request, aPk):
 					xdg = xdg + 1
 					if dg > 99:
 						dg = 0
-						print(xdg, '/', aLen)
+						# print(xdg, '/', aLen)
 					try:
 						if aToken['status'] == 'delete':
 							aElement = adbmodels.token.objects.get(id=aId)
@@ -291,9 +291,9 @@ def transcriptSave(request, aPk):
 						exc_type, exc_obj, exc_tb = sys.exc_info()
 						sData['aTokens'][key]['newStatus'] = 'error'
 						sData['aTokens'][key]['error'] = str(exc_tb.tb_lineno) + ' | ' + str(type(e)) + ' - ' + str(e)
-						print('token:', key, 'error:', sData['aTokens'][key]['error'], sData['aTokens'][key])
+						# print('token:', key, 'error:', sData['aTokens'][key]['error'], sData['aTokens'][key])
 		sData['sys_timer']['aTokens'] = time.time() - starttime
-		print('aTokens', sData['sys_timer']['aTokens'], 'sec.')
+		# print('aTokens', sData['sys_timer']['aTokens'], 'sec.')
 		starttime = time.time()
 		if 'aEvents' in sData:  # Update tid
 			for key, aEvent in enumerate(sData['aEvents']):
@@ -304,7 +304,7 @@ def transcriptSave(request, aPk):
 						sData['aEvents'][key]['tid'][str(av.ID_Inf_id)] = []
 					sData['aEvents'][key]['tid'][str(av.ID_Inf_id)].append(av.pk)
 		sData['sys_timer']['aEventsTid'] = time.time() - starttime
-		print('aEventsTid', sData['sys_timer']['aEventsTid'], 'sec.')
+		# print('aEventsTid', sData['sys_timer']['aEventsTid'], 'sec.')
 		return httpOutput(json.dumps(sData), 'application/json')
 	return httpOutput(json.dumps({'error': 'Fehlerhafte PK'}), 'application/json')
 
