@@ -175,7 +175,12 @@ def transcriptSave(request, aPk):
 			for key, aEvent in enumerate(sData['aEvents']):
 				try:
 					aEventKey[sData['aEvents'][key]['pk']] = key
-					if aEvent['status'] != 'delete' and aEvent['pk'] < 1:
+					if aEvent['status'] == 'delete':
+						aElement = adbmodels.event.objects.get(id=sData['aEvents'][key]['pk'])
+						aElement.delete()
+						sData['aEvents'][key]['newStatus'] = 'deleted'
+						# print('event', key, 'deleted')
+					elif aEvent['pk'] < 1:
 						eventUpdateAndInsert(sData, key, aEvent, aEventKey, eventPkChanges)
 				except Exception as e:
 					exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -185,12 +190,7 @@ def transcriptSave(request, aPk):
 			with transaction.atomic():
 				for key, aEvent in enumerate(sData['aEvents']):
 					try:
-						if aEvent['status'] == 'delete':
-							aElement = adbmodels.event.objects.get(id=sData['aEvents'][key]['pk'])
-							aElement.delete()
-							sData['aEvents'][key]['newStatus'] = 'deleted'
-							# print('event', key, 'deleted')
-						elif aEvent['pk'] > 0:
+						if aEvent['status'] != 'delete' and aEvent['pk'] > 0:
 							eventUpdateAndInsert(sData, key, aEvent, aEventKey, eventPkChanges)
 					except Exception as e:
 						exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -204,7 +204,12 @@ def transcriptSave(request, aPk):
 			for key, aToken in sData['aTokens'].items():
 				aId = int(key)
 				try:
-					if aToken['status'] != 'delete' and aId < 1:
+					if aToken['status'] == 'delete':
+						aElement = adbmodels.token.objects.get(id=aId)
+						aElement.delete()
+						sData['aTokens'][key]['newStatus'] = 'deleted'
+						# print('token', key, 'deleted')
+					elif aId < 1:
 						tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId)
 				except Exception as e:
 					exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -215,12 +220,7 @@ def transcriptSave(request, aPk):
 				for key, aToken in sData['aTokens'].items():
 					aId = int(key)
 					try:
-						if aToken['status'] == 'delete':
-							aElement = adbmodels.token.objects.get(id=aId)
-							aElement.delete()
-							sData['aTokens'][key]['newStatus'] = 'deleted'
-							# print('token', key, 'deleted')
-						elif aId > 0:
+						if aToken['status'] != 'delete' and aId > 0:
 							tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId)
 					except Exception as e:
 						exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -272,9 +272,9 @@ def eventUpdateAndInsert(sData, key, aEvent, aEventKey, eventPkChanges):
 	# Speichern
 	aElement.save()
 	# Erneut einlesen
-	sData['aEvents'][key]['s'] = str(aElement.start_time)  # "0:01:35.098000"
-	sData['aEvents'][key]['e'] = str(aElement.end_time)
-	sData['aEvents'][key]['l'] = str(aElement.layer if aElement.layer else 0)
+	# sData['aEvents'][key]['s'] = str(aElement.start_time)  # "0:01:35.098000"
+	# sData['aEvents'][key]['e'] = str(aElement.end_time)
+	# sData['aEvents'][key]['l'] = str(aElement.layer if aElement.layer else 0)
 	if aEvent['pk'] < 1:
 		sData['aEvents'][key]['newPk'] = aElement.pk
 		eventPkChanges[sData['aEvents'][key]['pk']] = aElement.pk
@@ -283,6 +283,7 @@ def eventUpdateAndInsert(sData, key, aEvent, aEventKey, eventPkChanges):
 	else:
 		sData['aEvents'][key]['newStatus'] = 'updated'
 		# print('event', key, 'updated')
+
 
 def tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId):
 	aEventPk = sData['aTokens'][key]['e']
@@ -308,32 +309,32 @@ def tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId):
 	# Speichern
 	aElement.save()
 	# Erneut einlesen
-	sData['aTokens'][key]['t'] = aElement.text
-	sData['aTokens'][key]['tt'] = aElement.token_type_id_id
-	sData['aTokens'][key]['tr'] = aElement.token_reihung
-	sData['aTokens'][key]['e'] = aElement.event_id_id
-	sData['aTokens'][key]['to'] = aElement.text_in_ortho
-	sData['aTokens'][key]['i'] = aElement.ID_Inf_id
-	if aElement.ortho:
-		sData['aTokens'][key]['o'] = aElement.ortho
-	elif 'o' in sData['aTokens'][key]:
-		del sData['aTokens'][key]['o']
-	if aElement.sentence_id_id:
-		sData['aTokens'][key]['s'] = aElement.sentence_id_id
-	elif 's' in sData['aTokens'][key]:
-		del sData['aTokens'][key]['s']
-	if aElement.sequence_in_sentence:
-		sData['aTokens'][key]['sr'] = aElement.sequence_in_sentence
-	elif 'sr' in sData['aTokens'][key]:
-		del sData['aTokens'][key]['sr']
-	if aElement.fragment_of_id:
-		sData['aTokens'][key]['fo'] = aElement.fragment_of_id
-	elif 'fo' in sData['aTokens'][key]:
-		del sData['aTokens'][key]['fo']
-	if aElement.likely_error:
-		sData['aTokens'][key]['le'] = 1
-	elif 'le' in sData['aTokens'][key]:
-		del sData['aTokens'][key]['le']
+	# sData['aTokens'][key]['t'] = aElement.text
+	# sData['aTokens'][key]['tt'] = aElement.token_type_id_id
+	# sData['aTokens'][key]['tr'] = aElement.token_reihung
+	# sData['aTokens'][key]['e'] = aElement.event_id_id
+	# sData['aTokens'][key]['to'] = aElement.text_in_ortho
+	# sData['aTokens'][key]['i'] = aElement.ID_Inf_id
+	# if aElement.ortho:
+	# 	sData['aTokens'][key]['o'] = aElement.ortho
+	# elif 'o' in sData['aTokens'][key]:
+	# 	del sData['aTokens'][key]['o']
+	# if aElement.sentence_id_id:
+	# 	sData['aTokens'][key]['s'] = aElement.sentence_id_id
+	# elif 's' in sData['aTokens'][key]:
+	# 	del sData['aTokens'][key]['s']
+	# if aElement.sequence_in_sentence:
+	# 	sData['aTokens'][key]['sr'] = aElement.sequence_in_sentence
+	# elif 'sr' in sData['aTokens'][key]:
+	# 	del sData['aTokens'][key]['sr']
+	# if aElement.fragment_of_id:
+	# 	sData['aTokens'][key]['fo'] = aElement.fragment_of_id
+	# elif 'fo' in sData['aTokens'][key]:
+	# 	del sData['aTokens'][key]['fo']
+	# if aElement.likely_error:
+	# 	sData['aTokens'][key]['le'] = 1
+	# elif 'le' in sData['aTokens'][key]:
+	# 	del sData['aTokens'][key]['le']
 	if aId < 1:
 		sData['aTokens'][key]['newPk'] = aElement.pk
 		sData['aTokens'][key]['newStatus'] = 'inserted'
