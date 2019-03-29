@@ -465,11 +465,11 @@ def startvue(request, ipk=0, tpk=0):
 			aTranskripte = [{'model': {'pk': val.pk, 'model_str': str(val), 'update_time': val.update_time.strftime("%d.%m.%Y- %H:%M"), 'name': val.name}, 'count': val.token_set.count()} for val in [adbmodels.transcript.objects.get(pk=atid['id']) for atid in adbmodels.transcript.objects.filter(token__ID_Inf=ipk).values('id').annotate(total=Count('id'))]]
 		return httpOutput(json.dumps({'informantenMitTranskripte': informantenMitTranskripte, 'aInformant': ipk, 'aTranskripte': aTranskripte}), 'application/json')
 
-	if 'getTranscripts' in request.POST:  # TOOL
+	if 'getTranscriptsInfList' in request.POST:  # TOOL
 		infList = [{
 			'pk': aInf.pk,
 			'modelStr': str(aInf),
-			'transcriptsPk': [aToken['transcript_id'] for aToken in adbmodels.token.objects.filter(ID_Inf=aInf.pk).values('ID_Inf', 'transcript_id').distinct().order_by('ID_Inf')]
+			'transcriptsPKs': [aToken['transcript_id'] for aToken in adbmodels.token.objects.filter(ID_Inf=aInf.pk).values('ID_Inf', 'transcript_id').distinct().order_by('ID_Inf')]
 		} for aInf in dbmodels.Informanten.objects.all()]
 		transList = [{
 			'pk': aTrans.pk,
