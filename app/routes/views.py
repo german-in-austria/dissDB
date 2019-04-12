@@ -210,7 +210,7 @@ def transcriptSave(request, aPk):
 						sData['aTokens'][key]['newStatus'] = 'deleted'
 						# print('token', key, 'deleted')
 					elif aId < 1:
-						tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId)
+						tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId, tpk)
 				except Exception as e:
 					exc_type, exc_obj, exc_tb = sys.exc_info()
 					sData['aTokens'][key]['newStatus'] = 'error'
@@ -221,7 +221,7 @@ def transcriptSave(request, aPk):
 					aId = int(key)
 					try:
 						if aToken['status'] != 'delete' and aId > 0:
-							tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId)
+							tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId, tpk)
 					except Exception as e:
 						exc_type, exc_obj, exc_tb = sys.exc_info()
 						sData['aTokens'][key]['newStatus'] = 'error'
@@ -285,7 +285,7 @@ def eventUpdateAndInsert(sData, key, aEvent, aEventKey, eventPkChanges):
 		# print('event', key, 'updated')
 
 
-def tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId):
+def tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId, tpk):
 	aEventPk = sData['aTokens'][key]['e']
 	if sData['aTokens'][key]['e'] in aEventKey:
 		if 'newPk' in sData['aEvents'][aEventKey[sData['aTokens'][key]['e']]]:
@@ -294,6 +294,7 @@ def tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId):
 		aElement = adbmodels.token()
 	else:
 		aElement = adbmodels.token.objects.get(id=aId)
+		aElement.transcript_id_id = tpk
 	# Daten setzen
 	aElement.text = sData['aTokens'][key]['t']
 	aElement.token_type_id_id = sData['aTokens'][key]['tt']
