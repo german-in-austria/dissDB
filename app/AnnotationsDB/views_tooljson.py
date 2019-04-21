@@ -296,15 +296,33 @@ def views_tooljson(request, ipk=0, tpk=0):
 		infList = [{
 			'pk': aInf.pk,
 			'modelStr': str(aInf),
-			'transcriptsPKs': [aToken['transcript_id'] for aToken in adbmodels.token.objects.filter(ID_Inf=aInf.pk).values('ID_Inf', 'transcript_id').distinct().order_by('ID_Inf')]
-		} for aInf in dbmodels.Informanten.objects.all()]
+			'transcriptsPKs': aInf.transcriptsPKs
+		} for aInf in dbmodels.Informanten.objects.raw('''
+			SELECT "Informanten".*,
+				ARRAY(
+					SELECT "token"."transcript_id_id"
+						FROM "token"
+						WHERE "token"."ID_Inf_id" = "Informanten"."id"
+						GROUP BY "token"."transcript_id_id"
+						ORDER BY "token"."transcript_id_id" ASC
+				) AS "transcriptsPKs"
+			FROM "Informanten"
+			ORDER BY "Informanten"."id" ASC
+		''')]
 		transList = [{
 			'pk': aTrans.pk,
 			'modelStr': str(aTrans),
 			'updateTime': aTrans.update_time.strftime("%d.%m.%Y- %H:%M"),
 			'name': aTrans.name,
-			'tokenCount': aTrans.token_set.count()
-		} for aTrans in [adbmodels.transcript.objects.get(pk=atid['id']) for atid in adbmodels.transcript.objects.all().values('id').annotate(total=Count('id'))]]
+			'tokenCount': aTrans.tokenCount
+		} for aTrans in adbmodels.transcript.objects.raw('''
+			SELECT "transcript".*,
+						(SELECT COUNT(*) FROM "token" WHERE "token".transcript_id_id = "transcript".id) AS "tokenCount"
+					FROM "transcript"
+					ORDER BY "transcript"."id" ASC
+		''')]
+		# from django.db import connection
+		# print(connection.queries)
 		return httpOutput(json.dumps({'informanten': infList, 'transcripts': transList}), 'application/json')
 
 	return render_to_response('AnnotationsDB/startvue.html', RequestContext(request))
