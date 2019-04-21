@@ -233,7 +233,7 @@ STATICFILES_DIRS = (
 	os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'dist')),
 )
 
-print(os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'dist')))
+# print(os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'dist')))
 
 WEBPACK_LOADER = {
 	'annotationsDB': {

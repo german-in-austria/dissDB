@@ -1,2 +1,1 @@
-manage.py runserver
-pause
+workon dissDB & manage.py runserver & pause
