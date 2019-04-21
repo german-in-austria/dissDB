@@ -5,6 +5,7 @@ class event(models.Model):
 	start_time			= models.DurationField(						  null=True												, verbose_name="Start Zeit")
 	end_time			= models.DurationField(						  null=True												, verbose_name="End Zeit")
 	layer				= models.IntegerField(						  null=True												, verbose_name="Layer")
+	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 	def __str__(self):
 		return "{} - {} bis {}".format(self.layer, self.start_time, self.end_time)
 	class Meta:
@@ -38,6 +39,7 @@ class token(models.Model):
 	spdep				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Dependency Relation")
 	sphead				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Dependency Relation")
 	spenttype			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Named Entity Type")
+	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 	def __str__(self):
 		return "\"{}\"".format(self.text)
 	class Meta:
@@ -49,6 +51,7 @@ class token(models.Model):
 
 class token_type(models.Model):
 	token_type_name		= models.CharField(max_length=511																	, verbose_name="Token Typ Name")
+	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 	def __str__(self):
 		return "{}".format(self.token_type_name)
 	class Meta:
@@ -61,6 +64,7 @@ class token_type(models.Model):
 class transcript(models.Model):
 	name				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Name")
 	update_time			= models.DateTimeField(																				  verbose_name="Update Zeit")
+	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 	def __str__(self):
 		return "{} ({})".format(self.name, self.update_time)
 	class Meta:
@@ -73,6 +77,7 @@ class transcript(models.Model):
 class tbl_tokenset(models.Model):
 	id_von_token		= models.ForeignKey('token', related_name='rn_id_von_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Von Token ID")
 	id_bis_token		= models.ForeignKey('token', related_name='rn_id_bis_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Bis Token ID")
+	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 	def __str__(self):
 		return "{} - {}".format(self.id_von_token, self.id_bis_token)
 	class Meta:
@@ -85,6 +90,7 @@ class tbl_tokenset(models.Model):
 class tbl_tokentoset(models.Model):
 	id_tokenset			= models.ForeignKey('tbl_tokenset'									, on_delete=models.CASCADE		, verbose_name="Tokenset")
 	id_token			= models.ForeignKey('token'											, on_delete=models.CASCADE		, verbose_name="Token")
+	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 	def __str__(self):
 		return "{} <- {}".format(self.id_tokenset, self.id_token)
 	class Meta:
