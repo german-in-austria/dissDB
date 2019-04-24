@@ -15,6 +15,46 @@ import sys
 from django.db import transaction
 
 
+def einzelerhebungen(request):
+	if not request.user.is_authenticated():
+		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
+	aEinzelErhebungen = []
+	try:
+		pass
+		for aEinzelErhebung in dbmodels.EinzelErhebung.objects.all():
+			aInformanten = [{
+				'Kuerzel': aInformant.ID_Inf.Kuerzel,
+				'Kuerzel_anonym': aInformant.ID_Inf.Kuerzel_anonym,
+				'Name': aInformant.ID_Inf.Name,
+				'Vorname': aInformant.ID_Inf.Vorname,
+				'weiblich': aInformant.ID_Inf.weiblich,
+				'Geburtsdatum': aInformant.ID_Inf.Geburtsdatum.strftime("%d.%m.%Y- %H:%M"),
+				'ErhAlterCa': aInformant.ID_Inf.ErhAlterCa,
+				'Wohnbezirk': aInformant.ID_Inf.Wohnbezirk,
+				'DialKomp': aInformant.ID_Inf.DialKomp,
+				'StandKomp': aInformant.ID_Inf.StandKomp,
+				'ZwischKomp': aInformant.ID_Inf.ZwischKomp,
+				'GWPGruppe': aInformant.ID_Inf.GWPGruppe
+			} for aInformant in aEinzelErhebung.inf_zu_erhebung_set.all()]
+			aEinzelErhebungen.append({
+				'pk': aEinzelErhebung.pk,
+				'ID_Erh': aEinzelErhebung.ID_Erh_id,
+				'id_transcript': aEinzelErhebung.id_transcript_id,
+				'Datum': aEinzelErhebung.Datum.strftime("%d.%m.%Y- %H:%M"),
+				'Explorator': aEinzelErhebung.Explorator,
+				'Kommentar': aEinzelErhebung.Kommentar,
+				'Dateipfad': aEinzelErhebung.Dateipfad,
+				'Audiofile': aEinzelErhebung.Audiofile,
+				'Logfile': aEinzelErhebung.Logfile,
+				'Ort': aEinzelErhebung.Ort,
+				'Besonderheiten': aEinzelErhebung.Besonderheiten,
+				'FX_Informanten': aInformanten
+			})
+	except Exception as e:
+		return httpOutput(json.dumps({'error': str(type(e)) + ' - ' + str(e)}), 'application/json')
+	return httpOutput(json.dumps({'einzelerhebungen': aEinzelErhebungen, 'error': None}), 'application/json')
+
+
 def transcripts(request):
 	if not request.user.is_authenticated():
 		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
