@@ -290,7 +290,7 @@ def tagsystemvue(request):
 	if 'getTags' in request.POST:
 		tags = {}
 		tagsReihung = []
-		for tag in dbmodels.Tags.objects.all():
+		for tag in dbmodels.Tags.objects.prefetch_related('tagebenezutag_set', 'id_ParentTag', 'id_ChildTag').all():
 			tagsReihung.append(tag.pk)
 			tags[tag.pk] = {
 				't': tag.Tag,
@@ -303,7 +303,7 @@ def tagsystemvue(request):
 				tags[tag.pk]['zppk'] = tag.zu_Phaenomen_id
 			try:
 				tmpTezt = []
-				for tezt in dbmodels.TagEbeneZuTag.objects.filter(id_Tag_id=tag.pk):
+				for tezt in tag.tagebenezutag_set.all():
 					tmpTezt.append(tezt.id_TagEbene_id)
 				if tmpTezt:
 					tags[tag.pk]['tezt'] = tmpTezt
@@ -311,7 +311,7 @@ def tagsystemvue(request):
 				pass
 			try:
 				tmpChilds = []
-				for aCTags in dbmodels.TagFamilie.objects.filter(id_ParentTag_id=tag.pk).order_by('id_ParentTag__AReihung'):
+				for aCTags in tag.id_ParentTag.all().order_by('id_ParentTag__AReihung'):
 					tmpChilds.append(aCTags.id_ChildTag_id)
 				if tmpChilds:
 					tags[tag.pk]['c'] = tmpChilds
@@ -319,7 +319,7 @@ def tagsystemvue(request):
 				pass
 			try:
 				tmpParents = []
-				for aCTags in dbmodels.TagFamilie.objects.filter(id_ChildTag_id=tag.pk).order_by('id_ChildTag__AReihung'):
+				for aCTags in tag.id_ChildTag.all().order_by('id_ChildTag__AReihung'):
 					tmpParents.append(aCTags.id_ParentTag_id)
 				if tmpParents:
 					tags[tag.pk]['p'] = tmpParents
@@ -330,7 +330,7 @@ def tagsystemvue(request):
 		import bearbeiten.models as bmodels
 		aPresetTags = []
 		# for val in bmodels.PresetTags.objects.filter(Q(presettagszuaufgabe__id_Aufgabe__pk=apk) | Q(presettagszuaufgabe=None)):
-		for val in bmodels.PresetTags.objects.all():
+		for val in bmodels.PresetTags.objects.prefetch_related('id_Tags').all():
 			tfVal = getTagFamiliePT(val.id_Tags.all())
 			if tfVal:
 				aPresetTags.append({'tf': tfVal})
