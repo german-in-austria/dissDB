@@ -65,6 +65,7 @@ class transcript(models.Model):
 	name				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Name")
 	update_time			= models.DateTimeField(																				  verbose_name="Update Zeit")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
+	default_tier		= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="default_tier")
 	def __str__(self):
 		return "{} ({})".format(self.name, self.update_time)
 	class Meta:

@@ -20,7 +20,6 @@ def einzelerhebungen(request):
 		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
 	aEinzelErhebungen = []
 	try:
-		pass
 		for aEinzelErhebung in dbmodels.EinzelErhebung.objects.all():
 			aInformanten = [{
 				'Kuerzel': aInformant.ID_Inf.Kuerzel,
@@ -53,6 +52,35 @@ def einzelerhebungen(request):
 	except Exception as e:
 		return httpOutput(json.dumps({'error': str(type(e)) + ' - ' + str(e)}), 'application/json')
 	return httpOutput(json.dumps({'einzelerhebungen': aEinzelErhebungen, 'error': None}), 'application/json')
+
+
+@csrf_exempt
+def transcriptCreate(request):
+	if not request.user.is_authenticated():
+		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
+	try:
+		nId = -1
+		sData = json.loads(request.body.decode('utf-8'))
+		aV_id_einzelerhebung = sData['id_einzelerhebung']
+		aV_name = sData['name']
+		aV_default_tier = sData['default_tier']
+		if aV_id_einzelerhebung:
+			aErhebung = dbmodels.EinzelErhebung.objects.get(pk=aV_id_einzelerhebung)
+			if aErhebung:
+				aElement = adbmodels.transcript()
+				aElement.name = aV_name
+				aElement.default_tier = aV_default_tier
+				aElement.save()
+				nId = aElement.pk
+				aErhebung.id_transcript = aElement
+				aErhebung.save()
+			else:
+				return httpOutput(json.dumps({'error': 'Erhebung mit ID "' + str(aV_id_einzelerhebung) + '" nicht gefunden!'}), 'application/json')
+		else:
+			return httpOutput(json.dumps({'error': '"id_einzelerhebung" fehlt!'}), 'application/json')
+	except Exception as e:
+		return httpOutput(json.dumps({'error': str(type(e)) + ' - ' + str(e)}), 'application/json')
+	return httpOutput(json.dumps({'transcript_id': str(nId), 'error': None}), 'application/json')
 
 
 def transcripts(request):
