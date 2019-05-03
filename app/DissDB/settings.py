@@ -231,6 +231,7 @@ STATICFILES_DIRS = (
 	os.path.join(BASE_DIR, 'tags', 'static'),
 	os.path.join(BASE_DIR, 'AnnotationsDB', 'static'),
 	os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'dist')),
+	os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'tagsystemVUE', 'dist')),
 )
 
 # print(os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'dist')))
@@ -238,5 +239,8 @@ STATICFILES_DIRS = (
 WEBPACK_LOADER = {
 	'annotationsDB': {
 		'STATS_FILE': os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'webpack-stats.json')),
+	},
+	'tagsystemVUE': {
+		'STATS_FILE': os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'tagsystemVUE', 'webpack-stats.json')),
 	}
 }
