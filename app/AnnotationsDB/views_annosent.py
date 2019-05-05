@@ -5,14 +5,22 @@ from django.template import RequestContext
 import AnnotationsDB.models as adbmodels
 import json
 from DB.funktionenDB import httpOutput
-# import datetime
+import datetime
 
 
 def views_annosent(request):
 	if 'refresh' in request.GET:
 		dauer = adbmodels.tbl_refreshlog_mat_adhocsentences.refresh()
 		return httpOutput(json.dumps({'OK': True, 'refreshed': dauer}), 'application/json')
+	adavg = datetime.timedelta()
+	adavgdg = 0
+	for aRl in adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[:5]:
+		adavg += aRl.duration
+		adavgdg += 1
+	if adavgdg > 0:
+		adavg = adavg / adavgdg
 	return render_to_response('AnnotationsDB/annosent.html', RequestContext(request, {
 		'tbl_refreshlog_mat_adhocsentences': adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at'),
+		'tbl_refreshlog_mat_adhocsentences_avg': adavg,
 		'mat_adhocsentences': adbmodels.mat_adhocsentences.objects.all()[:20]
 	}))

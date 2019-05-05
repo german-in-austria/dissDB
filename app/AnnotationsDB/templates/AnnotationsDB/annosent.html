@@ -13,7 +13,7 @@
 		<br>
 		<h3>Anno-sent</h3>
 		<br>
-		<a href="{% url 'AnnotationsDB:annosent' %}?refresh=1">Refresh</a><br>
+		<a href="{% url 'AnnotationsDB:annosent' %}?refresh=1"><b>Refresh</b></a> (Letzter Refresh: {{ tbl_refreshlog_mat_adhocsentences.0.created_at }} Uhr{% if tbl_refreshlog_mat_adhocsentences_avg %}, Durchschnittliche Dauer ca. {{ tbl_refreshlog_mat_adhocsentences_avg.total_seconds|floatformat:1 }} Sekunden{% endif %})<br>
 		<br>
 		<div class="row">
 			<div class="col col-md-8">
