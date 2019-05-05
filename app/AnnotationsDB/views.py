@@ -22,5 +22,12 @@ def tool(request):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
 		return redirect('dissdb_login')
-	from webpack_loader import utils
 	return render_to_response('AnnotationsDB/toolstart.html', RequestContext(request))
+
+
+def annosent(request):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return redirect('dissdb_login')
+	from .views_annosent import views_annosent
+	return views_annosent(request)
