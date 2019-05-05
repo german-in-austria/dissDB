@@ -11,7 +11,28 @@
 {% block inhalt %}
 	<div>
 		<br>
-		Anno-sent
+		<h3>Anno-sent</h3>
+		<br>
+		<a href="{% url 'AnnotationsDB:annosent' %}?refresh=1">Refresh</a><br>
+		<br>
+		<div class="row">
+			<div class="col col-md-8">
+				mat_adhocsentences:
+				<ul>
+					{% for line in mat_adhocsentences %}
+						<li>{{ line }} - {{ line.id }} - {{ line.adhoc_sentence }} - {{ line.tokenids }} ...</li>
+					{% endfor %}
+				</ul>
+			</div>
+			<div class="col col-md-4">
+				Refresh Log:
+				<ul>
+					{% for logEntry in tbl_refreshlog_mat_adhocsentences %}
+						<li>{{ logEntry }}</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
 	</div>
 {% endblock %}
 {% block sitejs %}

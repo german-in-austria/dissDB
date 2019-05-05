@@ -3,6 +3,8 @@ from django.template import RequestContext
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
+from django.db import connection
+from django.db.models import Count
 import collections
 from django.apps import apps
 from copy import deepcopy

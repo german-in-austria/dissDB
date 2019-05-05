@@ -1,4 +1,8 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
+from django.db import transaction, connection
+import datetime
+import time
 
 
 class event(models.Model):
@@ -78,7 +82,7 @@ class transcript(models.Model):
 class tbl_tokenset(models.Model):
 	id_von_token		= models.ForeignKey('token', related_name='rn_id_von_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Von Token ID")
 	id_bis_token		= models.ForeignKey('token', related_name='rn_id_bis_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Bis Token ID")
-	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
+	updated				= models.DateTimeField(auto_now=True																				, verbose_name="Letztes Änderung")
 	def __str__(self):
 		return "{} - {}".format(self.id_von_token, self.id_bis_token)
 	class Meta:
@@ -99,3 +103,51 @@ class tbl_tokentoset(models.Model):
 		verbose_name = "Token to Token Set"
 		verbose_name_plural = "Token to Token Sets"
 		ordering = ('id_tokenset',)
+
+
+class mat_adhocsentences(models.Model):
+	id					= models.AutoField(primary_key=True)
+	adhoc_sentence		= models.BigIntegerField(					  null=True												, verbose_name="adhoc_sentence")
+	tokenids			= ArrayField(models.IntegerField(			  null=True												, verbose_name="tokenids"))
+	infid				= models.IntegerField(						  null=True												, verbose_name="infid")
+	transid				= models.IntegerField(						  null=True												, verbose_name="transid")
+	tokreih				= ArrayField(models.IntegerField(			  null=True												, verbose_name="tokreih"))
+	seqsent				= ArrayField(models.IntegerField(			  null=True												, verbose_name="seqsent"))
+	sentorig			= models.TextField(							  blank=True, null=True									, verbose_name="sentorig")
+	sentorth			= models.TextField(							  blank=True, null=True									, verbose_name="sentorth")
+	left_context		= models.TextField(							  blank=True, null=True									, verbose_name="left_context")
+	senttext			= models.TextField(							  blank=True, null=True									, verbose_name="senttext")
+	right_context		= models.TextField(							  blank=True, null=True									, verbose_name="right_context")
+	sentttlemma			= models.TextField(							  blank=True, null=True									, verbose_name="sentttlemma")
+	sentttpos			= models.TextField(							  blank=True, null=True									, verbose_name="sentttpos")
+	sentsplemma			= models.TextField(							  blank=True, null=True									, verbose_name="sentsplemma")
+	sentsppos			= models.TextField(							  blank=True, null=True									, verbose_name="sentsppos")
+	sentsptag			= models.TextField(							  blank=True, null=True									, verbose_name="sentsptag")
+	sentspdep			= models.TextField(							  blank=True, null=True									, verbose_name="sentspdep")
+	sentspenttype		= models.TextField(							  blank=True, null=True									, verbose_name="sentspenttype")
+	class Meta:
+		db_table = "mat_adhocsentences"
+		managed = False
+		verbose_name = "mat_adhocsentences"
+		verbose_name_plural = "mat_adhocsentences"
+		ordering = ('adhoc_sentence',)
+
+
+class tbl_refreshlog_mat_adhocsentences(models.Model):
+	created_at			= models.DateTimeField(auto_now_add=True, db_index=True												, verbose_name="Erstellt")
+	duration			= models.DurationField(																				  verbose_name="Dauer")
+	def __str__(self):
+		return "{} ({})".format(self.created_at, self.duration)
+	@transaction.atomic
+	def refresh():
+		start_time = time.monotonic()
+		with connection.cursor() as cursor:
+			cursor.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY mat_adhocsentences")
+		end_time = time.monotonic()
+		tbl_refreshlog_mat_adhocsentences.objects.create(duration=datetime.timedelta(seconds=end_time - start_time))
+		return end_time - start_time
+	class Meta:
+		db_table = "tbl_refreshlog_mat_adhocsentences"
+		verbose_name = "tbl_refreshlog_mat_adhocsentences"
+		verbose_name_plural = "tbl_refreshlog_mat_adhocsentences"
+		ordering = ('created_at',)
