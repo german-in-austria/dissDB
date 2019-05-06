@@ -19,8 +19,10 @@ def views_annosent(request):
 		adavgdg += 1
 	if adavgdg > 0:
 		adavg = adavg / adavgdg
+	optionen = {'suche': [{'name': 'sentorig'}, {'name': 'sentorth'}, {'name': 'ttpos'}, {'name': 'sptag'}]}
 	return render_to_response('AnnotationsDB/annosent.html', RequestContext(request, {
-		'tbl_refreshlog_mat_adhocsentences': adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at'),
+		'tbl_refreshlog_mat_adhocsentences_last': adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[0],
 		'tbl_refreshlog_mat_adhocsentences_avg': adavg,
-		'mat_adhocsentences': adbmodels.mat_adhocsentences.objects.all()[:20]
+		'optionen': optionen,
+		'mat_adhocsentences': adbmodels.mat_adhocsentences.objects.all()[:100]
 	}))

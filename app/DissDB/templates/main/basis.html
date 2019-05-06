@@ -16,7 +16,7 @@
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#nbcol" aria-expanded="false"><span class="sr-only">Navigation ein-/ausblenden</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
-	  <a class="navbar-brand" href="{% url 'Startseite:start' %}">DissDB</a>
+	  <a class="navbar-brand" href="{% url 'Startseite:start' %}">DissDB{% block ueberschrift %}{% endblock %}</a>
     </div>
     <div class="collapse navbar-collapse" id="nbcol">
       <ul class="nav navbar-nav navbar-right">
