@@ -40,7 +40,7 @@ COPY app/requirements.txt /home/docker/code/app/
 RUN pip3 install -r /home/docker/code/app/requirements.txt
 RUN pip3 install psycopg2
 
-# Webpacks
+# Webpacks external
 RUN mkdir /home/docker/code/webpack_src/
 # Tagsystem VUE Komponente
 RUN git clone https://github.com/german-in-austria/tagsystemVUE /home/docker/code/webpack_src/tagsystemVUE --branch v0.01
@@ -51,6 +51,10 @@ RUN cd /home/docker/code/webpack_src/annotationsDB && npm install && npm run bui
 
 # ADD (THE REST OF) OUR CODE
 COPY . /home/docker/code/
+
+# Webpacks internal
+# Anno-sent
+RUN cd /home/docker/code/webpack_src/annoSent && npm install && npm run build
 
 # COLLECT ALL STATIC FILES IN /STATIC
 ENV DISSDB_STATIC_URL=/static/

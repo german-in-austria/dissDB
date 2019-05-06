@@ -7,6 +7,7 @@
 {% block ueberschrift %} - Anno-sent{% endblock %}
 {% block sitecss %}
 	{% render_bundle 'tagsystem' 'css' 'tagsystemVUE' %}
+	{% render_bundle 'app' 'css' 'annoSent' %}
 {% endblock %}
 {% block inhalt %}
 	<div>
@@ -145,6 +146,7 @@
 			</table>
 		</div>
 	</div>
+	<div id="app"></div>
 	<br>
 	<br>
 	<br>
@@ -159,4 +161,7 @@
 	<script src="{% static "main/js/vue.2-5-2.min.js" %}"></script>
 	<script src="{% static "main/js/vue-resource.1-5-1.min.js" %}"></script>
 	{% render_bundle 'tagsystem' 'js' 'tagsystemVUE' %}
+	{% render_bundle 'manifest' 'js' 'annoSent' %}
+	{% render_bundle 'vendor' 'js' 'annoSent' %}
+	{% render_bundle 'app' 'js' 'annoSent' %}
 {% endblock %}
