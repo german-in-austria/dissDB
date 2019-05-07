@@ -11,62 +11,6 @@
 {% endblock %}
 {% block inhalt %}
 	<div id="app"></div>
-	<div>
-		<div class="table-responsive">
-			<table class="table table-hover" style="white-space:pre">
-				<thead>
-	        <tr>
-	          <th>#</th>
-						<th>adhoc_sentence</th>
-						<th>tokenids</th>
-						<th>infid</th>
-						<th>transid</th>
-						<th>tokreih</th>
-						<th>seqsent</th>
-						<th>sentorig</th>
-						<th>sentorth</th>
-						<th>left_context</th>
-						<th>senttext</th>
-						<th>right_context</th>
-						<th>sentttlemma</th>
-						<th>sentttpos</th>
-						<th>sentsplemma</th>
-						<th>sentsppos</th>
-						<th>sentsptag</th>
-						<th>sentspdep</th>
-						<th>sentspenttype</th>
-	        </tr>
-	      </thead>
-				<tbody>
-					{% for line in mat_adhocsentences %}
-		        <tr>
-		          <th scope="row">{{ forloop.counter }}</th>
-		          <td>{{ line.adhoc_sentence }}</td>
-							<td>{{ line.tokenids }}</td>
-							<td>{{ line.infid }}</td>
-							<td>{{ line.transid }}</td>
-							<td>{{ line.tokreih }}</td>
-							<td>{{ line.seqsent }}</td>
-							<td>{{ line.sentorig }}</td>
-							<td>{{ line.sentorth }}</td>
-							<td>{{ line.left_context }}</td>
-							<td>{{ line.senttext }}</td>
-							<td>{{ line.right_context }}</td>
-							<td>{{ line.sentttlemma }}</td>
-							<td>{{ line.sentttpos }}</td>
-							<td>{{ line.sentsplemma }}</td>
-							<td>{{ line.sentsppos }}</td>
-							<td>{{ line.sentsptag }}</td>
-							<td>{{ line.sentspdep }}</td>
-							<td>{{ line.sentspenttype }}</td>
-		        </tr>
-					{% endfor %}
-	      </tbody>
-			</table>
-		</div>
-	</div>
-	<br>
-	<br>
 {% endblock %}
 {% block sitejs %}
 	<script>

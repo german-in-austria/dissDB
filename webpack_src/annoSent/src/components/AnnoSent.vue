@@ -8,7 +8,7 @@
         <Filtern :filterfelder="filterfelder" />
       </div>
     </div>
-    <Tabelle :tabellenfelder="tabellenfelder" />
+    <Tabelle :tabellenfelder="tabellenfelder" :http="$http" />
   </div>
 </template>
 

@@ -12,6 +12,34 @@ def views_annosent(request):
 	if 'refresh' in request.GET:
 		dauer = adbmodels.tbl_refreshlog_mat_adhocsentences.refresh()
 		return httpOutput(json.dumps({'OK': True, 'refreshed': dauer}), 'application/json')
+	if 'getEntries' in request.POST:
+		aSeite = int(request.POST.get('seite'))
+		aEps = int(request.POST.get('eps'))
+		aElemente = adbmodels.mat_adhocsentences.objects.all()
+		aEintraege = [
+			{
+				'adhoc_sentence': aEintrag.adhoc_sentence,
+				'tokenids': aEintrag.tokenids,
+				'infid': aEintrag.infid,
+				'transid': aEintrag.transid,
+				'tokreih': aEintrag.tokreih,
+				'seqsent': aEintrag.seqsent,
+				'sentorig': aEintrag.sentorig,
+				'sentorth': aEintrag.sentorth,
+				'left_context': aEintrag.left_context,
+				'senttext': aEintrag.senttext,
+				'right_context': aEintrag.right_context,
+				'sentttlemma': aEintrag.sentttlemma,
+				'sentttpos': aEintrag.sentttpos,
+				'sentsplemma': aEintrag.sentsplemma,
+				'sentsppos': aEintrag.sentsppos,
+				'sentsptag': aEintrag.sentsptag,
+				'sentspdep': aEintrag.sentspdep,
+				'sentspenttype': aEintrag.sentspenttype
+			}
+			for aEintrag in aElemente[aSeite * aEps:aSeite * aEps + aEps]
+		]
+		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')
 	adavg = datetime.timedelta()
 	adavgdg = 0
 	for aRl in adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[:5]:
