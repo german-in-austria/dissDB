@@ -10,89 +10,8 @@
 	{% render_bundle 'app' 'css' 'annoSent' %}
 {% endblock %}
 {% block inhalt %}
+	<div id="app"></div>
 	<div>
-		<br>
-		<div class="row">
-			<div class="col col-md-4">
-				<div class="form-horizontal">
-					{% for suche in optionen.suche %}
-					  <div class="form-group">
-					    <label for="suche-{{ suche.name }}" class="col-sm-2 control-label">{{ suche.name }}</label>
-					    <div class="col-sm-10">
-								<div class="input-group">
-					      	<input type="text" class="form-control" id="suche-{{ suche.name }}" placeholder="">
-									<span class="input-group-btn">
-						        <button class="btn btn-primary" type="button">Suchen</button>
-						      </span>
-								</div>
-					    </div>
-					  </div>
-					{% endfor %}
-				</div>
-			</div>
-			<div class="col col-md-offset-1 col-md-3">
-				<div class="form-horizontal">
-					{% for suche in optionen.suche %}
-						<div class="form-group">
-							<label for="kannmuss-{{ suche.name }}" class="col-sm-4 control-label">Methode</label>
-							<div class="col-sm-8">
-								<div class="input-group">
-									<select class="form-control" id="kannmuss-{{ suche.name }}" style="width:35%">
-									  <option>kann</option>
-									  <option>muß</option>
-									</select>
-									<select class="form-control" id="methode-{{suche.name }}" style="width:65%">
-										<option>case-insensetiv</option>
-										<option>case-sensetiv</option>
-										<option>RegEx</option>
-									</select>
-								</div>
-							</div>
-						</div>
-					{% endfor %}
-				</div>
-			</div>
-			<div class="col col-md-offset-1 col-md-3">
-				<div class="form-horizontal">
-					<div class="form-group">
-						<div class="col-sm-offset-4 col-sm-8">
-							<a href="{% url 'AnnotationsDB:annosent' %}?refresh=1" class="form-control-static btn btn-success w100" title="Letzter Refresh: {{ tbl_refreshlog_mat_adhocsentences_last.created_at }} Uhr{% if tbl_refreshlog_mat_adhocsentences_avg %}, Durchschnittliche Dauer ca. {{ tbl_refreshlog_mat_adhocsentences_avg.total_seconds|floatformat:1 }} Sekunden{% endif %}"><b>Refresh Materialized View</b></a>
-						</div>
-					</div>
-					<div class="form-group">
-				    <label for="informant" class="col-sm-4 control-label">Informant</label>
-				    <div class="col-sm-8">
-							<select class="form-control" id="informant">
-							  <option>Alle</option>
-								<option>xxx</option>
-								<option>yyy</option>
-							</select>
-				    </div>
-				  </div>
-					<div class="form-group">
-				    <label for="transkript" class="col-sm-4 control-label">Transkript</label>
-				    <div class="col-sm-8">
-							<select class="form-control" id="transkript">
-							  <option>Alle</option>
-								<option>xxx</option>
-								<option>yyy</option>
-							</select>
-				    </div>
-				  </div>
-					<div class="form-group">
-				    <label for="tagebene" class="col-sm-4 control-label">Tag Ebene</label>
-				    <div class="col-sm-8">
-							<select class="form-control" id="tagebene">
-							  <option>Auswählen</option>
-								<option>xxx</option>
-								<option>yyy</option>
-							</select>
-				    </div>
-				  </div>
-				</div>
-			</div>
-		</div>
-		<br>
 		<div class="table-responsive">
 			<table class="table table-hover" style="white-space:pre">
 				<thead>
@@ -146,8 +65,6 @@
 			</table>
 		</div>
 	</div>
-	<div id="app"></div>
-	<br>
 	<br>
 	<br>
 {% endblock %}
