@@ -93,7 +93,8 @@ export default {
           getEntries: true,
           seite: this.aSeite,
           eps: this.eintraegeProSeite,
-          filter: { inf: this.filterfelder.informant, trans: this.filterfelder.transkript }
+          filter: JSON.stringify({ inf: this.filterfelder.informant, trans: this.filterfelder.transkript }),
+          suche: JSON.stringify(this.suchfelder)
         }).then((response) => {
           console.log(response.data)
           this.eintraege = response.data.eintraege

@@ -2,13 +2,13 @@
   <div class="annosent">
     <div class="row">
       <div class="col col-md-8">
-        <Suchen :suchfelder="suchfelder" />
+        <Suchen :suchfelder="suchfelder" @suche="$refs.tabelle.reload()" />
       </div>
       <div class="col col-md-offset-1 col-md-3">
         <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" />
       </div>
     </div>
-    <Tabelle :tabellenfelder="tabellenfelder" :suchfelder="suchfelder" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" />
+    <Tabelle :tabellenfelder="tabellenfelder" :suchfelder="suchfelder" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" ref="tabelle" />
   </div>
 </template>
 
@@ -32,8 +32,8 @@ export default {
       suchfelder: [
         { name: 'sentorig', value: '', kannmuss: 'kann', methode: 'ci' },
         { name: 'sentorth', value: '', kannmuss: 'kann', methode: 'ci' },
-        { name: 'ttpos', value: '', kannmuss: 'kann', methode: 'ci' },
-        { name: 'sptag', value: '', kannmuss: 'kann', methode: 'ci' }
+        { name: 'sentttpos', value: '', kannmuss: 'kann', methode: 'ci' },
+        { name: 'sentsptag', value: '', kannmuss: 'kann', methode: 'ci' }
       ],
       filterfelder: {
         informant: 0,

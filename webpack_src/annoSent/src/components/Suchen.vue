@@ -1,39 +1,35 @@
 <template>
   <div class="annosent-suchen row">
-    <div class="col col-md-6">
+    <div class="col col-md-8">
       <div class="form-horizontal">
         <div class="form-group" v-for="suchfeld in suchfelder" :key="'sl-' + suchfeld.name">
           <label :for="'suche-' + suchfeld.name" class="col-sm-2 control-label">{{ suchfeld.name }}</label>
           <div class="col-sm-10">
-            <div class="input-group">
-              <input type="text" v-model="suchfeld.value" class="form-control" :id="'suche-' + suchfeld.name">
-              <span class="input-group-btn">
-                <button class="btn btn-primary" type="button">Suchen</button>
-              </span>
+            <div class="input-group igfx">
+              <div>
+                <input type="text" v-model="suchfeld.value" class="form-control" :id="'suche-' + suchfeld.name" style="border-radius:4px 0 0 4px;">
+              </div>
+              <div style="width:80px;">
+                <select class="form-control" v-model="suchfeld.kannmuss" :id="'kannmuss-' + suchfeld.name">
+                  <option value="kann">kann</option>
+                  <option value="muss">muß</option>
+                  <option value="nicht">nicht</option>
+                </select>
+              </div>
+              <div style="width:144px;">
+                <select class="form-control" v-model="suchfeld.methode" :id="'methode-' + suchfeld.name" style="border-radius:0 4px 4px 0;">
+                  <option value="ci">case-insensetiv</option>
+                  <option value="cs">case-sensetiv</option>
+                  <option value="regex" disabled>RegEx</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="col col-md-offset-1 col-md-5">
-      <div class="form-horizontal">
-        <div class="form-group" v-for="suchfeld in suchfelder" :key="'slm-' + suchfeld">
-          <label :for="'kannmuss-' + suchfeld.name" class="col-sm-4 control-label">Methode</label>
-          <div class="col-sm-8">
-            <div class="input-group">
-              <select class="form-control" v-model="suchfeld.kannmuss" :id="'kannmuss-' + suchfeld.name" style="width:35%">
-                <option value="kann">kann</option>
-                <option value="muss">muß</option>
-              </select>
-              <select class="form-control" v-model="suchfeld.methode" :id="'methode-' + suchfeld.name" style="width:65%">
-                <option value="ci">case-insensetiv</option>
-                <option value="cs">case-sensetiv</option>
-                <option value="regex" disabled>RegEx</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="col col-md-2">
+      <button class="btn btn-primary" type="button" @click="$emit('suche')">Suchen</button>
     </div>
   </div>
 </template>
@@ -49,4 +45,11 @@ export default {
 </script>
 
 <style scoped>
+.igfx {
+  width: 100%;
+}
+.igfx > * {
+  display: table-cell;
+  width: auto;
+}
 </style>

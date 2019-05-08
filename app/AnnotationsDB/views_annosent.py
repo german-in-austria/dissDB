@@ -1,5 +1,6 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.db.models import Q
 # from django.db.models import Count
 # import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
@@ -28,13 +29,42 @@ def views_annosent(request):
 	if 'getEntries' in request.POST:
 		aSeite = int(request.POST.get('seite'))
 		aEps = int(request.POST.get('eps'))
-		aFilterTrans = int(request.POST.get('filter[trans]'))
-		aFilterInf = int(request.POST.get('filter[inf]'))
+		aFilter = json.loads(request.POST.get('filter'))
+		aSuche = json.loads(request.POST.get('suche'))
 		aElemente = adbmodels.mat_adhocsentences.objects.all()
-		if aFilterTrans > 0:
-			aElemente = aElemente.filter(transid=aFilterTrans)
-		if aFilterInf > 0:
-			aElemente = aElemente.filter(infid=aFilterInf)
+		# Suche
+		aSucheMuss = []
+		aSucheKann = []
+		if int(aFilter['trans']) > 0:
+			aSucheMuss.append(Q(transid=aFilter['trans']))
+		if int(aFilter['inf']) > 0:
+			aSucheMuss.append(Q(infid=aFilter['inf']))
+		# [{'value': 'zwei', 'kannmuss': 'kann', 'methode': 'ci', 'name': 'sentorig'}, {'value': '', 'kannmuss': 'kann', 'methode': 'ci', 'name': 'sentorth'}, {'value': '', 'kannmuss': 'kann', 'methode': 'ci', 'name': 'sentttpos'}, {'value': '', 'kannmuss': 'kann', 'methode': 'ci', 'name': 'sentsptag'}]
+		for aSuchFeld in aSuche:
+			if aSuchFeld['value'].strip():
+				aTyp = 'icontains' if aSuchFeld['methode'] == 'ci' else 'contains'
+				if aSuchFeld['kannmuss'] == 'muss':
+					aSucheMuss.append(Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchFeld['value'].strip()}))
+				if aSuchFeld['kannmuss'] == 'nicht':
+					aSucheMuss.append(~Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchFeld['value'].strip()}))
+				if aSuchFeld['kannmuss'] == 'kann':
+					aSucheKann.append(Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchFeld['value'].strip()}))
+		if aSucheMuss:
+			import operator
+			aSucheMussX = aSucheMuss[0]
+			for aMuss in aSucheMuss[1:]:
+				aSucheMussX = operator.and_(aSucheMussX, aMuss)
+		if aSucheKann:
+			import operator
+			aSucheKannX = aSucheKann[0]
+			for aMuss in aSucheKann[1:]:
+				aSucheKannX = operator.or_(aSucheKannX, aMuss)
+		if aSucheMuss and aSucheKann:
+			aElemente = aElemente.filter(aSucheMussX, aSucheKannX)
+		elif aSucheMuss:
+			aElemente = aElemente.filter(aSucheMussX)
+		elif aSucheKann:
+			aElemente = aElemente.filter(aSucheKannX)
 		aEintraege = [
 			{
 				'adhoc_sentence': aEintrag.adhoc_sentence,
@@ -58,6 +88,8 @@ def views_annosent(request):
 			}
 			for aEintrag in aElemente[aSeite * aEps:aSeite * aEps + aEps]
 		]
+		# from django.db import connection
+		# print(connection.queries)
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')
 	optionen = {'suche': [{'name': 'sentorig'}, {'name': 'sentorth'}, {'name': 'ttpos'}, {'name': 'sptag'}]}
 	return render_to_response('AnnotationsDB/annosent.html', RequestContext(request, {
