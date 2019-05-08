@@ -48,7 +48,7 @@
 /* global _ */
 export default {
   name: 'Tabelle',
-  props: ['tabellenfelder', 'http', 'tagsData'],
+  props: ['tabellenfelder', 'suchfelder', 'filterfelder', 'http', 'tagsData'],
   data () {
     return {
       seite: 1,
@@ -87,7 +87,8 @@ export default {
         this.http.post('', {
           getEntries: true,
           seite: this.aSeite,
-          eps: this.eintraegeProSeite
+          eps: this.eintraegeProSeite,
+          filter: { inf: this.filterfelder.informant, trans: this.filterfelder.transkript }
         }).then((response) => {
           console.log(response.data)
           this.eintraege = response.data.eintraege
@@ -104,6 +105,12 @@ export default {
     }, 100)
   },
   watch: {
+    'filterfelder.informant' () {
+      this.reload()
+    },
+    'filterfelder.transkript' () {
+      this.reload()
+    },
     eintraegeProSeite () {
       this.reload()
     },

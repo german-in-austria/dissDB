@@ -28,7 +28,13 @@ def views_annosent(request):
 	if 'getEntries' in request.POST:
 		aSeite = int(request.POST.get('seite'))
 		aEps = int(request.POST.get('eps'))
+		aFilterTrans = int(request.POST.get('filter[trans]'))
+		aFilterInf = int(request.POST.get('filter[inf]'))
 		aElemente = adbmodels.mat_adhocsentences.objects.all()
+		if aFilterTrans > 0:
+			aElemente = aElemente.filter(transid=aFilterTrans)
+		if aFilterInf > 0:
+			aElemente = aElemente.filter(infid=aFilterInf)
 		aEintraege = [
 			{
 				'adhoc_sentence': aEintrag.adhoc_sentence,

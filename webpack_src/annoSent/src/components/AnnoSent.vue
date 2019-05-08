@@ -8,7 +8,7 @@
         <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" />
       </div>
     </div>
-    <Tabelle :tabellenfelder="tabellenfelder" :http="$http" :tagsData="tagsData" />
+    <Tabelle :tabellenfelder="tabellenfelder" :suchfelder="suchfelder" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" />
   </div>
 </template>
 
