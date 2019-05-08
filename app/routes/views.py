@@ -22,6 +22,7 @@ def einzelerhebungen(request):
 	try:
 		for aEinzelErhebung in dbmodels.EinzelErhebung.objects.all():
 			aInformanten = [{
+				'pk': aInformant.ID_Inf_id,
 				'Kuerzel': aInformant.ID_Inf.Kuerzel,
 				'Kuerzel_anonym': aInformant.ID_Inf.Kuerzel_anonym,
 				'Name': aInformant.ID_Inf.Name,
