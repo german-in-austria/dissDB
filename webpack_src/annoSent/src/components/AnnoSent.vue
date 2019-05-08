@@ -42,11 +42,11 @@ export default {
       },
       tabellenfelder: {
         'adhoc_sentence': { show: true },
-        'tokenids': { show: true },
+        'tokenids': { show: false },
         'infid': { show: true },
         'transid': { show: true },
-        'tokreih': { show: true },
-        'seqsent': { show: true },
+        'tokreih': { show: false },
+        'seqsent': { show: false },
         'sentorig': { show: true },
         'sentorth': { show: true },
         'left_context': { show: true },
@@ -58,7 +58,7 @@ export default {
         'sentsppos': { show: true },
         'sentsptag': { show: true },
         'sentspdep': { show: true },
-        'sentspenttype': { show: true }
+        'sentspenttype': { show: false }
       },
       tagsData: { data: new tagsystem.TagsystemObject.TagsystemBase(this.$http) }
     }

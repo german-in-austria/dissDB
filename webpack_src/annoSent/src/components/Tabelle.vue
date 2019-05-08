@@ -21,7 +21,10 @@
             <option :value="anz" v-for="anz in [10, 25, 50, 100, 250]" :key="'eps' + anz">{{ anz }}</option>
           </select>
         </div>
-        <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-eye-open"></span></button>
+        <button @click="zeigeSpaltenAuswahl = !zeigeSpaltenAuswahl" @blur="spaltenAuswahlBlur" ref="zeigeSpaltenAuswahlBtn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-eye-open"></span></button>
+        <div class="zsa" v-if="zeigeSpaltenAuswahl" ref="zeigeSpaltenAuswahl">
+          <button v-for="(feldoption, feld) in tabellenfelder" :key="'vthtf' + feld" @blur="spaltenAuswahlBlur" ref="zeigeSpaltenAuswahlBtns" @click="feldoption.show = !feldoption.show" :class="feldoption.show ? 'zsa-show' : ''"><span :class="'glyphicon glyphicon-eye-' + (feldoption.show ? 'open' : 'close')"></span> {{ feld }}</button>
+        </div>
       </div>
     </div>
     <div class="table-responsive">
@@ -45,7 +48,7 @@
 </template>
 
 <script>
-/* global _ */
+/* global _ Popper */
 export default {
   name: 'Tabelle',
   props: ['tabellenfelder', 'suchfelder', 'filterfelder', 'http', 'tagsData'],
@@ -56,7 +59,9 @@ export default {
       zaehler: 0,
       eintraegeProSeite: 50,
       eintraege: [],
-      loading: false
+      loading: false,
+      zeigeSpaltenAuswahl: false,
+      popper: null
     }
   },
   computed: {
@@ -102,9 +107,33 @@ export default {
           this.loading = false
         })
       }
-    }, 100)
+    }, 100),
+    spaltenAuswahlBlur: _.debounce(function () {
+      this.$nextTick(() => {
+        if (this.$refs.zeigeSpaltenAuswahlBtns && this.$refs.zeigeSpaltenAuswahlBtns.indexOf(document.activeElement) < 0) {
+          this.zeigeSpaltenAuswahl = false
+        }
+      })
+    }, 20),
+    close () {
+      this.$emit('close')
+    }
   },
   watch: {
+    zeigeSpaltenAuswahl (nVal) {
+      this.$nextTick(() => {
+        if (nVal) {
+          this.popper = new Popper(this.$refs.zeigeSpaltenAuswahlBtn, this.$refs.zeigeSpaltenAuswahl, {
+            placement: 'right-start',
+            modifiers: {
+              offset: { offset: '0,-100%' }
+            }
+          })
+        } else if (this.popper) {
+          this.popper.destroy()
+        }
+      })
+    },
     'filterfelder.informant' () {
       this.reload()
     },
@@ -189,5 +218,22 @@ export default {
 }
 td {
   white-space: nowrap;
+}
+.zsa {
+  background: #fff;
+  box-shadow: 3px 3px 5px rgba(0,0,0,0.3);
+  border: 1px solid #ccc;
+  padding: 15px;
+}
+.zsa > button {
+  background: none;
+  border: none;
+  display: block;
+  width: 100%;
+  text-align: left;
+  color: #999;
+}
+.zsa > button.zsa-show {
+  color: #333;
 }
 </style>
