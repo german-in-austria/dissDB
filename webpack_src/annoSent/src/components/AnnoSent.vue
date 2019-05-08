@@ -5,10 +5,10 @@
         <Suchen :suchfelder="suchfelder" />
       </div>
       <div class="col col-md-offset-1 col-md-3">
-        <Filtern :filterfelder="filterfelder" />
+        <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" />
       </div>
     </div>
-    <Tabelle :tabellenfelder="tabellenfelder" :http="$http" />
+    <Tabelle :tabellenfelder="tabellenfelder" :http="$http" :tagsData="tagsData" />
   </div>
 </template>
 
@@ -75,5 +75,18 @@ export default {
 .annosent {
   margin-top: 30px;
   margin-bottom: 50px;
+}
+.loading {
+  position: absolute;
+  left: -20px;
+  right: -20px;
+  top: -20px;
+  bottom: -20px;
+  text-align: center;
+  color: #000;
+  background: rgba(255,255,255,0.75);
+  z-index: 1000;
+  font-size: 70px;
+  padding-top: 250px;
 }
 </style>

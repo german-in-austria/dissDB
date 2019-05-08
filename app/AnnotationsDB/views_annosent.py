@@ -9,9 +9,22 @@ import datetime
 
 
 def views_annosent(request):
-	if 'refresh' in request.GET:
-		dauer = adbmodels.tbl_refreshlog_mat_adhocsentences.refresh()
-		return httpOutput(json.dumps({'OK': True, 'refreshed': dauer}), 'application/json')
+	# Materialized View Informationen und Aktuallisierung
+	if 'getMatViewData' in request.POST:
+		if 'refresh' in request.POST and request.POST.get('refresh') == 'true':
+			adbmodels.tbl_refreshlog_mat_adhocsentences.refresh()
+		adavg = datetime.timedelta()
+		adavgdg = 0
+		for aRl in adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[:5]:
+			adavg += aRl.duration
+			adavgdg += 1
+		if adavgdg > 0:
+			adavg = adavg / adavgdg
+		return httpOutput(json.dumps({'OK': True, 'mvDurchschnitt': adavg.total_seconds(), 'mvLastUpdate': str(adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[0].created_at.strftime("%d.%m.%Y %H:%M:%S"))}, 'application/json'))
+	# Basisdaten für Filter laden
+	if 'getBaseData' in request.POST:
+		return httpOutput(json.dumps({'OK': True}, 'application/json'))
+	# Einträge auslesen
 	if 'getEntries' in request.POST:
 		aSeite = int(request.POST.get('seite'))
 		aEps = int(request.POST.get('eps'))
@@ -40,17 +53,9 @@ def views_annosent(request):
 			for aEintrag in aElemente[aSeite * aEps:aSeite * aEps + aEps]
 		]
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')
-	adavg = datetime.timedelta()
-	adavgdg = 0
-	for aRl in adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[:5]:
-		adavg += aRl.duration
-		adavgdg += 1
-	if adavgdg > 0:
-		adavg = adavg / adavgdg
 	optionen = {'suche': [{'name': 'sentorig'}, {'name': 'sentorth'}, {'name': 'ttpos'}, {'name': 'sptag'}]}
 	return render_to_response('AnnotationsDB/annosent.html', RequestContext(request, {
 		'tbl_refreshlog_mat_adhocsentences_last': adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[0],
-		'tbl_refreshlog_mat_adhocsentences_avg': adavg,
 		'optionen': optionen,
 		'mat_adhocsentences': adbmodels.mat_adhocsentences.objects.all()[:100]
 	}))

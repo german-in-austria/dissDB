@@ -34,7 +34,7 @@
         </thead>
         <tbody>
           <tr v-for="(eintrag, key) in eintraege" :key="'ez' + eintrag">
-            <th scope="row">{{ aSeite * eintraegeProSeite + key + 1 }}</th>
+            <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
             <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">{{ eintrag[feld] }}</td>
           </tr>
         </tbody>
@@ -48,10 +48,11 @@
 /* global _ */
 export default {
   name: 'Tabelle',
-  props: ['tabellenfelder', 'http'],
+  props: ['tabellenfelder', 'http', 'tagsData'],
   data () {
     return {
       seite: 1,
+      lSeite: 0,
       zaehler: 0,
       eintraegeProSeite: 50,
       eintraege: [],
@@ -91,6 +92,8 @@ export default {
           console.log(response.data)
           this.eintraege = response.data.eintraege
           this.zaehler = response.data.zaehler
+          this.lSeite = response.data.seite
+          this.seite = this.lSeite + 1
           this.loading = false
         }).catch((err) => {
           console.log(err)
@@ -114,7 +117,9 @@ export default {
           this.seite = this.seite < 1 ? 1 : (this.seite > this.maxSeiten ? this.maxSeiten : this.seite)
         }
       }
-      this.reload()
+      if (this.lSeite !== this.aSeite) {
+        this.reload()
+      }
     }
   }
 }
@@ -177,18 +182,5 @@ export default {
 }
 td {
   white-space: nowrap;
-}
-.loading {
-  position: absolute;
-  left: -20px;
-  right: -20px;
-  top: -20px;
-  bottom: -20px;
-  text-align: center;
-  color: #000;
-  background: rgba(255,255,255,0.75);
-  z-index: 1000;
-  font-size: 70px;
-  padding-top: 250px;
 }
 </style>

@@ -28,7 +28,7 @@
               <select class="form-control" v-model="suchfeld.methode" :id="'methode-' + suchfeld.name" style="width:65%">
                 <option value="ci">case-insensetiv</option>
                 <option value="cs">case-sensetiv</option>
-                <option value="regex">RegEx</option>
+                <option value="regex" disabled>RegEx</option>
               </select>
             </div>
           </div>
