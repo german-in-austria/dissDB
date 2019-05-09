@@ -74,6 +74,7 @@ def views_annosent(request):
 			aElemente = aElemente.filter(aSucheKannX)
 		# Sortieren
 		aElemente = aElemente.order_by(('-' if not aSortierung['asc'] else '') + aSortierung['spalte'])
+		# Einträge ausgeben
 		aEintraege = [
 			{
 				'adhoc_sentence': aEintrag.adhoc_sentence,

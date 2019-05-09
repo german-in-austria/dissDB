@@ -39,17 +39,13 @@
 <script>
 export default {
   name: 'Filtern',
-  props: ['filterfelder', 'http', 'tagsData'],
+  props: ['filterfelder', 'http', 'tagsData', 'infTrans'],
   data () {
     return {
       loading: false,
       loadInfos: '',
       mvDurchschnitt: 0.0,
-      mvLastUpdate: 'Unbekannt ...',
-      infTransList: [],
-      infTransObj: {},
-      transcriptsList: [],
-      transcriptsObj: {}
+      mvLastUpdate: 'Unbekannt ...'
     }
   },
   computed: {
@@ -59,26 +55,26 @@ export default {
     infTransListFiltered () {
       if (this.filterfelder.transkript > 0) {
         let infTransList = []
-        this.infTransList.forEach(informant => {
+        this.infTrans.data.infTransList.forEach(informant => {
           if (informant.transcriptsPKs.indexOf(this.filterfelder.transkript) > -1) {
             infTransList.push(informant)
           }
         }, this)
         return infTransList
       }
-      return this.infTransList
+      return this.infTrans.data.infTransList
     },
     transcriptsListFiltered () {
       if (this.filterfelder.informant > 0) {
         let transcriptsList = []
-        this.transcriptsList.forEach(transcript => {
-          if (this.infTransObj[this.filterfelder.informant].transcriptsPKs.indexOf(transcript.pk) > -1) {
+        this.infTrans.data.transcriptsList.forEach(transcript => {
+          if (this.infTrans.data.infTransObj[this.filterfelder.informant].transcriptsPKs.indexOf(transcript.pk) > -1) {
             transcriptsList.push(transcript)
           }
         }, this)
         return transcriptsList
       }
-      return this.transcriptsList
+      return this.infTrans.data.transcriptsList
     }
   },
   mounted () {
@@ -92,27 +88,28 @@ export default {
       this.loadInfos = ''
       this.http.post('/annotationsdb/startvue', { getTranscriptsInfList: 1 })
         .then((response) => {
-          this.infTransList = response.data['informanten']
-          this.infTransObj = {}
-          for (let aInfKey in this.infTransList) {
-            this.infTransList[aInfKey].transcriptsPKs = this.infTransList[aInfKey].transcriptsPKs.filter(function (el) { return el != null })   // Null Werte filtern!
+          this.infTrans.data.infTransList = response.data['informanten']
+          this.infTrans.data.infTransObj = {}
+          for (let aInfKey in this.infTrans.data.infTransList) {
+            this.infTrans.data.infTransList[aInfKey].transcriptsPKs = this.infTrans.data.infTransList[aInfKey].transcriptsPKs.filter(function (el) { return el != null })   // Null Werte filtern!
             // Objekt mit PK als Property erstellen
-            if (this.infTransList.hasOwnProperty(aInfKey)) {
-              let aInf = this.infTransList[aInfKey]
-              this.infTransObj[aInf.pk] = aInf
+            if (this.infTrans.data.infTransList.hasOwnProperty(aInfKey)) {
+              let aInf = this.infTrans.data.infTransList[aInfKey]
+              this.infTrans.data.infTransObj[aInf.pk] = aInf
             }
           }
-          this.transcriptsList = response.data['transcripts']
-          this.transcriptsObj = {}
-          for (let aTransKey in this.transcriptsList) {
+          this.infTrans.data.transcriptsList = response.data['transcripts']
+          this.infTrans.data.transcriptsObj = {}
+          for (let aTransKey in this.infTrans.data.transcriptsList) {
             // Objekt mit PK als Property erstellen
-            if (this.transcriptsList.hasOwnProperty(aTransKey)) {
-              let aTrans = this.transcriptsList[aTransKey]
-              this.transcriptsObj[aTrans.pk] = aTrans
+            if (this.infTrans.data.transcriptsList.hasOwnProperty(aTransKey)) {
+              let aTrans = this.infTrans.data.transcriptsList[aTransKey]
+              this.infTrans.data.transcriptsObj[aTrans.pk] = aTrans
             }
           }
-          // console.log('infTransList', this.infTransList, 'infTransObj', this.infTransObj)
-          // console.log('transcriptsList', this.transcriptsList, 'transcriptsObj', this.transcriptsObj)
+          this.infTrans.data.loaded = true
+          // console.log('infTransList', this.infTrans.data.infTransList, 'infTransObj', this.infTrans.data.infTransObj)
+          // console.log('transcriptsList', this.infTrans.data.transcriptsList, 'transcriptsObj', this.infTrans.data.transcriptsObj)
           this.loading = false
         })
         .catch((err) => {

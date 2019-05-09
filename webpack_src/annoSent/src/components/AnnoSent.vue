@@ -5,10 +5,10 @@
         <Suchen :suchfelder="suchfelder" @suche="$refs.tabelle.reload()" />
       </div>
       <div class="col col-md-offset-1 col-md-3">
-        <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" />
+        <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" />
       </div>
     </div>
-    <Tabelle :tabellenfelder="tabellenfelder" :suchfelder="suchfelder" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" ref="tabelle" />
+    <Tabelle :tabellenfelder="tabellenfelder" :suchfelder="suchfelder" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" ref="tabelle" />
   </div>
 </template>
 
@@ -43,25 +43,28 @@ export default {
       tabellenfelder: {
         'adhoc_sentence': { show: true, displayName: 'a.s.' },
         'tokenids': { show: false },
-        'infid': { show: true },
-        'transid': { show: true },
+        'infid': { show: false },
+        'inf': { show: true, local: true, sortby: 'infid' },
+        'transid': { show: false },
+        'trans': { show: true, local: true, sortby: 'transid' },
         'tagspalte': { show: true, displayName: 'Tag Spalte (Test)', local: true },
+        'left_context': { show: true },
+        'sentorth': { show: true },
+        'right_context': { show: true },
+        'sentorig': { show: true },
         'tokreih': { show: false },
         'seqsent': { show: false },
-        'sentorig': { show: true },
-        'sentorth': { show: true },
-        'left_context': { show: true },
         'senttext': { show: true },
-        'right_context': { show: true },
-        'sentttlemma': { show: true },
+        'sentttlemma': { show: false },
         'sentttpos': { show: true },
-        'sentsplemma': { show: true },
-        'sentsppos': { show: true },
+        'sentsplemma': { show: false },
+        'sentsppos': { show: false },
         'sentsptag': { show: true },
-        'sentspdep': { show: true },
+        'sentspdep': { show: false },
         'sentspenttype': { show: false }
       },
-      tagsData: { data: new tagsystem.TagsystemObject.TagsystemBase(this.$http) }
+      tagsData: { data: new tagsystem.TagsystemObject.TagsystemBase(this.$http) },
+      infTrans: { data: { infTransList: [], infTransObj: {}, transcriptsList: [], transcriptsObj: {}, loaded: false } }
     }
   },
   components: {

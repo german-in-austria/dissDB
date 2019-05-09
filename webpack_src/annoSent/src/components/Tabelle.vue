@@ -32,16 +32,16 @@
         <thead>
           <tr>
             <th>#</th>
-            <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld" :title="feld">
-              <span v-if="feldoption.local">{{ feldoption.displayName || feld }}</span>
-              <button @click="spalteSortieren(feld)" class="sort-btn" v-else>{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === feld"></span></button>
+            <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld" :title="feldoption.sortby || feld">
+              <span v-if="feldoption.local && !feldoption.sortby">{{ feldoption.displayName || feld }}</span>
+              <button @click="spalteSortieren(feldoption.sortby || feld)" class="sort-btn" v-else>{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === (feldoption.sortby || feld)"></span></button>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(eintrag, key) in eintraege" :key="'ez' + eintrag">
             <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
-            <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">{{ eintrag[feld] }}</td>
+            <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">{{ feldoption.local ? fxFeld(eintrag, feld) : eintrag[feld] }}</td>
           </tr>
         </tbody>
       </table>
@@ -54,7 +54,7 @@
 /* global _ Popper */
 export default {
   name: 'Tabelle',
-  props: ['tabellenfelder', 'suchfelder', 'filterfelder', 'http', 'tagsData'],
+  props: ['tabellenfelder', 'suchfelder', 'filterfelder', 'http', 'tagsData', 'infTrans'],
   data () {
     return {
       seite: 1,
@@ -114,6 +114,15 @@ export default {
         })
       }
     }, 100),
+    fxFeld (eintrag, feld) {
+      if (feld === 'inf') {
+        return this.infTrans.data.loaded && this.infTrans.data.infTransObj[eintrag.infid] ? this.infTrans.data.infTransObj[eintrag.infid].modelStr : eintrag.infid
+      }
+      if (feld === 'trans') {
+        return this.infTrans.data.loaded && this.infTrans.data.transcriptsObj[eintrag.transid] ? this.infTrans.data.transcriptsObj[eintrag.transid].name : eintrag.transid
+      }
+      return 'Unbekannt: ' + feld
+    },
     spalteSortieren (feld) {
       if (this.spaltenSortierung.spalte === feld) {
         this.spaltenSortierung.asc = !this.spaltenSortierung.asc
