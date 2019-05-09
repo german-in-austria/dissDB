@@ -7,8 +7,8 @@
           <div class="input-group spinner">
             <input type="text" v-model="seite" min="1" :max="maxSeiten" class="form-control" id="annosent-tabelle-seite">
             <div class="input-group-btn-vertical">
-              <button class="btn btn-default" type="button" @click="seite < maxSeiten ? seite++ : false" :disabled="seite >= maxSeiten"><i class="glyphicon glyphicon-chevron-up"></i></button>
-              <button class="btn btn-default" type="button" @click="seite > 1 ? seite-- : false" :disabled="seite <= 1"><i class="glyphicon glyphicon-chevron-down"></i></button>
+              <button class="btn btn-default" type="button" @click="seite < maxSeiten ? seite++ : false" :disabled="seite >= maxSeiten"><span class="glyphicon glyphicon-chevron-up"></span></button>
+              <button class="btn btn-default" type="button" @click="seite > 1 ? seite-- : false" :disabled="seite <= 1"><span class="glyphicon glyphicon-chevron-down"></span></button>
             </div>
           </div>
           <b> / {{ maxSeiten }}</b> - Einträge: <b>{{ zaehler.toLocaleString('de-DE') }}</b>
@@ -75,7 +75,7 @@ export default {
     maxSeiten () {
       return Math.ceil(this.zaehler / this.eintraegeProSeite)
     },
-    sichtbareTabellenfelder () {
+    sichtbareTabellenfelder () {    // Liste der Spalten die nicht ausgeblendet sind
       let sichtbareTabellenfelder = {}
       Object.keys(this.tabellenfelder).forEach(key => {
         if (this.tabellenfelder[key].show) {
@@ -90,7 +90,7 @@ export default {
     this.reload()
   },
   methods: {
-    reload: _.debounce(function () {
+    reload: _.debounce(function () {  // Einträge laden
       if (!this.loading) {
         this.loading = true
         this.http.post('', {
@@ -101,7 +101,7 @@ export default {
           suche: JSON.stringify(this.suchfelder),
           sortierung: JSON.stringify(this.spaltenSortierung)
         }).then((response) => {
-          console.log(response.data)
+          // console.log(response.data)
           this.eintraege = response.data.eintraege
           this.zaehler = response.data.zaehler
           this.lSeite = response.data.seite
@@ -157,25 +157,11 @@ export default {
         }
       })
     },
-    'filterfelder.informant' () {
-      this.reload()
-    },
-    'filterfelder.transkript' () {
-      this.reload()
-    },
-    eintraegeProSeite () {
-      this.reload()
-    },
+    'filterfelder.informant' () { this.reload() },
+    'filterfelder.transkript' () { this.reload() },
+    eintraegeProSeite () { this.reload() },
     seite (nVal) {
-      if (isNaN(nVal)) {
-        this.seite = parseInt(nVal.replace(/\D/, ''))
-      } else {
-        if (this.maxSeiten < 1) {
-          this.seite = 1
-        } else {
-          this.seite = this.seite < 1 ? 1 : (this.seite > this.maxSeiten ? this.maxSeiten : this.seite)
-        }
-      }
+      this.seite = isNaN(nVal) ? parseInt(nVal.replace(/\D/, '')) : this.maxSeiten < 1 ? 1 : this.seite < 1 ? 1 : (this.seite > this.maxSeiten ? this.maxSeiten : this.seite)
       if (this.lSeite !== this.aSeite) {
         this.reload()
       }

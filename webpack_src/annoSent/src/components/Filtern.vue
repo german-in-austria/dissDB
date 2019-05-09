@@ -2,7 +2,7 @@
   <div class="annosent-filtern form-horizontal">
     <div class="form-group">
       <div class="col-sm-offset-4 col-sm-8">
-        <button class="form-control-static btn btn-success w100" @click="loadMatViewData(true)" :title="'Letzter Refresh: ' + mvLastUpdate + ' Uhr, Durchschnittliche Dauer ca. ' + mvDurchschnitt + ' Sekunden'"><b>Refresh Materialized View</b></button>
+        <button class="form-control-static btn btn-success w100" @click="loadMatViewData(true)" :title="mvDurchschnitt > 0 ? 'Letzter Refresh: ' + mvLastUpdate + ' Uhr, Durchschnittliche Dauer ca. ' + mvDurchschnitt + ' Sekunden' : ''"><b>Refresh Materialized View</b></button>
       </div>
     </div>
     <div class="form-group">
@@ -83,7 +83,7 @@ export default {
     this.getTranscriptsInfList()
   },
   methods: {
-    getTranscriptsInfList () {
+    getTranscriptsInfList () {    // Informationen zu Informanten und Transkripten laden
       this.loading = true
       this.loadInfos = ''
       this.http.post('/annotationsdb/startvue', { getTranscriptsInfList: 1 })
@@ -108,8 +108,6 @@ export default {
             }
           }
           this.infTrans.data.loaded = true
-          // console.log('infTransList', this.infTrans.data.infTransList, 'infTransObj', this.infTrans.data.infTransObj)
-          // console.log('transcriptsList', this.infTrans.data.transcriptsList, 'transcriptsObj', this.infTrans.data.transcriptsObj)
           this.loading = false
         })
         .catch((err) => {
@@ -118,7 +116,7 @@ export default {
           this.loading = false
         })
     },
-    loadMatViewData (refresh = false) {
+    loadMatViewData (refresh = false) {   // Informationen zu letzten Materialized View Refreshes laden
       if (!this.loading || !refresh) {
         if (refresh) {
           this.loading = true

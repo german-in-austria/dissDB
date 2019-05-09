@@ -43,7 +43,7 @@ export default {
     console.log(this.suchfelder)
   },
   methods: {
-    valPlaceholder (methode) {
+    valPlaceholder (methode) {    // Placeholder für Suchfeld entsprechend der ausgewählten Methode anpassen
       let aPH = 'hat'
       if (methode === 'regex' || methode === 'iregex') {
         aPH = '\\yh(a|ä)tte\\y'
