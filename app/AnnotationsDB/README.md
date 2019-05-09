@@ -47,3 +47,9 @@ CREATE MATERIALIZED VIEW mat_adhocsentences
 	);
 create unique index on mat_adhocsentences (id);
 ```
+
+Vorhandene Materialized View löschen
+
+```
+DROP MATERIALIZED VIEW mat_adhocsentences
+```

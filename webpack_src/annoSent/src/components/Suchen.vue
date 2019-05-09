@@ -1,6 +1,6 @@
 <template>
   <div class="annosent-suchen row">
-    <div class="col col-md-8">
+    <div class="col col-md-12">
       <div class="form-horizontal">
         <div class="form-group" v-for="suchfeld in suchfelder" :key="'sl-' + suchfeld.name">
           <label :for="'suche-' + suchfeld.name" class="col-sm-2 control-label">{{ suchfeld.name }}</label>
@@ -27,10 +27,12 @@
             </div>
           </div>
         </div>
+        <div class="form-group">
+          <div class="col-md-12">
+            <button class="btn btn-primary float-right" type="button" @click="$emit('suche')" style="width:224px;">Suchen</button>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="col col-md-2">
-      <button class="btn btn-primary" type="button" @click="$emit('suche')">Suchen</button>
     </div>
   </div>
 </template>

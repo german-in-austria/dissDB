@@ -4,11 +4,13 @@
       <div class="form-inline float-left">
         <div class="form-group">
           <label for="annosent-tabelle-seite">Seite</label>
-          <div class="input-group spinner">
+          <div class="input-group">
+            <div class="input-group-btn">
+              <button class="btn btn-default" type="button" @click="seite > 1 ? seite-- : false" title="Vorherige Seite" :disabled="seite <= 1"><span class="glyphicon glyphicon-chevron-left"></span></button>
+            </div>
             <input type="text" v-model="seite" min="1" :max="maxSeiten" class="form-control" id="annosent-tabelle-seite">
-            <div class="input-group-btn-vertical">
-              <button class="btn btn-default" type="button" @click="seite < maxSeiten ? seite++ : false" :disabled="seite >= maxSeiten"><span class="glyphicon glyphicon-chevron-up"></span></button>
-              <button class="btn btn-default" type="button" @click="seite > 1 ? seite-- : false" :disabled="seite <= 1"><span class="glyphicon glyphicon-chevron-down"></span></button>
+            <div class="input-group-btn">
+              <button class="btn btn-default" type="button" @click="seite < maxSeiten ? seite++ : false" title="Nächste Seite" :disabled="seite >= maxSeiten"><span class="glyphicon glyphicon-chevron-right"></span></button>
             </div>
           </div>
           <b> / {{ maxSeiten }}</b> - Einträge: <b>{{ zaehler.toLocaleString('de-DE') }}</b>
@@ -21,7 +23,7 @@
             <option :value="anz" v-for="anz in [10, 25, 50, 100, 250]" :key="'eps' + anz">{{ anz }}</option>
           </select>
         </div>
-        <button @click="zeigeSpaltenAuswahl = !zeigeSpaltenAuswahl" @blur="spaltenAuswahlBlur" ref="zeigeSpaltenAuswahlBtn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-eye-open"></span></button>
+        <button @click="zeigeSpaltenAuswahl = !zeigeSpaltenAuswahl" @blur="spaltenAuswahlBlur" ref="zeigeSpaltenAuswahlBtn" class="btn btn-default" type="button" title="Ansicht"><span class="glyphicon glyphicon-eye-open"></span></button>
         <div class="zsa" v-if="zeigeSpaltenAuswahl" ref="zeigeSpaltenAuswahl">
           <button v-for="(feldoption, feld) in tabellenfelder" :key="'vthtf' + feld" @blur="spaltenAuswahlBlur" ref="zeigeSpaltenAuswahlBtns" @click="feldoption.show = !feldoption.show" :class="feldoption.show ? 'zsa-show' : ''"><span :class="'glyphicon glyphicon-eye-' + (feldoption.show ? 'open' : 'close')"></span> {{ feld }}</button>
         </div>
@@ -46,6 +48,7 @@
         </tbody>
       </table>
     </div>
+    <div class="text-right">Anfrage Dauer: {{ (ladeZeit / 1000).toFixed(2) }} Sekunden</div>
     <div class="loading" v-if="loading">Lade ...</div>
   </div>
 </template>
@@ -61,11 +64,14 @@ export default {
       lSeite: 0,
       zaehler: 0,
       eintraegeProSeite: 50,
+      ladeZeit: 0.0,
+      ladeZeitStart: 0.0,
       eintraege: [],
       loading: false,
       zeigeSpaltenAuswahl: false,
       popper: null,
-      spaltenSortierung: { spalte: 'adhoc_sentence', asc: true }
+      spaltenSortierung: { spalte: 'adhoc_sentence', asc: true },
+      rereload: false
     }
   },
   computed: {
@@ -90,9 +96,14 @@ export default {
     this.reload()
   },
   methods: {
+    debouncedReload: _.debounce(function () {   // Einträge verzögert laden
+      this.reload()
+    }, 300),
     reload: _.debounce(function () {  // Einträge laden
       if (!this.loading) {
+        this.rereload = false
         this.loading = true
+        this.ladeZeitStart = performance.now()
         this.http.post('', {
           getEntries: true,
           seite: this.aSeite,
@@ -106,12 +117,18 @@ export default {
           this.zaehler = response.data.zaehler
           this.lSeite = response.data.seite
           this.seite = this.lSeite + 1
+          this.ladeZeit = performance.now() - this.ladeZeitStart
           this.loading = false
+          if (this.rereload) { this.reload() }
         }).catch((err) => {
           console.log(err)
           alert('Fehler!')
+          this.ladeZeit = performance.now() - this.ladeZeitStart
           this.loading = false
+          if (this.rereload) { this.reload() }
         })
+      } else {
+        this.rereload = true
       }
     }, 100),
     fxFeld (eintrag, feld) {
@@ -161,9 +178,9 @@ export default {
     'filterfelder.transkript' () { this.reload() },
     eintraegeProSeite () { this.reload() },
     seite (nVal) {
-      this.seite = isNaN(nVal) ? parseInt(nVal.replace(/\D/, '')) : this.maxSeiten < 1 ? 1 : this.seite < 1 ? 1 : (this.seite > this.maxSeiten ? this.maxSeiten : this.seite)
+      this.seite = this.maxSeiten < 1 ? 1 : isNaN(nVal) ? parseInt(nVal.replace(/\D/, '')) : this.seite < 1 ? 1 : (this.seite > this.maxSeiten ? this.maxSeiten : this.seite)
       if (this.lSeite !== this.aSeite) {
-        this.reload()
+        this.debouncedReload()
       }
     }
   }
@@ -173,7 +190,7 @@ export default {
 <style scoped>
 .annosent-tabelle {
   position: relative;
-  margin-top: 40px;
+  margin-top: 10px;
   margin-bottom: 150px;
 }
 .form-inline > .form-group {
@@ -187,44 +204,10 @@ export default {
 }
 #annosent-tabelle-seite {
   text-align: right;
-}
-.spinner {
-  width: 100px;
-}
-.spinner input {
-  text-align: right;
-}
-.input-group-btn-vertical {
-  position: relative;
-  white-space: nowrap;
-  width: 17px;
-  vertical-align: middle;
-  display: table-cell;
-}
-.input-group-btn-vertical > .btn {
-  display: block;
-  float: none;
-  width: 100%;
-  max-width: 100%;
-  padding: 8px;
-  margin-left: -1px;
-  position: relative;
-  border-radius: 0;
-}
-.input-group-btn-vertical > .btn:first-child {
-  border-top-right-radius: 4px;
-}
-.input-group-btn-vertical > .btn:last-child {
-  margin-top: -2px;
-  border-bottom-right-radius: 4px;
-}
-.input-group-btn-vertical i {
-  position: absolute;
-  top: 0;
-  left: 1px;
-}
-.input-group-btn-vertical > .btn:last-child i {
-  top: 2px;
+  width: 70px;
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
 }
 td {
   white-space: nowrap;

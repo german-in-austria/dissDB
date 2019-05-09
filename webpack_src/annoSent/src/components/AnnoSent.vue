@@ -1,10 +1,12 @@
 <template>
   <div class="annosent">
     <div class="row">
-      <div class="col col-md-8">
+      <div class="col col-md-5">
         <Suchen :suchfelder="suchfelder" @suche="$refs.tabelle.reload()" />
       </div>
-      <div class="col col-md-offset-1 col-md-3">
+      <div class="col col-md-4">
+      </div>
+      <div class="col col-md-3">
         <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" />
       </div>
     </div>
