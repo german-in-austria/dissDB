@@ -32,7 +32,10 @@
         <thead>
           <tr>
             <th>#</th>
-            <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld">{{ feld }}</th>
+            <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld" :title="feld">
+              <span v-if="feldoption.local">{{ feldoption.displayName || feld }}</span>
+              <button @click="spalteSortieren(feld)" class="sort-btn" v-else>{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === feld"></span></button>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -61,7 +64,8 @@ export default {
       eintraege: [],
       loading: false,
       zeigeSpaltenAuswahl: false,
-      popper: null
+      popper: null,
+      spaltenSortierung: { spalte: 'adhoc_sentence', asc: true }
     }
   },
   computed: {
@@ -94,7 +98,8 @@ export default {
           seite: this.aSeite,
           eps: this.eintraegeProSeite,
           filter: JSON.stringify({ inf: this.filterfelder.informant, trans: this.filterfelder.transkript }),
-          suche: JSON.stringify(this.suchfelder)
+          suche: JSON.stringify(this.suchfelder),
+          sortierung: JSON.stringify(this.spaltenSortierung)
         }).then((response) => {
           console.log(response.data)
           this.eintraege = response.data.eintraege
@@ -109,6 +114,14 @@ export default {
         })
       }
     }, 100),
+    spalteSortieren (feld) {
+      if (this.spaltenSortierung.spalte === feld) {
+        this.spaltenSortierung.asc = !this.spaltenSortierung.asc
+      } else {
+        this.spaltenSortierung = { spalte: feld, asc: true }
+      }
+      this.reload()
+    },
     spaltenAuswahlBlur: _.debounce(function () {
       this.$nextTick(() => {
         if (this.$refs.zeigeSpaltenAuswahlBtns && this.$refs.zeigeSpaltenAuswahlBtns.indexOf(document.activeElement) < 0) {
@@ -166,6 +179,7 @@ export default {
 .annosent-tabelle {
   position: relative;
   margin-top: 40px;
+  margin-bottom: 150px;
 }
 .form-inline > .form-group {
   margin-right: 10px;
@@ -236,5 +250,13 @@ td {
 }
 .zsa > button.zsa-show {
   color: #333;
+}
+.sort-btn {
+  background: none;
+  border: none;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0;
 }
 </style>

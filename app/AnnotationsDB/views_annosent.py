@@ -31,8 +31,9 @@ def views_annosent(request):
 		aEps = int(request.POST.get('eps'))
 		aFilter = json.loads(request.POST.get('filter'))
 		aSuche = json.loads(request.POST.get('suche'))
+		aSortierung = json.loads(request.POST.get('sortierung'))
 		aElemente = adbmodels.mat_adhocsentences.objects.all()
-		# Suche
+		# Suchen / Filtern
 		aSucheMuss = []
 		aSucheKann = []
 		if int(aFilter['trans']) > 0:
@@ -71,6 +72,8 @@ def views_annosent(request):
 			aElemente = aElemente.filter(aSucheMussX)
 		elif aSucheKann:
 			aElemente = aElemente.filter(aSucheKannX)
+		# Sortieren
+		aElemente = aElemente.order_by(('-' if not aSortierung['asc'] else '') + aSortierung['spalte'])
 		aEintraege = [
 			{
 				'adhoc_sentence': aEintrag.adhoc_sentence,
@@ -97,9 +100,4 @@ def views_annosent(request):
 		# from django.db import connection
 		# print(connection.queries)
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')
-	optionen = {'suche': [{'name': 'sentorig'}, {'name': 'sentorth'}, {'name': 'ttpos'}, {'name': 'sptag'}]}
-	return render_to_response('AnnotationsDB/annosent.html', RequestContext(request, {
-		'tbl_refreshlog_mat_adhocsentences_last': adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[0],
-		'optionen': optionen,
-		'mat_adhocsentences': adbmodels.mat_adhocsentences.objects.all()[:100]
-	}))
+	return render_to_response('AnnotationsDB/annosent.html', RequestContext(request))

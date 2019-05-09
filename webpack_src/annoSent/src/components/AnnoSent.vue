@@ -41,10 +41,11 @@ export default {
         tagebene: 0
       },
       tabellenfelder: {
-        'adhoc_sentence': { show: true },
+        'adhoc_sentence': { show: true, displayName: 'a.s.' },
         'tokenids': { show: false },
         'infid': { show: true },
         'transid': { show: true },
+        'tagspalte': { show: true, displayName: 'Tag Spalte (Test)', local: true },
         'tokreih': { show: false },
         'seqsent': { show: false },
         'sentorig': { show: true },

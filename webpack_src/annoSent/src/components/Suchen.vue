@@ -7,7 +7,7 @@
           <div class="col-sm-10">
             <div class="input-group igfx">
               <div>
-                <input type="text" v-model="suchfeld.value" class="form-control" :id="'suche-' + suchfeld.name" style="border-radius:4px 0 0 4px;">
+                <input type="text" v-model="suchfeld.value" class="form-control" :id="'suche-' + suchfeld.name" style="border-radius:4px 0 0 4px;" :placeholder="valPlaceholder(suchfeld.methode)">
               </div>
               <div style="width:80px;">
                 <select class="form-control" v-model="suchfeld.kannmuss" :id="'kannmuss-' + suchfeld.name">
@@ -20,8 +20,8 @@
                 <select class="form-control" v-model="suchfeld.methode" :id="'methode-' + suchfeld.name" style="border-radius:0 4px 4px 0;">
                   <option value="ci">case-insensetiv</option>
                   <option value="cs">case-sensetiv</option>
-                  <option value="regex">RegEx</option>
                   <option value="iregex">iRegEx</option>
+                  <option value="regex">RegEx</option>
                 </select>
               </div>
             </div>
@@ -41,6 +41,15 @@ export default {
   props: ['suchfelder'],
   mounted () {
     console.log(this.suchfelder)
+  },
+  methods: {
+    valPlaceholder (methode) {
+      let aPH = 'hat'
+      if (methode === 'regex' || methode === 'iregex') {
+        aPH = '\\yh(a|ä)tte\\y'
+      }
+      return 'z.B. "' + aPH + '"'
+    }
   }
 }
 </script>
