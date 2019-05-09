@@ -20,7 +20,8 @@
                 <select class="form-control" v-model="suchfeld.methode" :id="'methode-' + suchfeld.name" style="border-radius:0 4px 4px 0;">
                   <option value="ci">case-insensetiv</option>
                   <option value="cs">case-sensetiv</option>
-                  <option value="regex" disabled>RegEx</option>
+                  <option value="regex">RegEx</option>
+                  <option value="iregex">iRegEx</option>
                 </select>
               </div>
             </div>

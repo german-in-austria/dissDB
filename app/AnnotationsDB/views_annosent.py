@@ -42,13 +42,19 @@ def views_annosent(request):
 		# [{'value': 'zwei', 'kannmuss': 'kann', 'methode': 'ci', 'name': 'sentorig'}, {'value': '', 'kannmuss': 'kann', 'methode': 'ci', 'name': 'sentorth'}, {'value': '', 'kannmuss': 'kann', 'methode': 'ci', 'name': 'sentttpos'}, {'value': '', 'kannmuss': 'kann', 'methode': 'ci', 'name': 'sentsptag'}]
 		for aSuchFeld in aSuche:
 			if aSuchFeld['value'].strip():
-				aTyp = 'icontains' if aSuchFeld['methode'] == 'ci' else 'contains'
+				aSuchValue = aSuchFeld['value'].strip()
+				if 'regex' in aSuchFeld['methode']:
+					aTyp = aSuchFeld['methode']
+					aSuchValue = r"{0}".format(aSuchValue)
+				else:
+					aTyp = 'icontains' if aSuchFeld['methode'] == 'ci' else 'contains'
+				print(aSuchFeld['methode'], aTyp)
 				if aSuchFeld['kannmuss'] == 'muss':
-					aSucheMuss.append(Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchFeld['value'].strip()}))
+					aSucheMuss.append(Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchValue}))
 				if aSuchFeld['kannmuss'] == 'nicht':
-					aSucheMuss.append(~Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchFeld['value'].strip()}))
+					aSucheMuss.append(~Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchValue}))
 				if aSuchFeld['kannmuss'] == 'kann':
-					aSucheKann.append(Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchFeld['value'].strip()}))
+					aSucheKann.append(Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchValue}))
 		if aSucheMuss:
 			import operator
 			aSucheMussX = aSucheMuss[0]
