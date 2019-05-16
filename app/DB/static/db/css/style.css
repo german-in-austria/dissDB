@@ -546,7 +546,7 @@ button.element-btn {
 }
 
 
-.gly-spin {
+.gly-spin, .resetidseq.loading > .glyphicon {
   -webkit-animation: spin 2s infinite linear;
   -moz-animation: spin 2s infinite linear;
   -o-animation: spin 2s infinite linear;

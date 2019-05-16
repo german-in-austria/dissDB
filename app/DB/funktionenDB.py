@@ -11,6 +11,9 @@ from copy import deepcopy
 import json
 import pprint
 
+Monate = ('Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember')
+
+
 # Schneller HttpOutput
 def httpOutput(aoutput,mimetype='text/plain'):
 	txtausgabe = HttpResponse(aoutput)

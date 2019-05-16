@@ -13,6 +13,21 @@ from django.conf import settings
 import json
 from django.db import connection
 
+
+def refreshcache(request,app_name,tabelle_name):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return redirect('dioedb_login')
+	# Gibt es die Tabelle?
+	try : amodel = apps.get_model(app_name, tabelle_name)
+	except LookupError : return HttpResponseNotFound('<h1>Tabelle "'+tabelle_name+'" nicht gefunden!</h1>')
+	try:
+		success = json.dumps({'success':'success','db_table':str(amodel._meta.db_table),'refreshCache':amodel.refreshCache(),})
+	except Exception as e:
+		success = json.dumps({'error':str(type(e))+' - '+str(e),'db_table':str(amodel._meta.db_table),})
+	return httpOutput(success, mimetype='application/json')
+
+
 def resetidseq(request,app_name,tabelle_name):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
@@ -28,6 +43,7 @@ def resetidseq(request,app_name,tabelle_name):
 	except Exception as e:
 		success = json.dumps({'error':str(type(e))+' - '+str(e),'db_table':str(amodel._meta.db_table),})
 	return httpOutput(success, mimetype='application/json')
+
 
 # Startseite - Übersicht über alle verfügbaren Tabellen
 def start(request):
@@ -45,7 +61,7 @@ def start(request):
 			for model in apps.get_app_config(aapp).models.items():
 				amodel = apps.get_model(aapp, model[0])
 				if str(model[0])[:4]!='sys_':
-					tabellen[aapp].append({'model':model[0],'titel':amodel._meta.verbose_name_plural,'count':amodel.objects.count()})
+					tabellen[aapp].append({'model':model[0],'titel':amodel._meta.verbose_name_plural,'count':amodel.objects.count(),'refreshCache':(request.user.is_superuser and hasattr(amodel, 'refreshCache'))})
 	# Ausgabe der Seite
 	return render_to_response('DB/start.html',
 		RequestContext(request, {'tabellen':(tabellen.items()),'database':settings.DATABASES['default']['ENGINE'],'info':info}),)

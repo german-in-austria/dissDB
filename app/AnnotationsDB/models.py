@@ -83,6 +83,29 @@ class tbl_tokenset(models.Model):
 	id_von_token		= models.ForeignKey('token', related_name='rn_id_von_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Von Token ID")
 	id_bis_token		= models.ForeignKey('token', related_name='rn_id_bis_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Bis Token ID")
 	updated				= models.DateTimeField(auto_now=True																				, verbose_name="Letztes Änderung")
+	def refreshCache():
+		dg = 0
+		all = tbl_tokenset.objects.count()
+		for aTokenset in tbl_tokenset.objects.all():
+			start = time.time()
+			aTokenset.save()
+			dg += 1
+			print(dg, '/', all, 'pk:', aTokenset.pk, time.time() - start)
+		return dg
+	def save(self, *args, **kwargs):
+		# tbl_tokentoset_cache aktuallisieren ...
+		super().save(*args, **kwargs)
+		tbl_tokentoset_cache.objects.filter(id_tokenset=self.pk).delete()
+		if self.id_von_token and self.id_bis_token:
+			if self.id_von_token.ID_Inf.pk != self.id_bis_token.ID_Inf.pk:
+				raise Exception("self.id_von_token.ID_Inf.pk != self.id_bis_token.ID_Inf.pk")
+			if self.id_von_token.transcript_id.pk != self.id_bis_token.transcript_id.pk:
+				raise Exception("self.id_von_token.transcript_id.pk != self.id_bis_token.transcript_id.pk")
+			if self.id_von_token.token_reihung > self.id_bis_token.token_reihung:
+				(self.id_bis_token.token_reihung, self.id_von_token.token_reihung) = (self.id_von_token.token_reihung, self.id_bis_token.token_reihung)
+			with transaction.atomic():
+				for aToken in token.objects.values('pk').filter(ID_Inf=self.id_von_token.ID_Inf, transcript_id=self.id_von_token.transcript_id.pk, token_reihung__gte=self.id_von_token.token_reihung, token_reihung__lte=self.id_bis_token.token_reihung).order_by('token_reihung'):
+					tbl_tokentoset_cache(id_tokenset=self, id_token_id=aToken['pk']).save()
 	def __str__(self):
 		return "{} - {}".format(self.id_von_token, self.id_bis_token)
 	class Meta:
@@ -102,6 +125,19 @@ class tbl_tokentoset(models.Model):
 		db_table = "tokentoset"
 		verbose_name = "Token to Token Set"
 		verbose_name_plural = "Token to Token Sets"
+		ordering = ('id_tokenset',)
+
+
+class tbl_tokentoset_cache(models.Model):
+	id_tokenset			= models.ForeignKey('tbl_tokenset'									, on_delete=models.CASCADE		, verbose_name="Tokenset")
+	id_token			= models.ForeignKey('token'											, on_delete=models.CASCADE		, verbose_name="Token")
+	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
+	def __str__(self):
+		return "{} <- {}".format(self.id_tokenset, self.id_token)
+	class Meta:
+		db_table = "tokentoset_cache"
+		verbose_name = "Token to Token Set Cache"
+		verbose_name_plural = "Token to Token Sets Cache"
 		ordering = ('id_tokenset',)
 
 
