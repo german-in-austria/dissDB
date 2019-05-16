@@ -79,6 +79,22 @@ def views_annosent(request):
 			{
 				'adhoc_sentence': aEintrag.adhoc_sentence,
 				'tokenids': aEintrag.tokenids,
+				'tokens': [
+					{
+						'pk': aToken.pk,
+						't': aToken.text,
+						'tt': aToken.token_type_id_id,
+						'tr': aToken.token_reihung,
+						'e': aToken.event_id_id,
+						'to': aToken.text_in_ortho,
+						'i': aToken.ID_Inf_id,
+						'o': aToken.ortho,
+						's': aToken.sentence_id_id,
+						'sr': aToken.sequence_in_sentence,
+						'fo': aToken.fragment_of_id,
+						'le': aToken.likely_error
+					} for aToken in adbmodels.token.objects.filter(pk__in=aEintrag.tokenids)
+				],
 				'infid': aEintrag.infid,
 				'transid': aEintrag.transid,
 				'tokreih': aEintrag.tokreih,

@@ -43,7 +43,10 @@
         <tbody>
           <tr v-for="(eintrag, key) in eintraege" :key="'ez' + eintrag">
             <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
-            <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">{{ feldoption.local ? fxFeld(eintrag, feld) : eintrag[feld] }}</td>
+            <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">
+              <template v-if="feldoption.local && feld === 'sentorth_fx'"><Token :token="aToken" :tokens="eintrag.tokens" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></template>
+              <template v-else>{{ feldoption.local ? fxFeld(eintrag, feld) : eintrag[feld] }}</template>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -55,6 +58,8 @@
 
 <script>
 /* global _ Popper */
+import Token from './Token'
+
 export default {
   name: 'Tabelle',
   props: ['tabellenfelder', 'suchfelder', 'filterfelder', 'http', 'tagsData', 'infTrans'],
@@ -112,7 +117,7 @@ export default {
           suche: JSON.stringify(this.suchfelder),
           sortierung: JSON.stringify(this.spaltenSortierung)
         }).then((response) => {
-          // console.log(response.data)
+          console.log(response.data)
           this.eintraege = response.data.eintraege
           this.zaehler = response.data.zaehler
           this.lSeite = response.data.seite
@@ -137,6 +142,13 @@ export default {
       }
       if (feld === 'trans') {
         return this.infTrans.data.loaded && this.infTrans.data.transcriptsObj[eintrag.transid] ? this.infTrans.data.transcriptsObj[eintrag.transid].name : eintrag.transid
+      }
+      if (feld === 'sentorth_fx') {
+        let aLine = []
+        eintrag.tokens.forEach((aToken) => {
+          aLine.push(aToken.o === null ? aToken.to : aToken.o)
+        }, this)
+        return aLine
       }
       return 'Unbekannt: ' + feld
     },
@@ -183,6 +195,9 @@ export default {
         this.debouncedReload()
       }
     }
+  },
+  components: {
+    Token
   }
 }
 </script>
