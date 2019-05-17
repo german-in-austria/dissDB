@@ -2,7 +2,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.db.models import Q
 # from django.db.models import Count
-# import Datenbank.models as dbmodels
+import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import json
 from DB.funktionenDB import httpOutput
@@ -75,26 +75,12 @@ def views_annosent(request):
 		# Sortieren
 		aElemente = aElemente.order_by(('-' if not aSortierung['asc'] else '') + aSortierung['spalte'])
 		# Einträge ausgeben
+		aMatIds = [aEintrag['id'] for aEintrag in aElemente.values('id')[aSeite * aEps:aSeite * aEps + aEps]]
 		aEintraege = [
 			{
 				'adhoc_sentence': aEintrag.adhoc_sentence,
 				'tokenids': aEintrag.tokenids,
-				'tokens': [
-					{
-						'pk': aToken.pk,
-						't': aToken.text,
-						'tt': aToken.token_type_id_id,
-						'tr': aToken.token_reihung,
-						'e': aToken.event_id_id,
-						'to': aToken.text_in_ortho,
-						'i': aToken.ID_Inf_id,
-						'o': aToken.ortho,
-						's': aToken.sentence_id_id,
-						'sr': aToken.sequence_in_sentence,
-						'fo': aToken.fragment_of_id,
-						'le': aToken.likely_error
-					} for aToken in adbmodels.token.objects.filter(pk__in=aEintrag.tokenids)
-				],
+				'tokens': aEintrag.tokens,
 				'infid': aEintrag.infid,
 				'transid': aEintrag.transid,
 				'tokreih': aEintrag.tokreih,
@@ -112,8 +98,75 @@ def views_annosent(request):
 				'sentspdep': aEintrag.sentspdep,
 				'sentspenttype': aEintrag.sentspenttype
 			}
-			for aEintrag in aElemente[aSeite * aEps:aSeite * aEps + aEps]
-		]
+			for aEintrag in adbmodels.mat_adhocsentences.objects.raw('''
+				SELECT "mat_adhocsentences".*,
+					(
+						SELECT array_to_json(array_agg(row_to_json(atok)))
+						FROM (
+							SELECT "token".*,
+							(
+								SELECT array_to_json(array_agg(row_to_json(aantwort)))
+									FROM (
+										SELECT "Antworten".*
+										FROM "Antworten"
+										WHERE "Antworten"."ist_token_id" = "token"."id"
+									) AS aantwort
+							) AS antworten,
+							(
+								SELECT array_to_json(array_agg(row_to_json(atokenset)))
+									FROM (
+											SELECT "tokenset".*,
+											(
+												SELECT array_to_json(array_agg(row_to_json(aantwort)))
+													FROM (
+														SELECT "Antworten".*
+														FROM "Antworten"
+														WHERE "Antworten"."ist_tokenset_id" = "tokenset"."id"
+													) AS aantwort
+											) AS antworten,
+											(
+												SELECT array_to_json(array_agg(row_to_json(atokentoset_cache)))
+													FROM (
+														SELECT "tokentoset"."id_token_id"
+														FROM "tokentoset"
+														WHERE "tokentoset"."id_tokenset_id" = "tokenset"."id"
+													) AS atokentoset_cache
+											) AS tokentoset
+												FROM "tokenset"
+												LEFT OUTER JOIN "tokentoset" ON ( "tokenset"."id" = "tokentoset"."id_tokenset_id" )
+												WHERE "tokentoset"."id_token_id" = "token"."id"
+										UNION ALL
+											SELECT "tokenset".*,
+											(
+												SELECT array_to_json(array_agg(row_to_json(aantwort)))
+													FROM (
+														SELECT "Antworten".*
+														FROM "Antworten"
+														WHERE "Antworten"."ist_tokenset_id" = "token"."id"
+													) AS aantwort
+											) AS antworten,
+											(
+												SELECT array_to_json(array_agg(row_to_json(atokentoset_cache)))
+													FROM (
+														SELECT "tokentoset_cache"."id_token_id"
+														FROM "tokentoset_cache"
+														WHERE "tokentoset_cache"."id_tokenset_id" = "tokenset"."id"
+													) AS atokentoset_cache
+											) AS tokentoset
+												FROM "tokenset"
+												LEFT OUTER JOIN "tokentoset_cache" ON ( "tokenset"."id" = "tokentoset_cache"."id_tokenset_id" )
+												WHERE "tokentoset_cache"."id_token_id" = "token"."id"
+									) AS atokenset
+							) AS tokensets
+								FROM "token"
+								WHERE "token"."id" = ANY("mat_adhocsentences"."tokenids")
+								ORDER BY "token"."token_reihung" ASC
+						) atok
+					) AS "tokens"
+				FROM "mat_adhocsentences"
+				WHERE "mat_adhocsentences"."id" IN %s
+				ORDER BY "mat_adhocsentences"."adhoc_sentence" ASC
+			''', [tuple(aMatIds)])]
 		# from django.db import connection
 		# print(connection.queries)
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')

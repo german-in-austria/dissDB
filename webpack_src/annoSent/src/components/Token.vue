@@ -1,8 +1,11 @@
 <template>
   <button
-    :class="'token token-type-' + token.tt + (token.fo || token.tt === 2 ? '' : ' space') + (tokenIsFragment ? ' isfragment' : '') + (nextTokenIsFragment ? ' hasfragment' : '')"
-    :title="'pk: ' + token.pk + '\ntext: ' + token.t + '\ntext_in_ortho: ' + token.to + '\northo: ' + token.o + '\ntoken_type_id: ' + token.tt"
-  ><i v-if="!this.token.fo && this.token.tt !== 2">&nbsp;</i>{{ tokenText }}</button>
+    :class="'token token-type-' + token.token_type_id_id + (token.fragment_of_id || token.token_type_id_id === 2 ? '' : ' space') + (tokenIsFragment ? ' isfragment' : '') + (nextTokenIsFragment ? ' hasfragment' : '')"
+    :title="'id: ' + token.id + '\ntext: ' + token.text + '\ntext_in_ortho: ' + token.text_in_ortho + '\northo: ' + token.ortho + '\ntoken_type_id: ' + token.token_type_id_id"
+  >
+    <div :class="'mark-tokenset' + (token.tokensets && token.tokensets.length > 0 ? ' has-antwort' : '')" />
+    <div :class="'mark-token' + (token.antworten && token.antworten.length > 0 ? ' has-antwort' : '')" />
+    <i v-if="!this.token.fragment_of_id && this.token.token_type_id_id !== 2">&nbsp;</i>{{ tokenText }}</button>
 </template>
 
 <script>
@@ -14,7 +17,7 @@ export default {
       let isAToken = false
       let nToken = null
       this.tokens.some((aToken) => {
-        if (aToken.pk === this.token.pk) {
+        if (aToken.id === this.token.id) {
           isAToken = true
         } else if (isAToken) {
           nToken = aToken
@@ -24,15 +27,15 @@ export default {
       return nToken
     },
     nextTokenIsFragment () {
-      return this.nextToken ? this.nextToken.fo : null
+      return this.nextToken ? this.nextToken.fragment_of_id : null
     },
     tokenIsFragment () {
-      return this.token.fo
+      return this.token.fragment_of_id
     },
     tokenText () {
-      let aTokenText = (this.token.o === null ? this.token.to : this.token.o)
+      let aTokenText = (this.token.ortho === null ? this.token.text_in_ortho : this.token.ortho)
       if (this.nextToken && this.nextTokenIsFragment) {
-        let foTokenText = (this.nextToken.o === null ? this.nextToken.to : this.nextToken.o)
+        let foTokenText = (this.nextToken.ortho === null ? this.nextToken.text_in_ortho : this.nextToken.ortho)
         if (aTokenText.substr(aTokenText.length - foTokenText.length) === foTokenText) {
           aTokenText = aTokenText.substr(0, aTokenText.length - foTokenText.length)
         }
@@ -48,10 +51,8 @@ export default {
 </script>
 
 <style scoped>
-.token > i {
-  font-size: 0;
-}
 .token {
+  position: relative;
   padding: 3px 1px;
   background-color: #fafafa;
   border: 1px solid #fafafa;
@@ -76,4 +77,28 @@ export default {
   background-color: #eef;
   border-color: #ddf;
 }
+.token > i {
+  font-size: 0;
+}
+.mark-tokenset, .mark-token {
+  background-color: #337ab7;
+  background-color: #337ab7;
+  position: absolute;
+  bottom: 1px;
+  height: 2px;
+  left: 1px;
+  width: 50%;
+  width: calc(50% - 1px);
+  opacity: 0.33;
+}
+.mark-token {
+  background-color: #5cb85c;
+  background-color: #5cb85c;
+  left: inherit;
+  right: 1px;
+}
+.mark-tokenset.has-antwort, .mark-token.has-antwort {
+  opacity: 1;
+}
+
 </style>

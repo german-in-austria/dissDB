@@ -85,10 +85,10 @@ export default {
 }
 .loading {
   position: absolute;
-  left: -20px;
-  right: -20px;
-  top: -20px;
-  bottom: -20px;
+  left: -15px;
+  right: -15px;
+  top: -15px;
+  bottom: -15px;
   text-align: center;
   color: #000;
   background: rgba(255,255,255,0.75);
