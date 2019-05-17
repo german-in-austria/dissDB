@@ -32,6 +32,7 @@ RUN pip3 install uwsgi
 
 # NGINX STANDARD SETUP
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+COPY nginx-gzip.conf /etc/nginx/conf.d/
 COPY nginx-app.conf /etc/nginx/sites-available/default
 COPY supervisor-app.conf /etc/supervisor/conf.d/
 
