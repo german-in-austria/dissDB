@@ -34,6 +34,9 @@
         <thead>
           <tr>
             <th>#</th>
+            <th v-if="filterfelder.bearbeitungsmodus === 'auswahl'">
+              <button class="auswahl-btn" @click="selectAll()"><span :class="'glyphicon glyphicon-' + ((eintraege.length > 0 && countSelected > 0) ? (eintraege.length === countSelected ? 'check' : 'share') : 'unchecked')"></span></button>
+            </th>
             <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld" :title="feldoption.sortby || feld">
               <span v-if="feldoption.local && !feldoption.sortby">{{ feldoption.displayName || feld }}</span>
               <button @click="spalteSortieren(feldoption.sortby || feld)" class="sort-btn" v-else>{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === (feldoption.sortby || feld)"></span></button>
@@ -43,8 +46,11 @@
         <tbody>
           <tr v-for="(eintrag, key) in eintraege" :key="'ez' + eintrag">
             <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
+            <td v-if="filterfelder.bearbeitungsmodus === 'auswahl'">
+              <button class="auswahl-btn" @click="selectAllTokens(eintrag)"><span :class="'glyphicon glyphicon-' + (eintrag.selected && eintrag.selected.length > 0 ? (eintrag.selected.length === eintrag.tokens.length ? 'check' : 'share') : 'unchecked')"></span></button>
+            </td>
             <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">
-              <template v-if="feldoption.local && feld === 'sentorth_fx'"><Token :token="aToken" :tokens="eintrag.tokens" :fxData="fxData" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></template>
+              <div class="tokens" v-if="feldoption.local && feld === 'sentorth_fx'"><Token @selectToken="selectToken(eintrag, aToken)" :token="aToken" :tokens="eintrag.tokens" :eintrag="eintrag" :filterfelder="filterfelder" :fxData="fxData" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></div>
               <template v-else>{{ feldoption.local ? fxFeld(eintrag, feld) : eintrag[feld] }}</template>
             </td>
           </tr>
@@ -97,6 +103,15 @@ export default {
         }
       }, this)
       return sichtbareTabellenfelder
+    },
+    countSelected () {
+      let count = 0
+      this.eintraege.forEach((aEintrag) => {
+        if (aEintrag.selected && aEintrag.selected.length === aEintrag.tokens.length) {
+          count += 1
+        }
+      }, this)
+      return count
     }
   },
   mounted () {
@@ -104,6 +119,42 @@ export default {
     this.reload()
   },
   methods: {
+    selectAll (set = null) {
+      if (set === null) {   // Toggle
+        set = !(this.countSelected === this.eintraege.length)
+      }
+      this.eintraege.forEach((aEintrag) => {
+        this.selectAllTokens(aEintrag, set)
+      }, this)
+    },
+    selectToken (eintrag, token, set = null) {
+      if (set === null) {   // Toggle
+        set = !(eintrag.selected && eintrag.selected.indexOf(token.id) > -1)
+      }
+      if (set) {
+        if (!eintrag.selected) {
+          this.$set(eintrag, 'selected', [])
+        }
+        if (eintrag.selected.indexOf(token.id) < 0) {
+          eintrag.selected.push(token.id)
+        }
+      } else {
+        if (eintrag.selected && eintrag.selected.indexOf(token.id) > -1) {
+          eintrag.selected.splice(eintrag.selected.indexOf(token.id), 1)
+        }
+      }
+    },
+    selectAllTokens (eintrag, set = null) {
+      if (set === null) {   // Toggle
+        set = !(eintrag.selected && eintrag.selected.length === eintrag.tokens.length)
+      }
+      this.$set(eintrag, 'selected', [])
+      if (set) {
+        eintrag.tokens.forEach((aToken) => {
+          eintrag.selected.push(aToken.id)
+        }, this)
+      }
+    },
     debouncedReload: _.debounce(function () {   // Einträge verzögert laden
       this.reload()
     }, 300),
@@ -254,5 +305,19 @@ td {
   width: 100%;
   text-align: left;
   padding: 0;
+}
+.auswahl-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  outline: none!important;
+}
+.auswahl-btn:focus {
+  color: #337ab7;
+}
+.tokens {
+  position: relative;
+  z-index: 1;
 }
 </style>

@@ -2,9 +2,12 @@
   <button
     :class="'token token-type-' +
             (token.token_type_id_id + (token.fragment_of_id || token.token_type_id_id === 2 ? '' : ' space')) +
-            (tokenIsFragment ? ' isfragment' : '') + (nextTokenIsFragment ? ' hasfragment' : '') +
-            (activeTokenSet ? ' mark-active-tokenset' : '')"
+            (tokenIsFragment ? ' isfragment' : '') +
+            (nextTokenIsFragment ? ' hasfragment' : '') +
+            (activeTokenSet ? ' mark-active-tokenset' : '') +
+            (selected ? ' selected' : '')"
     @mouseenter="fxData.hoverToken = token" @mouseleave="fxData.hoverToken = null"
+    @click="filterfelder.bearbeitungsmodus === 'auswahl' ? $emit('selectToken') : null"
   >
     <div :class="'mark-tokenset' + (token.tokensets && token.tokensets.length > 0 ? ' has-antwort' : '')" />
     <div :class="'mark-token' + (token.antworten && token.antworten.length > 0 ? ' has-antwort' : '')" />
@@ -14,8 +17,11 @@
 <script>
 export default {
   name: 'Token',
-  props: ['token', 'tokens', 'fxData'],
+  props: ['token', 'tokens', 'eintrag', 'filterfelder', 'fxData'],
   computed: {
+    selected () {
+      return this.filterfelder.bearbeitungsmodus === 'auswahl' && this.eintrag.selected && this.eintrag.selected.indexOf(this.token.id) > -1
+    },
     nextToken () {
       let isAToken = false
       let nToken = null
@@ -101,7 +107,19 @@ export default {
   border-color: #ddf;
 }
 .token.mark-active-tokenset {
-  border-color: #93b0ca;
+  border-color: #337ab7;
+  background-color: #eef7ff;
+}
+.token.selected:after {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: #5cb85c;
+  z-index: -1;
+  border-radius: 5px;
 }
 .mark-tokenset, .mark-token {
   background-color: #337ab7;

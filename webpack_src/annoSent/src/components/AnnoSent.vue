@@ -40,7 +40,8 @@ export default {
       filterfelder: {
         informant: 0,
         transkript: 0,
-        tagebene: 0
+        tagebene: 0,
+        bearbeitungsmodus: 'direkt'
       },
       tabellenfelder: {
         'adhoc_sentence': { show: true, displayName: 'a.s.' },

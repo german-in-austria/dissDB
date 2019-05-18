@@ -32,6 +32,15 @@
         </select>
       </div>
     </div>
+    <div class="form-group">
+      <label for="tagebene" class="col-sm-4 control-label" title="Bearbeitungsmodus">Modus</label>
+      <div class="col-sm-8">
+        <select class="form-control" v-model="filterfelder.bearbeitungsmodus" id="bearbeitungsmodus">
+          <option value="direkt">Direkt</option>
+          <option value="auswahl">Auswahl</option>
+        </select>
+      </div>
+    </div>
     <div class="loading" v-if="loading">Lade ...<div>{{ loadInfos }}</div></div>
   </div>
 </template>
