@@ -1,17 +1,20 @@
 <template>
   <button
-    :class="'token token-type-' + token.token_type_id_id + (token.fragment_of_id || token.token_type_id_id === 2 ? '' : ' space') + (tokenIsFragment ? ' isfragment' : '') + (nextTokenIsFragment ? ' hasfragment' : '')"
-    :title="'id: ' + token.id + '\ntext: ' + token.text + '\ntext_in_ortho: ' + token.text_in_ortho + '\northo: ' + token.ortho + '\ntoken_type_id: ' + token.token_type_id_id"
+    :class="'token token-type-' +
+            (token.token_type_id_id + (token.fragment_of_id || token.token_type_id_id === 2 ? '' : ' space')) +
+            (tokenIsFragment ? ' isfragment' : '') + (nextTokenIsFragment ? ' hasfragment' : '') +
+            (activeTokenSet ? ' mark-active-tokenset' : '')"
+    @mouseenter="fxData.hoverToken = token" @mouseleave="fxData.hoverToken = null"
   >
     <div :class="'mark-tokenset' + (token.tokensets && token.tokensets.length > 0 ? ' has-antwort' : '')" />
     <div :class="'mark-token' + (token.antworten && token.antworten.length > 0 ? ' has-antwort' : '')" />
-    <i v-if="!this.token.fragment_of_id && this.token.token_type_id_id !== 2">&nbsp;</i>{{ tokenText }}</button>
+    <span class="space" v-if="!this.token.fragment_of_id && this.token.token_type_id_id !== 2">&nbsp;</span>{{ tokenText }}</button>
 </template>
 
 <script>
 export default {
   name: 'Token',
-  props: ['token', 'tokens'],
+  props: ['token', 'tokens', 'fxData'],
   computed: {
     nextToken () {
       let isAToken = false
@@ -41,6 +44,23 @@ export default {
         }
       }
       return aTokenText
+    },
+    activeTokenSet () {
+      let found = false
+      if (this.fxData.hoverToken && this.fxData.hoverToken.tokensets) {
+        this.fxData.hoverToken.tokensets.some((aTokenset) => {
+          if (aTokenset.tokentoset) {
+            aTokenset.tokentoset.some((aToken) => {
+              if (aToken.id_token_id === this.token.id) {
+                found = true
+                return true
+              }
+            }, this)
+          }
+          return found
+        }, this)
+      }
+      return found
     }
   },
   mounted () {
@@ -63,6 +83,9 @@ export default {
 .token.space {
   margin-left: 5px;
 }
+.token > span.space {
+  font-size: 0;
+}
 .token.isfragment {
   border-left: none;
   border-top-left-radius: 0;
@@ -77,14 +100,13 @@ export default {
   background-color: #eef;
   border-color: #ddf;
 }
-.token > i {
-  font-size: 0;
+.token.mark-active-tokenset {
+  border-color: #93b0ca;
 }
 .mark-tokenset, .mark-token {
   background-color: #337ab7;
-  background-color: #337ab7;
   position: absolute;
-  bottom: 1px;
+  bottom: 2px;
   height: 2px;
   left: 1px;
   width: 50%;
@@ -92,7 +114,6 @@ export default {
   opacity: 0.33;
 }
 .mark-token {
-  background-color: #5cb85c;
   background-color: #5cb85c;
   left: inherit;
   right: 1px;

@@ -44,7 +44,7 @@
           <tr v-for="(eintrag, key) in eintraege" :key="'ez' + eintrag">
             <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
             <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">
-              <template v-if="feldoption.local && feld === 'sentorth_fx'"><Token :token="aToken" :tokens="eintrag.tokens" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></template>
+              <template v-if="feldoption.local && feld === 'sentorth_fx'"><Token :token="aToken" :tokens="eintrag.tokens" :fxData="fxData" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></template>
               <template v-else>{{ feldoption.local ? fxFeld(eintrag, feld) : eintrag[feld] }}</template>
             </td>
           </tr>
@@ -76,7 +76,10 @@ export default {
       zeigeSpaltenAuswahl: false,
       popper: null,
       spaltenSortierung: { spalte: 'adhoc_sentence', asc: true },
-      rereload: false
+      rereload: false,
+      fxData: {
+        hoverToken: null
+      }
     }
   },
   computed: {
