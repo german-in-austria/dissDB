@@ -38,8 +38,6 @@ export default {
     })
     $(this.$refs.modal).modal('show')
   },
-  watch: {
-  },
   methods: {
     close () {
       console.log('close')
@@ -49,8 +47,6 @@ export default {
     escKey () {
       this.$refs.modal.focus()
     }
-  },
-  computed: {
   },
   beforeDestroy () {
     $('.modal-backdrop').remove()

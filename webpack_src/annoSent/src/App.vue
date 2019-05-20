@@ -16,4 +16,10 @@ export default {
 </script>
 
 <style>
+.ml10 {
+  margin-left: 10px;
+}
+.mt-5 {
+  margin-top: -5px;
+}
 </style>
