@@ -7,7 +7,7 @@
             (activeTokenSet ? ' mark-active-tokenset' : '') +
             (selected ? ' selected' : '')"
     @mouseenter="fxData.hoverToken = token" @mouseleave="fxData.hoverToken = null"
-    @click="filterfelder.bearbeitungsmodus === 'auswahl' ? $emit('selectToken') : null"
+    @click="filterfelder.bearbeitungsmodus === 'auswahl' ? $emit('selectToken') : $emit('tokenEdit', token)"
   >
     <div :class="'mark-tokenset' + (token.tokensets && token.tokensets.length > 0 ? ' has-antwort' : '')" />
     <div :class="'mark-token' + (token.antworten && token.antworten.length > 0 ? ' has-antwort' : '')" />
@@ -105,12 +105,13 @@ export default {
 .token:hover, .token:focus {
   background-color: #eef;
   border-color: #ddf;
+  outline: none;
 }
 .token.mark-active-tokenset {
   border-color: #337ab7;
   background-color: #eef7ff;
 }
-.token.selected:after {
+.token.selected:after, .token:hover:after, .token:focus:after {
   content: '';
   position: absolute;
   left: -3px;
@@ -120,6 +121,12 @@ export default {
   background: #5cb85c;
   z-index: -1;
   border-radius: 5px;
+}
+.token:hover:after, .token:focus:after {
+  background: #337ab7;
+}
+.token.selected:hover:after, .token.selected:focus:after {
+  background: #33aeb7;
 }
 .mark-tokenset, .mark-token {
   background-color: #337ab7;
