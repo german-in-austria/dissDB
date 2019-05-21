@@ -59,10 +59,14 @@
           <span :class="sv.class + ' tt' + sv.token.tt" v-for="(sv, svKey) in satzView" :key="'sv' + svKey">{{ transcript.aTokens.getTokenString(sv.token, 't') }}</span>
         </div>
       </template> -->
-      <!-- <template v-if="aToken.antworten && !token.antworten[0].deleteIt">
+      <template v-if="token.antworten && token.antworten.length > 0 && !token.antworten[0].deleteIt"><!-- TODO: Nur wenn Tagsystem geladen wurde! -->
+        <Tagsystem :tagsData="tagsData" :tags="token.antworten[0].tags" :http="http" mode="edit" v-if="token.antworten[0].tags" />
+        <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
+          {{ processRawTags(token.antworten[0], token.antworten[0].antwortentags_raw) }}
+        </div>
+        <div v-else>Tags laden noch ...</div>
         <hr>
-        <Tagsystem :tagsData="tagsData" :tags="token.antworten[0].tags" :http="http" mode="edit"/>
-      </template> -->
+      </template>
       <template v-if="tokenSetsBereiche.length > 0">
         <br><h4><b>Tokensets:</b> Bereiche</h4><hr>
         <div v-for="tokenSet in tokenSetsBereiche" :key="'tsb' + tokenSet">
@@ -80,6 +84,14 @@
               <button type="button" @click="addTokenAntwort(tokenSet.antworten)" class="btn btn-primary" v-else>Antwort erstellen</button>
             </div>
           </div>
+          <template v-if="tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt"><!-- TODO: Nur wenn Tagsystem geladen wurde! -->
+            <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
+            <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
+              {{ processRawTags(tokenSet.antworten[0], tokenSet.antworten[0].antwortentags_raw) }}
+            </div>
+            <div v-else>Tags laden noch ...</div>
+            <hr>
+          </template>
         </div>
       </template>
       <template v-if="tokenSetsListen.length > 0">
@@ -99,6 +111,14 @@
               <button type="button" @click="addTokenAntwort(tokenSet.antworten)" class="btn btn-primary" v-else>Antwort erstellen</button>
             </div>
           </div>
+          <template v-if="tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt"><!-- TODO: Nur wenn Tagsystem geladen wurde! -->
+            <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
+            <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
+              {{ processRawTags(tokenSet.antworten[0], tokenSet.antworten[0].antwortentags_raw) }}
+            </div>
+            <div v-else>Tags laden noch ...</div>
+            <hr>
+          </template>
         </div>
       </template>
     </div>
@@ -111,6 +131,7 @@
 </template>
 
 <script>
+/* global tagsystem */
 import Modal from './Modal'
 
 export default {
@@ -126,10 +147,81 @@ export default {
   },
   methods: {
     updateTokenData () {
+      // Änderungen speichern.
       console.log('TODO: updateTokenData()')
     },
     addTokenAntwort (antworten) {
       console.log('TODO: addTokenAntwort()')
+    },
+    processRawTags (antwort, rawTags) {
+      let outTags = []
+      if (rawTags && rawTags.length > 0) {
+        // console.log('rawTags', rawTags)
+        let cTags = this.tagsData.data.tagsCache.tags
+        let getTagFamilie = function (tags) {
+          let afam = []
+          let oTags = []
+          tags.forEach((tag) => {
+            let pClose = 0
+            if (afam.length) {
+              let wDg = 0
+              let childOfPreviousTag = false
+              do {
+                if (afam.length && cTags[tag.id_Tag_id].p && cTags[tag.id_Tag_id].p.length) {
+                  childOfPreviousTag = cTags[tag.id_Tag_id].p.indexOf(afam[afam.length - 1]) > -1
+                }
+                if (!childOfPreviousTag) {
+                  pClose += 1
+                  afam.pop()
+                }
+                wDg += 1
+              } while (afam.length && !childOfPreviousTag && wDg < 99)
+            }
+            oTags.push({t: tag.id_Tag_id, i: tag.id, c: pClose})
+            afam.push(tag.id_Tag_id)
+          }, this)
+          // console.log('oTags', JSON.parse(JSON.stringify(oTags)))
+          return oTags
+        }
+        let tagsByEbene = {}
+        rawTags.forEach((tag) => {
+          if (!tagsByEbene[tag.id_TagEbene_id]) {
+            tagsByEbene[tag.id_TagEbene_id] = []
+          }
+          tagsByEbene[tag.id_TagEbene_id].push(tag)
+        }, this)
+        // console.log('tagsByEbene', tagsByEbene)
+        Object.keys(tagsByEbene).forEach((ebenenId) => {
+          let gTF = getTagFamilie(tagsByEbene[ebenenId])
+          let pTags = []
+          if (gTF) {
+            pTags = this.processTags(gTF).tags
+          }
+          outTags.push({e: parseInt(ebenenId), 'tags': pTags})
+        }, this)
+        // console.log('outTags', outTags)
+      }
+      this.$set(antwort, 'tags', outTags)
+      return 'Verarbeite Tokens ...'
+    },
+    processTags: function (pTags, pPos = 0) {
+      var xTags = []
+      var xPos = pPos
+      var xClose = 0
+      while (xPos < pTags.length && xClose < 1) {
+        if (pTags[xPos].c > 0) {
+          xClose = pTags[xPos].c
+          pTags[xPos].c -= 1
+          xPos = xPos - 1
+        } else {
+          var prData = this.processTags(pTags, xPos + 1)
+          var zTags = prData.tags
+          var zPos = prData.pos
+          xTags.push({'id': pTags[xPos].i, 'tag': pTags[xPos].t, 'tags': zTags})
+          xPos = zPos + 1
+        }
+      }
+      return {'tags': xTags, 'pos': xPos}
     }
   },
   computed: {
@@ -175,7 +267,8 @@ export default {
     }
   },
   components: {
-    Modal
+    Modal,
+    Tagsystem: tagsystem.TagsystemVue
   }
 }
 </script>

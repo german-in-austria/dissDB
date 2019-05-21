@@ -334,11 +334,11 @@ def getTagFamilie(Tags):
 	for value in Tags:
 		pClose = 0
 		try:
-			while not value.id_Tag.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
+			while not value.id_Tag.id_ChildTag.filter(id_ParentTag=afam[-1]):
 				pClose += 1
 				del afam[-1]
 		except:
 			pass
 		oTags.append({'t': value.id_Tag_id, 'i': value.pk, 'c': pClose})
-		afam.append(value.id_Tag)
+		afam.append(value.id_Tag_id)
 	return oTags

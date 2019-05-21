@@ -107,7 +107,16 @@ def views_annosent(request):
 							(
 								SELECT array_to_json(array_agg(row_to_json(aantwort)))
 									FROM (
-										SELECT "Antworten".*
+										SELECT "Antworten".*,
+										(
+											SELECT array_to_json(array_agg(row_to_json(aAntwortenTags)))
+												FROM (
+													SELECT "AntwortenTags".*
+													FROM "AntwortenTags"
+													WHERE "AntwortenTags"."id_Antwort_id" = "Antworten"."id"
+													ORDER BY "AntwortenTags"."id_TagEbene_id" ASC, "AntwortenTags"."Reihung" ASC
+												) AS aAntwortenTags
+										) AS AntwortenTags_raw
 										FROM "Antworten"
 										WHERE "Antworten"."ist_token_id" = "token"."id"
 									) AS aantwort
@@ -119,7 +128,16 @@ def views_annosent(request):
 											(
 												SELECT array_to_json(array_agg(row_to_json(aantwort)))
 													FROM (
-														SELECT "Antworten".*
+														SELECT "Antworten".*,
+														(
+															SELECT array_to_json(array_agg(row_to_json(aAntwortenTags)))
+																FROM (
+																	SELECT "AntwortenTags".*
+																	FROM "AntwortenTags"
+																	WHERE "AntwortenTags"."id_Antwort_id" = "Antworten"."id"
+																	ORDER BY "AntwortenTags"."id_TagEbene_id" ASC, "AntwortenTags"."Reihung" ASC
+																) AS aAntwortenTags
+														) AS AntwortenTags_raw
 														FROM "Antworten"
 														WHERE "Antworten"."ist_tokenset_id" = "tokenset"."id"
 													) AS aantwort
@@ -140,9 +158,18 @@ def views_annosent(request):
 											(
 												SELECT array_to_json(array_agg(row_to_json(aantwort)))
 													FROM (
-														SELECT "Antworten".*
+														SELECT "Antworten".*,
+														(
+															SELECT array_to_json(array_agg(row_to_json(aAntwortenTags)))
+																FROM (
+																	SELECT "AntwortenTags".*
+																	FROM "AntwortenTags"
+																	WHERE "AntwortenTags"."id_Antwort_id" = "Antworten"."id"
+																	ORDER BY "AntwortenTags"."id_TagEbene_id" ASC, "AntwortenTags"."Reihung" ASC
+																) AS aAntwortenTags
+														) AS AntwortenTags_raw
 														FROM "Antworten"
-														WHERE "Antworten"."ist_tokenset_id" = "token"."id"
+														WHERE "Antworten"."ist_tokenset_id" = "tokenset"."id"
 													) AS aantwort
 											) AS antworten,
 											(
