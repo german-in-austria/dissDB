@@ -12,11 +12,11 @@ RUN add-apt-repository ppa:fkrull/deadsnakes
 RUN apt-get update -yq && apt-get install -y curl gnupg && curl -sL https://deb.nodesource.com/setup_8.x | bash && apt-get install -y nodejs
 RUN apt-get update
 RUN apt-get install -y git
-RUN apt-get install -y python3.5
+RUN apt-get install -y --force-yes python3.5
 RUN rm /usr/bin/python3
 RUN ln -s /usr/bin/python3.5 /usr/bin/python3
 RUN apt-get install -y python3-pip
-RUN apt-get install -y python3.5-dev
+RUN apt-get install -y --force-yes python3.5-dev
 RUN apt-get install -y python3-setuptools
 RUN apt-get install -y nginx
 RUN apt-get install -y supervisor
