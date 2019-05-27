@@ -46,8 +46,8 @@
         <div class="col-sm-10">
           <p class="form-control-static" v-if="token.antworten && token.antworten.length > 0">{{ token.antworten[0].id + (0 > token.antworten[0].id ? ' - Neu' : '') + (token.antworten[0].deleteIt ? ' - Wird gelöscht !!!' : '') }}
             <template v-if="!(token.antworten[0].tags && token.antworten[0].tags.length > 0) && (token.antworten.length !== 0)">
-              <button type="button" @click="$set(token.antworten[0], 'deleteIt', true)" class="btn btn-danger btn-xs ml10 mt-5" v-if="!token.antworten[0].deleteIt"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
-              <button type="button" @click="$set(token.antworten[0], 'deleteIt', false)" class="btn btn-danger btn-xs ml10 mt-5" v-else><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+              <button type="button" @click="$set(token.antworten[0], 'deleteIt', true); changed = true" class="btn btn-danger btn-xs ml10 mt-5" v-if="!token.antworten[0].deleteIt"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+              <button type="button" @click="$set(token.antworten[0], 'deleteIt', false); changed = true" class="btn btn-danger btn-xs ml10 mt-5" v-else><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
             </template>
           </p>
           <button type="button" @click="addTokenAntwort()" class="btn btn-primary" v-else>Antwort erstellen</button>
@@ -60,7 +60,7 @@
         </div>
       </template> -->
       <template v-if="tagsData.data.ready && token.antworten && token.antworten.length > 0 && !token.antworten[0].deleteIt">
-        <Tagsystem :tagsData="tagsData" :tags="token.antworten[0].tags" :http="http" mode="edit" v-if="token.antworten[0].tags" />
+        <Tagsystem :tagsData="tagsData" :tags="token.antworten[0].tags" @changed="tagChange" :http="http" mode="edit" v-if="token.antworten[0].tags" />
         <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
           {{ processRawTags(token.antworten[0], token.antworten[0].antwortentags_raw) }}
         </div>
@@ -77,15 +77,15 @@
             <div class="col-sm-4">
               <p class="form-control-static" v-if="tokenSet.antworten && tokenSet.antworten.length > 0">{{ tokenSet.antworten[0].id + (0 > tokenSet.antworten[0].id ? ' - Neu' : '') + (tokenSet.antworten[0].deleteIt ? ' - Wird gelöscht !!!' : '') }}
                 <template v-if="!(tokenSet.antworten[0].tags && tokenSet.antworten[0].tags.length > 0) && (tokenSet.antworten.length !== 0)">
-                  <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', true)" class="btn btn-danger btn-xs ml10 mt-5" v-if="!tokenSet.antworten[0].deleteIt"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
-                  <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', false)" class="btn btn-danger btn-xs ml10 mt-5" v-else><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                  <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', true); changed = true" class="btn btn-danger btn-xs ml10 mt-5" v-if="!tokenSet.antworten[0].deleteIt"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                  <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', false); changed = true" class="btn btn-danger btn-xs ml10 mt-5" v-else><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
                 </template>
               </p>
               <button type="button" @click="addTokenSetAntwort(tokenSet)" class="btn btn-primary" v-else>Antwort erstellen</button>
             </div>
           </div>
           <template v-if="tagsData.data.ready && tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt">
-            <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
+            <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" @changed="tagChange" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
             <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
               {{ processRawTags(tokenSet.antworten[0], tokenSet.antworten[0].antwortentags_raw) }}
             </div>
@@ -104,15 +104,15 @@
             <div class="col-sm-4">
               <p class="form-control-static" v-if="tokenSet.antworten && tokenSet.antworten.length > 0">{{ tokenSet.antworten[0].id + (0 > tokenSet.antworten[0].id ? ' - Neu' : '') + (tokenSet.antworten[0].deleteIt ? ' - Wird gelöscht !!!' : '') }}
                 <template v-if="!(tokenSet.antworten[0].tags && tokenSet.antworten[0].tags.length > 0) && (tokenSet.antworten.length !== 0)">
-                  <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', true)" class="btn btn-danger btn-xs ml10 mt-5" v-if="!tokenSet.antworten[0].deleteIt"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
-                  <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', false)" class="btn btn-danger btn-xs ml10 mt-5" v-else><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                  <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', true); changed = true" class="btn btn-danger btn-xs ml10 mt-5" v-if="!tokenSet.antworten[0].deleteIt"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                  <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', false); changed = true" class="btn btn-danger btn-xs ml10 mt-5" v-else><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
                 </template>
               </p>
               <button type="button" @click="addTokenSetAntwort(tokenSet)" class="btn btn-primary" v-else>Antwort erstellen</button>
             </div>
           </div>
           <template v-if="tagsData.data.ready && tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt">
-            <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
+            <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" @changed="tagChange" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
             <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
               {{ processRawTags(tokenSet.antworten[0], tokenSet.antworten[0].antwortentags_raw) }}
             </div>
@@ -150,17 +150,22 @@ export default {
       // Änderungen speichern.
       console.log('TODO: updateTokenData()')
     },
+    tagChange () {
+      this.changed = true
+    },
     addTokenAntwort () {
       if (!Array.isArray(this.token.antworten)) {
         this.token.antworten = []
       }
       this.token.antworten.push({id: -1, ist_token_id: this.token.id, tags: []})
+      this.changed = true
     },
     addTokenSetAntwort (tokenset) {
       if (!Array.isArray(tokenset.antworten)) {
         tokenset.antworten = []
       }
       tokenset.antworten.push({id: -1, ist_tokenset_id: tokenset.id, tags: []})
+      this.changed = true
     },
     processRawTags (antwort, rawTags) {
       let outTags = []
@@ -274,6 +279,8 @@ export default {
       }
       return tsb
     }
+  },
+  watch: {
   },
   components: {
     Modal,

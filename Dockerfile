@@ -44,7 +44,7 @@ RUN pip3 install psycopg2
 # Webpacks
 RUN mkdir /home/docker/code/webpack_src/
 # Tagsystem VUE Komponente
-RUN git clone https://github.com/german-in-austria/tagsystemVUE /home/docker/code/webpack_src/tagsystemVUE --branch v0.01
+RUN git clone https://github.com/german-in-austria/tagsystemVUE /home/docker/code/webpack_src/tagsystemVUE --branch v0.02
 RUN cd /home/docker/code/webpack_src/tagsystemVUE && npm install && npm run build
 # Annotations Tool
 RUN git clone https://github.com/german-in-austria/annotationsDB-frontend /home/docker/code/webpack_src/annotationsDB --branch v0.28
