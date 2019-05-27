@@ -58,7 +58,7 @@
       </table>
     </div>
     <div class="text-right">Anfrage Dauer: {{ (ladeZeit / 1000).toFixed(2) }} Sekunden</div>
-    <TokenEdit @closed="tokenEdit = null" :token="tokenEdit[0]" :eintrag="tokenEdit[1]" :http="http" :tagsData="tagsData" :infTrans="infTrans" :filterfelder="filterfelder" v-if="tokenEdit" />
+    <TokenEdit @closed="tokenEdit = null" :token="tokenEdit[0]" :eintrag="tokenEdit[1]" :http="http" :tagsData="tagsData" :infTrans="infTrans" :filterfelder="filterfelder" @changed="debouncedReload()" v-if="tokenEdit" />
     <div class="loading" v-if="loading">Lade ...</div>
   </div>
 </template>

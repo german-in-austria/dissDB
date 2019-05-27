@@ -3,11 +3,11 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Schließen" v-if="!blocked"><span aria-hidden="true">×</span></button>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Schließen" v-if="!blocked && !locked"><span aria-hidden="true">×</span></button>
           <h4 class="modal-title"><slot name="title">title</slot></h4>
         </div>
         <div class="modal-body"><slot>body</slot></div>
-        <div class="modal-footer"><slot name="addButtons" /><button type="button" class="btn btn-default" data-dismiss="modal" ref="closeButton" @keydown.esc="escKey"><slot name="closeButtonsText">Schließen</slot></button></div>
+        <div class="modal-footer"><slot name="addButtons" /><button type="button" class="btn btn-default" data-dismiss="modal" ref="closeButton" @keydown.esc="escKey" :disabled="locked"><slot name="closeButtonsText">Schließen</slot></button></div>
       </div>
     </div>
   </div>
@@ -18,7 +18,7 @@
 
 export default {
   name: 'Modal',
-  props: ['modalData', 'blocked'],
+  props: ['modalData', 'blocked', 'locked'],
   data () {
     return {
       forceClose: false
@@ -34,7 +34,7 @@ export default {
       aModalThis.$emit('closed')
     })
     $(this.$refs.modal).on('hide.bs.modal', function (e) {
-      return !aModalThis.blocked || document.activeElement === aModalThis.$refs.closeButton || aModalThis.forceClose
+      return aModalThis.locked ? false : !aModalThis.blocked || document.activeElement === aModalThis.$refs.closeButton || aModalThis.forceClose
     })
     $(this.$refs.modal).modal('show')
   },

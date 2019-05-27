@@ -1,5 +1,5 @@
 <template>
-  <Modal ref="modal" :modalData="modalData" :blocked="changed" @closed="$emit('closed')">
+  <Modal ref="modal" :modalData="modalData" :blocked="changed" @closed="$emit('closed')" :locked="locked">
     <template v-slot:title>Token bearbeiten: <b>{{ token.text }}</b> ({{ token.id }})</template>
 
     <div class="form-horizontal">
@@ -123,8 +123,10 @@
       </template>
     </div>
 
+    <div class="loading" v-if="loading">Lade ...</div>
+
     <template v-slot:addButtons>
-      <button type="button" class="btn btn-primary" :disabled="!changed" @click="updateTokenData">Speichern</button>
+      <button type="button" class="btn btn-primary" :disabled="!changed" @click="saveTokenData">Speichern</button>
     </template>
     <template v-slot:closeButtonsText>{{ ((changed) ? 'Verwerfen' : 'Schließen') }}</template>
   </Modal>
@@ -139,16 +141,50 @@ export default {
   props: ['token', 'eintrag', 'http', 'tagsData', 'infTrans', 'filterfelder'],
   data () {
     return {
-      changed: false
+      changed: false,
+      locked: false,
+      loading: false
     }
   },
   mounted () {
     console.log(this.token, this.filterfelder)
   },
+  beforeDestroy () {
+    if (this.changed) {
+      this.$emit('changed')
+    }
+  },
   methods: {
-    updateTokenData () {
+    saveTokenData () {
       // Änderungen speichern.
-      console.log('TODO: updateTokenData()')
+      this.loading = true
+      this.locked = true
+      let sAntworten = []
+      if (this.token.antworten && this.token.antworten[0]) {
+        sAntworten.push(this.token.antworten)
+      }
+      if (this.token.tokensets && this.token.tokensets.length > 0) {
+        this.token.tokensets.forEach((ts) => {
+          if (ts.antworten && ts.antworten[0]) {
+            sAntworten.push(ts.antworten[0])
+          }
+        }, this)
+      }
+      this.http.post('', {
+        saveAntworten: true,
+        antworten: JSON.stringify(sAntworten)
+      }).then((response) => {
+        console.log(response.data)
+        this.loading = false
+        this.locked = false
+        // TODO: Modal schließen ...
+      }).catch((err) => {
+        console.log(err)
+        alert('Fehler!')
+        this.loading = false
+        this.locked = false
+      })
+      console.log('TODO: saveTokenData()')
     },
     tagChange () {
       this.changed = true
@@ -290,4 +326,10 @@ export default {
 </script>
 
 <style scoped>
+.loading {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
 </style>

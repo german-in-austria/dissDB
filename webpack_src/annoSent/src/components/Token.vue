@@ -9,8 +9,8 @@
     @mouseenter="fxData.hoverToken = token" @mouseleave="fxData.hoverToken = null"
     @click="filterfelder.bearbeitungsmodus === 'auswahl' ? $emit('selectToken') : $emit('tokenEdit')"
   >
-    <div :class="'mark-tokenset' + (token.tokensets && token.tokensets.length > 0 ? ' has-antwort' : '')" />
-    <div :class="'mark-token' + (token.antworten && token.antworten.length > 0 ? ' has-antwort' : '')" />
+    <div :class="'mark-tokenset' + (token.tokensets && token.tokensets.length > 0 ? ' has-antwort' : '') + (token.antworten && token.antworten.length > 0 ? ' sib-antwort' : '')" />
+    <div :class="'mark-token' + (token.antworten && token.antworten.length > 0 ? ' has-antwort' : '') + (token.tokensets && token.tokensets.length > 0 ? ' sib-antwort' : '')" />
     <span class="space" v-if="!this.token.fragment_of_id && this.token.token_type_id_id !== 2">&nbsp;</span>{{ tokenText }}</button>
 </template>
 
@@ -136,12 +136,15 @@ export default {
   left: 1px;
   width: 50%;
   width: calc(50% - 1px);
-  opacity: 0.33;
+  opacity: 0;
 }
 .mark-token {
   background-color: #5cb85c;
   left: inherit;
   right: 1px;
+}
+.mark-token.sib-antwort, .mark-tokenset.sib-antwort {
+  opacity: 0.25;
 }
 .mark-tokenset.has-antwort, .mark-token.has-antwort {
   opacity: 1;

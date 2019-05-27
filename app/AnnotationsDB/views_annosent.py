@@ -10,6 +10,11 @@ import datetime
 
 
 def views_annosent(request):
+	# Antworten mit Tags speichern/ändern/löschen
+	if 'saveAntworten' in request.POST:
+		sAntworten = json.loads(request.POST.get('antworten'))
+		print(json.dumps(sAntworten))
+		return httpOutput(json.dumps({'OK': True}, 'application/json'))
 	# Materialized View Informationen und Aktuallisierung
 	if 'getMatViewData' in request.POST:
 		if 'refresh' in request.POST and request.POST.get('refresh') == 'true':
