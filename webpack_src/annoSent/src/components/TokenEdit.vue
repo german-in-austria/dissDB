@@ -50,7 +50,7 @@
               <button type="button" @click="$set(token.antworten[0], 'deleteIt', false)" class="btn btn-danger btn-xs ml10 mt-5" v-else><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
             </template>
           </p>
-          <button type="button" @click="addTokenAntwort(token.antworten)" class="btn btn-primary" v-else>Antwort erstellen</button>
+          <button type="button" @click="addTokenAntwort()" class="btn btn-primary" v-else>Antwort erstellen</button>
         </div>
       </div>
       <!-- <template v-if="satzView">
@@ -59,7 +59,7 @@
           <span :class="sv.class + ' tt' + sv.token.tt" v-for="(sv, svKey) in satzView" :key="'sv' + svKey">{{ transcript.aTokens.getTokenString(sv.token, 't') }}</span>
         </div>
       </template> -->
-      <template v-if="token.antworten && token.antworten.length > 0 && !token.antworten[0].deleteIt"><!-- TODO: Nur wenn Tagsystem geladen wurde! -->
+      <template v-if="tagsData.data.ready && token.antworten && token.antworten.length > 0 && !token.antworten[0].deleteIt">
         <Tagsystem :tagsData="tagsData" :tags="token.antworten[0].tags" :http="http" mode="edit" v-if="token.antworten[0].tags" />
         <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
           {{ processRawTags(token.antworten[0], token.antworten[0].antwortentags_raw) }}
@@ -81,10 +81,10 @@
                   <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', false)" class="btn btn-danger btn-xs ml10 mt-5" v-else><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
                 </template>
               </p>
-              <button type="button" @click="addTokenAntwort(tokenSet.antworten)" class="btn btn-primary" v-else>Antwort erstellen</button>
+              <button type="button" @click="addTokenSetAntwort(tokenSet)" class="btn btn-primary" v-else>Antwort erstellen</button>
             </div>
           </div>
-          <template v-if="tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt"><!-- TODO: Nur wenn Tagsystem geladen wurde! -->
+          <template v-if="tagsData.data.ready && tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt">
             <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
             <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
               {{ processRawTags(tokenSet.antworten[0], tokenSet.antworten[0].antwortentags_raw) }}
@@ -108,10 +108,10 @@
                   <button type="button" @click="$set(tokenSet.antworten[0], 'deleteIt', false)" class="btn btn-danger btn-xs ml10 mt-5" v-else><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
                 </template>
               </p>
-              <button type="button" @click="addTokenAntwort(tokenSet.antworten)" class="btn btn-primary" v-else>Antwort erstellen</button>
+              <button type="button" @click="addTokenSetAntwort(tokenSet)" class="btn btn-primary" v-else>Antwort erstellen</button>
             </div>
           </div>
-          <template v-if="tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt"><!-- TODO: Nur wenn Tagsystem geladen wurde! -->
+          <template v-if="tagsData.data.ready && tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt">
             <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
             <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
               {{ processRawTags(tokenSet.antworten[0], tokenSet.antworten[0].antwortentags_raw) }}
@@ -136,7 +136,7 @@ import Modal from './Modal'
 
 export default {
   name: 'TokenEdit',
-  props: ['token', 'http', 'tagsData', 'infTrans', 'filterfelder'],
+  props: ['token', 'eintrag', 'http', 'tagsData', 'infTrans', 'filterfelder'],
   data () {
     return {
       changed: false
@@ -150,8 +150,17 @@ export default {
       // Änderungen speichern.
       console.log('TODO: updateTokenData()')
     },
-    addTokenAntwort (antworten) {
-      console.log('TODO: addTokenAntwort()')
+    addTokenAntwort () {
+      if (!Array.isArray(this.token.antworten)) {
+        this.token.antworten = []
+      }
+      this.token.antworten.push({id: -1, ist_token_id: this.token.id, tags: []})
+    },
+    addTokenSetAntwort (tokenset) {
+      if (!Array.isArray(tokenset.antworten)) {
+        tokenset.antworten = []
+      }
+      tokenset.antworten.push({id: -1, ist_tokenset_id: tokenset.id, tags: []})
     },
     processRawTags (antwort, rawTags) {
       let outTags = []

@@ -50,7 +50,7 @@
               <button class="auswahl-btn" @click="selectAllTokens(eintrag)"><span :class="'glyphicon glyphicon-' + (eintrag.selected && eintrag.selected.length > 0 ? (eintrag.selected.length === eintrag.tokens.length ? 'check' : 'share') : 'unchecked')"></span></button>
             </td>
             <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">
-              <div class="tokens" v-if="feldoption.local && feld === 'sentorth_fx'"><Token @selectToken="selectToken(eintrag, aToken)" @tokenEdit="tokenEditSet" :token="aToken" :tokens="eintrag.tokens" :eintrag="eintrag" :filterfelder="filterfelder" :fxData="fxData" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></div>
+              <div class="tokens" v-if="feldoption.local && feld === 'sentorth_fx'"><Token @selectToken="selectToken(eintrag, aToken)" @tokenEdit="tokenEditSet(aToken, eintrag)" :token="aToken" :tokens="eintrag.tokens" :eintrag="eintrag" :filterfelder="filterfelder" :fxData="fxData" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></div>
               <template v-else>{{ feldoption.local ? fxFeld(eintrag, feld) : eintrag[feld] }}</template>
             </td>
           </tr>
@@ -58,7 +58,7 @@
       </table>
     </div>
     <div class="text-right">Anfrage Dauer: {{ (ladeZeit / 1000).toFixed(2) }} Sekunden</div>
-    <TokenEdit @closed="tokenEdit = null" :token="tokenEdit" :http="http" :tagsData="tagsData" :infTrans="infTrans" :filterfelder="filterfelder" v-if="tokenEdit" />
+    <TokenEdit @closed="tokenEdit = null" :token="tokenEdit[0]" :eintrag="tokenEdit[1]" :http="http" :tagsData="tagsData" :infTrans="infTrans" :filterfelder="filterfelder" v-if="tokenEdit" />
     <div class="loading" v-if="loading">Lade ...</div>
   </div>
 </template>
@@ -122,8 +122,8 @@ export default {
     this.reload()
   },
   methods: {
-    tokenEditSet (token) {
-      this.tokenEdit = token
+    tokenEditSet (token, eintrag) {
+      this.tokenEdit = [token, eintrag]
     },
     selectAll (set = null) {
       if (set === null) {   // Toggle

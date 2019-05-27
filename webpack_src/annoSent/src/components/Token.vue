@@ -7,7 +7,7 @@
             (activeTokenSet ? ' mark-active-tokenset' : '') +
             (selected ? ' selected' : '')"
     @mouseenter="fxData.hoverToken = token" @mouseleave="fxData.hoverToken = null"
-    @click="filterfelder.bearbeitungsmodus === 'auswahl' ? $emit('selectToken') : $emit('tokenEdit', token)"
+    @click="filterfelder.bearbeitungsmodus === 'auswahl' ? $emit('selectToken') : $emit('tokenEdit')"
   >
     <div :class="'mark-tokenset' + (token.tokensets && token.tokensets.length > 0 ? ' has-antwort' : '')" />
     <div :class="'mark-token' + (token.antworten && token.antworten.length > 0 ? ' has-antwort' : '')" />
