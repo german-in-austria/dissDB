@@ -13,7 +13,71 @@ def views_annosent(request):
 	# Antworten mit Tags speichern/ändern/löschen
 	if 'saveAntworten' in request.POST:
 		sAntworten = json.loads(request.POST.get('antworten'))
-		print(json.dumps(sAntworten))
+		for sAntwort in sAntworten:
+			print(json.dumps(sAntwort))
+			if 'deleteIt' in sAntwort:
+				if sAntwort['id'] > 0:
+					aElement = dbmodels.Antworten.objects.get(id=sAntwort['id'])
+					aElement.delete()
+			else:
+				if sAntwort['id'] > 0:
+					aElement = dbmodels.Antworten.objects.get(id=sAntwort['id'])
+				else:
+					aElement = dbmodels.Antworten()
+					setattr(aElement, 'start_Antwort', datetime.timedelta(microseconds=0))
+					setattr(aElement, 'stop_Antwort', datetime.timedelta(microseconds=0))
+				setattr(aElement, 'von_Inf_id', (sAntwort['von_Inf_id'] if 'von_Inf_id' in sAntwort else None))
+				if 'ist_nat' in sAntwort:
+					setattr(aElement, 'ist_nat', sAntwort['ist_nat'])
+				if 'ist_Satz_id' in sAntwort:
+					setattr(aElement, 'ist_Satz_id', sAntwort['ist_Satz_id'])
+				if 'ist_bfl' in sAntwort:
+					setattr(aElement, 'ist_bfl', sAntwort['ist_bfl'])
+				if 'ist_token_id' in sAntwort:
+					setattr(aElement, 'ist_token_id', sAntwort['ist_token_id'])
+				if 'ist_token_id' in sAntwort:
+					setattr(aElement, 'ist_token_id', sAntwort['ist_token_id'])
+				if 'ist_tokenset_id' in sAntwort:
+					setattr(aElement, 'ist_tokenset_id', sAntwort['ist_tokenset_id'])
+				if 'bfl_durch_S' in sAntwort:
+					setattr(aElement, 'bfl_durch_S', sAntwort['bfl_durch_S'])
+				if 'Kommentar' in sAntwort:
+					setattr(aElement, 'Kommentar', sAntwort['Kommentar'])
+				aElement.save()
+				sAntwort['nId'] = aElement.pk
+				# AntwortenTags speichern
+				if 'tags' in sAntwort:
+					pass
+					for eValue in sAntwort['tags']:
+						aEbene = eValue['e']
+						if aEbene > 0:
+							for antwortenTag in dbmodels.AntwortenTags.objects.filter(id_Antwort=sAntwort['nId'], id_TagEbene=aEbene):
+								delIt = True
+								for tValue in eValue['t']:
+									if int(tValue['i']) == antwortenTag.pk:
+										delIt = False
+								if delIt:
+									antwortenTag.delete()
+						reihung = 0
+						if aEbene > 0:
+							for tValue in eValue['t']:
+								tagId = int(tValue['i'])
+								if tagId > 0:
+									aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
+								else:
+									aElement = dbmodels.AntwortenTags()
+								setattr(aElement, 'id_Antwort_id', sAntwort['nId'])
+								setattr(aElement, 'id_Tag_id', tValue['t'])
+								setattr(aElement, 'id_TagEbene_id', aEbene)
+								setattr(aElement, 'Reihung', reihung)
+								reihung += 1
+								aElement.save()
+						else:
+							for tValue in eValue['t']:
+								tagId = int(tValue['i'])
+								if tagId > 0:
+									aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
+									aElement.delete()
 		return httpOutput(json.dumps({'OK': True}, 'application/json'))
 	# Materialized View Informationen und Aktuallisierung
 	if 'getMatViewData' in request.POST:

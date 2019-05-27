@@ -133,7 +133,7 @@
 </template>
 
 <script>
-/* global tagsystem */
+/* global tagsystem _ */
 import Modal from './Modal'
 
 export default {
@@ -160,16 +160,24 @@ export default {
       this.loading = true
       this.locked = true
       let sAntworten = []
+      // Antworten mit Tags für Speicherung sammeln
       if (this.token.antworten && this.token.antworten[0]) {
-        sAntworten.push(this.token.antworten)
+        let sAntwort = _.cloneDeep(this.token.antworten[0])
+        delete sAntwort.antwortentags_raw
+        sAntwort.tags = this.getFlatTags(sAntwort.tags)
+        sAntworten.push(sAntwort)
       }
       if (this.token.tokensets && this.token.tokensets.length > 0) {
         this.token.tokensets.forEach((ts) => {
           if (ts.antworten && ts.antworten[0]) {
-            sAntworten.push(ts.antworten[0])
+            let sAntwort = _.cloneDeep(ts.antworten[0])
+            delete sAntwort.antwortentags_raw
+            sAntwort.tags = this.getFlatTags(sAntwort.tags)
+            sAntworten.push(sAntwort)
           }
         }, this)
       }
+      // Speichern
       this.http.post('', {
         saveAntworten: true,
         antworten: JSON.stringify(sAntworten)
@@ -177,7 +185,9 @@ export default {
         console.log(response.data)
         this.loading = false
         this.locked = false
-        // TODO: Modal schließen ...
+        this.$nextTick(() => {
+          this.$refs.modal.close()
+        })
       }).catch((err) => {
         console.log(err)
         alert('Fehler!')
@@ -193,7 +203,7 @@ export default {
       if (!Array.isArray(this.token.antworten)) {
         this.token.antworten = []
       }
-      this.token.antworten.push({id: -1, ist_token_id: this.token.id, tags: []})
+      this.token.antworten.push({id: -1, ist_token_id: this.token.id, von_Inf_id: this.token.ID_Inf_id, tags: []})
       this.changed = true
     },
     addTokenSetAntwort (tokenset) {
@@ -272,6 +282,26 @@ export default {
         }
       }
       return {'tags': xTags, 'pos': xPos}
+    },
+    getFlatTags (aTags) {
+      let fTags = []
+      aTags.forEach(function (val) {
+        fTags.push({'e': val.e, 't': this.getFlatTagsX(val.tags)})
+      }, this)
+      return fTags
+    },
+    getFlatTagsX (aTags) {
+      let fTags = []
+      aTags.forEach(function (val) {
+        let aTag = {'i': val.id, 't': val.tag}
+        fTags.push(aTag)
+        if (val.tags) {
+          this.getFlatTagsX(val.tags).forEach(function (sval) {
+            fTags.push(sval)
+          })
+        }
+      }, this)
+      return fTags
     }
   },
   computed: {
