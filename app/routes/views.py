@@ -68,13 +68,19 @@ def transcriptCreate(request):
 		if aV_id_einzelerhebung:
 			aErhebung = dbmodels.EinzelErhebung.objects.get(pk=aV_id_einzelerhebung)
 			if aErhebung:
-				aElement = adbmodels.transcript()
+				aElement = adbmodels.transcript.objects.get_or_create(pk=int(sData['pk']) if 'pk' in sData else 0)
 				aElement.name = aV_name
 				aElement.default_tier = aV_default_tier
 				aElement.save()
 				nId = aElement.pk
 				aErhebung.id_transcript = aElement
 				aErhebung.save()
+				if 'aTiers' in sData:
+					for aTierPk, aTierData in sData['aTiers'].items():
+						aTier, created = adbmodels.tbl_tier.objects.get_or_create(pk=int(aTierPk))
+						aTier.transcript_id_id = nId
+						aTier.tier_name = aTierData.tier_name
+						aTier.save()
 			else:
 				return httpOutput(json.dumps({'error': 'Erhebung mit ID "' + str(aV_id_einzelerhebung) + '" nicht gefunden!'}), 'application/json')
 		else:
@@ -108,6 +114,8 @@ def transcript(request, aPk, aNr):
 		if aNr == 0:
 			aTranskriptData = adbmodels.transcript.objects.get(pk=tpk)
 			aTranskript = {'pk': aTranskriptData.pk, 'ut': aTranskriptData.update_time.strftime("%d.%m.%Y- %H:%M"), 'n': aTranskriptData.name}
+			aTiersData = adbmodels.tbl_tier.objects.filter(transcript_id=aTranskriptData)
+			aTiers = {aTier.pk: aTier.tier_name for aTier in aTiersData}
 			aEinzelErhebung = {}
 			aEinzelErhebungData = dbmodels.EinzelErhebung.objects.filter(id_transcript_id=tpk)
 			if aEinzelErhebungData:
@@ -127,7 +135,7 @@ def transcript(request, aPk, aNr):
 			for aSatz in dbmodels.Saetze.objects.filter(token__transcript_id_id=tpk):
 				aSaetze[aSatz.pk] = {'t': aSatz.Transkript, 's': aSatz.Standardorth, 'k': aSatz.Kommentar}
 			aTmNr = int(adbmodels.event.objects.prefetch_related('rn_token_event_id').filter(rn_token_event_id__transcript_id_id=tpk).distinct().order_by('start_time').count() / maxQuerys)
-			dataout.update({'aTranskript': aTranskript, 'aEinzelErhebung': aEinzelErhebung, 'aTokenTypes': aTokenTypes, 'aInformanten': aInformanten, 'aSaetze': aSaetze, 'aTmNr': aTmNr})
+			dataout.update({'aTranskript': aTranskript, 'aTiers': aTiers, 'aEinzelErhebung': aEinzelErhebung, 'aTokenTypes': aTokenTypes, 'aInformanten': aInformanten, 'aSaetze': aSaetze, 'aTmNr': aTmNr})
 		# Events laden:
 		aEvents = []
 		aTokens = {}
@@ -159,7 +167,19 @@ def transcript(request, aPk, aNr):
 				if aEIToken.likely_error:
 					aTokenData['le'] = 1
 				aTokens[aEIToken.pk] = aTokenData
-			aEvents.append({'pk': aEvent.pk, 's': str(aEvent.start_time), 'e': str(aEvent.end_time), 'l': str(aEvent.layer if aEvent.layer else 0), 'tid': aEITokens})
+			aEventsTiers = {}
+			for aEventTier in aEvent.tbl_event_tier_set.all():
+				if aEventTier.ID_Inf_id not in aEventsTiers:
+					aEventsTiers[aEventTier.ID_Inf_id] = {}
+				aEventsTiers[aEventTier.ID_Inf_id][aEventTier.pk] = {'t': aEventTier.text, 'ti': aEventTier.tier_id_id}
+			aEvents.append({
+				'pk': aEvent.pk,
+				's': str(aEvent.start_time),
+				'e': str(aEvent.end_time),
+				'l': str(aEvent.layer if aEvent.layer else 0),
+				'tid': aEITokens,
+				'event_tiers': aEventsTiers
+			})
 		if len(aEvents) == maxQuerys:
 			nNr += 1
 		aTokenIds = [aTokenId for aTokenId in aTokens]
@@ -344,6 +364,15 @@ def eventUpdateAndInsert(sData, key, aEvent, aEventKey, eventPkChanges):
 	# sData['aEvents'][key]['s'] = str(aElement.start_time)  # "0:01:35.098000"
 	# sData['aEvents'][key]['e'] = str(aElement.end_time)
 	# sData['aEvents'][key]['l'] = str(aElement.layer if aElement.layer else 0)
+	if 'event_tiers' in sData['aEvents'][key]:
+		for aEventTierInfKey, aEventTierInfData in sData['aEvents'][key]['event_tiers'].items():
+			for aEventTierKey, aEventTierData in aEventTierInfData.items():
+				aEventTier, created = adbmodels.tbl_event_tier.objects.get_or_create(pk=int(aEventTierKey))
+				aEventTier.event_id = aElement
+				aEventTier.tier_id_id = aEventTierData['ti']
+				aEventTier.ID_Inf_id = aEventTierInfKey
+				aEventTier.text = aEventTierData['t']
+				aEventTier.save()
 	if aEvent['pk'] < 1:
 		sData['aEvents'][key]['newPk'] = aElement.pk
 		eventPkChanges[sData['aEvents'][key]['pk']] = aElement.pk

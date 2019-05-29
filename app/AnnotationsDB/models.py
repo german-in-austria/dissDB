@@ -79,6 +79,32 @@ class transcript(models.Model):
 		ordering = ('id',)
 
 
+class tbl_tier(models.Model):
+	tier_name			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Tier Name")
+	transcript_id		= models.ForeignKey('transcript'			, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Transcript ID")
+	def __str__(self):
+		return "{} -> {}".format(self.tier_name, self.transcript_id)
+	class Meta:
+		db_table = "tier"
+		verbose_name = "Tier"
+		verbose_name_plural = "Tier"
+		ordering = ('transcript_id',)
+
+
+class tbl_event_tier(models.Model):
+	event_id			= models.ForeignKey('event'					, blank=True, null=True, on_delete=models.SET_NULL		, verbose_name="Event ID")
+	tier_id				= models.ForeignKey('tbl_tier'				, blank=True, null=True, on_delete=models.SET_NULL		, verbose_name="Tier ID")
+	ID_Inf				= models.ForeignKey('Datenbank.Informanten'	, blank=True, null=True, on_delete=models.SET_NULL		, verbose_name="ID Informant")
+	text				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="default_tier")
+	def __str__(self):
+		return "{} -> {} ({})".format(self.tier_id, self.event_id, self.ID_Inf)
+	class Meta:
+		db_table = "event_tier"
+		verbose_name = "Event Tier"
+		verbose_name_plural = "Event Tier"
+		ordering = ('event_id',)
+
+
 class tbl_tokenset(models.Model):
 	id_von_token		= models.ForeignKey('token', related_name='rn_id_von_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Von Token ID")
 	id_bis_token		= models.ForeignKey('token', related_name='rn_id_bis_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Bis Token ID")
