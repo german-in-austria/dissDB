@@ -202,6 +202,7 @@ export default {
           this.token.tokensets.forEach((ts) => {
             if (response.data.aTokenSetSatz[ts.id]) {
               this.$set(ts, 'satz', response.data.aTokenSetSatz[ts.id])
+              ts.satz.sort((a, b) => (a.token_reihung > b.token_reihung) ? 1 : ((b.token_reihung > a.token_reihung) ? -1 : 0))
             }
           }, this)
         }).catch((err) => {
@@ -217,6 +218,7 @@ export default {
       }).then((response) => {
         console.log(response.data)
         this.tokenSatz = response.data.aTokenSatz
+        this.tokenSatz.sort((a, b) => (a.token_reihung > b.token_reihung) ? 1 : ((b.token_reihung > a.token_reihung) ? -1 : 0))
       }).catch((err) => {
         console.log(err)
         alert('Fehler!')

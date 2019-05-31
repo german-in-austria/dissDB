@@ -120,7 +120,7 @@ def views_annosent(request):
 							WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" >= %s AND "token"."token_reihung" <= %s)
 							ORDER BY "token"."token_reihung" ASC
 						) UNION ALL (
-							SELECT "token".*, 0 AS tb
+							SELECT "token".*, 2 AS tb
 							FROM "token"
 							WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" > %s)
 							ORDER BY "token"."token_reihung" ASC
