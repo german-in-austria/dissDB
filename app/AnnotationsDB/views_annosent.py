@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.db.models import Q
+from django.db import connection
 # from django.db.models import Count
 import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
@@ -91,6 +92,31 @@ def views_annosent(request):
 		if adavgdg > 0:
 			adavg = adavg / adavgdg
 		return httpOutput(json.dumps({'OK': True, 'mvDurchschnitt': adavg.total_seconds(), 'mvLastUpdate': str(adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[0].created_at.strftime("%d.%m.%Y %H:%M:%S"))}, 'application/json'))
+	# getTokenSatz
+	if 'getTokenSatz' in request.POST:
+		aTokenId = request.POST.get('tokenId')
+		aToken = adbmodels.token.objects.get(pk=aTokenId)
+		with connection.cursor() as cursor:
+			cursor.execute('''
+				SELECT array_to_json(array_agg(row_to_json(atok)))
+				FROM (
+					(
+						SELECT "token".*
+						FROM "token"
+						WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" < %s)
+						ORDER BY "token"."token_reihung" DESC
+						LIMIT 10
+					) UNION ALL (
+						SELECT "token".*
+						FROM "token"
+						WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" >= %s)
+						ORDER BY "token"."token_reihung" ASC
+						LIMIT 11
+					)
+				) AS atok
+			''', [aToken.ID_Inf_id, aToken.transcript_id_id, aToken.token_reihung, aToken.ID_Inf_id, aToken.transcript_id_id, aToken.token_reihung])
+			aTokenSatz = cursor.fetchone()[0]
+		return httpOutput(json.dumps({'OK': True, 'aTokenSatz': aTokenSatz}, 'application/json'))
 	# Basisdaten für Filter laden
 	if 'getBaseData' in request.POST:
 		return httpOutput(json.dumps({'OK': True}, 'application/json'))
@@ -263,7 +289,6 @@ def views_annosent(request):
 				WHERE "mat_adhocsentences"."id" IN %s
 				ORDER BY "mat_adhocsentences"."adhoc_sentence" ASC
 			''', [tuple(aMatIds)])]
-		# from django.db import connection
 		# print(connection.queries)
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')
 	return render_to_response('AnnotationsDB/annosent.html', RequestContext(request))

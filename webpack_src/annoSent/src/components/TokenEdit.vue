@@ -53,12 +53,18 @@
           <button type="button" @click="addTokenAntwort()" class="btn btn-primary" v-else>Antwort erstellen</button>
         </div>
       </div>
-      <!-- <template v-if="satzView">
-        <hr/>
+      <template v-if="tokenSatz && tokenSatz.length > 0">
         <div class="satzview">
-          <span :class="sv.class + ' tt' + sv.token.tt" v-for="(sv, svKey) in satzView" :key="'sv' + svKey">{{ transcript.aTokens.getTokenString(sv.token, 't') }}</span>
+          <span
+            v-for="sToken in tokenSatz"
+            :key="'st' + sToken.id"
+            :class="'s-tok s-tok-tt' + sToken.token_type_id_id + (sToken.id === token.id ? ' s-tok-act' : '')"
+          >{{
+              ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
+              (sToken.ortho === null ? (!sToken.text_in_ortho ? sToken.text : sToken.text_in_ortho) : sToken.ortho)
+           }}</span>
         </div>
-      </template> -->
+      </template>
       <template v-if="tagsData.data.ready && token.antworten && token.antworten.length > 0 && !token.antworten[0].deleteIt">
         <Tagsystem :tagsData="tagsData" :tags="token.antworten[0].tags" @changed="tagChange" :http="http" mode="edit" v-if="token.antworten[0].tags" />
         <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
@@ -143,11 +149,13 @@ export default {
     return {
       changed: false,
       locked: false,
-      loading: false
+      loading: false,
+      tokenSatz: []
     }
   },
   mounted () {
     console.log(this.token, this.filterfelder)
+    this.getTokenSatz()
   },
   beforeDestroy () {
     if (this.changed) {
@@ -155,6 +163,21 @@ export default {
     }
   },
   methods: {
+    getTokenSatz () {
+      this.loading = true
+      this.http.post('', {
+        getTokenSatz: true,
+        tokenId: this.token.id
+      }).then((response) => {
+        console.log(response.data)
+        this.tokenSatz = response.data.aTokenSatz
+        this.loading = false
+      }).catch((err) => {
+        console.log(err)
+        alert('Fehler!')
+        this.loading = false
+      })
+    },
     saveTokenData () {
       // Änderungen speichern.
       this.loading = true
@@ -361,5 +384,18 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
+}
+.satzview {
+  padding: 10px 50px;
+  margin: 10px 0px;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+.s-tok {
+  color: #888;
+}
+.s-tok-act {
+  font-weight: bold;
+  color: #333;
 }
 </style>
