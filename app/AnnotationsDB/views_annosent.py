@@ -92,6 +92,48 @@ def views_annosent(request):
 		if adavgdg > 0:
 			adavg = adavg / adavgdg
 		return httpOutput(json.dumps({'OK': True, 'mvDurchschnitt': adavg.total_seconds(), 'mvLastUpdate': str(adbmodels.tbl_refreshlog_mat_adhocsentences.objects.all().order_by('-created_at')[0].created_at.strftime("%d.%m.%Y %H:%M:%S"))}, 'application/json'))
+	# getTokenSetsSatz
+	if 'getTokenSetsSatz' in request.POST:
+		aTokenSetsIds = request.POST.getlist('tokenSetsIds[]')
+		aTokenSetSatz = {}
+		for aTokenSetId in aTokenSetsIds:
+			aTokenSet = adbmodels.tbl_tokenset.objects.get(pk=aTokenSetId)
+			if aTokenSet.id_von_token and aTokenSet.id_bis_token:
+				startToken = aTokenSet.id_von_token
+				endToken = aTokenSet.id_bis_token
+			else:
+				startToken = adbmodels.tbl_tokentoset.objects.filter(id_tokenset=aTokenSet).order_by('id_token__token_reihung')[0].id_token
+				endToken = adbmodels.tbl_tokentoset.objects.filter(id_tokenset=aTokenSet).order_by('-id_token__token_reihung')[0].id_token
+			with connection.cursor() as cursor:
+				cursor.execute('''
+					SELECT array_to_json(array_agg(row_to_json(atok)))
+					FROM (
+						(
+							SELECT "token".*, 0 AS tb
+							FROM "token"
+							WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" < %s)
+							ORDER BY "token"."token_reihung" DESC
+							LIMIT 10
+						) UNION ALL (
+							SELECT "token".*, 1 AS tb
+							FROM "token"
+							WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" >= %s AND "token"."token_reihung" <= %s)
+							ORDER BY "token"."token_reihung" ASC
+						) UNION ALL (
+							SELECT "token".*, 0 AS tb
+							FROM "token"
+							WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" > %s)
+							ORDER BY "token"."token_reihung" ASC
+							LIMIT 10
+						)
+					) AS atok
+				''', [
+					startToken.ID_Inf_id, startToken.transcript_id_id, startToken.token_reihung,
+					startToken.ID_Inf_id, startToken.transcript_id_id, startToken.token_reihung, endToken.token_reihung,
+					startToken.ID_Inf_id, startToken.transcript_id_id, endToken.token_reihung
+				])
+				aTokenSetSatz[aTokenSetId] = cursor.fetchone()[0]
+		return httpOutput(json.dumps({'OK': True, 'aTokenSetSatz': aTokenSetSatz}, 'application/json'))
 	# getTokenSatz
 	if 'getTokenSatz' in request.POST:
 		aTokenId = request.POST.get('tokenId')

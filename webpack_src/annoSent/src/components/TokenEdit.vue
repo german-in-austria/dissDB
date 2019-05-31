@@ -90,6 +90,18 @@
               <button type="button" @click="addTokenSetAntwort(tokenSet)" class="btn btn-primary" v-else>Antwort erstellen</button>
             </div>
           </div>
+          <template v-if="tokenSet.satz && tokenSet.satz.length > 0">
+            <div class="satzview">
+              <span
+                v-for="sToken in tokenSet.satz"
+                :key="'st' + sToken.id"
+                :class="'s-tok s-tok-tt' + sToken.token_type_id_id + (sToken.tb === 1 ? ' s-tok-act' : '')"
+              >{{
+                  ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
+                  (sToken.ortho === null ? (!sToken.text_in_ortho ? sToken.text : sToken.text_in_ortho) : sToken.ortho)
+              }}</span>
+            </div>
+          </template>
           <template v-if="tagsData.data.ready && tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt">
             <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" @changed="tagChange" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
             <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
@@ -117,6 +129,18 @@
               <button type="button" @click="addTokenSetAntwort(tokenSet)" class="btn btn-primary" v-else>Antwort erstellen</button>
             </div>
           </div>
+          <template v-if="tokenSet.satz && tokenSet.satz.length > 0">
+            <div class="satzview">
+              <span
+                v-for="sToken in tokenSet.satz"
+                :key="'st' + sToken.id"
+                :class="'s-tok s-tok-tt' + sToken.token_type_id_id + ((getFirstObjectOfValueInPropertyOfArray(tokenSet.tokentoset, 'id_token_id', sToken.id, false)) ? ' s-tok-act' : '')"
+              >{{
+                  ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
+                  (sToken.ortho === null ? (!sToken.text_in_ortho ? sToken.text : sToken.text_in_ortho) : sToken.ortho)
+              }}</span>
+            </div>
+          </template>
           <template v-if="tagsData.data.ready && tokenSet.antworten && tokenSet.antworten.length > 0 && !tokenSet.antworten[0].deleteIt">
             <Tagsystem :tagsData="tagsData" :tags="tokenSet.antworten[0].tags" @changed="tagChange" :http="http" mode="edit" v-if="tokenSet.antworten[0].tags" />
             <div v-else-if="tagsData.data.ready && tagsData.data.tagsCache && tagsData.data.tagsCache.tags">
@@ -156,6 +180,7 @@ export default {
   mounted () {
     console.log(this.token, this.filterfelder)
     this.getTokenSatz()
+    this.getTokenSetsSatz()
   },
   beforeDestroy () {
     if (this.changed) {
@@ -163,19 +188,38 @@ export default {
     }
   },
   methods: {
+    getTokenSetsSatz () {
+      if (this.token.tokensets && this.token.tokensets.length > 0) {
+        let aTokenSetsIds = []
+        this.token.tokensets.forEach((ts) => {
+          aTokenSetsIds.push(ts.id)
+        }, this)
+        this.http.post('', {
+          getTokenSetsSatz: true,
+          tokenSetsIds: aTokenSetsIds
+        }).then((response) => {
+          console.log(response.data)
+          this.token.tokensets.forEach((ts) => {
+            if (response.data.aTokenSetSatz[ts.id]) {
+              this.$set(ts, 'satz', response.data.aTokenSetSatz[ts.id])
+            }
+          }, this)
+        }).catch((err) => {
+          console.log(err)
+          alert('Fehler!')
+        })
+      }
+    },
     getTokenSatz () {
-      this.loading = true
       this.http.post('', {
         getTokenSatz: true,
         tokenId: this.token.id
       }).then((response) => {
         console.log(response.data)
         this.tokenSatz = response.data.aTokenSatz
-        this.loading = false
       }).catch((err) => {
         console.log(err)
         alert('Fehler!')
-        this.loading = false
       })
     },
     saveTokenData () {
@@ -325,6 +369,18 @@ export default {
         }
       }, this)
       return fTags
+    },
+    getFirstObjectOfValueInPropertyOfArray (arr, property, value, returnObj) {
+      let rObj = ((returnObj) ? {} : null)
+      if (Array.isArray(arr)) {
+        arr.some(function (aVal, aKey) {
+          if (aVal[property] && aVal[property] === value) {
+            rObj = aVal
+            return true
+          }
+        })
+      }
+      return rObj
     }
   },
   computed: {
