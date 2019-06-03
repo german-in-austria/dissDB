@@ -5,18 +5,20 @@
         <Suchen :suchfelder="suchfelder" @suche="$refs.tabelle.reload()" />
       </div>
       <div class="col col-md-4">
+        <Auswahl :eintraege="eintraege" :filterfelder="filterfelder" :http="$http" />
       </div>
       <div class="col col-md-3">
         <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" />
       </div>
     </div>
-    <Tabelle :tabellenfelder="tabellenfelder" :suchfelder="suchfelder" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" ref="tabelle" />
+    <Tabelle :tabellenfelder="tabellenfelder" :eintraege="eintraege" :suchfelder="suchfelder" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" ref="tabelle" />
   </div>
 </template>
 
 <script>
 /* global csrf tagsystem */
 import Suchen from './Suchen'
+import Auswahl from './Auswahl'
 import Filtern from './Filtern'
 import Tabelle from './Tabelle'
 
@@ -50,7 +52,6 @@ export default {
         'inf': { show: true, local: true, sortby: 'infid' },
         'transid': { show: false },
         'trans': { show: true, local: true, sortby: 'transid' },
-        'tagspalte': { show: true, displayName: 'Tag Spalte (Test)', local: true },
         'left_context': { show: true },
         'sentorth': { show: false },
         'sentorth_fx': { show: true, displayName: 'Sentorth (tokenids)', local: true, sortby: 'sentorth' },
@@ -68,11 +69,13 @@ export default {
         'sentspenttype': { show: false }
       },
       tagsData: { data: new tagsystem.TagsystemObject.TagsystemBase(this.$http) },
-      infTrans: { data: { infTransList: [], infTransObj: {}, transcriptsList: [], transcriptsObj: {}, loaded: false } }
+      infTrans: { data: { infTransList: [], infTransObj: {}, transcriptsList: [], transcriptsObj: {}, loaded: false } },
+      eintraege: { data: { list: [], tokenSets: {}, selTokenSet: 0 } }
     }
   },
   components: {
     Suchen,
+    Auswahl,
     Filtern,
     Tabelle
   }

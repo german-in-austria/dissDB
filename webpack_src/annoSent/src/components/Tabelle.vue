@@ -35,7 +35,7 @@
           <tr>
             <th>#</th>
             <th v-if="filterfelder.bearbeitungsmodus === 'auswahl'">
-              <button class="auswahl-btn" @click="selectAll()"><span :class="'glyphicon glyphicon-' + ((eintraege.length > 0 && countSelected > 0) ? (eintraege.length === countSelected ? 'check' : 'share') : 'unchecked')"></span></button>
+              <button class="auswahl-btn" @click="selectAll()"><span :class="'glyphicon glyphicon-' + ((eintraege.data.list.length > 0 && countSelected > 0) ? (eintraege.data.list.length === countSelected ? 'check' : 'share') : 'unchecked')"></span></button>
             </th>
             <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld" :title="feldoption.sortby || feld">
               <span v-if="feldoption.local && !feldoption.sortby">{{ feldoption.displayName || feld }}</span>
@@ -44,7 +44,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(eintrag, key) in eintraege" :key="'ez' + eintrag">
+          <tr v-for="(eintrag, key) in eintraege.data.list" :key="'ez' + eintrag">
             <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
             <td v-if="filterfelder.bearbeitungsmodus === 'auswahl'">
               <button class="auswahl-btn" @click="selectAllTokens(eintrag)"><span :class="'glyphicon glyphicon-' + (eintrag.selected && eintrag.selected.length > 0 ? (eintrag.selected.length === eintrag.tokens.length ? 'check' : 'share') : 'unchecked')"></span></button>
@@ -70,7 +70,7 @@ import TokenEdit from './TokenEdit'
 
 export default {
   name: 'Tabelle',
-  props: ['tabellenfelder', 'suchfelder', 'filterfelder', 'http', 'tagsData', 'infTrans'],
+  props: ['tabellenfelder', 'suchfelder', 'filterfelder', 'eintraege', 'http', 'tagsData', 'infTrans'],
   data () {
     return {
       seite: 1,
@@ -79,7 +79,6 @@ export default {
       eintraegeProSeite: 50,
       ladeZeit: 0.0,
       ladeZeitStart: 0.0,
-      eintraege: [],
       loading: false,
       zeigeSpaltenAuswahl: false,
       popper: null,
@@ -109,7 +108,7 @@ export default {
     },
     countSelected () {
       let count = 0
-      this.eintraege.forEach((aEintrag) => {
+      this.eintraege.data.list.forEach((aEintrag) => {
         if (aEintrag.selected && aEintrag.selected.length === aEintrag.tokens.length) {
           count += 1
         }
@@ -127,9 +126,9 @@ export default {
     },
     selectAll (set = null) {
       if (set === null) {   // Toggle
-        set = !(this.countSelected === this.eintraege.length)
+        set = !(this.countSelected === this.eintraege.data.list.length)
       }
-      this.eintraege.forEach((aEintrag) => {
+      this.eintraege.data.list.forEach((aEintrag) => {
         this.selectAllTokens(aEintrag, set)
       }, this)
     },
@@ -178,7 +177,8 @@ export default {
           sortierung: JSON.stringify(this.spaltenSortierung)
         }).then((response) => {
           console.log(response.data)
-          this.eintraege = response.data.eintraege
+          this.eintraege.data.list = response.data.eintraege
+          this.eintraege.data.tokenSets = this.getAllTokenSets(this.eintraege.data.list)
           this.zaehler = response.data.zaehler
           this.lSeite = response.data.seite
           this.seite = this.lSeite + 1
@@ -227,6 +227,23 @@ export default {
         }
       })
     }, 20),
+    getAllTokenSets (aEintraege) {
+      let allTokenSets = {}
+      aEintraege.forEach((aEintrag) => {
+        if (aEintrag.tokens) {
+          aEintrag.tokens.forEach((aToken) => {
+            if (aToken.tokensets) {
+              aToken.tokensets.forEach((aTokenSet) => {
+                if (!allTokenSets[aTokenSet.id]) {
+                  allTokenSets[aTokenSet.id] = aTokenSet
+                }
+              }, this)
+            }
+          }, this)
+        }
+      }, this)
+      return allTokenSets
+    },
     close () {
       this.$emit('close')
     }
