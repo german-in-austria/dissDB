@@ -50,7 +50,7 @@
               <button class="auswahl-btn" @click="selectAllTokens(eintrag)"><span :class="'glyphicon glyphicon-' + (eintrag.selected && eintrag.selected.length > 0 ? (eintrag.selected.length === eintrag.tokens.length ? 'check' : 'share') : 'unchecked')"></span></button>
             </td>
             <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">
-              <div class="tokens" v-if="feldoption.local && feld === 'sentorth_fx'"><Token @selectToken="selectToken(eintrag, aToken)" @tokenEdit="tokenEditSet(aToken, eintrag)" :token="aToken" :tokens="eintrag.tokens" :eintrag="eintrag" :filterfelder="filterfelder" :fxData="fxData" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></div>
+              <div class="tokens" v-if="feldoption.local && feld === 'sentorth_fx'"><Token @selectToken="selectToken(eintrag, aToken)" @tokenEdit="tokenEditSet(aToken, eintrag)" :token="aToken" :tokens="eintrag.tokens" :eintrag="eintrag" :eintraege="eintraege" :filterfelder="filterfelder" :fxData="fxData" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></div>
               <template v-else>{{ feldoption.local ? fxFeld(eintrag, feld) : eintrag[feld] }}</template>
             </td>
           </tr>
