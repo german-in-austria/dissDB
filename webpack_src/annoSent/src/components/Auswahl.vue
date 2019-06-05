@@ -35,11 +35,18 @@
       </template>
     </template>
     <template v-else-if="filterfelder.bearbeitungsmodus === 'auswahl'">
-      <div class="form-group" v-if="eintraege.data.selTokenSet > 0">
-        <div class="col-sm-offset-3 col-sm-9">
-          <button class="form-control-static btn btn-primary w100" @click="selTokensOfSet" title="Momentane Auswahl verwerfen und Tokens des aktuellen Sets auswählen.">Token auswählen</button>
+      <template v-if="eintraege.data.selTokenSet > 0">
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9">
+            <button class="form-control-static btn btn-primary w100" @click="selTokensOfSet" title="Momentane Auswahl verwerfen und Tokens des aktuellen Sets auswählen.">Tokens auswählen</button>
+          </div>
         </div>
-      </div>
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9">
+            <button class="form-control-static btn btn-warning w100" @click="saveTokenSet" title="Aktuelles Token Set ändern und speichern" :disabled="tokensetSelectGleich">Token Set ändern</button>
+          </div>
+        </div>
+      </template>
     </template>
   </div>
 </template>
@@ -59,6 +66,9 @@ export default {
     this.getTokenSetsSatz()
   },
   methods: {
+    saveTokenSet () {
+      console.log('TODO: Token Set speichern ...')
+    },
     selTokensOfSet () {
       if (this.eintraege.data.selTokenSet > 0 && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet] && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet].tokentoset) {
         this.eintraege.data.list.forEach((aEintrag) => {
@@ -101,6 +111,28 @@ export default {
         })
       }
       return rObj
+    }
+  },
+  computed: {
+    tokensetSelectGleich () {
+      if (this.eintraege.data.selTokenSet > 0 && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet] && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet].tokentoset) {
+        let aSelTokens = []
+        this.eintraege.data.list.forEach((aEintrag) => {
+          if (Array.isArray(aEintrag.selected)) {
+            aSelTokens = [...aSelTokens, ...aEintrag.selected]
+          }
+        }, this)
+        aSelTokens = aSelTokens.sort()
+        let aSelTokenSetTokens = []
+        this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet].tokentoset.forEach((aToken) => {
+          aSelTokenSetTokens.push(aToken.id_token_id)
+        }, this)
+        aSelTokenSetTokens = aSelTokenSetTokens.sort()
+        return aSelTokenSetTokens.length === aSelTokens.length && aSelTokenSetTokens.every((value, index) => value === aSelTokens[index])
+      } else if (this.eintraege.data.selTokenSet < 0) {
+        return false
+      }
+      return true
     }
   },
   watch: {
