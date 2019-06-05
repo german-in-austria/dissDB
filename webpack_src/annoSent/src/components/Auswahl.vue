@@ -38,12 +38,20 @@
       <template v-if="eintraege.data.selTokenSet > 0">
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-9">
-            <button class="form-control-static btn btn-primary w100" @click="selTokensOfSet" title="Momentane Auswahl verwerfen und Tokens des aktuellen Sets auswählen.">Tokens auswählen</button>
+            <div class="btn-group w100">
+              <button class="btn btn-primary" @click="selTokensOfSet" title="Momentane Auswahl verwerfen und Tokens des aktuellen Sets auswählen." style="width: calc(100% - 40px); padding-left:52px;">Tokens auswählen</button>
+              <button class="btn btn-primary" @click="autoSelect = !autoSelect" title="Bei Wechsel des Token Sets automatisch auswählen." style="width:40px;"><span :class="'glyphicon glyphicon-' + (autoSelect ? 'check' : 'unchecked')" aria-hidden="true"></span></button>
+            </div>
           </div>
         </div>
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-9">
-            <button class="form-control-static btn btn-warning w100" @click="saveTokenSet" title="Aktuelles Token Set ändern und speichern" :disabled="tokensetSelectGleich">Token Set ändern</button>
+            <button class="form-control-static btn btn-success w100" @click="editTokenSetTags" title="Tags des aktuellen Token Sets bearbeiten." :disabled="!tokensetSelectGleich">Tags bearbeiten</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9">
+            <button class="form-control-static btn btn-warning w100" @click="saveTokenSet" title="Aktuelles Token Set ändern und speichern!" :disabled="tokensetSelectGleich">Token Set ändern</button>
           </div>
         </div>
       </template>
@@ -58,7 +66,8 @@ export default {
   data () {
     return {
       satz: {},
-      satzOpen: false
+      satzOpen: false,
+      autoSelect: true
     }
   },
   mounted () {
@@ -68,6 +77,9 @@ export default {
   methods: {
     saveTokenSet () {
       console.log('TODO: Token Set speichern ...')
+    },
+    editTokenSetTags () {
+      console.log('TODO: Token Set Tags bearbeiten')
     },
     selTokensOfSet () {
       if (this.eintraege.data.selTokenSet > 0 && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet] && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet].tokentoset) {
@@ -143,6 +155,13 @@ export default {
           this.eintraege.data.selTokenSet = 0
         }
       })
+    },
+    'eintraege.data.selTokenSet' (nVal) {
+      if (nVal > 0 && this.autoSelect) {
+        this.$nextTick(() => {
+          this.selTokensOfSet()
+        })
+      }
     }
   }
 }
