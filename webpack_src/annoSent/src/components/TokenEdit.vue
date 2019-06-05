@@ -58,6 +58,7 @@
           <span
             v-for="sToken in tokenSatz"
             :key="'st' + sToken.id"
+            :title="'ID: ' + sToken.id"
             :class="'s-tok s-tok-tt' + sToken.token_type_id_id + (sToken.id === token.id ? ' s-tok-act' : '')"
           >{{
               ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
@@ -95,6 +96,7 @@
               <span
                 v-for="sToken in tokenSet.satz"
                 :key="'st' + sToken.id"
+                :title="'ID: ' + sToken.id"
                 :class="'s-tok s-tok-tt' + sToken.token_type_id_id + (sToken.tb === 1 ? ' s-tok-act' : '')"
               >{{
                   ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
@@ -134,6 +136,7 @@
               <span
                 v-for="sToken in tokenSet.satz"
                 :key="'st' + sToken.id"
+                :title="'ID: ' + sToken.id"
                 :class="'s-tok s-tok-tt' + sToken.token_type_id_id + ((getFirstObjectOfValueInPropertyOfArray(tokenSet.tokentoset, 'id_token_id', sToken.id, false)) ? ' s-tok-act' : '')"
               >{{
                   ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
