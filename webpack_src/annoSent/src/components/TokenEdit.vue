@@ -266,7 +266,6 @@ export default {
         this.loading = false
         this.locked = false
       })
-      console.log('TODO: saveTokenData()')
     },
     tagChange () {
       this.changed = true
@@ -282,7 +281,7 @@ export default {
       if (!Array.isArray(tokenset.antworten)) {
         tokenset.antworten = []
       }
-      tokenset.antworten.push({id: -1, ist_tokenset_id: tokenset.id, tags: []})
+      tokenset.antworten.push({id: -1, ist_tokenset_id: tokenset.id, von_Inf_id: this.token.ID_Inf_id, tags: []})
       this.changed = true
     },
     processRawTags (antwort, rawTags) {

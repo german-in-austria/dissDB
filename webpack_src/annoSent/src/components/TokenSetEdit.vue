@@ -36,7 +36,6 @@
             {{ processRawTags(tokenSet.antworten[0], tokenSet.antworten[0].antwortentags_raw) }}
           </div>
           <div v-else>Tags laden noch ...</div>
-          <hr>
         </template>
     </div>
 
@@ -50,12 +49,12 @@
 </template>
 
 <script>
-/* global tagsystem */
+/* global tagsystem _ */
 import Modal from './Modal'
 
 export default {
   name: 'TokenSetEdit',
-  props: ['tokenSet', 'satz', 'http', 'tagsData', 'infTrans', 'filterfelder'],
+  props: ['tokenSet', 'satz', 'http', 'tagsData', 'filterfelder'],
   data () {
     return {
       changed: false,
@@ -73,54 +72,47 @@ export default {
   methods: {
     saveTokenSetData () {
     //   // Änderungen speichern.
-    //   this.loading = true
-    //   this.locked = true
-    //   let sAntworten = []
-    //   // Antworten mit Tags für Speicherung sammeln
-    //   if (this.token.antworten && this.token.antworten[0]) {
-    //     let sAntwort = _.cloneDeep(this.token.antworten[0])
-    //     delete sAntwort.antwortentags_raw
-    //     sAntwort.tags = this.getFlatTags(sAntwort.tags)
-    //     sAntworten.push(sAntwort)
-    //   }
-    //   if (this.token.tokensets && this.token.tokensets.length > 0) {
-    //     this.token.tokensets.forEach((ts) => {
-    //       if (ts.antworten && ts.antworten[0]) {
-    //         let sAntwort = _.cloneDeep(ts.antworten[0])
-    //         delete sAntwort.antwortentags_raw
-    //         sAntwort.tags = this.getFlatTags(sAntwort.tags)
-    //         sAntworten.push(sAntwort)
-    //       }
-    //     }, this)
-    //   }
-    //   // Speichern
-    //   this.http.post('', {
-    //     saveAntworten: true,
-    //     antworten: JSON.stringify(sAntworten)
-    //   }).then((response) => {
-    //     console.log(response.data)
-    //     this.loading = false
-    //     this.locked = false
-    //     this.$nextTick(() => {
-    //       this.$refs.modal.close()
-    //     })
-    //   }).catch((err) => {
-    //     console.log(err)
-    //     alert('Fehler!')
-    //     this.loading = false
-    //     this.locked = false
-    //   })
-    //   console.log('TODO: saveTokenData()')
+      this.loading = true
+      this.locked = true
+      let sAntworten = []
+      // Antworten mit Tags für Speicherung sammeln
+      if (this.tokenSet.antworten && this.tokenSet.antworten[0]) {
+        let sAntwort = _.cloneDeep(this.tokenSet.antworten[0])
+        delete sAntwort.antwortentags_raw
+        sAntwort.tags = this.getFlatTags(sAntwort.tags)
+        sAntworten.push(sAntwort)
+      }
+      // Speichern
+      this.http.post('', {
+        saveAntworten: true,
+        antworten: JSON.stringify(sAntworten)
+      }).then((response) => {
+        console.log(response.data)
+        this.loading = false
+        this.locked = false
+        this.$nextTick(() => {
+          this.$refs.modal.close()
+        })
+      }).catch((err) => {
+        console.log(err)
+        alert('Fehler!')
+        this.loading = false
+        this.locked = false
+      })
     },
     tagChange () {
       this.changed = true
     },
     addTokenSetAntwort (tokenset) {
-      if (!Array.isArray(tokenset.antworten)) {
-        tokenset.antworten = []
+      if (this.satz[0]) {
+        if (!Array.isArray(tokenset.antworten)) {
+          tokenset.antworten = []
+        }
+        tokenset.antworten.push({id: -1, ist_tokenset_id: tokenset.id, von_Inf_id: this.satz[0].ID_Inf_id, tags: []})
+        this.changed = true
+      } else {
+        alert('Fehler! Token Set enthält keine Tokens!')
       }
-      tokenset.antworten.push({id: -1, ist_tokenset_id: tokenset.id, tags: []})
-      this.changed = true
     },
     processRawTags (antwort, rawTags) {
       let outTags = []

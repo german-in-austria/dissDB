@@ -61,7 +61,8 @@
         </div>
       </template>
     </template>
-    <TokenSetEdit @closed="showTokenSetEdit = null" :tokenSet="eintraege.data.tokenSets[this.eintraege.data.selTokenSet]" :satz="satz[this.eintraege.data.selTokenSet]" :http="http" :tagsData="tagsData" :infTrans="infTrans" :filterfelder="filterfelder" @changed="debouncedReload()" v-if="showTokenSetEdit && eintraege.data.selTokenSet > 0" />
+    <TokenSetEdit @closed="showTokenSetEdit = null" :tokenSet="eintraege.data.tokenSets[this.eintraege.data.selTokenSet]" :satz="satz[this.eintraege.data.selTokenSet]" :http="http" :tagsData="tagsData" :filterfelder="filterfelder" @changed="debouncedReload()" v-if="showTokenSetEdit && eintraege.data.selTokenSet > 0" />
+    <div class="loading" v-if="$parent.$refs.tabelle && $parent.$refs.tabelle.loading">Lade ...</div>
   </div>
 </template>
 
@@ -182,6 +183,9 @@ export default {
 </script>
 
 <style scoped>
+.annosent-auswahl {
+  position: relative;
+}
 .satzview {
   position: relative;
   padding: 0;
@@ -214,5 +218,12 @@ export default {
 .s-tok-act {
   font-weight: bold;
   color: #333;
+}
+.loading {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: 30px;
 }
 </style>
