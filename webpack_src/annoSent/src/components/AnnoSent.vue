@@ -5,7 +5,7 @@
         <Suchen :suchfelder="suchfelder" @suche="$refs.tabelle.reload()" />
       </div>
       <div class="col col-md-4">
-        <Auswahl :eintraege="eintraege" :filterfelder="filterfelder" :http="$http" />
+        <Auswahl :eintraege="eintraege" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" />
       </div>
       <div class="col col-md-3">
         <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" />

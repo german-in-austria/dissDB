@@ -33,6 +33,11 @@
           <button @click="satzOpen = !satzOpen"><span :class="'glyphicon glyphicon-chevron-' + (satzOpen ? 'up' : 'down')" aria-hidden="true"></span></button>
         </div>
       </template>
+      <div class="form-group" v-if="eintraege.data.selTokenSet > 0">
+        <div class="col-sm-12">
+          <button class="form-control-static btn btn-success w100" @click="showTokenSetEdit = true" title="Tags des aktuellen Token Sets bearbeiten.">Tags bearbeiten</button>
+        </div>
+      </div>
     </template>
     <template v-else-if="filterfelder.bearbeitungsmodus === 'auswahl'">
       <template v-if="eintraege.data.selTokenSet > 0">
@@ -46,7 +51,7 @@
         </div>
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-9">
-            <button class="form-control-static btn btn-success w100" @click="editTokenSetTags" title="Tags des aktuellen Token Sets bearbeiten." :disabled="!tokensetSelectGleich">Tags bearbeiten</button>
+            <button class="form-control-static btn btn-success w100" @click="showTokenSetEdit = true" title="Tags des aktuellen Token Sets bearbeiten." :disabled="!tokensetSelectGleich">Tags bearbeiten</button>
           </div>
         </div>
         <div class="form-group">
@@ -56,18 +61,23 @@
         </div>
       </template>
     </template>
+    <TokenSetEdit @closed="showTokenSetEdit = null" :tokenSet="eintraege.data.tokenSets[this.eintraege.data.selTokenSet]" :satz="satz[this.eintraege.data.selTokenSet]" :http="http" :tagsData="tagsData" :infTrans="infTrans" :filterfelder="filterfelder" @changed="debouncedReload()" v-if="showTokenSetEdit && eintraege.data.selTokenSet > 0" />
   </div>
 </template>
 
 <script>
+/* global _ */
+import TokenSetEdit from './TokenSetEdit'
+
 export default {
   name: 'Auswahl',
-  props: ['eintraege', 'filterfelder', 'http'],
+  props: ['eintraege', 'filterfelder', 'http', 'tagsData'],
   data () {
     return {
       satz: {},
       satzOpen: false,
-      autoSelect: true
+      autoSelect: true,
+      showTokenSetEdit: false
     }
   },
   mounted () {
@@ -77,9 +87,6 @@ export default {
   methods: {
     saveTokenSet () {
       console.log('TODO: Token Set speichern ...')
-    },
-    editTokenSetTags () {
-      console.log('TODO: Token Set Tags bearbeiten')
     },
     selTokensOfSet () {
       if (this.eintraege.data.selTokenSet > 0 && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet] && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet].tokentoset) {
@@ -123,7 +130,10 @@ export default {
         })
       }
       return rObj
-    }
+    },
+    debouncedReload: _.debounce(function () {   // Einträge verzögert laden
+      this.$parent.$refs.tabelle.reload()
+    }, 300)
   },
   computed: {
     tokensetSelectGleich () {
@@ -154,6 +164,7 @@ export default {
         if (!this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet]) {
           this.eintraege.data.selTokenSet = 0
         }
+        this.selTokensOfSet()
       })
     },
     'eintraege.data.selTokenSet' (nVal) {
@@ -163,6 +174,9 @@ export default {
         })
       }
     }
+  },
+  components: {
+    TokenSetEdit
   }
 }
 </script>
@@ -180,7 +194,7 @@ export default {
 }
 .satzview.closed > div {
   overflow-y: auto;
-  max-height: 140px;
+  max-height: 104px;
 }
 .satzview > button {
   position: absolute;
