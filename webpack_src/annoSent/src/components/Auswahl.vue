@@ -51,13 +51,14 @@
         </div>
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-9">
-            <button class="form-control-static btn btn-success w100" @click="showTokenSetEdit = true" title="Tags des aktuellen Token Sets bearbeiten." :disabled="!tokenSetSelectGleich">Tags bearbeiten</button>
+            <button class="form-control-static btn btn-success w100" @click="showTokenSetEdit = true" title="Tags des aktuellen Token Sets bearbeiten." :disabled="!tokenSetSelectGleich && tokenSetAlleTokensVorhanden">Tags bearbeiten</button>
           </div>
         </div>
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-9">
             <div class="btn-group w100">
-              <button class="btn btn-warning" @click="saveTokenSet" title="Aktuelles Token Set ändern und speichern!" :disabled="tokenSetSelectGleich" style="width: calc(100% - 40px); padding-left:52px;">Token Set ändern</button>
+              <button class="btn btn-warning" @click="saveTokenSet" title="Aktuelles Token Set ändern und speichern!" :disabled="tokenSetSelectGleich" style="width: calc(100% - 40px); padding-left:52px;" v-if="tokenSetAlleTokensVorhanden">Token Set ändern</button>
+              <button class="btn btn-default" @click="saveTokenSet" title="Es werden nicht alle Tokens angezeigt!" disabled style="width: calc(100% - 40px); padding-left:52px;" v-else>Token Set ändern</button>
               <button class="btn btn-danger" @click="deleteTokenSet" title="Aktelles Token Set löschen!" style="width:40px;"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
             </div>
           </div>
@@ -189,6 +190,16 @@ export default {
         }
       }, this)
       return aSelTokens
+    },
+    tokenSetAlleTokensVorhanden () {
+      let avTokens = []
+      if (this.eintraege.data.list && this.eintraege.data.selTokenSet > 0 && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet] && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet].tokentoset) {
+        this.eintraege.data.list.forEach((aEintrag) => {
+          avTokens = [...avTokens, ...aEintrag.tokenids]
+        }, this)
+        return this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet].tokentoset.every((val) => avTokens.indexOf(val.id_token_id) > -1)
+      }
+      return false
     },
     tokenSetSelectGleich () {
       if (this.eintraege.data.selTokenSet > 0 && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet] && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet].tokentoset) {
