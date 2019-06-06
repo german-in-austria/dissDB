@@ -11,6 +11,57 @@ import datetime
 
 
 def views_annosent(request):
+	# Token Set löschen
+	if 'delTokenSet' in request.POST:
+		aTokenSetId = int(request.POST.get('tokenSetId'))
+		aTokenSet = adbmodels.tbl_tokenset.objects.get(id=aTokenSetId)
+		adbmodels.tbl_tokentoset.objects.filter(id_tokenset=aTokenSet).delete()
+		aTokenSet.delete()
+		return httpOutput(json.dumps({'OK': True}, 'application/json'))
+	# Token Set Speichern
+	if 'saveTokenSet' in request.POST:
+		aTokensIds = json.loads(request.POST.get('tokens'))
+		aTokenSetId = int(request.POST.get('tokenSetId'))
+		if len(aTokensIds) < 1:
+			return httpOutput(json.dumps({'error': 'Keine Tokens übergeben!'}, 'application/json'))
+		with connection.cursor() as cursor:
+			cursor.execute('''
+				(
+					SELECT "token"."id", "token"."token_reihung"
+					FROM "token"
+					WHERE ("token"."id" IN %s)
+					ORDER BY "token"."token_reihung" ASC
+					LIMIT 1
+				) UNION ALL (
+					SELECT "token"."id", "token"."token_reihung"
+					FROM "token"
+					WHERE ("token"."id" IN %s)
+					ORDER BY "token"."token_reihung" DESC
+					LIMIT 1
+				)
+			''', [tuple(aTokensIds), tuple(aTokensIds)])
+			vTokenId, vTokenReihung = cursor.fetchone()
+			bTokenId, bTokenReihung = cursor.fetchone()
+		vTokenObj = adbmodels.token.objects.get(pk=vTokenId)
+		vbTokenCount = adbmodels.token.objects.filter(ID_Inf_id=vTokenObj.ID_Inf_id, transcript_id_id=vTokenObj.transcript_id_id, token_reihung__gte=vTokenReihung, token_reihung__lte=bTokenReihung).order_by('token_reihung').count()
+		# print(vTokenObj, vTokenId, bTokenId, len(aTokensIds), vbTokenCount)
+		try:
+			aTokenSet = adbmodels.tbl_tokenset.objects.get(id=aTokenSetId)
+		except adbmodels.tbl_tokenset.DoesNotExist:
+			aTokenSet = adbmodels.tbl_tokenset()
+			aTokenSet.save()
+		if len(aTokensIds) == vbTokenCount:		# Ist ein Token Set Bereich
+			adbmodels.tbl_tokentoset.objects.filter(id_tokenset=aTokenSet).delete()
+			aTokenSet.id_von_token = vTokenObj
+			aTokenSet.id_bis_token_id = bTokenId
+		else:									# Ist eine Token Set Liste
+			aTokenSet.id_von_token_id = None
+			aTokenSet.id_bis_token_id = None
+			adbmodels.tbl_tokentoset.objects.filter(id_tokenset=aTokenSet).exclude(id_token__in=aTokensIds).delete()
+			for aTokenId in aTokensIds:
+				obj, created = adbmodels.tbl_tokentoset.objects.update_or_create(id_tokenset_id=aTokenSet.id, id_token_id=aTokenId, defaults={'id_tokenset_id': aTokenSet.id, 'id_token_id': aTokenId})
+		aTokenSet.save()
+		return httpOutput(json.dumps({'OK': True}, 'application/json'))
 	# Antworten mit Tags speichern/ändern/löschen
 	if 'saveAntworten' in request.POST:
 		sAntworten = json.loads(request.POST.get('antworten'))

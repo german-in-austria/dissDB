@@ -71,7 +71,7 @@ export default {
   },
   methods: {
     saveTokenSetData () {
-    //   // Änderungen speichern.
+      // Änderungen speichern.
       this.loading = true
       this.locked = true
       let sAntworten = []
