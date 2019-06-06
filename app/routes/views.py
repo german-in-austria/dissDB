@@ -68,7 +68,10 @@ def transcriptCreate(request):
 		if aV_id_einzelerhebung:
 			aErhebung = dbmodels.EinzelErhebung.objects.get(pk=aV_id_einzelerhebung)
 			if aErhebung:
-				aElement = adbmodels.transcript.objects.get_or_create(pk=int(sData['pk']) if 'pk' in sData else 0)
+				try:
+					aElement = adbmodels.transcript.objects.get(pk=int(sData['pk']))
+				except adbmodels.transcript.DoesNotExist:
+					aElement = adbmodels.transcript()
 				aElement.name = aV_name
 				aElement.default_tier = aV_default_tier
 				aElement.save()
@@ -77,7 +80,10 @@ def transcriptCreate(request):
 				aErhebung.save()
 				if 'aTiers' in sData:
 					for aTierPk, aTierData in sData['aTiers'].items():
-						aTier, created = adbmodels.tbl_tier.objects.get_or_create(pk=int(aTierPk))
+						try:
+							aTier = adbmodels.tbl_tier.objects.get(pk=int(aTierPk))
+						except adbmodels.tbl_tier.DoesNotExist:
+							aTier = adbmodels.tbl_tier()
 						aTier.transcript_id_id = nId
 						aTier.tier_name = aTierData.tier_name
 						aTier.save()
@@ -367,7 +373,10 @@ def eventUpdateAndInsert(sData, key, aEvent, aEventKey, eventPkChanges):
 	if 'event_tiers' in sData['aEvents'][key]:
 		for aEventTierInfKey, aEventTierInfData in sData['aEvents'][key]['event_tiers'].items():
 			for aEventTierKey, aEventTierData in aEventTierInfData.items():
-				aEventTier, created = adbmodels.tbl_event_tier.objects.get_or_create(pk=int(aEventTierKey))
+				try:
+					aEventTier = adbmodels.tbl_event_tier.objects.get(pk=int(aEventTierKey))
+				except adbmodels.tbl_event_tier.DoesNotExist:
+					aEventTier = adbmodels.tbl_event_tier()
 				aEventTier.event_id = aElement
 				aEventTier.tier_id_id = aEventTierData['ti']
 				aEventTier.ID_Inf_id = aEventTierInfKey
