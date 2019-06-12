@@ -3,17 +3,22 @@
     <div class="form-group">
       <label for="seltokensets" class="col-sm-3 control-label">Token Set</label>
       <div class="col-sm-9">
-        <select class="form-control" v-model="eintraege.data.selTokenSet" id="seltokensets">
-          <option value="0">Auswählen ({{ Object.keys(eintraege.data.tokenSets).length }})</option>
-          <option :value="-1" v-if="filterfelder.bearbeitungsmodus === 'auswahl'">Neues Token Set</option>
-          <option
-            :value="aTokenSet.id"
-            v-for="aTokenSet in eintraege.data.tokenSets"
-            :key="'ts' + aTokenSet.id"
-          >
-            ID: {{ aTokenSet.id + ', ' + (aTokenSet.id_von_token_id ? 'Bereich' : 'Liste' ) + (aTokenSet.antworten ? ', Antworten vorhanden' : '' ) }}
-          </option>
-        </select>
+        <div class="input-group">
+          <select class="form-control" v-model="eintraege.data.selTokenSet" id="seltokensets">
+            <option value="0">Auswählen ({{ Object.keys(eintraege.data.tokenSets).length }})</option>
+            <option :value="-1" v-if="filterfelder.bearbeitungsmodus === 'auswahl'">Neues Token Set</option>
+            <option
+              :value="aTokenSet.id"
+              v-for="aTokenSet in eintraege.data.tokenSets"
+              :key="'ts' + aTokenSet.id"
+            >
+              ID: {{ aTokenSet.id + ', ' + (aTokenSet.id_von_token_id ? 'Bereich' : 'Liste' ) + (aTokenSet.antworten ? ', Antworten vorhanden' : '' ) }}
+            </option>
+          </select>
+          <span class="input-group-btn">
+            <button class="btn btn-default" @click="newTokenSet" type="button" title="Neues Tokenset erstellen."><span class="glyphicon glyphicon-file" aria-hidden="true"></span></button>
+          </span>
+        </div>
       </div>
     </div>
     <template v-if="filterfelder.bearbeitungsmodus === 'direkt'">
@@ -59,12 +64,17 @@
             <div class="btn-group w100">
               <button class="btn btn-warning" @click="saveTokenSet" title="Aktuelles Token Set ändern und speichern!" :disabled="tokenSetSelectGleich" style="width: calc(100% - 40px); padding-left:52px;" v-if="tokenSetAlleTokensVorhanden">Token Set ändern</button>
               <button class="btn btn-default" @click="saveTokenSet" title="Es werden nicht alle Tokens angezeigt!" disabled style="width: calc(100% - 40px); padding-left:52px;" v-else>Token Set ändern</button>
-              <button class="btn btn-danger" @click="deleteTokenSet" title="Aktelles Token Set löschen!" style="width:40px;"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+              <button class="btn btn-danger" @click="deleteTokenSet" title="Aktuelles Token Set löschen!" style="width:40px;"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
             </div>
           </div>
         </div>
       </template>
       <template v-else-if="eintraege.data.selTokenSet === -1">
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9">
+            <button class="form-control-static btn btn-primary w100" @click="selNone" title="Token Auswahl aufheben. (Strg + d)" :disabled="tokenSelectFlat.length < 1">Token Auswahl aufheben</button>
+          </div>
+        </div>
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-9">
             <button class="form-control-static btn btn-primary w100" @click="saveTokenSet" title="Aktuelles Token Set erstellen und speichern!" :disabled="tokenSelectFlat.length < 1">Token Set erstellen</button>
@@ -89,7 +99,8 @@ export default {
       satz: {},
       satzOpen: false,
       autoSelect: true,
-      showTokenSetEdit: false
+      showTokenSetEdit: false,
+      newTokenSetId: null
     }
   },
   mounted () {
@@ -108,6 +119,7 @@ export default {
         }).then((response) => {
           console.log(response.data)
           this.loading = false
+          this.newTokenSetId = response.data.tokenset_id
           this.$parent.$refs.tabelle.reload()
         }).catch((err) => {
           console.log(err)
@@ -133,6 +145,11 @@ export default {
           this.loading = false
         })
       }
+    },
+    selNone () {
+      this.eintraege.data.list.forEach((aEintrag) => {
+        this.$set(aEintrag, 'selected', [])
+      }, this)
     },
     selTokensOfSet () {
       if (this.eintraege.data.selTokenSet > 0 && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet] && this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet].tokentoset) {
@@ -179,7 +196,11 @@ export default {
     },
     debouncedReload: _.debounce(function () {   // Einträge verzögert laden
       this.$parent.$refs.tabelle.reload()
-    }, 300)
+    }, 300),
+    newTokenSet () {
+      this.filterfelder.bearbeitungsmodus = 'auswahl'
+      this.eintraege.data.selTokenSet = -1
+    }
   },
   computed: {
     tokenSelectFlat () {
@@ -221,7 +242,10 @@ export default {
     'eintraege.data.tokenSets' (nVal) {
       this.$nextTick(() => {
         this.getTokenSetsSatz()
-        if (!this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet] && this.eintraege.data.selTokenSet !== -1) {
+        if (this.newTokenSetId) {
+          this.eintraege.data.selTokenSet = this.newTokenSetId
+          this.newTokenSetId = null
+        } else if (!this.eintraege.data.tokenSets[this.eintraege.data.selTokenSet] && this.eintraege.data.selTokenSet !== -1) {
           this.eintraege.data.selTokenSet = 0
         }
         this.selTokensOfSet()

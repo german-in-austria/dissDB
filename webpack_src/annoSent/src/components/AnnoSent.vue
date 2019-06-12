@@ -5,7 +5,7 @@
         <Suchen :suchfelder="suchfelder" @suche="$refs.tabelle.reload()" />
       </div>
       <div class="col col-md-4">
-        <Auswahl :eintraege="eintraege" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" />
+        <Auswahl :eintraege="eintraege" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" ref="auswahl" />
       </div>
       <div class="col col-md-3">
         <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" />
@@ -72,6 +72,28 @@ export default {
       infTrans: { data: { infTransList: [], infTransObj: {}, transcriptsList: [], transcriptsObj: {}, loaded: false } },
       eintraege: { data: { list: [], tokenSets: {}, selTokenSet: 0 } }
     }
+  },
+  mounted () {
+    window.addEventListener('keyup', this.keyUp)
+    window.addEventListener('keydown', this.keyDown)
+  },
+  methods: {
+    keyUp (e) {
+      // console.log(e)
+    },
+    keyDown (e) {
+      // console.log(e)
+      if (e.ctrlKey) {
+        if (e.key === 'd') {    // Auswahl aufheben: Strg + D
+          e.preventDefault()
+          this.$refs.auswahl.selNone()
+        }
+      }
+    }
+  },
+  beforeDestroy: function () {
+    window.removeEventListener('keyup', this.keyUp)
+    window.removeEventListener('keydown', this.keyDown)
   },
   components: {
     Suchen,

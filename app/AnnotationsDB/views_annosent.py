@@ -61,7 +61,7 @@ def views_annosent(request):
 			for aTokenId in aTokensIds:
 				obj, created = adbmodels.tbl_tokentoset.objects.update_or_create(id_tokenset_id=aTokenSet.id, id_token_id=aTokenId, defaults={'id_tokenset_id': aTokenSet.id, 'id_token_id': aTokenId})
 		aTokenSet.save()
-		return httpOutput(json.dumps({'OK': True}, 'application/json'))
+		return httpOutput(json.dumps({'OK': True, 'tokenset_id': aTokenSet.id}, 'application/json'))
 	# Antworten mit Tags speichern/ändern/löschen
 	if 'saveAntworten' in request.POST:
 		sAntworten = json.loads(request.POST.get('antworten'))
