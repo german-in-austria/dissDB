@@ -102,7 +102,7 @@ def transcripts(request):
 	aTranscripts = []
 	try:
 		for aTranscript in adbmodels.transcript.objects.all():
-			aTranscripts.append({'pk': aTranscript.pk, 'n': aTranscript.name, 'ut': aTranscript.update_time.strftime("%d.%m.%Y- %H:%M")})
+			aTranscripts.append({'pk': aTranscript.pk, 'n': aTranscript.name, 'ut': aTranscript.update_time.strftime("%d.%m.%Y- %H:%M"), 'default_tier': aTranscript.default_tier})
 	except Exception as e:
 		return httpOutput(json.dumps({'error': str(type(e)) + ' - ' + str(e)}), 'application/json')
 	return httpOutput(json.dumps({'transcripts': aTranscripts, 'error': None}), 'application/json')
@@ -119,7 +119,7 @@ def transcript(request, aPk, aNr):
 		# Startinformationen laden: (transcript, EinzelErhebung, Informanten, Saetze)
 		if aNr == 0:
 			aTranskriptData = adbmodels.transcript.objects.get(pk=tpk)
-			aTranskript = {'pk': aTranskriptData.pk, 'ut': aTranskriptData.update_time.strftime("%d.%m.%Y- %H:%M"), 'n': aTranskriptData.name}
+			aTranskript = {'pk': aTranskriptData.pk, 'ut': aTranskriptData.update_time.strftime("%d.%m.%Y- %H:%M"), 'n': aTranskriptData.name, 'default_tier': aTranskriptData.default_tier}
 			aTiersData = adbmodels.tbl_tier.objects.filter(transcript_id=aTranskriptData)
 			aTiers = {aTier.pk: aTier.tier_name for aTier in aTiersData}
 			aEinzelErhebung = {}
@@ -164,6 +164,8 @@ def transcript(request, aPk, aNr):
 				}
 				if aEIToken.ortho:
 					aTokenData['o'] = aEIToken.ortho
+				if aEIToken.phon:
+					aTokenData['p'] = aEIToken.phon
 				if aEIToken.sentence_id_id:
 					aTokenData['s'] = aEIToken.sentence_id_id
 				if aEIToken.sequence_in_sentence:
@@ -410,6 +412,7 @@ def tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId, tpk):
 	aElement.text_in_ortho = sData['aTokens'][key]['to']
 	aElement.ID_Inf_id = sData['aTokens'][key]['i']
 	aElement.ortho = sData['aTokens'][key]['o'] if 'o' in sData['aTokens'][key] else None
+	aElement.phon = sData['aTokens'][key]['p'] if 'p' in sData['aTokens'][key] else None
 	aElement.sentence_id_id = sData['aTokens'][key]['s'] if 's' in sData['aTokens'][key] and sData['aTokens'][key]['s'] > 0 else None
 	aElement.sequence_in_sentence = sData['aTokens'][key]['sr'] if 'sr' in sData['aTokens'][key] and sData['aTokens'][key]['sr'] > 0 else None
 	aElement.fragment_of_id = sData['aTokens'][key]['fo'] if 'fo' in sData['aTokens'][key] and sData['aTokens'][key]['fo'] > 0 else None
@@ -425,6 +428,8 @@ def tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId, tpk):
 	# sData['aTokens'][key]['i'] = aElement.ID_Inf_id
 	# if aElement.ortho:
 	# 	sData['aTokens'][key]['o'] = aElement.ortho
+	# if aElement.phon:
+	# 	sData['aTokens'][key]['p'] = aElement.phon
 	# elif 'o' in sData['aTokens'][key]:
 	# 	del sData['aTokens'][key]['o']
 	# if aElement.sentence_id_id:

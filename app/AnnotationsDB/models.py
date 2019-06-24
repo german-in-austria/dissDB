@@ -23,6 +23,7 @@ class token(models.Model):
 	text				= models.CharField(max_length=511																	, verbose_name="Das aktuelle Token")
 	token_type_id		= models.ForeignKey('token_type'			, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Token Type")
 	ortho				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Ortho")
+	phon				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Phon")
 	ID_Inf				= models.ForeignKey('Datenbank.Informanten'	, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="ID Informant")
 	fragment_of			= models.ForeignKey('token', related_name='rn_token_fragment_of', blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Fragment von")
 	token_reihung		= models.IntegerField(						  null=True												, verbose_name="Token Reihung")
