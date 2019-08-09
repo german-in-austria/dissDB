@@ -62,14 +62,14 @@ def transcriptCreate(request):
 	try:
 		nId = -1
 		sData = json.loads(request.body.decode('utf-8'))
-		aV_id_einzelerhebung = sData['id_einzelerhebung']
+		aV_id_einzelerhebung = sData['id_einzelerhebung'] if 'id_einzelerhebung' in sData else 0
 		aV_name = sData['name']
 		aV_default_tier = sData['default_tier']
 		if aV_id_einzelerhebung:
 			aErhebung = dbmodels.EinzelErhebung.objects.get(pk=aV_id_einzelerhebung)
 			if aErhebung:
 				try:
-					aElement = adbmodels.transcript.objects.get(pk=int(sData['pk']))
+					aElement = adbmodels.transcript.objects.get(pk=int(sData['pk']) if 'pk' in sData else 0)
 				except adbmodels.transcript.DoesNotExist:
 					aElement = adbmodels.transcript()
 				aElement.name = aV_name
