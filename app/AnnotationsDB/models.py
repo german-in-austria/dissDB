@@ -68,7 +68,7 @@ class token_type(models.Model):
 
 class transcript(models.Model):
 	name				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Name")
-	update_time			= models.DateTimeField(blank=True, null=True														, verbose_name="Update Zeit")
+	update_time			= models.DateTimeField(auto_now_add=True															, verbose_name="Update Zeit")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 	default_tier		= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="default_tier")
 	def __str__(self):
