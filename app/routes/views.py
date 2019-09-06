@@ -80,13 +80,15 @@ def transcriptCreate(request):
 				aErhebung.save()
 				if 'aTiers' in sData:
 					for aTierPk, aTierData in sData['aTiers'].items():
-						try:
-							aTier = adbmodels.tbl_tier.objects.get(pk=int(aTierPk))
-						except adbmodels.tbl_tier.DoesNotExist:
+						if int(aTierPk) < 1:
 							aTier = adbmodels.tbl_tier()
+						else:
+							aTier = adbmodels.tbl_tier.objects.get(pk=int(aTierPk))
 						aTier.transcript_id_id = nId
-						aTier.tier_name = aTierData.tier_name
+						aTier.tier_name = aTierData['tier_name']
 						aTier.save()
+						if int(aTierPk) < 1:
+							sData['aTiers'][aTierPk]['newPk'] = aTier.pk
 			else:
 				return httpOutput(json.dumps({'error': 'Erhebung mit ID "' + str(aV_id_einzelerhebung) + '" nicht gefunden!'}), 'application/json')
 		else:
@@ -121,7 +123,7 @@ def transcript(request, aPk, aNr):
 			aTranskriptData = adbmodels.transcript.objects.get(pk=tpk)
 			aTranskript = {'pk': aTranskriptData.pk, 'ut': aTranskriptData.update_time.strftime("%d.%m.%Y- %H:%M"), 'n': aTranskriptData.name, 'default_tier': aTranskriptData.default_tier}
 			aTiersData = adbmodels.tbl_tier.objects.filter(transcript_id=aTranskriptData)
-			aTiers = {aTier.pk: aTier.tier_name for aTier in aTiersData}
+			aTiers = {aTier.pk: {"tier_name": aTier.tier_name} for aTier in aTiersData}
 			aEinzelErhebung = {}
 			aEinzelErhebungData = dbmodels.EinzelErhebung.objects.filter(id_transcript_id=tpk)
 			if aEinzelErhebungData:
@@ -258,8 +260,8 @@ def transcript(request, aPk, aNr):
 
 @csrf_exempt
 def transcriptSave(request, aPk):
-	if not request.user.is_authenticated():
-		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
+	# if not request.user.is_authenticated():
+	# 	return httpOutput(json.dumps({'error': 'login'}), 'application/json')
 	tpk = int(aPk)
 	# Testen: $.post( "/routes/transcript/save/1/", '{"aTokens": {"6061": {"e": -3,"i": 2,"s": 15010,"sr": 2,"t": "tich","to": "","tr": 6061,"tt": 1,"fo": 6060,"status": "update"},"-5": {"e": 1479,"i": 2,"s": -1,"sr": -1,"t": ",","to": "","tr": 6069,"tt": 2,"status": "insert"}}}').always(function(x) { console.log(x); });
 	if tpk > 0:
@@ -268,6 +270,19 @@ def transcriptSave(request, aPk):
 		aEventKey = {}
 		starttime = time.time()
 		sData['sys_timer'] = {}
+		if 'aTiers' in sData:
+			for aTierPk, aTierData in sData['aTiers'].items():
+				if int(aTierPk) < 1:
+					aTier = adbmodels.tbl_tier()
+				else:
+					aTier = adbmodels.tbl_tier.objects.get(pk=int(aTierPk))
+				aTier.transcript_id_id = tpk
+				aTier.tier_name = aTierData['tier_name']
+				aTier.save()
+				if int(aTierPk) < 1:
+					sData['aTiers'][aTierPk]['newPk'] = aTier.pk
+		sData['sys_timer']['aTiers'] = time.time() - starttime
+		starttime = time.time()
 		if 'aEvents' in sData:
 			for key, aEvent in enumerate(sData['aEvents']):
 				try:
@@ -375,15 +390,20 @@ def eventUpdateAndInsert(sData, key, aEvent, aEventKey, eventPkChanges):
 	if 'event_tiers' in sData['aEvents'][key]:
 		for aEventTierInfKey, aEventTierInfData in sData['aEvents'][key]['event_tiers'].items():
 			for aEventTierKey, aEventTierData in aEventTierInfData.items():
-				try:
-					aEventTier = adbmodels.tbl_event_tier.objects.get(pk=int(aEventTierKey))
-				except adbmodels.tbl_event_tier.DoesNotExist:
+				if int(aEventTierKey) < 1:
 					aEventTier = adbmodels.tbl_event_tier()
+				else:
+					aEventTier = adbmodels.tbl_event_tier.objects.get(pk=int(aEventTierKey))
 				aEventTier.event_id = aElement
-				aEventTier.tier_id_id = aEventTierData['ti']
+				if int(aEventTierData['ti']) < 1:
+					aEventTier.tier_id_id = sData['aTiers'][aEventTierData['ti']]['newPk']
+				else:
+					aEventTier.tier_id_id = int(aEventTierData['ti'])
 				aEventTier.ID_Inf_id = aEventTierInfKey
 				aEventTier.text = aEventTierData['t']
 				aEventTier.save()
+				if int(aEventTierKey) < 1:
+					sData['aEvents'][key]['event_tiers'][aEventTierInfKey][aEventTierKey]['newPk'] = aEventTier.pk
 	if aEvent['pk'] < 1:
 		sData['aEvents'][key]['newPk'] = aElement.pk
 		eventPkChanges[sData['aEvents'][key]['pk']] = aElement.pk
@@ -451,7 +471,7 @@ def tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId, tpk):
 	if aId < 1:
 		sData['aTokens'][key]['newPk'] = aElement.pk
 		sData['aTokens'][key]['newStatus'] = 'inserted'
-		print('token', aId, 'inserted', sData['aTokens'][key]['newPk'], 'in event', aEventPk)
+		# print('token', aId, 'inserted', sData['aTokens'][key]['newPk'], 'in event', aEventPk)
 	else:
 		sData['aTokens'][key]['newStatus'] = 'updated'
 		# print('token', key, 'updated')
