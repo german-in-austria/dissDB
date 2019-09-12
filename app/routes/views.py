@@ -475,3 +475,14 @@ def tokenUpdateAndInsert(sData, key, aToken, aEventKey, aId, tpk):
 	else:
 		sData['aTokens'][key]['newStatus'] = 'updated'
 		# print('token', key, 'updated')
+
+
+# Dateien
+def files(request):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return httpOutput(json.dumps({'error': 'login'}), 'application/json')
+	if not request.user.has_perm('DB.dateien'):
+		return httpOutput(json.dumps({'error': 'no file permission'}), 'application/json')
+	from DB.funktionenDateien import view_dateien
+	return view_dateien(request, True)
