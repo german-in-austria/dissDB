@@ -5,7 +5,7 @@ from django.template import RequestContext
 def auswertung(request, aTagEbene, aSeite):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
-		return redirect('dioedb_login')
+		return redirect('dissdb_login')
 	from .views_auswertung import views_auswertung
 	return views_auswertung(request, aTagEbene, aSeite)
 

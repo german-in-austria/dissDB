@@ -1,0 +1,259 @@
+.mcon {
+  padding: 20px;
+}
+.filetreerow {
+  border-left: 1px solid #eee;
+}
+
+.fileobject {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  word-break: break-word;
+  background: #eee;
+  padding: 2px;
+}
+a.filelink_img {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding-bottom: 66.6%;
+  color:#2B5A84;
+  background:#fff;
+  overflow: hidden;
+}
+a.filelink_img:hover,a.filelink_img:focus {
+  color:#ddd;
+  background:#555;
+}
+a.filelink_img>.fileimgc {
+  position: absolute;
+  z-index: 1;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  background: #fff;
+}
+a.filelink_img:hover>.fileimgc, a.filelink_img:focus>.fileimgc {
+  position: absolute;
+  z-index: 1;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  background: #555;
+}
+a.filelink_img>.fileimgc>img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+a.filelink_img>.filetype {
+  position: absolute;
+  z-index: 0;
+  left: 0px;
+  right: 0px;
+  top: 31%;
+  font-size: 40px;
+  text-transform: uppercase;
+}
+a.filelink_img>.filesize {
+  position: absolute;
+  z-index:2;
+  right: 8px;
+  bottom: 3px;
+}
+
+.filetree a {
+  display: block;
+  background: #eee;
+}
+.filetree a.loading {
+  background: #f0ffc5;
+}
+.filetree a.selected {
+  color: #ddd;
+  background: #555;
+}
+.filetree ul {
+  list-style: none;
+  padding: 0px;
+  margin: 2px 0px 2px 32px;
+}
+.filetree li {
+  display:block;
+  position:relative;
+}
+.filetree a, .filetree .norights {
+  display: block;
+  background: #eee;
+  margin-left: -4px;
+  padding: 5px 9px;
+}
+.filetree button.treebtn, .filetree button.treeeditbtn {
+  position: absolute;
+  left: -35px;
+  padding: 5px 8px;
+  background: #eee;
+  color: #2B5A84;
+  border: none;
+  overflow: hidden;
+}
+.filetree button.treeeditbtn {
+  z-index: 10;
+  top: 0px;
+  left: inherit;
+  right: 0px;
+}
+.filetree button.treebtn:after {
+  content:"\e234";
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.filetree button.treebtn.opend {
+  background: #eee;
+}
+.filetree button.treebtn.opend:after {
+  content:"\2212";
+}
+.filetree button.treebtn.closed {
+  color: #ddd;
+  background: #555;
+}
+.filetree button.treebtn.closed:after {
+  content:"\2b";
+}
+
+
+.dateien-hochladen, .dateien-neuesverzeichnis, .dateien-ansicht {
+  position:relative;
+  border: none;
+  font-size: 22px;
+  background: #fcfcfc;
+  color: #333;
+  margin-left: 3px;
+  float: right;
+}
+.dateien-hochladen:hover, .dateien-hochladen:focus, .dateien-neuesverzeichnis:hover, .dateien-neuesverzeichnis:focus, .dateien-ansicht:hover, .dateien-ansicht:focus {
+  background: #555;
+  color: #ddd;
+}
+.dateientopline h4 {
+  display: inline;
+}
+.dateien-neuesverzeichnis:after {
+  content: "\e006";
+  color: #fff;
+  font-size: 10px;
+  position: absolute;
+  top: 13px;
+  right: 11px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.dateien-neuesverzeichnis:hover:after, .dateien-neuesverzeichnis:focus:after {
+  color: #000;
+}
+#dateiuploadfortschritt {
+  display:none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 50vh 10%;
+  top: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.64);
+}
+#dateiuploadfortschritt>div.text {
+  text-align:center;
+  margin-bottom:10px;
+  font-size:22px;
+  color:#fff;
+}
+
+.dateien-dateien {
+  border: none;
+  padding: 1px 4px;
+}
+.dateien-dateien:hover,.dateien-dateien:focus {
+  background: #555;
+  color: #ddd;
+}
+.dateien-dateien.dateien-dateiloeschen:hover,.dateien-dateien.dateien-dateiloeschen:focus {
+  background: #a92b2b;
+  color: #ffc2c2;
+}
+.iconview .fileobject>.filelink, .iconview .fileobject>.filetime {
+	display:block;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+  padding: 0px 5px;
+}
+.iconview .fileobject>.filesize {
+	display:none;
+}
+.iconview .fileobject>.filebtn {
+	display: block;
+  padding: 2px;
+}
+
+.dateienliste.listview {
+  display: table;
+	border-collapse:separate;
+  border-spacing: 0px 1px;
+  width: 100%;
+}
+.dateienliste.listview>.clearfix {
+	display:none;
+}
+.listview .fileobject {
+	text-align:left;
+  display: table-row;
+	border-bottom:1px solid #666;
+}
+.listview .fileobject:hover {
+	background:#ddd;
+}
+.listview .fileobject>* {
+  display: table-cell;
+  padding: 2px 3px;
+}
+.listview .fileobject>.filelink_img {
+	display:none;
+}
+.listview .fileobject>.filebtn {
+  text-align: right;
+}
+
+
+
+@media (min-width: 400px) {
+	.iconview .fileobject {
+		width: 48.5%;
+		float: left;
+		margin-right: 1.5%;
+		margin-bottom: 15px;
+	}
+}
+
+@media (min-width: 992px) {
+	.iconview .fileobject {
+	  width: 23.5%;
+	}
+}

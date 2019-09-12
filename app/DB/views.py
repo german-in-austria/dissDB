@@ -17,7 +17,7 @@ from django.db import connection
 def refreshcache(request,app_name,tabelle_name):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
-		return redirect('dioedb_login')
+		return redirect('dissdb_login')
 	# Gibt es die Tabelle?
 	try : amodel = apps.get_model(app_name, tabelle_name)
 	except LookupError : return HttpResponseNotFound('<h1>Tabelle "'+tabelle_name+'" nicht gefunden!</h1>')
@@ -31,7 +31,7 @@ def refreshcache(request,app_name,tabelle_name):
 def resetidseq(request,app_name,tabelle_name):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
-		return redirect('dioedb_login')
+		return redirect('dissdb_login')
 	# Gibt es die Tabelle?
 	try : amodel = apps.get_model(app_name, tabelle_name)
 	except LookupError : return HttpResponseNotFound('<h1>Tabelle "'+tabelle_name+'" nicht gefunden!</h1>')
@@ -50,7 +50,7 @@ def start(request):
 	info = ''
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
-		return redirect('dioedb_login')
+		return redirect('dissdb_login')
 
 	# Liste der verfuegbaren Tabellen:
 	tabellen = collections.OrderedDict()
@@ -73,7 +73,7 @@ def view(request,app_name,tabelle_name):
 	error = ''
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
-		return redirect('dioedb_login')
+		return redirect('dissdb_login')
 
 	# Gibt es die Tabelle?
 	try : amodel = apps.get_model(app_name, tabelle_name)
@@ -177,7 +177,7 @@ def search(request):
 	info = ''
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
-		return redirect('dioedb_login')
+		return redirect('dissdb_login')
 
 	# Nach OpenStreetMap Orten in der tbl_orte suchen ...
 	if 'sucheorte' in request.POST:
@@ -286,7 +286,7 @@ def view_diagramm(request):
 def tagsystemvue(request):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
-		return redirect('dioedb_login')
+		return redirect('dissdb_login')
 	import Datenbank.models as dbmodels
 	output = {}
 	if 'getBase' in request.POST:
@@ -367,3 +367,13 @@ def getTagFamiliePT(Tags):
 		oTags.append({'t': value.pk, 'c': pClose})
 		afam.append(value)
 	return oTags
+
+# Dateien
+def dateien(request):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return redirect('dissdb_login')
+	if not request.user.has_perm('DB.dateien'):
+		return redirect('Startseite:start')
+	from .funktionenDateien import view_dateien
+	return view_dateien(request)

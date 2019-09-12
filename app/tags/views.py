@@ -23,7 +23,7 @@ def tagsedit(request):
 	info = ''
 	error = ''
 	if not request.user.is_authenticated():
-		return redirect('dioedb_login')
+		return redirect('dissdb_login')
 	app_name = 'Datenbank'
 	tabelle_name = 'Tags'
 	permName = 'personen'

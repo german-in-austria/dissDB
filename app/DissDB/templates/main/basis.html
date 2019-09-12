@@ -41,7 +41,8 @@
 				<ul class="dropdown-menu" role="menu">
       		<li><a href="{% url 'DB:start' %}">Übersicht</a></li>
 					<li><a href="{% url 'DB:diagramm' %}">Diagramm</a></li>
-					<li><a href="/plate/">spaghetti and meatballs</a></li>
+					<li><a href="{% url 'DB:dateien' %}">Dateien</a></li>
+					<!-- <li><a href="/plate/">spaghetti and meatballs</a></li> -->
 				</ul>
 			</li>
 			<li class="dropdown"><a href="#" class="dropdown-toggle text-uppercase" data-toggle="dropdown" role="button" aria-expanded="false">{{ user.username }} <span class="caret"></span></a>
