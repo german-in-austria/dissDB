@@ -1,4 +1,5 @@
 from django.shortcuts import render_to_response
+from django.http import HttpResponse
 from django.template import RequestContext
 from django.db.models import Q
 from django.db import connection
@@ -214,9 +215,13 @@ def views_annosent(request):
 	if 'getBaseData' in request.POST:
 		return httpOutput(json.dumps({'OK': True}, 'application/json'))
 	# Einträge auslesen
-	if 'getEntries' in request.POST:
-		aSeite = int(request.POST.get('seite'))
-		aEps = int(request.POST.get('eps'))
+	if 'getEntries' in request.POST or 'getXML' in request.POST:
+		if 'getXML' in request.POST:
+			aSeite = 0
+			aEps = 999999999
+		else:
+			aSeite = int(request.POST.get('seite'))
+			aEps = int(request.POST.get('eps'))
 		aFilter = json.loads(request.POST.get('filter'))
 		aSuche = json.loads(request.POST.get('suche'))
 		aSortierung = json.loads(request.POST.get('sortierung'))
@@ -264,6 +269,58 @@ def views_annosent(request):
 		aElemente = aElemente.order_by(('-' if not aSortierung['asc'] else '') + aSortierung['spalte'])
 		# Einträge ausgeben
 		aMatIds = [aEintrag['id'] for aEintrag in aElemente.values('id')[aSeite * aEps:aSeite * aEps + aEps]]
+		if 'getXML' in request.POST:
+			import xlwt
+			response = HttpResponse(content_type='text/ms-excel')
+			response['Content-Disposition'] = 'attachment; filename="as_' + datetime.datetime.now().today().strftime('%Y_%m_%d_%H_%M_%S') + '.xls"'
+			aInfs = {aInf.id: aInf.Kuerzel for aInf in dbmodels.Informanten.objects.all()}
+			aTranscripts = {aTranscript.id: aTranscript.name for aTranscript in adbmodels.transcript.objects.all()}
+			aEintraege = []
+			aQuery = adbmodels.mat_adhocsentences.objects.raw('''
+				SELECT "mat_adhocsentences".*
+				FROM "mat_adhocsentences"
+				WHERE "mat_adhocsentences"."id" IN %s
+				ORDER BY "mat_adhocsentences"."adhoc_sentence" ASC
+			''', [tuple(aMatIds)])
+			for aEintrag in aQuery:
+				aEintraege.append({
+					'adhoc_sentence': aEintrag.adhoc_sentence,
+					'tokenids': ', '.join(str(v) for v in aEintrag.tokenids) if aEintrag.tokenids else aEintrag.tokenids,
+					'inf': aInfs[aEintrag.infid],
+					'infid': aEintrag.infid,
+					'trans': aTranscripts[aEintrag.transid],
+					'transid': aEintrag.transid,
+					'tokreih': ', '.join(str(v) for v in aEintrag.tokreih) if aEintrag.tokreih else aEintrag.tokreih,
+					'seqsent': ', '.join(str(v) for v in aEintrag.seqsent) if aEintrag.seqsent else aEintrag.seqsent,
+					'sentorig': aEintrag.sentorig,
+					'sentorth': aEintrag.sentorth,
+					'left_context': aEintrag.left_context,
+					'senttext': aEintrag.senttext,
+					'right_context': aEintrag.right_context,
+					'sentttlemma': aEintrag.sentttlemma,
+					'sentttpos': aEintrag.sentttpos,
+					'sentsplemma': aEintrag.sentsplemma,
+					'sentsppos': aEintrag.sentsppos,
+					'sentsptag': aEintrag.sentsptag,
+					'sentspdep': aEintrag.sentspdep,
+					'sentspenttype': aEintrag.sentspenttype
+				})
+			aColTitel = ['adhoc_sentence', 'inf', 'trans', 'sentorig', 'sentorth', 'left_context', 'senttext', 'right_context', 'sentttlemma', 'sentttpos', 'sentsplemma', 'sentsppos', 'sentsptag', 'sentspdep', 'sentspenttype', 'tokreih', 'seqsent', 'infid', 'transid', 'tokenids']
+			wb = xlwt.Workbook(encoding='utf-8')
+			ws = wb.add_sheet('Anno-sent')
+			row_num = 0
+			columns = [(ct, 2000) for ct in aColTitel]
+			font_style = xlwt.XFStyle()
+			font_style.font.bold = True
+			for col_num in range(len(columns)):
+				ws.write(row_num, col_num, columns[col_num][0], font_style)
+			font_style = xlwt.XFStyle()
+			for aEintrag in aEintraege:
+				row_num += 1
+				for cti in range(len(aColTitel)):
+					ws.write(row_num, cti, aEintrag[aColTitel[cti]], font_style)
+			wb.save(response)
+			return response
 		aEintraege = [
 			{
 				'adhoc_sentence': aEintrag.adhoc_sentence,

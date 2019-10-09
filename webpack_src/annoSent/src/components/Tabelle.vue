@@ -14,6 +14,7 @@
             </div>
           </div>
           <b> / {{ maxSeiten }}</b> - Einträge: <b>{{ zaehler.toLocaleString('de-DE') }}</b>
+          <button @click="getXLS" class="btn btn-default ml10" type="button" title="XLS Export" :disabled="zaehler > 65000"><span class="glyphicon glyphicon-download-alt"></span></button>
         </div>
       </div>
       <div class="form-inline float-right">
@@ -64,7 +65,7 @@
 </template>
 
 <script>
-/* global _ Popper */
+/* global _ Popper post csrf */
 import Token from './Token'
 import TokenEdit from './TokenEdit'
 
@@ -80,6 +81,7 @@ export default {
       ladeZeit: 0.0,
       ladeZeitStart: 0.0,
       loading: false,
+      downloading: false,
       zeigeSpaltenAuswahl: false,
       popper: null,
       spaltenSortierung: { spalte: 'adhoc_sentence', asc: true },
@@ -163,6 +165,15 @@ export default {
     debouncedReload: _.debounce(function () {   // Einträge verzögert laden
       this.reload()
     }, 300),
+    getXLS () {   // XLS herunterladen
+      post('', {
+        csrfmiddlewaretoken: csrf,
+        getXML: true,
+        filter: JSON.stringify({ inf: this.filterfelder.informant, trans: this.filterfelder.transkript }),
+        suche: JSON.stringify(this.suchfelder),
+        sortierung: JSON.stringify(this.spaltenSortierung)
+      }, '_blank')
+    },
     reload: _.debounce(function () {  // Einträge laden
       if (!this.loading) {
         this.rereload = false
