@@ -90,7 +90,7 @@ class transcript(models.Model):
 
 class tbl_tier(models.Model):
 	tier_name			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Tier Name")
-	transcript_id		= models.ForeignKey('transcript'		, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Transcript ID")
+	transcript_id		= models.ForeignKey('transcript'			, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Transcript ID")
 
 	def __str__(self):
 		return "{} -> {}".format(self.tier_name, self.transcript_id)
@@ -160,7 +160,7 @@ class tbl_tokenset(models.Model):
 
 class tbl_tokentoset(models.Model):
 	id_tokenset			= models.ForeignKey('tbl_tokenset'									, on_delete=models.CASCADE		, verbose_name="Tokenset")
-	id_token			= models.ForeignKey('token'										, on_delete=models.CASCADE		, verbose_name="Token")
+	id_token			= models.ForeignKey('token'											, on_delete=models.CASCADE		, verbose_name="Token")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 
 	def __str__(self):
@@ -175,7 +175,7 @@ class tbl_tokentoset(models.Model):
 
 class tbl_tokentoset_cache(models.Model):
 	id_tokenset			= models.ForeignKey('tbl_tokenset'									, on_delete=models.CASCADE		, verbose_name="Tokenset")
-	id_token			= models.ForeignKey('token'										, on_delete=models.CASCADE		, verbose_name="Token")
+	id_token			= models.ForeignKey('token'											, on_delete=models.CASCADE		, verbose_name="Token")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 
 	def __str__(self):
