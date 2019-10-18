@@ -10,8 +10,10 @@ class event(models.Model):
 	end_time			= models.DurationField(						  null=True												, verbose_name="End Zeit")
 	layer				= models.IntegerField(						  null=True												, verbose_name="Layer")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
+
 	def __str__(self):
 		return "{} - {} bis {}".format(self.layer, self.start_time, self.end_time)
+
 	class Meta:
 		db_table = "event"
 		verbose_name = "Event"
@@ -45,8 +47,10 @@ class token(models.Model):
 	sphead				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Dependency Relation")
 	spenttype			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Spacy Named Entity Type")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
+
 	def __str__(self):
 		return "\"{}\"".format(self.text)
+
 	class Meta:
 		db_table = "token"
 		verbose_name = "Token"
@@ -57,8 +61,10 @@ class token(models.Model):
 class token_type(models.Model):
 	token_type_name		= models.CharField(max_length=511																	, verbose_name="Token Typ Name")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
+
 	def __str__(self):
 		return "{}".format(self.token_type_name)
+
 	class Meta:
 		db_table = "token_type"
 		verbose_name = "Token Typ"
@@ -71,8 +77,10 @@ class transcript(models.Model):
 	update_time			= models.DateTimeField(auto_now_add=True															, verbose_name="Update Zeit")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
 	default_tier		= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="default_tier")
+
 	def __str__(self):
 		return "{} ({})".format(self.name, self.update_time)
+
 	class Meta:
 		db_table = "transcript"
 		verbose_name = "Transcript"
@@ -82,9 +90,11 @@ class transcript(models.Model):
 
 class tbl_tier(models.Model):
 	tier_name			= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="Tier Name")
-	transcript_id		= models.ForeignKey('transcript'			, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Transcript ID")
+	transcript_id		= models.ForeignKey('transcript'		, blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Transcript ID")
+
 	def __str__(self):
 		return "{} -> {}".format(self.tier_name, self.transcript_id)
+
 	class Meta:
 		db_table = "tier"
 		verbose_name = "Tier"
@@ -97,8 +107,10 @@ class tbl_event_tier(models.Model):
 	tier_id				= models.ForeignKey('tbl_tier'				, blank=True, null=True, on_delete=models.SET_NULL		, verbose_name="Tier ID")
 	ID_Inf				= models.ForeignKey('Datenbank.Informanten'	, blank=True, null=True, on_delete=models.SET_NULL		, verbose_name="ID Informant")
 	text				= models.CharField(max_length=511			, blank=True, null=True									, verbose_name="default_tier")
+
 	def __str__(self):
 		return "{} -> {} ({})".format(self.tier_id, self.event_id, self.ID_Inf)
+
 	class Meta:
 		db_table = "event_tier"
 		verbose_name = "Event Tier"
@@ -107,9 +119,10 @@ class tbl_event_tier(models.Model):
 
 
 class tbl_tokenset(models.Model):
-	id_von_token		= models.ForeignKey('token', related_name='rn_id_von_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Von Token ID")
-	id_bis_token		= models.ForeignKey('token', related_name='rn_id_bis_token', blank=True, null=True	, on_delete=models.SET_NULL		, verbose_name="Bis Token ID")
+	id_von_token		= models.ForeignKey('token', related_name='rn_id_von_token', blank=True, null=True	, on_delete=models.SET_NULL	, verbose_name="Von Token ID")
+	id_bis_token		= models.ForeignKey('token', related_name='rn_id_bis_token', blank=True, null=True	, on_delete=models.SET_NULL	, verbose_name="Bis Token ID")
 	updated				= models.DateTimeField(auto_now=True																				, verbose_name="Letztes Änderung")
+
 	def refreshCache():
 		dg = 0
 		all = tbl_tokenset.objects.count()
@@ -119,6 +132,7 @@ class tbl_tokenset(models.Model):
 			dg += 1
 			print(dg, '/', all, 'pk:', aTokenset.pk, time.time() - start)
 		return dg
+
 	def save(self, *args, **kwargs):
 		# tbl_tokentoset_cache aktuallisieren ...
 		super().save(*args, **kwargs)
@@ -131,10 +145,12 @@ class tbl_tokenset(models.Model):
 			if self.id_von_token.token_reihung > self.id_bis_token.token_reihung:
 				(self.id_bis_token.token_reihung, self.id_von_token.token_reihung) = (self.id_von_token.token_reihung, self.id_bis_token.token_reihung)
 			with transaction.atomic():
-				for aToken in token.objects.values('pk').filter(ID_Inf=self.id_von_token.ID_Inf, transcript_id=self.id_von_token.transcript_id.pk, token_reihung__gte=self.id_von_token.token_reihung, token_reihung__lte=self.id_bis_token.token_reihung).order_by('token_reihung'):
+				for aToken in tbl_token.objects.values('pk').filter(ID_Inf=self.id_von_token.ID_Inf, transcript_id=self.id_von_token.transcript_id.pk, token_reihung__gte=self.id_von_token.token_reihung, token_reihung__lte=self.id_bis_token.token_reihung).order_by('token_reihung'):
 					tbl_tokentoset_cache(id_tokenset=self, id_token_id=aToken['pk']).save()
+
 	def __str__(self):
 		return "{} - {}".format(self.id_von_token, self.id_bis_token)
+
 	class Meta:
 		db_table = "tokenset"
 		verbose_name = "Token Set"
@@ -144,10 +160,12 @@ class tbl_tokenset(models.Model):
 
 class tbl_tokentoset(models.Model):
 	id_tokenset			= models.ForeignKey('tbl_tokenset'									, on_delete=models.CASCADE		, verbose_name="Tokenset")
-	id_token			= models.ForeignKey('token'											, on_delete=models.CASCADE		, verbose_name="Token")
+	id_token			= models.ForeignKey('token'										, on_delete=models.CASCADE		, verbose_name="Token")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
+
 	def __str__(self):
 		return "{} <- {}".format(self.id_tokenset, self.id_token)
+
 	class Meta:
 		db_table = "tokentoset"
 		verbose_name = "Token to Token Set"
@@ -157,10 +175,12 @@ class tbl_tokentoset(models.Model):
 
 class tbl_tokentoset_cache(models.Model):
 	id_tokenset			= models.ForeignKey('tbl_tokenset'									, on_delete=models.CASCADE		, verbose_name="Tokenset")
-	id_token			= models.ForeignKey('token'											, on_delete=models.CASCADE		, verbose_name="Token")
+	id_token			= models.ForeignKey('token'										, on_delete=models.CASCADE		, verbose_name="Token")
 	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
+
 	def __str__(self):
 		return "{} <- {}".format(self.id_tokenset, self.id_token)
+
 	class Meta:
 		db_table = "tokentoset_cache"
 		verbose_name = "Token to Token Set Cache"
@@ -188,6 +208,7 @@ class mat_adhocsentences(models.Model):
 	sentsptag			= models.TextField(							  blank=True, null=True									, verbose_name="sentsptag")
 	sentspdep			= models.TextField(							  blank=True, null=True									, verbose_name="sentspdep")
 	sentspenttype		= models.TextField(							  blank=True, null=True									, verbose_name="sentspenttype")
+
 	class Meta:
 		db_table = "mat_adhocsentences"
 		managed = False
@@ -199,8 +220,10 @@ class mat_adhocsentences(models.Model):
 class tbl_refreshlog_mat_adhocsentences(models.Model):
 	created_at			= models.DateTimeField(auto_now_add=True, db_index=True												, verbose_name="Erstellt")
 	duration			= models.DurationField(																				  verbose_name="Dauer")
+
 	def __str__(self):
 		return "{} ({})".format(self.created_at, self.duration)
+
 	@transaction.atomic
 	def refresh():
 		start_time = time.monotonic()
@@ -209,6 +232,7 @@ class tbl_refreshlog_mat_adhocsentences(models.Model):
 		end_time = time.monotonic()
 		tbl_refreshlog_mat_adhocsentences.objects.create(duration=datetime.timedelta(seconds=end_time - start_time))
 		return end_time - start_time
+
 	class Meta:
 		db_table = "tbl_refreshlog_mat_adhocsentences"
 		verbose_name = "tbl_refreshlog_mat_adhocsentences"
