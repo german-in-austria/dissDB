@@ -5,6 +5,7 @@ from django.db.models import Count, Q
 import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import datetime
+import time
 
 
 def views_auswertung(request, aTagEbene, aSeite):
@@ -49,6 +50,7 @@ def views_auswertung(request, aTagEbene, aSeite):
 		aAntTagsTitle = nTagEbenen[aTagEbene]
 		nAntTagsTitle = []
 		aNr = aSeite * maxPerPage
+		# start = time.time()
 		for aAntwort in aAntwortenM if getXls else aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
 			aNr += 1
 			# Tag Ebene mit Tags
@@ -68,9 +70,12 @@ def views_auswertung(request, aTagEbene, aSeite):
 				aTokens.append(aAntwort.ist_token_id)
 			if aAntwort.ist_tokenset:
 				if aAntwort.ist_tokenset.id_von_token is None:		# ToDo: Optimieren
+					# xStart = time.time()
 					for aToken in aAntwort.ist_tokenset.tbl_tokentoset_set.all().values('id_token_id').order_by('id_token__token_reihung'):
 						aTokens.append(aToken['id_token_id'])
+					# print('Tokenset - Bereich', time.time() - xStart)
 				else:		# ToDo: Optimieren
+					# xStart = time.time()
 					for aToken in adbmodels.token.objects.filter(
 						ID_Inf_id=aAntwort.ist_tokenset.id_von_token.ID_Inf_id,
 						transcript_id=aAntwort.ist_tokenset.id_von_token.transcript_id,
@@ -78,6 +83,7 @@ def views_auswertung(request, aTagEbene, aSeite):
 						token_reihung__lte=aAntwort.ist_tokenset.id_bis_token.token_reihung
 					).values('pk').order_by('token_reihung'):
 						aTokens.append(aToken['pk'])
+					# print('Tokenset - Liste', time.time() - xStart)  # 0.015 Sek
 			# Transcript
 			transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
 			aTransId = adbmodels.transcript.objects.filter(token=aTokens[0])[0].pk
@@ -88,7 +94,7 @@ def views_auswertung(request, aTagEbene, aSeite):
 					ID_Inf_id=fToken.ID_Inf_id,
 					transcript_id=fToken.transcript_id,
 					token_reihung__lt=fToken.token_reihung
-				).values('pk').order_by('-token_reihung')[0]['pk']])
+				).values('pk').order_by('-token_reihung')[0]['pk']], True)
 			except IndexError:
 				vSatz = ''
 			try:
@@ -96,11 +102,12 @@ def views_auswertung(request, aTagEbene, aSeite):
 					ID_Inf_id=lToken.ID_Inf_id,
 					transcript_id=lToken.transcript_id,
 					token_reihung__gt=lToken.token_reihung
-				).values('pk').order_by('token_reihung')[0]['pk']])
+				).values('pk').order_by('token_reihung')[0]['pk']], True)
 			except IndexError:
 				nSatz = ''
 			# Datensatz
 			aAuswertungen.append({'aNr': aNr, 'fSatzId': str(fSatz.pk), 'lSatzId': str(lSatz.pk), 'aTrans': transName, 'aTransId': aTransId, 'aAntwortId': str(aAntwort.pk), 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+		# print('aAuswertungen', time.time() - start)  # 1,7 Sekunden
 		if getXls:
 			import xlwt
 			response = HttpResponse(content_type='text/ms-excel')
@@ -157,7 +164,8 @@ def views_auswertung(request, aTagEbene, aSeite):
 	return render_to_response('AnnotationsDB/auswertungstart.html', RequestContext(request, {'aTagEbene': aTagEbene, 'prev': prev, 'next': next, 'tagEbenen': aTagEbenen, 'aAuswertungen': aAuswertungen, 'aAntTagsTitle': aAntTagsTitle, 'nAntTagsTitle': nAntTagsTitle, 'aCount': aCount}))
 
 
-def getSatzFromTokenList(aTokens):
+def getSatzFromTokenList(aTokens, justText=False):
+	# start = time.time()
 	fSatz = dbmodels.Saetze.objects.filter(token__id=aTokens[0])[0]
 	fToken = fSatz.token_set.all().order_by('token_reihung')[0]
 	lSatz = dbmodels.Saetze.objects.filter(token__id=aTokens[len(aTokens) - 1])[0]
@@ -172,5 +180,7 @@ def getSatzFromTokenList(aTokens):
 		token_reihung__lte=lToken.token_reihung
 	).values('text', 'ortho', 'token_type_id_id').order_by('token_reihung'):
 		text += (' ' if aToken['token_type_id_id'] != 2 else '') + aToken['text']
-		ortho += (' ' if aToken['token_type_id_id'] != 2 else '') + (aToken['ortho'] if aToken['ortho'] else aToken['text'])
+		if not justText:
+			ortho += (' ' if aToken['token_type_id_id'] != 2 else '') + (aToken['ortho'] if aToken['ortho'] else aToken['text'])
+	# print('getSatzFromTokenList', time.time() - start)  # 0.02 Sek
 	return [fSatz, fToken, lSatz, lToken, text, ortho]
