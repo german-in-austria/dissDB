@@ -30,11 +30,9 @@
 					<th>iId</th>
 					<th>aId</th>
 					<th>vorheriger Satz</th>
-					<th>Sätze</th>
+					<th>Satz</th>
 					<th>nächster Satz</th>
 					<th>Sätze in Ortho</th>
-					<th>von sId</th>
-					<th>bis sId</th>
 					<th>Ausgewählte Tokens (Id)</th>
 					<th>{{ aAntTagsTitle }}</th>
 					{% for nATT in nAntTagsTitle %}
@@ -55,8 +53,6 @@
 					<td>{{ auswertung.aSaetze }}</td>
 					<td>{{ auswertung.nSatz }}</td>
 					<td>{{ auswertung.aOrtho }}</td>
-					<td>{{ auswertung.fSatzId }}</td>
-					<td>{{ auswertung.lSatzId }}</td>
 					<td>{{ auswertung.aTokens }}</td>
 					<td>{{ auswertung.aAntTags.t }}</td>
 					{% for nATT in nAntTagsTitle %}

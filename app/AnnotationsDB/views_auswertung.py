@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse
 from django.template import RequestContext
+from django.db import connection
 from django.db.models import Count, Q
 import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
@@ -88,26 +89,10 @@ def views_auswertung(request, aTagEbene, aSeite):
 			transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
 			aTransId = adbmodels.transcript.objects.filter(token=aTokens[0])[0].pk
 			# Sätze erfassen
-			[fSatz, fToken, lSatz, lToken, aSaetze, aOrtho] = getSatzFromTokenList(aTokens)
-			try:
-				[nix, nix, nix, nix, vSatz, nix] = getSatzFromTokenList([adbmodels.token.objects.filter(
-					ID_Inf_id=fToken.ID_Inf_id,
-					transcript_id=fToken.transcript_id,
-					token_reihung__lt=fToken.token_reihung
-				).values('pk').order_by('-token_reihung')[0]['pk']], True)
-			except IndexError:
-				vSatz = ''
-			try:
-				[nix, nix, nix, nix, nSatz, nix] = getSatzFromTokenList([adbmodels.token.objects.filter(
-					ID_Inf_id=lToken.ID_Inf_id,
-					transcript_id=lToken.transcript_id,
-					token_reihung__gt=lToken.token_reihung
-				).values('pk').order_by('token_reihung')[0]['pk']], True)
-			except IndexError:
-				nSatz = ''
+			[aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = getSatzFromTokenList(aTokens)
 			# Datensatz
-			aAuswertungen.append({'aNr': aNr, 'fSatzId': str(fSatz.pk), 'lSatzId': str(lSatz.pk), 'aTrans': transName, 'aTransId': aTransId, 'aAntwortId': str(aAntwort.pk), 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
-		# print('aAuswertungen', time.time() - start)  # 1,7 Sekunden
+			aAuswertungen.append({'aNr': aNr, 'aTrans': transName, 'aTransId': aTransId, 'aAntwortId': str(aAntwort.pk), 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+		# print('aAuswertungen', time.time() - start)  # 1,7 Sekunden -> 1,1 Sekunden
 		if getXls:
 			import xlwt
 			response = HttpResponse(content_type='text/ms-excel')
@@ -126,8 +111,6 @@ def views_auswertung(request, aTagEbene, aSeite):
 			columns.append(('Sätze', 2000))
 			columns.append(('nächster Satz', 2000))
 			columns.append(('Sätze in Ortho', 2000))
-			columns.append(('von sId', 2000))
-			columns.append(('bis sId', 2000))
 			columns.append(('Ausgewählte Tokens (Id)', 2000))
 			columns.append((aAntTagsTitle, 2000))
 			for nATT in nAntTagsTitle:
@@ -149,8 +132,6 @@ def views_auswertung(request, aTagEbene, aSeite):
 				ws.write(row_num, 7, obj['aSaetze'], font_style)
 				ws.write(row_num, 8, obj['nSatz'], font_style)
 				ws.write(row_num, 9, obj['aOrtho'], font_style)
-				ws.write(row_num, 10, int(obj['fSatzId']), font_style)
-				ws.write(row_num, 11, int(obj['lSatzId']), font_style)
 				ws.write(row_num, 12, obj['aTokens'], font_style)
 				if obj['aAntTags']:
 					ws.write(row_num, 13, obj['aAntTags']['t'], font_style)
@@ -166,21 +147,146 @@ def views_auswertung(request, aTagEbene, aSeite):
 
 def getSatzFromTokenList(aTokens, justText=False):
 	# start = time.time()
-	fSatz = dbmodels.Saetze.objects.filter(token__id=aTokens[0])[0]
-	fToken = fSatz.token_set.all().order_by('token_reihung')[0]
-	lSatz = dbmodels.Saetze.objects.filter(token__id=aTokens[len(aTokens) - 1])[0]
-	lToken = lSatz.token_set.all().order_by('token_reihung')
-	lToken = lToken[len(lToken) - 1]
-	text = ''
-	ortho = ''
-	for aToken in adbmodels.token.objects.filter(
-		ID_Inf_id=fToken.ID_Inf_id,
-		transcript_id=fToken.transcript_id,
-		token_reihung__gte=fToken.token_reihung,
-		token_reihung__lte=lToken.token_reihung
-	).values('text', 'ortho', 'token_type_id_id').order_by('token_reihung'):
-		text += (' ' if aToken['token_type_id_id'] != 2 else '') + aToken['text']
-		if not justText:
-			ortho += (' ' if aToken['token_type_id_id'] != 2 else '') + (aToken['ortho'] if aToken['ortho'] else aToken['text'])
-	# print('getSatzFromTokenList', time.time() - start)  # 0.02 Sek
-	return [fSatz, fToken, lSatz, lToken, text, ortho]
+	with connection.cursor() as cursor:
+		cursor.execute('''
+			WITH o_f_token AS (
+				SELECT
+					t.token_reihung as o_f_token_reihung,
+					x.token_reihung as o_f_prev_token_reihung,
+					x.token_type_id_id as o_f_prev_token_type,
+					t."ID_Inf_id" as informanten_id,
+					t.transcript_id_id as transcript_id
+				FROM token t
+				LEFT JOIN LATERAL (
+					SELECT p.token_type_id_id, p.token_reihung
+					FROM token p
+					WHERE
+						p.token_reihung < t.token_reihung AND
+						p."ID_Inf_id" = t."ID_Inf_id" AND
+						p.transcript_id_id = t.transcript_id_id
+					ORDER BY p.token_reihung DESC LIMIT 1
+				) x ON true
+				WHERE t.id = %s
+			), r_f_token AS (
+				SELECT
+					t.token_reihung as r_f_token_reihung
+				FROM token t, o_f_token oft
+				WHERE
+					t.token_reihung <= oft.o_f_token_reihung AND
+					t."ID_Inf_id" = oft.informanten_id AND
+					t.transcript_id_id = oft.transcript_id AND
+					t.token_type_id_id = 2
+				ORDER BY t.token_reihung DESC LIMIT 1
+			), o_l_token AS (
+				SELECT
+					t.token_reihung as o_l_token_reihung,
+					t.token_type_id_id as o_l_token_type
+				FROM token t
+				WHERE id = %s
+			), r_l_token AS (
+				SELECT
+					t.token_reihung as r_l_token_reihung
+				FROM token t, o_f_token oft, o_l_token olt
+				WHERE
+					t.token_reihung > olt.o_l_token_reihung AND
+					t."ID_Inf_id" = oft.informanten_id AND
+					t.transcript_id_id = oft.transcript_id AND
+					t.token_type_id_id = 2
+				ORDER BY t.token_reihung ASC LIMIT 1
+			), base_data AS (
+				SELECT
+					o_f_token.o_f_token_reihung,
+					(CASE
+						WHEN o_f_token.o_f_prev_token_type = 2 THEN
+							o_f_token.o_f_prev_token_reihung
+						ELSE (
+							SELECT r_f_token.r_f_token_reihung FROM r_f_token
+						)
+					END) as r_f_token_reihung,
+					o_l_token.o_l_token_reihung,
+					(CASE
+						WHEN o_l_token.o_l_token_type = 2 THEN
+							o_l_token.o_l_token_reihung
+						ELSE (
+							SELECT r_l_token.r_l_token_reihung FROM r_l_token
+						)
+					END) as r_l_token_reihung,
+					o_l_token.o_l_token_type,
+					o_f_token.transcript_id,
+					o_f_token.informanten_id
+				FROM o_l_token, o_f_token
+			), text_data AS (
+				SELECT
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || td.text, '') AS text,
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || (CASE WHEN td.ortho IS NOT NULL THEN td.ortho ELSE td.text END), '') AS orthotext
+				FROM (
+					SELECT *
+					FROM token ttd, base_data bd
+					WHERE
+						ttd.token_reihung > bd.r_f_token_reihung AND
+						ttd.token_reihung <= bd.r_l_token_reihung AND
+						ttd."ID_Inf_id" = bd.informanten_id AND
+						ttd.transcript_id_id = bd.transcript_id
+					ORDER BY ttd.token_reihung ASC
+				) as td
+			), p_f_token AS (
+				SELECT
+					t.token_reihung as p_f_token_reihung
+				FROM token t, base_data bd
+				WHERE
+					t.token_reihung < bd.r_f_token_reihung AND
+					t."ID_Inf_id" = bd.informanten_id AND
+					t.transcript_id_id = bd.transcript_id AND
+					t.token_type_id_id = 2
+				ORDER BY t.token_reihung DESC LIMIT 1
+			), prev_text_data AS (
+				SELECT
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || td.text, '') AS text,
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || (CASE WHEN td.ortho IS NOT NULL THEN td.ortho ELSE td.text END), '') AS orthotext
+				FROM (
+					SELECT *
+					FROM token ttd, base_data bd, p_f_token
+					WHERE
+						ttd.token_reihung <= bd.r_f_token_reihung AND
+						ttd.token_reihung > p_f_token.p_f_token_reihung AND
+						ttd."ID_Inf_id" = bd.informanten_id AND
+						ttd.transcript_id_id = bd.transcript_id
+					ORDER BY ttd.token_reihung ASC
+				) as td
+			), n_l_token AS (
+				SELECT
+					t.token_reihung as n_l_token_reihung
+				FROM token t, base_data bd
+				WHERE
+					t.token_reihung > bd.r_l_token_reihung AND
+					t."ID_Inf_id" = bd.informanten_id AND
+					t.transcript_id_id = bd.transcript_id AND
+					t.token_type_id_id = 2
+				ORDER BY t.token_reihung ASC LIMIT 1
+			), next_text_data AS (
+				SELECT
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || td.text, '') AS text,
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || (CASE WHEN td.ortho IS NOT NULL THEN td.ortho ELSE td.text END), '') AS orthotext
+				FROM (
+					SELECT *
+					FROM token ttd, base_data bd, n_l_token
+					WHERE
+						ttd.token_reihung > bd.r_l_token_reihung AND
+						ttd.token_reihung <= n_l_token.n_l_token_reihung AND
+						ttd."ID_Inf_id" = bd.informanten_id AND
+						ttd.transcript_id_id = bd.transcript_id
+					ORDER BY ttd.token_reihung ASC
+				) as td
+			)
+
+			SELECT
+				td.*,
+				ptd.*,
+				ntd.*,
+				bd.*
+			FROM base_data bd, text_data td, prev_text_data ptd, next_text_data ntd
+		''', [aTokens[0], aTokens[len(aTokens) - 1]])
+		[a_text, a_orthotext, prev_text, prev_orthotext, next_text, next_orthotext, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = cursor.fetchone()
+	# print(aTokens[0], aTokens[len(aTokens) - 1], ' -> ', [a_text, a_orthotext, prev_text, prev_orthotext, next_text, next_orthotext, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id])
+	# print('getSatzFromTokenList', time.time() - start)  # 0.02 Sek * 3 -> 0.045 Sek * 1
+	return [a_text, a_orthotext, prev_text, prev_orthotext, next_text, next_orthotext, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id]
