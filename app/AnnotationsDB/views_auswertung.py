@@ -55,6 +55,7 @@ def views_auswertung(request, aTagEbene, aSeite):
 		for aAntwort in aAntwortenM if getXls else aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
 			aNr += 1
 			# Tag Ebene mit Tags
+			# tetstart = time.time()
 			nAntTags = {}
 			aAntTags = None
 			for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=aAntwort.pk).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
@@ -65,33 +66,89 @@ def views_auswertung(request, aTagEbene, aSeite):
 					nAntTags[xDat['e']['i']] = xDat
 					if xDat['e'] not in nAntTagsTitle:
 						nAntTagsTitle.append(xDat['e'])
+			# print('Tag Ebene mit Tags', time.time() - tetstart)  # 0.00 Sek
 			# Tokens
 			aTokens = []
+			aTokensText = []
+			aTokensOrtho = []
 			if aAntwort.ist_token:
 				aTokens.append(aAntwort.ist_token_id)
+				aTokensText.append(aAntwort.ist_token.text)
+				aTokensOrtho.append(aAntwort.ist_token.ortho)
+				aTokensType = 't'
 			if aAntwort.ist_tokenset:
-				if aAntwort.ist_tokenset.id_von_token is None:		# ToDo: Optimieren
-					# xStart = time.time()
-					for aToken in aAntwort.ist_tokenset.tbl_tokentoset_set.all().values('id_token_id').order_by('id_token__token_reihung'):
-						aTokens.append(aToken['id_token_id'])
-					# print('Tokenset - Bereich', time.time() - xStart)
-				else:		# ToDo: Optimieren
-					# xStart = time.time()
-					for aToken in adbmodels.token.objects.filter(
-						ID_Inf_id=aAntwort.ist_tokenset.id_von_token.ID_Inf_id,
-						transcript_id=aAntwort.ist_tokenset.id_von_token.transcript_id,
-						token_reihung__gte=aAntwort.ist_tokenset.id_von_token.token_reihung,
-						token_reihung__lte=aAntwort.ist_tokenset.id_bis_token.token_reihung
-					).values('pk').order_by('token_reihung'):
-						aTokens.append(aToken['pk'])
-					# print('Tokenset - Liste', time.time() - xStart)  # 0.015 Sek
+				# xStart = time.time()
+				with connection.cursor() as cursor:
+					cursor.execute('''
+						SELECT (
+							CASE
+								WHEN ts.id_von_token_id > 0 THEN
+									'b'
+								ELSE
+									'l'
+							END
+						) as tokenset_type,
+						(
+							CASE
+								WHEN ts.id_von_token_id > 0 THEN
+									(
+										SELECT
+											ARRAY_AGG(json_build_array(at.id, at.text, (CASE WHEN at.ortho IS NOT NULL THEN at.ortho ELSE at.text END)))
+										FROM (
+											SELECT t.id, t.text, t.ortho
+											FROM token t
+											LEFT JOIN LATERAL (
+												SELECT vt.token_reihung, vt."ID_Inf_id", vt.transcript_id_id
+												FROM token vt
+												WHERE
+													vt.id = ts.id_von_token_id
+												ORDER BY vt.token_reihung DESC LIMIT 1
+											) vtr ON true
+											LEFT JOIN LATERAL (
+												SELECT bt.token_reihung
+												FROM token bt
+												WHERE
+													bt.id = ts.id_bis_token_id
+												ORDER BY bt.token_reihung DESC LIMIT 1
+											) btr ON true
+											WHERE
+												t.token_reihung >= vtr.token_reihung AND
+												t.token_reihung <= btr.token_reihung AND
+												t."ID_Inf_id" = vtr."ID_Inf_id" AND
+												t.transcript_id_id = vtr.transcript_id_id
+											ORDER BY t.token_reihung ASC
+										) as at
+									)
+								ELSE
+									(
+										SELECT
+											ARRAY_AGG(json_build_array(at.id, at.text, (CASE WHEN at.ortho IS NOT NULL THEN at.ortho ELSE at.text END)))
+										FROM (
+											SELECT t.id, t.text, t.ortho
+											FROM token t
+											LEFT JOIN tokentoset tts ON tts.id_tokenset_id = ts.id
+											WHERE t.id = tts.id_token_id
+											ORDER BY t.token_reihung ASC
+										) as at
+									)
+							END
+						) as tokens
+						FROM tokenset ts
+						WHERE ts.id = %s
+					''', [aAntwort.ist_tokenset_id])
+					[aTokensType, ts_tokens] = cursor.fetchone()
+					for aToken in ts_tokens:
+						aTokens.append(aToken[0])
+						aTokensText.append(aToken[1])
+						aTokensOrtho.append(aToken[2])
+				# print('Tokenset - Raw  ', aAntwort.ist_tokenset_id, time.time() - xStart)  # 0.015 Sek
 			# Transcript
 			transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
 			aTransId = adbmodels.transcript.objects.filter(token=aTokens[0])[0].pk
 			# Sätze erfassen
 			[aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = getSatzFromTokenList(aTokens)
 			# Datensatz
-			aAuswertungen.append({'aNr': aNr, 'aTrans': transName, 'aTransId': aTransId, 'aAntwortId': str(aAntwort.pk), 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+			aAuswertungen.append({'aNr': aNr, 'aTrans': transName, 'aTransId': aTransId, 'aAntwortId': str(aAntwort.pk), 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokensText': ' '.join(str(x) for x in aTokensText), 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
 		# print('aAuswertungen', time.time() - start)  # 1,7 Sekunden -> 1,1 Sekunden
 		if getXls:
 			import xlwt
@@ -111,6 +168,7 @@ def views_auswertung(request, aTagEbene, aSeite):
 			columns.append(('Sätze', 2000))
 			columns.append(('nächster Satz', 2000))
 			columns.append(('Sätze in Ortho', 2000))
+			columns.append(('Ausgewählte Tokens', 2000))
 			columns.append(('Ausgewählte Tokens (Id)', 2000))
 			columns.append((aAntTagsTitle, 2000))
 			for nATT in nAntTagsTitle:
@@ -132,13 +190,14 @@ def views_auswertung(request, aTagEbene, aSeite):
 				ws.write(row_num, 7, obj['aSaetze'], font_style)
 				ws.write(row_num, 8, obj['nSatz'], font_style)
 				ws.write(row_num, 9, obj['aOrtho'], font_style)
-				ws.write(row_num, 12, obj['aTokens'], font_style)
+				ws.write(row_num, 10, obj['aTokensText'], font_style)
+				ws.write(row_num, 11, obj['aTokens'], font_style)
 				if obj['aAntTags']:
-					ws.write(row_num, 13, obj['aAntTags']['t'], font_style)
+					ws.write(row_num, 12, obj['aAntTags']['t'], font_style)
 				dg = 0
 				for nATT in nAntTagsTitle:
 					if nATT['i'] in obj['nAntTags']:
-						ws.write(row_num, 14 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
+						ws.write(row_num, 13 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
 					dg += 1
 			wb.save(response)
 			return response
