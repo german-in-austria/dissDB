@@ -241,8 +241,8 @@ def getSatzFromTokenList(aTokens, justText=False):
 				ORDER BY t.token_reihung DESC LIMIT 1
 			), prev_text_data AS (
 				SELECT
-					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || td.text, '') AS text,
-					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || (CASE WHEN td.ortho IS NOT NULL THEN td.ortho ELSE td.text END), '') AS orthotext
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || td.text, '') AS prev_text,
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || (CASE WHEN td.ortho IS NOT NULL THEN td.ortho ELSE td.text END), '') AS prev_orthotext
 				FROM (
 					SELECT *
 					FROM token ttd, base_data bd, p_f_token
@@ -265,8 +265,8 @@ def getSatzFromTokenList(aTokens, justText=False):
 				ORDER BY t.token_reihung ASC LIMIT 1
 			), next_text_data AS (
 				SELECT
-					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || td.text, '') AS text,
-					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || (CASE WHEN td.ortho IS NOT NULL THEN td.ortho ELSE td.text END), '') AS orthotext
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || td.text, '') AS next_text,
+					string_agg(CASE WHEN td.token_type_id_id=2 THEN '' ELSE ' ' END || (CASE WHEN td.ortho IS NOT NULL THEN td.ortho ELSE td.text END), '') AS next_orthotext
 				FROM (
 					SELECT *
 					FROM token ttd, base_data bd, n_l_token
