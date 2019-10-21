@@ -2,7 +2,7 @@ from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse
 from django.template import RequestContext
 from django.db import connection
-from django.db.models import Count, Q
+from django.db.models import Count
 import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import datetime
@@ -23,7 +23,6 @@ def views_auswertung(request, aTagEbene, aSeite):
 	for aTE in dbmodels.TagEbene.objects.all():
 		nTagEbenen[aTE.pk] = str(aTE)
 		aTagEbenen.append({'pk': aTE.pk, 'title': str(aTE), 'count': dbmodels.Antworten.objects.filter(
-			Q(ist_token__isnull=False) | Q(ist_tokenset__isnull=False),
 			antwortentags__id_TagEbene_id=aTE.pk).distinct().count()}
 		)
 	aAuswertungen = []
@@ -38,7 +37,6 @@ def views_auswertung(request, aTagEbene, aSeite):
 		nTags = {x.pk: x.Tag for x in dbmodels.Tags.objects.all()}
 		# Antworten
 		aAntwortenM = dbmodels.Antworten.objects.filter(
-			Q(ist_token__isnull=False) | Q(ist_tokenset__isnull=False),
 			antwortentags__id_TagEbene_id=aTagEbene
 		).distinct()
 		aCount = aAntwortenM.count()
@@ -71,11 +69,12 @@ def views_auswertung(request, aTagEbene, aSeite):
 			aTokens = []
 			aTokensText = []
 			aTokensOrtho = []
+			aAntwortType = None		# t = Token, b = Bereich (TokenSet), l = Liste (TokenSet), s = Satz (Kein Transkript)
 			if aAntwort.ist_token:
 				aTokens.append(aAntwort.ist_token_id)
 				aTokensText.append(aAntwort.ist_token.text)
 				aTokensOrtho.append(aAntwort.ist_token.ortho)
-				aTokensType = 't'
+				aAntwortType = 't'
 			if aAntwort.ist_tokenset:
 				# xStart = time.time()
 				with connection.cursor() as cursor:
@@ -136,19 +135,27 @@ def views_auswertung(request, aTagEbene, aSeite):
 						FROM tokenset ts
 						WHERE ts.id = %s
 					''', [aAntwort.ist_tokenset_id])
-					[aTokensType, ts_tokens] = cursor.fetchone()
+					[aAntwortType, ts_tokens] = cursor.fetchone()
 					for aToken in ts_tokens:
 						aTokens.append(aToken[0])
 						aTokensText.append(aToken[1])
 						aTokensOrtho.append(aToken[2])
 				# print('Tokenset - Raw  ', aAntwort.ist_tokenset_id, time.time() - xStart)  # 0.015 Sek
-			# Transcript
-			transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
-			aTransId = adbmodels.transcript.objects.filter(token=aTokens[0])[0].pk
-			# Sätze erfassen
-			[aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = getSatzFromTokenList(aTokens)
+			[aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = [None, None, None, None, None, None, None, None, None, None, None, None, None]
+			if aTokens:
+				# Transcript
+				transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
+				aTransId = adbmodels.transcript.objects.filter(token=aTokens[0])[0].pk
+				# Sätze erfassen
+				[aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = getSatzFromTokenList(aTokens)
+			else:
+				transName = None
+				aTransId = None
+				aAntwortType = 's'
+				aSaetze = aAntwort.ist_Satz.Transkript if aAntwort.ist_Satz.Transkript else aAntwort.ist_Satz.Standardorth
+				aOrtho = aAntwort.ist_Satz.Standardorth if aAntwort.ist_Satz.Standardorth else aAntwort.ist_Satz.Transkript
 			# Datensatz
-			aAuswertungen.append({'aNr': aNr, 'aTrans': transName, 'aTransId': aTransId, 'aAntwortId': str(aAntwort.pk), 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokensText': ' '.join(str(x) for x in aTokensText), 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+			aAuswertungen.append({'aNr': aNr, 'aTrans': transName, 'aTransId': aTransId, 'aAntwortId': str(aAntwort.pk), 'aAntwortType': aAntwortType, 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokensText': ' '.join(str(x) for x in aTokensText), 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
 		# print('aAuswertungen', time.time() - start)  # 1,7 Sekunden -> 1,1 Sekunden
 		if getXls:
 			import xlwt
@@ -164,6 +171,7 @@ def views_auswertung(request, aTagEbene, aSeite):
 			columns.append(('Informant', 2000))
 			columns.append(('iId', 2000))
 			columns.append(('aId', 2000))
+			columns.append(('aType', 2000))
 			columns.append(('vorheriger Satz', 2000))
 			columns.append(('Sätze', 2000))
 			columns.append(('nächster Satz', 2000))
@@ -186,18 +194,19 @@ def views_auswertung(request, aTagEbene, aSeite):
 				ws.write(row_num, 3, obj['aInf'], font_style)
 				ws.write(row_num, 4, obj['aInfId'], font_style)
 				ws.write(row_num, 5, int(obj['aAntwortId']), font_style)
-				ws.write(row_num, 6, obj['vSatz'], font_style)
-				ws.write(row_num, 7, obj['aSaetze'], font_style)
-				ws.write(row_num, 8, obj['nSatz'], font_style)
-				ws.write(row_num, 9, obj['aOrtho'], font_style)
-				ws.write(row_num, 10, obj['aTokensText'], font_style)
-				ws.write(row_num, 11, obj['aTokens'], font_style)
+				ws.write(row_num, 6, int(obj['aAntwortType']), font_style)
+				ws.write(row_num, 7, obj['vSatz'], font_style)
+				ws.write(row_num, 8, obj['aSaetze'], font_style)
+				ws.write(row_num, 9, obj['nSatz'], font_style)
+				ws.write(row_num, 10, obj['aOrtho'], font_style)
+				ws.write(row_num, 11, obj['aTokensText'], font_style)
+				ws.write(row_num, 12, obj['aTokens'], font_style)
 				if obj['aAntTags']:
-					ws.write(row_num, 12, obj['aAntTags']['t'], font_style)
+					ws.write(row_num, 13, obj['aAntTags']['t'], font_style)
 				dg = 0
 				for nATT in nAntTagsTitle:
 					if nATT['i'] in obj['nAntTags']:
-						ws.write(row_num, 13 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
+						ws.write(row_num, 14 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
 					dg += 1
 			wb.save(response)
 			return response
