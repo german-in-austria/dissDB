@@ -155,7 +155,26 @@ def views_auswertung(request, aTagEbene, aSeite):
 				aSaetze = aAntwort.ist_Satz.Transkript if aAntwort.ist_Satz.Transkript else aAntwort.ist_Satz.Standardorth
 				aOrtho = aAntwort.ist_Satz.Standardorth if aAntwort.ist_Satz.Standardorth else aAntwort.ist_Satz.Transkript
 			# Datensatz
-			aAuswertungen.append({'aNr': aNr, 'aTrans': transName, 'aTransId': aTransId, 'aAntwortId': str(aAntwort.pk), 'aAntwortType': aAntwortType, 'aInf': aAntwort.von_Inf.Kuerzel, 'aInfId': aAntwort.von_Inf.pk, 'aTokensText': ' '.join(str(x) for x in aTokensText), 'aTokens': ', '.join(str(x) for x in aTokens), 'aAntTags': aAntTags, 'nAntTags': nAntTags, 'aOrtho': aOrtho, 'aSaetze': aSaetze, 'vSatz': vSatz, 'nSatz': nSatz})
+			aAuswertungen.append({
+				'aNr': aNr,
+				'aTrans': transName,
+				'aTransId': aTransId,
+				'aAntwortId': str(aAntwort.pk),
+				'aAntwortType': aAntwortType,
+				'aAufgabeId': aAntwort.zu_Aufgabe_id,
+				'aAufgabeBeschreibung': aAntwort.zu_Aufgabe.Beschreibung_Aufgabe if aAntwort.zu_Aufgabe_id else None,
+				'aAufgabeVariante': aAntwort.zu_Aufgabe.Variante if aAntwort.zu_Aufgabe_id else None,
+				'aInf': aAntwort.von_Inf.Kuerzel,
+				'aInfId': aAntwort.von_Inf.pk,
+				'aTokensText': ' '.join(str(x) for x in aTokensText),
+				'aTokens': ', '.join(str(x) for x in aTokens),
+				'aAntTags': aAntTags,
+				'nAntTags': nAntTags,
+				'aOrtho': aOrtho,
+				'aSaetze': aSaetze,
+				'vSatz': vSatz,
+				'nSatz': nSatz
+			})
 		# print('aAuswertungen', time.time() - start)  # 1,7 Sekunden -> 1,1 Sekunden
 		if getXls:
 			import xlwt
@@ -170,8 +189,11 @@ def views_auswertung(request, aTagEbene, aSeite):
 			columns.append(('tId', 2000))
 			columns.append(('Informant', 2000))
 			columns.append(('iId', 2000))
-			columns.append(('aId', 2000))
-			columns.append(('aType', 2000))
+			columns.append(('antId', 2000))
+			columns.append(('antType', 2000))
+			columns.append(('aufId', 2000))
+			columns.append(('aufBe', 2000))
+			columns.append(('aufVar', 2000))
 			columns.append(('vorheriger Satz', 2000))
 			columns.append(('Sätze', 2000))
 			columns.append(('nächster Satz', 2000))
@@ -194,19 +216,22 @@ def views_auswertung(request, aTagEbene, aSeite):
 				ws.write(row_num, 3, obj['aInf'], font_style)
 				ws.write(row_num, 4, obj['aInfId'], font_style)
 				ws.write(row_num, 5, int(obj['aAntwortId']), font_style)
-				ws.write(row_num, 6, int(obj['aAntwortType']), font_style)
-				ws.write(row_num, 7, obj['vSatz'], font_style)
-				ws.write(row_num, 8, obj['aSaetze'], font_style)
-				ws.write(row_num, 9, obj['nSatz'], font_style)
-				ws.write(row_num, 10, obj['aOrtho'], font_style)
-				ws.write(row_num, 11, obj['aTokensText'], font_style)
-				ws.write(row_num, 12, obj['aTokens'], font_style)
+				ws.write(row_num, 6, obj['aAntwortType'], font_style)
+				ws.write(row_num, 7, int(obj['aAufgabeId']), font_style)
+				ws.write(row_num, 8, obj['aAufgabeBeschreibung'], font_style)
+				ws.write(row_num, 9, int(obj['aAufgabeVariante']), font_style)
+				ws.write(row_num, 10, obj['vSatz'], font_style)
+				ws.write(row_num, 11, obj['aSaetze'], font_style)
+				ws.write(row_num, 12, obj['nSatz'], font_style)
+				ws.write(row_num, 13, obj['aOrtho'], font_style)
+				ws.write(row_num, 14, obj['aTokensText'], font_style)
+				ws.write(row_num, 15, obj['aTokens'], font_style)
 				if obj['aAntTags']:
-					ws.write(row_num, 13, obj['aAntTags']['t'], font_style)
+					ws.write(row_num, 16, obj['aAntTags']['t'], font_style)
 				dg = 0
 				for nATT in nAntTagsTitle:
 					if nATT['i'] in obj['nAntTags']:
-						ws.write(row_num, 14 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
+						ws.write(row_num, 17 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
 					dg += 1
 			wb.save(response)
 			return response
