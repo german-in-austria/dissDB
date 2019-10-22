@@ -65,6 +65,9 @@ RUN cd /home/docker/code/webpack_src/annotationsDB && npm install && npm run bui
 # Anno-sent
 COPY webpack_src/annoSent /home/docker/code/webpack_src/annoSent/
 RUN cd /home/docker/code/webpack_src/annoSent && npm install && npm run build
+# Anno-check
+COPY webpack_src/annoCheck /home/docker/code/webpack_src/annoCheck/
+RUN cd /home/docker/code/webpack_src/annoCheck && npm install && npm run build
 
 # ADD (THE REST OF) OUR CODE
 COPY . /home/docker/code/
