@@ -174,7 +174,6 @@ export default {
           seite: this.aSeite,
           eps: this.eintraegeProSeite,
           filter: JSON.stringify({ inf: this.filterfelder.informant, trans: this.filterfelder.transkript }),
-          suche: JSON.stringify(this.suchfelder),
           sortierung: JSON.stringify(this.spaltenSortierung)
         }).then((response) => {
           console.log(response.data)

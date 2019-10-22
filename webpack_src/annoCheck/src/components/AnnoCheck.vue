@@ -2,23 +2,21 @@
   <div class="annocheck">
     <div class="row">
       <div class="col col-md-5">
-        <Suchen :suchfelder="suchfelder" @suche="$refs.tabelle.reload()" />
+        Links
       </div>
       <div class="col col-md-4">
-        <Auswahl :eintraege="eintraege" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" ref="auswahl" />
+        Mitte
       </div>
       <div class="col col-md-3">
         <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" />
       </div>
     </div>
-    <Tabelle :tabellenfelder="tabellenfelder" :eintraege="eintraege" :suchfelder="suchfelder" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" ref="tabelle" />
+    <Tabelle :tabellenfelder="tabellenfelder" :eintraege="eintraege" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" ref="tabelle" />
   </div>
 </template>
 
 <script>
 /* global csrf tagsystem */
-import Suchen from './Suchen'
-import Auswahl from './Auswahl'
 import Filtern from './Filtern'
 import Tabelle from './Tabelle'
 
@@ -33,12 +31,6 @@ export default {
   },
   data () {
     return {
-      suchfelder: [
-        { name: 'sentorig', value: '', kannmuss: 'kann', methode: 'ci' },
-        { name: 'sentorth', value: '', kannmuss: 'kann', methode: 'ci' },
-        { name: 'sentttpos', value: '', kannmuss: 'kann', methode: 'ci' },
-        { name: 'sentsptag', value: '', kannmuss: 'kann', methode: 'ci' }
-      ],
       filterfelder: {
         informant: 0,
         transkript: 0,
@@ -96,8 +88,6 @@ export default {
     window.removeEventListener('keydown', this.keyDown)
   },
   components: {
-    Suchen,
-    Auswahl,
     Filtern,
     Tabelle
   }

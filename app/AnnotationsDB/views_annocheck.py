@@ -40,7 +40,7 @@ def views_annocheck(request):
 		aSeite = int(request.POST.get('seite'))
 		aEps = int(request.POST.get('eps'))
 		aFilter = json.loads(request.POST.get('filter'))
-		aSuche = json.loads(request.POST.get('suche'))
+		aSuche = json.loads(request.POST.get('suche')) if request.POST.get('suche') else []
 		aSortierung = json.loads(request.POST.get('sortierung'))
 		aElemente = adbmodels.mat_adhocsentences.objects.all()
 		# Suchen / Filtern

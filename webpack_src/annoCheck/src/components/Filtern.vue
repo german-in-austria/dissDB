@@ -1,6 +1,15 @@
 <template>
   <div class="annocheck-filtern form-horizontal">
     <div class="form-group">
+      <label for="tagebene" class="col-sm-4 control-label">Tag Ebene</label>
+      <div class="col-sm-8">
+        <select class="form-control" v-model="filterfelder.tagebene" id="tagebene">
+          <option value="0">Auswählen</option>
+          <option :value="tagebene.pk" v-for="tagebene in tagebenenListe" :key="'te' + tagebene">{{ tagebene.t }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
       <label for="informant" class="col-sm-4 control-label">Informant</label>
       <div class="col-sm-8">
         <select class="form-control" v-model="filterfelder.informant" id="informant">
@@ -19,20 +28,18 @@
       </div>
     </div>
     <div class="form-group">
-      <label for="tagebene" class="col-sm-4 control-label">Tag Ebene</label>
+      <label for="aufgabensets" class="col-sm-4 control-label">Aufgabensets</label>
       <div class="col-sm-8">
-        <select class="form-control" v-model="filterfelder.tagebene" id="tagebene">
-          <option value="0">Auswählen</option>
-          <option :value="tagebene.pk" v-for="tagebene in tagebenenListe" :key="'te' + tagebene">{{ tagebene.t }}</option>
+        <select class="form-control" id="aufgabensets">
+          <option value="0">Alle</option>
         </select>
       </div>
     </div>
     <div class="form-group">
-      <label for="tagebene" class="col-sm-4 control-label" title="Bearbeitungsmodus">Modus</label>
+      <label for="aufgaben" class="col-sm-4 control-label">Aufgaben</label>
       <div class="col-sm-8">
-        <select class="form-control" v-model="filterfelder.bearbeitungsmodus" id="bearbeitungsmodus">
-          <option value="direkt">Direkt</option>
-          <option value="auswahl">Auswahl</option>
+        <select class="form-control" id="aufgaben">
+          <option value="0">Alle</option>
         </select>
       </div>
     </div>
