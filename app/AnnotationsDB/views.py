@@ -31,3 +31,11 @@ def annosent(request):
 		return redirect('dissdb_login')
 	from .views_annosent import views_annosent
 	return views_annosent(request)
+
+
+def annocheck(request):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return redirect('dissdb_login')
+	from .views_annocheck import views_annocheck
+	return views_annocheck(request)
