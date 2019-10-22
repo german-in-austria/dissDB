@@ -168,7 +168,7 @@ export default {
     getXLS () {   // XLS herunterladen
       post('', {
         csrfmiddlewaretoken: csrf,
-        getXML: true,
+        getXLS: true,
         filter: JSON.stringify({ inf: this.filterfelder.informant, trans: this.filterfelder.transkript }),
         suche: JSON.stringify(this.suchfelder),
         sortierung: JSON.stringify(this.spaltenSortierung)

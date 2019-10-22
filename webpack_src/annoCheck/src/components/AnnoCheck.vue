@@ -25,7 +25,7 @@ import Tabelle from './Tabelle'
 export default {
   name: 'AnnoCheck',
   http: {
-    root: '/annotationsdb/annosent',
+    root: '/annotationsdb/annocheck',
     headers: {
       'X-CSRFToken': csrf
     },

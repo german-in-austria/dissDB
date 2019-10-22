@@ -1,11 +1,6 @@
 <template>
   <div class="annocheck-filtern form-horizontal">
     <div class="form-group">
-      <div class="col-sm-offset-4 col-sm-8">
-        <button class="form-control-static btn btn-success w100" @click="loadMatViewData(true)" :title="mvDurchschnitt > 0 ? 'Letzter Refresh: ' + mvLastUpdate + ' Uhr, Durchschnittliche Dauer ca. ' + mvDurchschnitt + ' Sekunden' : ''"><b>Refresh Materialized View</b></button>
-      </div>
-    </div>
-    <div class="form-group">
       <label for="informant" class="col-sm-4 control-label">Informant</label>
       <div class="col-sm-8">
         <select class="form-control" v-model="filterfelder.informant" id="informant">
@@ -88,7 +83,6 @@ export default {
   },
   mounted () {
     console.log(this.filterfelder)
-    this.loadMatViewData()
     this.getTranscriptsInfList()
   },
   methods: {
@@ -124,30 +118,6 @@ export default {
           alert('Fehler!')
           this.loading = false
         })
-    },
-    loadMatViewData (refresh = false) {   // Informationen zu letzten Materialized View Refreshes laden
-      if (!this.loading || !refresh) {
-        if (refresh) {
-          this.loading = true
-          this.loadInfos = 'Die letzten 5 Aktuallisierungen haben durchschnittlich ' + this.mvDurchschnitt.toFixed(1) + ' Sekunden gedauert ...'
-        }
-        this.http.post('', {
-          getMatViewData: 1,
-          refresh: refresh
-        }).then((response) => {
-          this.mvDurchschnitt = response.data.mvDurchschnitt
-          this.mvLastUpdate = response.data.mvLastUpdate
-          if (refresh) {
-            this.loading = false
-          }
-        }).catch((err) => {
-          console.log(err)
-          alert('Fehler!')
-          if (refresh) {
-            this.loading = false
-          }
-        })
-      }
     }
   }
 }
