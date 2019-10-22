@@ -23,75 +23,15 @@ def views_annocheck(request):
 	# Antworten mit Tags speichern/ändern/löschen
 	if 'saveAntworten' in request.POST:
 		from .funktionenAnno import annoSaveAntworten
-		sAntworten = json.loads(request.POST.get('antworten'))
-		annoSaveAntworten(sAntworten, adbmodels, dbmodels)
+		annoSaveAntworten(json.loads(request.POST.get('antworten')), adbmodels, dbmodels)
 	# getTokenSetsSatz
 	if 'getTokenSetsSatz' in request.POST:
-		aTokenSetsIds = request.POST.getlist('tokenSetsIds[]')
-		aTokenSetSatz = {}
-		for aTokenSetId in aTokenSetsIds:
-			aTokenSet = adbmodels.tbl_tokenset.objects.get(pk=aTokenSetId)
-			if aTokenSet.id_von_token and aTokenSet.id_bis_token:
-				startToken = aTokenSet.id_von_token
-				endToken = aTokenSet.id_bis_token
-			else:
-				startToken = adbmodels.tbl_tokentoset.objects.filter(id_tokenset=aTokenSet).order_by('id_token__token_reihung')[0].id_token
-				endToken = adbmodels.tbl_tokentoset.objects.filter(id_tokenset=aTokenSet).order_by('-id_token__token_reihung')[0].id_token
-			with connection.cursor() as cursor:
-				cursor.execute('''
-					SELECT array_to_json(array_agg(row_to_json(atok)))
-					FROM (
-						(
-							SELECT "token".*, 0 AS tb
-							FROM "token"
-							WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" < %s)
-							ORDER BY "token"."token_reihung" DESC
-							LIMIT 10
-						) UNION ALL (
-							SELECT "token".*, 1 AS tb
-							FROM "token"
-							WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" >= %s AND "token"."token_reihung" <= %s)
-							ORDER BY "token"."token_reihung" ASC
-						) UNION ALL (
-							SELECT "token".*, 2 AS tb
-							FROM "token"
-							WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" > %s)
-							ORDER BY "token"."token_reihung" ASC
-							LIMIT 10
-						)
-					) AS atok
-				''', [
-					startToken.ID_Inf_id, startToken.transcript_id_id, startToken.token_reihung,
-					startToken.ID_Inf_id, startToken.transcript_id_id, startToken.token_reihung, endToken.token_reihung,
-					startToken.ID_Inf_id, startToken.transcript_id_id, endToken.token_reihung
-				])
-				aTokenSetSatz[aTokenSetId] = cursor.fetchone()[0]
-		return httpOutput(json.dumps({'OK': True, 'aTokenSetSatz': aTokenSetSatz}, 'application/json'))
+		from .funktionenAnno import getTokenSetsSatz
+		return getTokenSetsSatz(request.POST.getlist('tokenSetsIds[]'), adbmodels)
 	# getTokenSatz
 	if 'getTokenSatz' in request.POST:
-		aTokenId = request.POST.get('tokenId')
-		aToken = adbmodels.token.objects.get(pk=aTokenId)
-		with connection.cursor() as cursor:
-			cursor.execute('''
-				SELECT array_to_json(array_agg(row_to_json(atok)))
-				FROM (
-					(
-						SELECT "token".*
-						FROM "token"
-						WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" < %s)
-						ORDER BY "token"."token_reihung" DESC
-						LIMIT 10
-					) UNION ALL (
-						SELECT "token".*
-						FROM "token"
-						WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" >= %s)
-						ORDER BY "token"."token_reihung" ASC
-						LIMIT 11
-					)
-				) AS atok
-			''', [aToken.ID_Inf_id, aToken.transcript_id_id, aToken.token_reihung, aToken.ID_Inf_id, aToken.transcript_id_id, aToken.token_reihung])
-			aTokenSatz = cursor.fetchone()[0]
-		return httpOutput(json.dumps({'OK': True, 'aTokenSatz': aTokenSatz}, 'application/json'))
+		from .funktionenAnno import getTokenSatz
+		return getTokenSatz(request.POST.get('tokenId'), adbmodels)
 	# Basisdaten für Filter laden
 	if 'getBaseData' in request.POST:
 		return httpOutput(json.dumps({'OK': True}, 'application/json'))

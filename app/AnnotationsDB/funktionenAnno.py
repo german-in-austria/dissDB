@@ -127,6 +127,75 @@ def annoSaveAntworten(sAntworten, adbmodels, dbmodels):
 	return httpOutput(json.dumps({'OK': True}, 'application/json'))
 
 
+def getTokenSetsSatz(aTokenSetsIds, adbmodels):
+	"""getTokenSetsSatz. (annoSent und annoCheck)."""
+	aTokenSetSatz = {}
+	for aTokenSetId in aTokenSetsIds:
+		aTokenSet = adbmodels.tbl_tokenset.objects.get(pk=aTokenSetId)
+		if aTokenSet.id_von_token and aTokenSet.id_bis_token:
+			startToken = aTokenSet.id_von_token
+			endToken = aTokenSet.id_bis_token
+		else:
+			startToken = adbmodels.tbl_tokentoset.objects.filter(id_tokenset=aTokenSet).order_by('id_token__token_reihung')[0].id_token
+			endToken = adbmodels.tbl_tokentoset.objects.filter(id_tokenset=aTokenSet).order_by('-id_token__token_reihung')[0].id_token
+		with connection.cursor() as cursor:
+			cursor.execute('''
+				SELECT array_to_json(array_agg(row_to_json(atok)))
+				FROM (
+					(
+						SELECT "token".*, 0 AS tb
+						FROM "token"
+						WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" < %s)
+						ORDER BY "token"."token_reihung" DESC
+						LIMIT 10
+					) UNION ALL (
+						SELECT "token".*, 1 AS tb
+						FROM "token"
+						WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" >= %s AND "token"."token_reihung" <= %s)
+						ORDER BY "token"."token_reihung" ASC
+					) UNION ALL (
+						SELECT "token".*, 2 AS tb
+						FROM "token"
+						WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" > %s)
+						ORDER BY "token"."token_reihung" ASC
+						LIMIT 10
+					)
+				) AS atok
+			''', [
+				startToken.ID_Inf_id, startToken.transcript_id_id, startToken.token_reihung,
+				startToken.ID_Inf_id, startToken.transcript_id_id, startToken.token_reihung, endToken.token_reihung,
+				startToken.ID_Inf_id, startToken.transcript_id_id, endToken.token_reihung
+			])
+			aTokenSetSatz[aTokenSetId] = cursor.fetchone()[0]
+	return httpOutput(json.dumps({'OK': True, 'aTokenSetSatz': aTokenSetSatz}, 'application/json'))
+
+
+def getTokenSatz(aTokenId, adbmodels):
+	"""getTokenSatz. (annoSent und annoCheck)."""
+	aToken = adbmodels.token.objects.get(pk=aTokenId)
+	with connection.cursor() as cursor:
+		cursor.execute('''
+			SELECT array_to_json(array_agg(row_to_json(atok)))
+			FROM (
+				(
+					SELECT "token".*
+					FROM "token"
+					WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" < %s)
+					ORDER BY "token"."token_reihung" DESC
+					LIMIT 10
+				) UNION ALL (
+					SELECT "token".*
+					FROM "token"
+					WHERE ("token"."ID_Inf_id" = %s AND "token"."transcript_id_id" = %s AND "token"."token_reihung" >= %s)
+					ORDER BY "token"."token_reihung" ASC
+					LIMIT 11
+				)
+			) AS atok
+		''', [aToken.ID_Inf_id, aToken.transcript_id_id, aToken.token_reihung, aToken.ID_Inf_id, aToken.transcript_id_id, aToken.token_reihung])
+		aTokenSatz = cursor.fetchone()[0]
+	return httpOutput(json.dumps({'OK': True, 'aTokenSatz': aTokenSatz}, 'application/json'))
+
+
 def getSatzFromTokenList(aTokens):
 	"""Satz anhand der Punktion ermitteln und vorherigen und nachfolgenden Satz ausgeben. (Auswertung und annoCheck)."""
 	# start = time.time()
