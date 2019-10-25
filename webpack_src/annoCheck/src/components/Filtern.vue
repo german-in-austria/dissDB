@@ -36,22 +36,6 @@
         </select>
       </div>
     </div>
-    <div class="form-group">
-      <div class="col-sm-offset-4 col-sm-8">
-        <div class="form-inline">
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" v-model="showCount"> Zähler anzeigen
-            </label>
-          </div>
-          <div class="checkbox">
-            <label class="ml10">
-              <input type="checkbox" v-model="showCountTrans" :disabled="!showCount"> Transkript
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
     <!-- <div class="form-group">
       <label for="aufgabensets" class="col-sm-4 control-label">Aufgabensets</label>
       <div class="col-sm-8">
@@ -68,6 +52,22 @@
         </select>
       </div>
     </div> -->
+    <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-8">
+        <div class="form-inline">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" v-model="showCount"> Anzahl anzeigen
+            </label>
+          </div>
+          <div class="checkbox">
+            <label class="ml10">
+              <input type="checkbox" v-model="showCountTrans" :disabled="!showCount"> Transkript
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="loading" v-if="loading">Lade ...<div>{{ loadInfos }}</div></div>
   </div>
 </template>
