@@ -72,7 +72,7 @@ export default {
       downloading: false,
       zeigeSpaltenAuswahl: false,
       popper: null,
-      spaltenSortierung: { spalte: 'adhoc_sentence', asc: true },
+      spaltenSortierung: { spalte: 'Reihung', asc: true },
       rereload: false
     }
   },
@@ -155,7 +155,7 @@ export default {
           getEntries: true,
           seite: this.aSeite,
           eps: this.eintraegeProSeite,
-          filter: JSON.stringify({ inf: this.filterfelder.informant, trans: this.filterfelder.transkript }),
+          filter: JSON.stringify({ ebene: this.filterfelder.tagebene, inf: this.filterfelder.informant, trans: this.filterfelder.transkript }),
           sortierung: JSON.stringify(this.spaltenSortierung)
         }).then((response) => {
           console.log(response.data)

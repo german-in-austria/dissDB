@@ -103,7 +103,7 @@ export default {
         getFilterData: true,
         showCount: this.showCount,
         showCountTrans: this.showCountTrans,
-        filter: JSON.stringify({ inf: this.filterfelder.informant, trans: this.filterfelder.transkript })
+        filter: JSON.stringify({ ebene: this.filterfelder.tagebene, inf: this.filterfelder.informant, trans: this.filterfelder.transkript })
       }).then((response) => {
         this.tagebenenListe = response.data['tagEbenen']
         this.informantenListe = response.data['informanten']
