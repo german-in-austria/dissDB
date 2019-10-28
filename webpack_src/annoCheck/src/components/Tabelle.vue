@@ -35,7 +35,8 @@
           <tr>
             <th>#</th>
             <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld" :title="feldoption.sortby || feld">
-              <button @click="spalteSortieren(feldoption.sortby || feld)" class="sort-btn">{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === (feldoption.sortby || feld)"></span></button>
+              <button @click="spalteSortieren(feldoption.sortby || feld)" class="sort-btn" v-if="!feldoption.dontSort">{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === (feldoption.sortby || feld)"></span></button>
+              <template v-else>{{ feldoption.displayName || feld }}</template>
             </th>
           </tr>
         </thead>

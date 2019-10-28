@@ -91,8 +91,13 @@ def views_annocheck(request):
 		aEintraege = []
 		for aEintrag in aElemente[aSeite * aEps:aSeite * aEps + aEps]:
 			aEintraege.append({
-				'antId': aEintrag.id,
-				'Reihung': aEintrag.Reihung
+				'id': aEintrag.id,
+				'Reihung': aEintrag.Reihung,
+				'zu_Aufgabe_id': aEintrag.zu_Aufgabe_id,
+				'aufBe': aEintrag.zu_Aufgabe.Beschreibung_Aufgabe if aEintrag.zu_Aufgabe_id else None,
+				'aufVar': aEintrag.zu_Aufgabe.Variante if aEintrag.zu_Aufgabe_id else None,
+				'aInf': aEintrag.von_Inf.Kuerzel,
+				'von_Inf_id': aEintrag.von_Inf_id
 			})
 		# Einträge ausgeben
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')
