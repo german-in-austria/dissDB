@@ -5,10 +5,9 @@
             (tokenIsFragment ? ' isfragment' : '') +
             (nextTokenIsFragment ? ' hasfragment' : '') +
             (activeTokenSet ? ' mark-active-tokenset' : '') +
-            (inSelTokenSet ? ' mark-active-seltokenset' : '') +
-            (selected ? ' selected' : '')"
+            (inSelTokenSet ? ' mark-active-seltokenset' : '')"
     @mouseenter="fxData.hoverToken = token" @mouseleave="fxData.hoverToken = null"
-    @click="filterfelder.bearbeitungsmodus === 'auswahl' ? $emit('selectToken') : $emit('tokenEdit')"
+    @click="$emit('tokenEdit')"
   >
     <div :class="'mark-tokenset' + (token.tokensets && token.tokensets.length > 0 ? ' has-antwort' : '') + (token.antworten && token.antworten.length > 0 ? ' sib-antwort' : '')" />
     <div :class="'mark-token' + (token.antworten && token.antworten.length > 0 ? ' has-antwort' : '') + (token.tokensets && token.tokensets.length > 0 ? ' sib-antwort' : '')" />
@@ -20,9 +19,6 @@ export default {
   name: 'Token',
   props: ['token', 'tokens', 'eintrag', 'eintraege', 'filterfelder', 'fxData'],
   computed: {
-    selected () {
-      return this.filterfelder.bearbeitungsmodus === 'auswahl' && this.eintrag.selected && this.eintrag.selected.indexOf(this.token.id) > -1
-    },
     nextToken () {
       let isAToken = false
       let nToken = null
@@ -132,29 +128,9 @@ export default {
 .token.mark-active-seltokenset.mark-active-tokenset {
   border-color: #8e3dbd;
 }
-.token.selected.mark-active-seltokenset {
-  border-color: #5cb85c;
-}
-.token.selected:after, .token:hover:after, .token:focus:after {
-  content: '';
-  position: absolute;
-  left: -3px;
-  top: -3px;
-  right: -3px;
-  bottom: -3px;
-  background: #337ab7;
-  z-index: -1;
-  border-radius: 5px;
-}
-.token.selected.mark-active-seltokenset:after {
-  background: #5cb85c;
-}
 .token:hover:after, .token:focus:after {
   background: #8e3dbd;
 }
-/* .token.selected:hover:after, .token.selected:focus:after {
-  background: #33aeb7;
-} */
 .mark-tokenset, .mark-token {
   background-color: #337ab7;
   position: absolute;

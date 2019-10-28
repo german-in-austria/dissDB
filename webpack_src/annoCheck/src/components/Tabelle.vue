@@ -34,39 +34,28 @@
         <thead>
           <tr>
             <th>#</th>
-            <th v-if="filterfelder.bearbeitungsmodus === 'auswahl'">
-              <button class="auswahl-btn" @click="selectAll()"><span :class="'glyphicon glyphicon-' + ((eintraege.data.list.length > 0 && countSelected > 0) ? (eintraege.data.list.length === countSelected ? 'check' : 'share') : 'unchecked')"></span></button>
-            </th>
             <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld" :title="feldoption.sortby || feld">
-              <span v-if="feldoption.local && !feldoption.sortby">{{ feldoption.displayName || feld }}</span>
-              <button @click="spalteSortieren(feldoption.sortby || feld)" class="sort-btn" v-else>{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === (feldoption.sortby || feld)"></span></button>
+              <button @click="spalteSortieren(feldoption.sortby || feld)" class="sort-btn">{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === (feldoption.sortby || feld)"></span></button>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(eintrag, key) in eintraege.data.list" :key="'ez' + eintrag">
             <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
-            <td v-if="filterfelder.bearbeitungsmodus === 'auswahl'">
-              <button class="auswahl-btn" @click="selectAllTokens(eintrag)"><span :class="'glyphicon glyphicon-' + (eintrag.selected && eintrag.selected.length > 0 ? (eintrag.selected.length === eintrag.tokens.length ? 'check' : 'share') : 'unchecked')"></span></button>
-            </td>
             <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">
-              <div class="tokens" v-if="feldoption.local && feld === 'sentorth_fx'"><Token @selectToken="selectToken(eintrag, aToken)" @tokenEdit="tokenEditSet(aToken, eintrag)" :token="aToken" :tokens="eintrag.tokens" :eintrag="eintrag" :eintraege="eintraege" :filterfelder="filterfelder" :fxData="fxData" v-for="aToken in eintrag.tokens" :key="'aT' + aToken.pk" /></div>
-              <template v-else>{{ feldoption.local ? fxFeld(eintrag, feld) : eintrag[feld] }}</template>
+              {{ eintrag[feld] }}
             </td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="text-right">Anfrage Dauer: {{ (ladeZeit / 1000).toFixed(2) }} Sekunden</div>
-    <TokenEdit @closed="tokenEdit = null" :token="tokenEdit[0]" :eintrag="tokenEdit[1]" :http="http" :tagsData="tagsData" :infTrans="infTrans" :filterfelder="filterfelder" @changed="debouncedReload()" v-if="tokenEdit" />
     <div class="loading" v-if="loading">Lade ...</div>
   </div>
 </template>
 
 <script>
 /* global _ Popper */
-import Token from './Token'
-import TokenEdit from './TokenEdit'
 
 export default {
   name: 'Tabelle',
@@ -84,11 +73,7 @@ export default {
       zeigeSpaltenAuswahl: false,
       popper: null,
       spaltenSortierung: { spalte: 'adhoc_sentence', asc: true },
-      rereload: false,
-      fxData: {
-        hoverToken: null
-      },
-      tokenEdit: null
+      rereload: false
     }
   },
   computed: {
@@ -122,9 +107,6 @@ export default {
     this.reload()
   },
   methods: {
-    tokenEditSet (token, eintrag) {
-      this.tokenEdit = [token, eintrag]
-    },
     selectAll (set = null) {
       if (set === null) {   // Toggle
         set = !(this.countSelected === this.eintraege.data.list.length)
@@ -196,22 +178,6 @@ export default {
         this.rereload = true
       }
     }, 100),
-    fxFeld (eintrag, feld) {
-      if (feld === 'inf') {
-        return this.infTrans.data.loaded && this.infTrans.data.infTransObj[eintrag.infid] ? this.infTrans.data.infTransObj[eintrag.infid].modelStr : eintrag.infid
-      }
-      if (feld === 'trans') {
-        return this.infTrans.data.loaded && this.infTrans.data.transcriptsObj[eintrag.transid] ? this.infTrans.data.transcriptsObj[eintrag.transid].name : eintrag.transid
-      }
-      if (feld === 'sentorth_fx') {
-        let aLine = []
-        eintrag.tokens.forEach((aToken) => {
-          aLine.push(aToken.o === null ? aToken.to : aToken.o)
-        }, this)
-        return aLine
-      }
-      return 'Unbekannt: ' + feld
-    },
     spalteSortieren (feld) {
       if (this.spaltenSortierung.spalte === feld) {
         this.spaltenSortierung.asc = !this.spaltenSortierung.asc
@@ -263,6 +229,7 @@ export default {
         }
       })
     },
+    'filterfelder.tagebene' () { this.reload() },
     'filterfelder.informant' () { this.reload() },
     'filterfelder.transkript' () { this.reload() },
     eintraegeProSeite () { this.reload() },
@@ -274,8 +241,6 @@ export default {
     }
   },
   components: {
-    Token,
-    TokenEdit
   }
 }
 </script>
