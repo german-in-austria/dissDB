@@ -340,3 +340,101 @@ def getSatzFromTokenList(aTokens):
 		''', [aTokens[0], aTokens[len(aTokens) - 1]])
 		[a_text, a_orthotext, prev_text, prev_orthotext, next_text, next_orthotext, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = cursor.fetchone()
 	return [a_text, a_orthotext, prev_text, prev_orthotext, next_text, next_orthotext, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id]
+
+
+def getAntwortenSatzUndTokens(aAntwort, adbmodels):
+	"""Ermittelt Satz bzw. Tokens einer Antwort."""
+	# Tokens
+	aTokens = []
+	aTokensText = []
+	aTokensOrtho = []
+	aAntwortType = None		# t = Token, b = Bereich (TokenSet), l = Liste (TokenSet), s = Satz (Kein Transkript)
+	if aAntwort.ist_token:
+		aTokens.append(aAntwort.ist_token_id)
+		aTokensText.append(aAntwort.ist_token.text)
+		aTokensOrtho.append(aAntwort.ist_token.ortho)
+		aAntwortType = 't'
+	if aAntwort.ist_tokenset:
+		# xStart = time.time()
+		with connection.cursor() as cursor:
+			cursor.execute('''
+				SELECT (
+					CASE
+						WHEN ts.id_von_token_id > 0 THEN
+							'b'
+						ELSE
+							'l'
+					END
+				) as tokenset_type,
+				(
+					CASE
+						WHEN ts.id_von_token_id > 0 THEN
+							(
+								SELECT
+									ARRAY_AGG(json_build_array(at.id, at.text, (CASE WHEN at.ortho IS NOT NULL THEN at.ortho ELSE at.text END)))
+								FROM (
+									SELECT t.id, t.text, t.ortho
+									FROM token t
+									LEFT JOIN LATERAL (
+										SELECT vt.token_reihung, vt."ID_Inf_id", vt.transcript_id_id
+										FROM token vt
+										WHERE
+											vt.id = ts.id_von_token_id
+										ORDER BY vt.token_reihung DESC LIMIT 1
+									) vtr ON true
+									LEFT JOIN LATERAL (
+										SELECT bt.token_reihung
+										FROM token bt
+										WHERE
+											bt.id = ts.id_bis_token_id
+										ORDER BY bt.token_reihung DESC LIMIT 1
+									) btr ON true
+									WHERE
+										t.token_reihung >= vtr.token_reihung AND
+										t.token_reihung <= btr.token_reihung AND
+										t."ID_Inf_id" = vtr."ID_Inf_id" AND
+										t.transcript_id_id = vtr.transcript_id_id
+									ORDER BY t.token_reihung ASC
+								) as at
+							)
+						ELSE
+							(
+								SELECT
+									ARRAY_AGG(json_build_array(at.id, at.text, (CASE WHEN at.ortho IS NOT NULL THEN at.ortho ELSE at.text END)))
+								FROM (
+									SELECT t.id, t.text, t.ortho
+									FROM token t
+									LEFT JOIN tokentoset tts ON tts.id_tokenset_id = ts.id
+									WHERE t.id = tts.id_token_id
+									ORDER BY t.token_reihung ASC
+								) as at
+							)
+					END
+				) as tokens
+				FROM tokenset ts
+				WHERE ts.id = %s
+			''', [aAntwort.ist_tokenset_id])
+			[aAntwortType, ts_tokens] = cursor.fetchone()
+			for aToken in ts_tokens:
+				aTokens.append(aToken[0])
+				aTokensText.append(aToken[1])
+				aTokensOrtho.append(aToken[2])
+		# print('Tokenset - Raw  ', aAntwort.ist_tokenset_id, time.time() - xStart)  # 0.015 Sek
+	[aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = [None, None, None, None, None, None, None, None, None, None, None, None, None]
+	if aTokens:
+		# Transcript
+		transName = adbmodels.transcript.objects.filter(token=aTokens[0])[0].name
+		aTransId = adbmodels.transcript.objects.filter(token=aTokens[0])[0].pk
+		# Sätze erfassen
+		[aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = getSatzFromTokenList(aTokens)
+	else:
+		transName = None
+		aTransId = None
+		aAntwortType = 's'
+		aSaetze = aAntwort.ist_Satz.Transkript if aAntwort.ist_Satz.Transkript else aAntwort.ist_Satz.Standardorth
+		aOrtho = aAntwort.ist_Satz.Standardorth if aAntwort.ist_Satz.Standardorth else aAntwort.ist_Satz.Transkript
+	return [
+		aTokens, aTokensText, aTokensOrtho, aAntwortType,
+		transName, aTransId,
+		aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id
+	]
