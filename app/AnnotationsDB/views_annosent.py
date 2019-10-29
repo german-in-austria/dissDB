@@ -154,124 +154,127 @@ def views_annosent(request):
 					ws.write(row_num, cti, aEintrag[aColTitel[cti]], font_style)
 			wb.save(response)
 			return response
-		aEintraege = [
-			{
-				'adhoc_sentence': aEintrag.adhoc_sentence,
-				'tokenids': aEintrag.tokenids,
-				'tokens': aEintrag.tokens,
-				'infid': aEintrag.infid,
-				'transid': aEintrag.transid,
-				'tokreih': aEintrag.tokreih,
-				'seqsent': aEintrag.seqsent,
-				'sentorig': aEintrag.sentorig,
-				'sentorth': aEintrag.sentorth,
-				'left_context': aEintrag.left_context,
-				'senttext': aEintrag.senttext,
-				'right_context': aEintrag.right_context,
-				'sentttlemma': aEintrag.sentttlemma,
-				'sentttpos': aEintrag.sentttpos,
-				'sentsplemma': aEintrag.sentsplemma,
-				'sentsppos': aEintrag.sentsppos,
-				'sentsptag': aEintrag.sentsptag,
-				'sentspdep': aEintrag.sentspdep,
-				'sentspenttype': aEintrag.sentspenttype
-			}
-			for aEintrag in adbmodels.mat_adhocsentences.objects.raw('''
-				SELECT "mat_adhocsentences".*,
-					(
-						SELECT array_to_json(array_agg(row_to_json(atok)))
-						FROM (
-							SELECT "token".*,
-							(
-								SELECT array_to_json(array_agg(row_to_json(aantwort)))
-									FROM (
-										SELECT "Antworten".*,
-										(
-											SELECT array_to_json(array_agg(row_to_json(aAntwortenTags)))
-												FROM (
-													SELECT "AntwortenTags".*
-													FROM "AntwortenTags"
-													WHERE "AntwortenTags"."id_Antwort_id" = "Antworten"."id"
-													ORDER BY "AntwortenTags"."id_TagEbene_id" ASC, "AntwortenTags"."Reihung" ASC
-												) AS aAntwortenTags
-										) AS AntwortenTags_raw
-										FROM "Antworten"
-										WHERE "Antworten"."ist_token_id" = "token"."id"
-									) AS aantwort
-							) AS antworten,
-							(
-								SELECT array_to_json(array_agg(row_to_json(atokenset)))
-									FROM (
-											SELECT "tokenset".*,
+		if not aMatIds:
+			aEintraege = []
+		else:
+			aEintraege = [
+				{
+					'adhoc_sentence': aEintrag.adhoc_sentence,
+					'tokenids': aEintrag.tokenids,
+					'tokens': aEintrag.tokens,
+					'infid': aEintrag.infid,
+					'transid': aEintrag.transid,
+					'tokreih': aEintrag.tokreih,
+					'seqsent': aEintrag.seqsent,
+					'sentorig': aEintrag.sentorig,
+					'sentorth': aEintrag.sentorth,
+					'left_context': aEintrag.left_context,
+					'senttext': aEintrag.senttext,
+					'right_context': aEintrag.right_context,
+					'sentttlemma': aEintrag.sentttlemma,
+					'sentttpos': aEintrag.sentttpos,
+					'sentsplemma': aEintrag.sentsplemma,
+					'sentsppos': aEintrag.sentsppos,
+					'sentsptag': aEintrag.sentsptag,
+					'sentspdep': aEintrag.sentspdep,
+					'sentspenttype': aEintrag.sentspenttype
+				}
+				for aEintrag in adbmodels.mat_adhocsentences.objects.raw('''
+					SELECT "mat_adhocsentences".*,
+						(
+							SELECT array_to_json(array_agg(row_to_json(atok)))
+							FROM (
+								SELECT "token".*,
+								(
+									SELECT array_to_json(array_agg(row_to_json(aantwort)))
+										FROM (
+											SELECT "Antworten".*,
 											(
-												SELECT array_to_json(array_agg(row_to_json(aantwort)))
+												SELECT array_to_json(array_agg(row_to_json(aAntwortenTags)))
 													FROM (
-														SELECT "Antworten".*,
-														(
-															SELECT array_to_json(array_agg(row_to_json(aAntwortenTags)))
-																FROM (
-																	SELECT "AntwortenTags".*
-																	FROM "AntwortenTags"
-																	WHERE "AntwortenTags"."id_Antwort_id" = "Antworten"."id"
-																	ORDER BY "AntwortenTags"."id_TagEbene_id" ASC, "AntwortenTags"."Reihung" ASC
-																) AS aAntwortenTags
-														) AS AntwortenTags_raw
-														FROM "Antworten"
-														WHERE "Antworten"."ist_tokenset_id" = "tokenset"."id"
-													) AS aantwort
-											) AS antworten,
-											(
-												SELECT array_to_json(array_agg(row_to_json(atokentoset_cache)))
-													FROM (
-														SELECT "tokentoset"."id_token_id"
-														FROM "tokentoset"
-														WHERE "tokentoset"."id_tokenset_id" = "tokenset"."id"
-													) AS atokentoset_cache
-											) AS tokentoset
-												FROM "tokenset"
-												LEFT OUTER JOIN "tokentoset" ON ( "tokenset"."id" = "tokentoset"."id_tokenset_id" )
-												WHERE "tokentoset"."id_token_id" = "token"."id"
-										UNION ALL
-											SELECT "tokenset".*,
-											(
-												SELECT array_to_json(array_agg(row_to_json(aantwort)))
-													FROM (
-														SELECT "Antworten".*,
-														(
-															SELECT array_to_json(array_agg(row_to_json(aAntwortenTags)))
-																FROM (
-																	SELECT "AntwortenTags".*
-																	FROM "AntwortenTags"
-																	WHERE "AntwortenTags"."id_Antwort_id" = "Antworten"."id"
-																	ORDER BY "AntwortenTags"."id_TagEbene_id" ASC, "AntwortenTags"."Reihung" ASC
-																) AS aAntwortenTags
-														) AS AntwortenTags_raw
-														FROM "Antworten"
-														WHERE "Antworten"."ist_tokenset_id" = "tokenset"."id"
-													) AS aantwort
-											) AS antworten,
-											(
-												SELECT array_to_json(array_agg(row_to_json(atokentoset_cache)))
-													FROM (
-														SELECT "tokentoset_cache"."id_token_id"
-														FROM "tokentoset_cache"
-														WHERE "tokentoset_cache"."id_tokenset_id" = "tokenset"."id"
-													) AS atokentoset_cache
-											) AS tokentoset
-												FROM "tokenset"
-												LEFT OUTER JOIN "tokentoset_cache" ON ( "tokenset"."id" = "tokentoset_cache"."id_tokenset_id" )
-												WHERE "tokentoset_cache"."id_token_id" = "token"."id"
-									) AS atokenset
-							) AS tokensets
-								FROM "token"
-								WHERE "token"."id" = ANY("mat_adhocsentences"."tokenids")
-								ORDER BY "token"."token_reihung" ASC
-						) atok
-					) AS "tokens"
-				FROM "mat_adhocsentences"
-				WHERE "mat_adhocsentences"."id" IN %s
-				ORDER BY "mat_adhocsentences"."adhoc_sentence" ASC
-			''', [tuple(aMatIds)])]
+														SELECT "AntwortenTags".*
+														FROM "AntwortenTags"
+														WHERE "AntwortenTags"."id_Antwort_id" = "Antworten"."id"
+														ORDER BY "AntwortenTags"."id_TagEbene_id" ASC, "AntwortenTags"."Reihung" ASC
+													) AS aAntwortenTags
+											) AS AntwortenTags_raw
+											FROM "Antworten"
+											WHERE "Antworten"."ist_token_id" = "token"."id"
+										) AS aantwort
+								) AS antworten,
+								(
+									SELECT array_to_json(array_agg(row_to_json(atokenset)))
+										FROM (
+												SELECT "tokenset".*,
+												(
+													SELECT array_to_json(array_agg(row_to_json(aantwort)))
+														FROM (
+															SELECT "Antworten".*,
+															(
+																SELECT array_to_json(array_agg(row_to_json(aAntwortenTags)))
+																	FROM (
+																		SELECT "AntwortenTags".*
+																		FROM "AntwortenTags"
+																		WHERE "AntwortenTags"."id_Antwort_id" = "Antworten"."id"
+																		ORDER BY "AntwortenTags"."id_TagEbene_id" ASC, "AntwortenTags"."Reihung" ASC
+																	) AS aAntwortenTags
+															) AS AntwortenTags_raw
+															FROM "Antworten"
+															WHERE "Antworten"."ist_tokenset_id" = "tokenset"."id"
+														) AS aantwort
+												) AS antworten,
+												(
+													SELECT array_to_json(array_agg(row_to_json(atokentoset_cache)))
+														FROM (
+															SELECT "tokentoset"."id_token_id"
+															FROM "tokentoset"
+															WHERE "tokentoset"."id_tokenset_id" = "tokenset"."id"
+														) AS atokentoset_cache
+												) AS tokentoset
+													FROM "tokenset"
+													LEFT OUTER JOIN "tokentoset" ON ( "tokenset"."id" = "tokentoset"."id_tokenset_id" )
+													WHERE "tokentoset"."id_token_id" = "token"."id"
+											UNION ALL
+												SELECT "tokenset".*,
+												(
+													SELECT array_to_json(array_agg(row_to_json(aantwort)))
+														FROM (
+															SELECT "Antworten".*,
+															(
+																SELECT array_to_json(array_agg(row_to_json(aAntwortenTags)))
+																	FROM (
+																		SELECT "AntwortenTags".*
+																		FROM "AntwortenTags"
+																		WHERE "AntwortenTags"."id_Antwort_id" = "Antworten"."id"
+																		ORDER BY "AntwortenTags"."id_TagEbene_id" ASC, "AntwortenTags"."Reihung" ASC
+																	) AS aAntwortenTags
+															) AS AntwortenTags_raw
+															FROM "Antworten"
+															WHERE "Antworten"."ist_tokenset_id" = "tokenset"."id"
+														) AS aantwort
+												) AS antworten,
+												(
+													SELECT array_to_json(array_agg(row_to_json(atokentoset_cache)))
+														FROM (
+															SELECT "tokentoset_cache"."id_token_id"
+															FROM "tokentoset_cache"
+															WHERE "tokentoset_cache"."id_tokenset_id" = "tokenset"."id"
+														) AS atokentoset_cache
+												) AS tokentoset
+													FROM "tokenset"
+													LEFT OUTER JOIN "tokentoset_cache" ON ( "tokenset"."id" = "tokentoset_cache"."id_tokenset_id" )
+													WHERE "tokentoset_cache"."id_token_id" = "token"."id"
+										) AS atokenset
+								) AS tokensets
+									FROM "token"
+									WHERE "token"."id" = ANY("mat_adhocsentences"."tokenids")
+									ORDER BY "token"."token_reihung" ASC
+							) atok
+						) AS "tokens"
+					FROM "mat_adhocsentences"
+					WHERE "mat_adhocsentences"."id" IN %s
+					ORDER BY "mat_adhocsentences"."adhoc_sentence" ASC
+				''', [tuple(aMatIds)])]
 		# print(connection.queries)
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')
 	return render_to_response('AnnotationsDB/annosent.html', RequestContext(request))

@@ -321,6 +321,8 @@ td {
   box-shadow: 3px 3px 5px rgba(0,0,0,0.3);
   border: 1px solid #ccc;
   padding: 15px;
+  position: relative;
+  z-index: 10;
 }
 .zsa > button {
   background: none;

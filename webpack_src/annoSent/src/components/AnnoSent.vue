@@ -37,7 +37,9 @@ export default {
         { name: 'sentorig', value: '', kannmuss: 'kann', methode: 'ci' },
         { name: 'sentorth', value: '', kannmuss: 'kann', methode: 'ci' },
         { name: 'sentttpos', value: '', kannmuss: 'kann', methode: 'ci' },
-        { name: 'sentsptag', value: '', kannmuss: 'kann', methode: 'ci' }
+        { name: 'sentsptag', value: '', kannmuss: 'kann', methode: 'ci' },
+        { name: 'sentsplemma', value: '', kannmuss: 'kann', methode: 'ci' },
+        { name: 'sentttlemma', value: '', kannmuss: 'kann', methode: 'ci' }
       ],
       filterfelder: {
         informant: 0,

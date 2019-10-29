@@ -16,10 +16,10 @@
                   <option value="nicht">nicht</option>
                 </select>
               </div>
-              <div style="width:144px;">
+              <div style="width:149px;">
                 <select class="form-control" v-model="suchfeld.methode" :id="'methode-' + suchfeld.name" style="border-radius:0 4px 4px 0;">
-                  <option value="ci">case-insensetiv</option>
-                  <option value="cs">case-sensetiv</option>
+                  <option value="ci">case-insensetive</option>
+                  <option value="cs">case-sensetive</option>
                   <option value="iregex">iRegEx</option>
                   <option value="regex">RegEx</option>
                 </select>
