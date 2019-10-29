@@ -6,6 +6,7 @@ import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import json
 from DB.funktionenDB import httpOutput
+from .funktionenAnno import getAntwortenSatzUndTokens
 
 
 def views_annocheck(request):
@@ -59,12 +60,12 @@ def views_annocheck(request):
 		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), 0, int(aFilter['inf']))
 		aTranskripte = [{'pk': 0, 'name': 'Alle', 'count': aAntwortenElementF.distinct().count() if aShowCount else -1}]
 		aTranskripte.append({'pk': -1, 'name': 'Keine Transkripte', 'count': aAntwortenElementF.filter(
-			Q(ist_token__gt=0) |
-			Q(ist_tokenset__gt=0)
-		).distinct().count() if aShowCount else -1})
-		aTranskripte.append({'pk': -2, 'name': 'Nur Transkripte', 'count': aAntwortenElementF.filter(
 			ist_token=None,
 			ist_tokenset=None
+		).distinct().count() if aShowCount else -1})
+		aTranskripte.append({'pk': -2, 'name': 'Nur Transkripte', 'count': aAntwortenElementF.filter(
+			Q(ist_token__gt=0) |
+			Q(ist_tokenset__gt=0)
 		).distinct().count() if aShowCount else -1})
 		for aTrans in adbmodels.transcript.objects.all():
 			aTranskripte.append({'pk': aTrans.pk, 'name': aTrans.name, 'count': aAntwortenElementF.filter(
@@ -90,14 +91,28 @@ def views_annocheck(request):
 		# Einträge laden
 		aEintraege = []
 		for aEintrag in aElemente[aSeite * aEps:aSeite * aEps + aEps]:
+			[
+				aTokens, aTokensText, aTokensOrtho, aAntwortType,
+				transName, aTransId,
+				aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id
+			] = getAntwortenSatzUndTokens(aEintrag, adbmodels)
 			aEintraege.append({
 				'id': aEintrag.id,
+				'antType': aAntwortType,
 				'Reihung': aEintrag.Reihung,
+				'Transkript': transName,
+				'tId': aTransId,
 				'zu_Aufgabe_id': aEintrag.zu_Aufgabe_id,
 				'aufBe': aEintrag.zu_Aufgabe.Beschreibung_Aufgabe if aEintrag.zu_Aufgabe_id else None,
 				'aufVar': aEintrag.zu_Aufgabe.Variante if aEintrag.zu_Aufgabe_id else None,
 				'aInf': aEintrag.von_Inf.Kuerzel,
-				'von_Inf_id': aEintrag.von_Inf_id
+				'von_Inf_id': aEintrag.von_Inf_id,
+				'aTokensText': ' '.join(str(x) for x in aTokensText),
+				'aTokens': ', '.join(str(x) for x in aTokens),
+				'aOrtho': aOrtho,
+				'aSaetze': aSaetze,
+				'vSatz': vSatz,
+				'nSatz': nSatz
 			})
 		# Einträge ausgeben
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')
@@ -111,10 +126,10 @@ def filternSuchen(aElemente, fEbene, fTrans, fInf):
 	if fEbene > 0:
 		aSucheMuss.append(Q(antwortentags__id_TagEbene_id=fEbene))
 	if fTrans == -1:
-		aSucheMuss.append(Q(ist_token__gt=0) | Q(ist_tokenset__gt=0))
-	elif fTrans == -2:
 		aSucheMuss.append(Q(ist_token=None))
 		aSucheMuss.append(Q(ist_tokenset=None))
+	elif fTrans == -2:
+		aSucheMuss.append(Q(ist_token__gt=0) | Q(ist_tokenset__gt=0))
 	elif fTrans > 0:
 		aSucheMuss.append(Q(ist_token__gt=0) | Q(ist_tokenset__gt=0))
 		aSucheMuss.append(

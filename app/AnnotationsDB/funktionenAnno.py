@@ -431,8 +431,12 @@ def getAntwortenSatzUndTokens(aAntwort, adbmodels):
 		transName = None
 		aTransId = None
 		aAntwortType = 's'
-		aSaetze = aAntwort.ist_Satz.Transkript if aAntwort.ist_Satz.Transkript else aAntwort.ist_Satz.Standardorth
-		aOrtho = aAntwort.ist_Satz.Standardorth if aAntwort.ist_Satz.Standardorth else aAntwort.ist_Satz.Transkript
+		if aAntwort.ist_Satz:
+			aSaetze = aAntwort.ist_Satz.Transkript if aAntwort.ist_Satz.Transkript else aAntwort.ist_Satz.Standardorth
+			aOrtho = aAntwort.ist_Satz.Standardorth if aAntwort.ist_Satz.Standardorth else aAntwort.ist_Satz.Transkript
+		else:
+			aSaetze = 'Fehler! Kein Satz übergeben!'
+			aOrtho = 'Fehler! Kein Satz übergeben!'
 	return [
 		aTokens, aTokensText, aTokensOrtho, aAntwortType,
 		transName, aTransId,

@@ -20,7 +20,7 @@
         <div class="form-group">
           <label for="annocheck-tabelle-eps">Einträge pro Seite</label>
           <select class="form-control" v-model="eintraegeProSeite" id="annocheck-tabelle-eps">
-            <option :value="anz" v-for="anz in [10, 25, 50, 100, 250]" :key="'eps' + anz">{{ anz }}</option>
+            <option :value="anz" v-for="anz in [10, 15, 25, 50, 100, 250]" :key="'eps' + anz">{{ anz }}</option>
           </select>
         </div>
         <button @click="zeigeSpaltenAuswahl = !zeigeSpaltenAuswahl" @blur="spaltenAuswahlBlur" ref="zeigeSpaltenAuswahlBtn" class="btn btn-default" type="button" title="Ansicht"><span class="glyphicon glyphicon-eye-open"></span></button>
@@ -66,7 +66,7 @@ export default {
       seite: 1,
       lSeite: 0,
       zaehler: 0,
-      eintraegeProSeite: 50,
+      eintraegeProSeite: 15,
       ladeZeit: 0.0,
       ladeZeitStart: 0.0,
       loading: false,
