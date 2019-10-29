@@ -121,7 +121,7 @@ def views_annocheck(request):
 				'zu_Aufgabe_id': aEintrag.zu_Aufgabe_id,
 				'aufBe': aEintrag.zu_Aufgabe.Beschreibung_Aufgabe if aEintrag.zu_Aufgabe_id else None,
 				'aufVar': aEintrag.zu_Aufgabe.Variante if aEintrag.zu_Aufgabe_id else None,
-				'aInf': aEintrag.von_Inf.Kuerzel,
+				'aInf': aEintrag.von_Inf.Kuerzel_anonym,
 				'von_Inf_id': aEintrag.von_Inf_id,
 				'aTokensText': ' '.join(str(x) for x in aTokensText),
 				'aTokens': ', '.join(str(x) for x in aTokens),
@@ -130,6 +130,8 @@ def views_annocheck(request):
 				'vSatz': vSatz,
 				'nSatz': nSatz,
 				'Tagebenen': aAntTags,
+				'ist_token_id': aEintrag.ist_token_id,
+				'ist_tokenset_id': aEintrag.ist_tokenset_id,
 				'antwortentags_raw': [{
 					"id": aAT.id,
 					"id_Antwort_id": aAT.id_Antwort_id,

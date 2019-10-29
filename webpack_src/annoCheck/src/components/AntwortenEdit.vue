@@ -20,11 +20,29 @@
             v-for="sToken in tokenSatz"
             :key="'st' + sToken.id"
             :title="'ID: ' + sToken.id"
-            :class="'s-tok s-tok-tt' + sToken.token_type_id_id + (sToken.id === token.id ? ' s-tok-act' : '')"
+            :class="'s-tok s-tok-tt' + sToken.token_type_id_id + (sToken.id === eintrag.ist_token_id ? ' s-tok-act' : '')"
           >{{
               ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
               (sToken.ortho === null ? (!sToken.text_in_ortho ? sToken.text : sToken.text_in_ortho) : sToken.ortho)
            }}</span>
+        </div>
+      </template>
+      <template v-else-if="tokenSetsSatz && tokenSetsSatz.length > 0">
+        <div class="satzview">
+          <span
+            v-for="sToken in tokenSetsSatz"
+            :key="'st' + sToken.id"
+            :title="'ID: ' + sToken.id"
+            :class="'s-tok s-tok-tt' + sToken.token_type_id_id + (sToken.tb === 1 ? ' s-tok-act' : '')"
+          >{{
+              ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
+              (sToken.ortho === null ? (!sToken.text_in_ortho ? sToken.text : sToken.text_in_ortho) : sToken.ortho)
+          }}</span>
+        </div>
+      </template>
+      <template v-else-if="eintrag.aOrtho">
+        <div class="satzview">
+          {{ eintrag.aOrtho }}
         </div>
       </template>
       <template v-if="tagsData.data.ready && eintrag && !eintrag.deleteIt">
@@ -57,13 +75,14 @@ export default {
       changed: false,
       locked: false,
       loading: false,
-      tokenSatz: []
+      tokenSatz: [],
+      tokenSetsSatz: []
     }
   },
   mounted () {
     console.log(this.eintrag, this.filterfelder)
-    // this.getTokenSatz()
-    // this.getTokenSetsSatz()
+    this.getTokenSatz()
+    this.getTokenSetsSatz()
   },
   beforeDestroy () {
     if (this.changed) {
@@ -71,46 +90,41 @@ export default {
     }
   },
   methods: {
-    // getTokenSetsSatz () {
-    //   if (this.token.tokensets && this.token.tokensets.length > 0) {
-    //     let aTokenSetsIds = []
-    //     this.token.tokensets.forEach((ts) => {
-    //       aTokenSetsIds.push(ts.id)
-    //     }, this)
-    //     this.http.post('', {
-    //       getTokenSetsSatz: true,
-    //       tokenSetsIds: aTokenSetsIds
-    //     }).then((response) => {
-    //       console.log(response.data)
-    //       this.token.tokensets.forEach((ts) => {
-    //         if (response.data.aTokenSetSatz[ts.id]) {
-    //           this.$set(ts, 'satz', response.data.aTokenSetSatz[ts.id])
-    //           ts.satz.sort((a, b) => (a.token_reihung > b.token_reihung) ? 1 : ((b.token_reihung > a.token_reihung) ? -1 : 0))
-    //         }
-    //       }, this)
-    //     }).catch((err) => {
-    //       console.log(err)
-    //       alert('Fehler!')
-    //     })
-    //   }
-    // },
-    // getTokenSatz () {
-    //   this.http.post('', {
-    //     getTokenSatz: true,
-    //     tokenId: this.token.id
-    //   }).then((response) => {
-    //     console.log(response.data)
-    //     this.tokenSatz = response.data.aTokenSatz
-    //     this.tokenSatz.sort((a, b) => (a.token_reihung > b.token_reihung) ? 1 : ((b.token_reihung > a.token_reihung) ? -1 : 0))
-    //   }).catch((err) => {
-    //     console.log(err)
-    //     alert('Fehler!')
-    //   })
-    // },
+    getTokenSetsSatz () {
+      if (this.eintrag.ist_tokenset_id > 0) {
+        let aTokenSetsIds = [this.eintrag.ist_tokenset_id]
+        this.http.post('', {
+          getTokenSetsSatz: true,
+          tokenSetsIds: aTokenSetsIds
+        }).then((response) => {
+          console.log('getTokenSetsSatz', response.data)
+          this.tokenSetsSatz = response.data.aTokenSetSatz[Object.keys(response.data.aTokenSetSatz)[0]]
+          this.tokenSetsSatz.sort((a, b) => (a.token_reihung > b.token_reihung) ? 1 : ((b.token_reihung > a.token_reihung) ? -1 : 0))
+        }).catch((err) => {
+          console.log(err)
+          alert('Fehler!')
+        })
+      }
+    },
+    getTokenSatz () {
+      if (this.eintrag.ist_token_id > 0) {
+        this.http.post('', {
+          getTokenSatz: true,
+          tokenId: this.eintrag.ist_token_id
+        }).then((response) => {
+          console.log('getTokenSatz', response.data)
+          this.tokenSatz = response.data.aTokenSatz
+          this.tokenSatz.sort((a, b) => (a.token_reihung > b.token_reihung) ? 1 : ((b.token_reihung > a.token_reihung) ? -1 : 0))
+        }).catch((err) => {
+          console.log(err)
+          alert('Fehler!')
+        })
+      }
+    },
     saveTokenData () {
       // Änderungen speichern.
-      // this.loading = true
-      // this.locked = true
+      this.loading = true
+      this.locked = true
       let sAntworten = []
       // Antworten mit Tags für Speicherung sammeln
       if (this.eintrag) {
@@ -126,33 +140,34 @@ export default {
         delete sAntwort.Reihung
         delete sAntwort.Transkript
         delete sAntwort.tId
-        delete sAntwort.von_Inf_id
         delete sAntwort.zu_Aufgabe_id
         delete sAntwort.aufVar
         delete sAntwort.aufBe
         delete sAntwort.antType
         delete sAntwort.aInf
+        delete sAntwort.ist_token_id
+        delete sAntwort.ist_tokenset_id
         sAntwort.tags = this.getFlatTags(sAntwort.tags)
         sAntworten.push(sAntwort)
       }
       console.log('sAntworten', sAntworten)
       // Speichern
-      // this.http.post('', {
-      //   saveAntworten: true,
-      //   antworten: JSON.stringify(sAntworten)
-      // }).then((response) => {
-      //   console.log(response.data)
-      //   this.loading = false
-      //   this.locked = false
-      //   this.$nextTick(() => {
-      //     this.$refs.modal.close()
-      //   })
-      // }).catch((err) => {
-      //   console.log(err)
-      //   alert('Fehler!')
-      //   this.loading = false
-      //   this.locked = false
-      // })
+      this.http.post('', {
+        saveAntworten: true,
+        antworten: JSON.stringify(sAntworten)
+      }).then((response) => {
+        console.log(response.data)
+        this.loading = false
+        this.locked = false
+        this.$nextTick(() => {
+          this.$refs.modal.close()
+        })
+      }).catch((err) => {
+        console.log(err)
+        alert('Fehler!')
+        this.loading = false
+        this.locked = false
+      })
     },
     tagChange () {
       this.changed = true
