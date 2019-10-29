@@ -27,6 +27,7 @@
         <div class="zsa" v-if="zeigeSpaltenAuswahl" ref="zeigeSpaltenAuswahl">
           <button v-for="(feldoption, feld) in tabellenfelder" :key="'vthtf' + feld" @blur="spaltenAuswahlBlur" ref="zeigeSpaltenAuswahlBtns" @click="feldoption.show = !feldoption.show" :class="feldoption.show ? 'zsa-show' : ''"><span :class="'glyphicon glyphicon-eye-' + (feldoption.show ? 'open' : 'close')"></span> {{ feld }}</button>
         </div>
+        <button @click="maxColWidth = !maxColWidth" class="btn btn-default" type="button" title="Maximale Spaltenbreite"><span :class="'glyphicon ' + (maxColWidth ? 'glyphicon-text-height' : 'glyphicon-text-width')"></span></button>
       </div>
     </div>
     <div class="table-responsive">
@@ -50,12 +51,12 @@
             v-for="(eintrag, key) in eintraege.data.list"
             :key="'ez' + eintrag"
             @click="editAntwort(eintrag)"
-            class="edit-antwort"
+            :class="'edit-antwort' + (maxColWidth ? ' max-col-width' : '')"
           >
             <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
             <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">
               <span v-html="fxFeld(eintrag, feld)" v-if="feldoption.local"/>
-              <template v-else>{{ eintrag[feld] }}</template>
+              <div v-else>{{ eintrag[feld] }}</div>
             </td>
           </tr>
         </tbody>
@@ -95,7 +96,8 @@ export default {
       spaltenSortierung: { spalte: 'Reihung', asc: true },
       rereload: false,
       showAllTagEbenen: true,
-      antwortenEdit: null
+      antwortenEdit: null,
+      maxColWidth: true
     }
   },
   computed: {
@@ -350,5 +352,10 @@ td {
 }
 .edit-antwort {
   cursor: pointer;
+}
+.edit-antwort.max-col-width > td > div {
+  white-space: normal;
+  max-width: 500px;
+  width: max-content;
 }
 </style>
