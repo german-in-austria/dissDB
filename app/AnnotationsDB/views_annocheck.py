@@ -129,7 +129,15 @@ def views_annocheck(request):
 				'aSaetze': aSaetze,
 				'vSatz': vSatz,
 				'nSatz': nSatz,
-				'Tagebenen': aAntTags
+				'Tagebenen': aAntTags,
+				'antwortentags_raw': [{
+					"id": aAT.id,
+					"id_Antwort_id": aAT.id_Antwort_id,
+					"id_Tag_id": aAT.id_Tag_id,
+					"id_TagEbene_id": aAT.id_TagEbene_id,
+					"primaer": aAT.primaer,
+					"Reihung": aAT.Reihung
+				} for aAT in dbmodels.AntwortenTags.objects.filter(id_Antwort_id=aEintrag.id).order_by('id_TagEbene_id', 'Reihung')]
 			})
 		# Einträge ausgeben
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')

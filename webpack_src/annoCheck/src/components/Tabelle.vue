@@ -46,7 +46,12 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(eintrag, key) in eintraege.data.list" :key="'ez' + eintrag">
+          <tr
+            v-for="(eintrag, key) in eintraege.data.list"
+            :key="'ez' + eintrag"
+            @click="editAntwort(eintrag)"
+            class="edit-antwort"
+          >
             <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
             <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">
               <span v-html="fxFeld(eintrag, feld)" v-if="feldoption.local"/>
@@ -63,12 +68,14 @@
       <i><b>Tr.</b> = Transkript</i><br>
       <i><b>aT</b> = Antworten Type:</i>&nbsp; <b>s</b> = Satz, <b>t</b> = Token, <b>b</b> = Tokenset Bereich, <b>l</b> = Tokenset Liste<br>
     </div>
+    <AntwortenEdit @closed="antwortenEdit = null" :eintrag="antwortenEdit" :http="http" :tagsData="tagsData" :infTrans="infTrans" :filterfelder="filterfelder" @changed="debouncedReload()" v-if="antwortenEdit" />
     <div class="loading" v-if="loading">Lade ...</div>
   </div>
 </template>
 
 <script>
 /* global _ Popper */
+import AntwortenEdit from './AntwortenEdit'
 
 export default {
   name: 'Tabelle',
@@ -87,7 +94,8 @@ export default {
       popper: null,
       spaltenSortierung: { spalte: 'Reihung', asc: true },
       rereload: false,
-      showAllTagEbenen: true
+      showAllTagEbenen: true,
+      antwortenEdit: null
     }
   },
   computed: {
@@ -121,6 +129,10 @@ export default {
     this.reload()
   },
   methods: {
+    editAntwort (eintrag) {
+      console.log('editAntwort', eintrag.id, eintrag)
+      this.antwortenEdit = eintrag
+    },
     fxFeld (eintrag, feld) {
       if (feld === 'Tagebenen') {
         let out = ''
@@ -267,6 +279,7 @@ export default {
     }
   },
   components: {
+    AntwortenEdit
   }
 }
 </script>
@@ -334,5 +347,8 @@ td {
 .tokens {
   position: relative;
   z-index: 1;
+}
+.edit-antwort {
+  cursor: pointer;
 }
 </style>
