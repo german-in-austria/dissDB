@@ -37,13 +37,13 @@ export default {
         tagebene: 0
       },
       tabellenfelder: {
-        'Reihung': { show: true },
-        'Transkript': { show: true },
+        'Reihung': { show: true, displayName: 'R' },
+        'Transkript': { show: true, displayName: 'Tr.' },
         'tId': { show: false },
-        'aInf': { show: true, displayName: 'Informant', dontSort: true },
+        'aInf': { show: true, displayName: 'Inf.', dontSort: true },
         'von_Inf_id': { show: false, displayName: 'iId' },
         'id': { show: true, displayName: 'antId' },
-        'antType': { show: true, dontSort: true },
+        'antType': { show: true, displayName: 'aT', dontSort: true },
         'zu_Aufgabe_id': { show: false, displayName: 'aufId' },
         'aufBe': { show: true, dontSort: true },
         'aufVar': { show: true, dontSort: true },
@@ -53,7 +53,7 @@ export default {
         'aOrtho': { show: true, displayName: 'Sätze in Ortho', dontSort: true },
         'aTokensText': { show: true, displayName: 'Ausgewählte Tokens', dontSort: true },
         'aTokens': { show: false, displayName: 'Ausgewählte Tokens (Id)', dontSort: true },
-        'Tagebenen': { show: true, displayName: 'Tagebenen', dontSort: true }
+        'Tagebenen': { show: true, displayName: 'Tagebenen', local: true, dontSort: true }
       },
       tagsData: { data: new tagsystem.TagsystemObject.TagsystemBase(this.$http) },
       infTrans: { data: { infTransList: [], infTransObj: {}, transcriptsList: [], transcriptsObj: {}, loaded: false } },

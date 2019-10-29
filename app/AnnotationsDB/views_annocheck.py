@@ -1,10 +1,12 @@
 """Anno-Check Tool."""
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.db.models import Count
 from django.db.models import Q
 import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import json
+# import time
 from DB.funktionenDB import httpOutput
 from .funktionenAnno import getAntwortenSatzUndTokens
 
@@ -82,6 +84,8 @@ def views_annocheck(request):
 		aEps = int(request.POST.get('eps')) if request.POST.get('eps') else 0
 		aFilter = json.loads(request.POST.get('filter'))
 		# aSuche = json.loads(request.POST.get('suche')) if request.POST.get('suche') else []
+		# Tagnamen cachen
+		nTags = {x.pk: x.Tag for x in dbmodels.Tags.objects.all()}
 		aSortierung = json.loads(request.POST.get('sortierung')) if request.POST.get('sortierung') else []
 		aElemente = dbmodels.Antworten.objects.distinct().all()
 		# Suchen / Filtern
@@ -91,11 +95,23 @@ def views_annocheck(request):
 		# Einträge laden
 		aEintraege = []
 		for aEintrag in aElemente[aSeite * aEps:aSeite * aEps + aEps]:
+			# Satz/Tokens ermitteln
 			[
 				aTokens, aTokensText, aTokensOrtho, aAntwortType,
 				transName, aTransId,
 				aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id
 			] = getAntwortenSatzUndTokens(aEintrag, adbmodels)
+			# Tagebenen und Tags ermitteln
+			# tetstart = time.time()
+			aAntTags = []
+			for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=aEintrag.pk).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
+				aEbene = dbmodels.TagEbene.objects.get(id=xval['id_TagEbene'])
+				aAntTags.append({
+					'eId': aEbene.id,
+					'e': str(aEbene),
+					't': ', '.join([nTags[x['id_Tag_id']] for x in dbmodels.AntwortenTags.objects.filter(id_Antwort=aEintrag.pk, id_TagEbene=xval['id_TagEbene']).values('id_Tag_id').order_by('Reihung')])
+				})
+			# print('Tag Ebene mit Tags', time.time() - tetstart)  # 0.00 Sek
 			aEintraege.append({
 				'id': aEintrag.id,
 				'antType': aAntwortType,
@@ -112,7 +128,8 @@ def views_annocheck(request):
 				'aOrtho': aOrtho,
 				'aSaetze': aSaetze,
 				'vSatz': vSatz,
-				'nSatz': nSatz
+				'nSatz': nSatz,
+				'Tagebenen': aAntTags
 			})
 		# Einträge ausgeben
 		return httpOutput(json.dumps({'OK': True, 'seite': aSeite, 'eps': aEps, 'eintraege': aEintraege, 'zaehler': aElemente.count()}), 'application/json')

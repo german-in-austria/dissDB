@@ -60,11 +60,11 @@
               <input type="checkbox" v-model="showCount"> Anzahl anzeigen
             </label>
           </div>
-          <div class="checkbox">
+          <!-- <div class="checkbox">
             <label class="ml10">
               <input type="checkbox" v-model="showCountTrans" :disabled="!showCount"> Transkript
             </label>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>

@@ -37,6 +37,9 @@
             <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld" :title="feldoption.sortby || feld">
               <button @click="spalteSortieren(feldoption.sortby || feld)" class="sort-btn" v-if="!feldoption.dontSort">{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === (feldoption.sortby || feld)"></span></button>
               <template v-else>{{ feldoption.displayName || feld }}</template>
+              <template v-if="feldoption.local && feld === 'Tagebenen'">
+                <label class="ml10"><input type="checkbox" v-model="showAllTagEbenen">Alle Ebenen anzeigen.</label>
+              </template>
             </th>
           </tr>
         </thead>
@@ -44,13 +47,19 @@
           <tr v-for="(eintrag, key) in eintraege.data.list" :key="'ez' + eintrag">
             <th scope="row">{{ lSeite * eintraegeProSeite + key + 1 }}</th>
             <td v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'ez' + eintrag + 'thtf' + feld">
-              {{ eintrag[feld] }}
+              <span v-html="fxFeld(eintrag, feld)" v-if="feldoption.local"/>
+              <template v-else>{{ eintrag[feld] }}</template>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="text-right">Anfrage Dauer: {{ (ladeZeit / 1000).toFixed(2) }} Sekunden</div>
+    <div>
+      <i><b>R</b> = Reihung</i><br>
+      <i><b>Tr.</b> = Transkript</i><br>
+      <i><b>aT</b> = Antworten Type:</i>&nbsp; <b>s</b> = Satz, <b>t</b> = Token, <b>b</b> = Tokenset Bereich, <b>l</b> = Tokenset Liste<br>
+    </div>
     <div class="loading" v-if="loading">Lade ...</div>
   </div>
 </template>
@@ -74,7 +83,8 @@ export default {
       zeigeSpaltenAuswahl: false,
       popper: null,
       spaltenSortierung: { spalte: 'Reihung', asc: true },
-      rereload: false
+      rereload: false,
+      showAllTagEbenen: true
     }
   },
   computed: {
@@ -108,6 +118,18 @@ export default {
     this.reload()
   },
   methods: {
+    fxFeld (eintrag, feld) {
+      if (feld === 'Tagebenen') {
+        let out = ''
+        eintrag[feld].forEach(aEbene => {
+          if (this.showAllTagEbenen || this.filterfelder.tagebene < 1 || this.filterfelder.tagebene === aEbene.eId) {
+            out += '<b>' + aEbene.e + ':</b> ' + aEbene.t + '<br>'
+          }
+        })
+        return out
+      }
+      return 'Unbekannt: ' + feld
+    },
     selectAll (set = null) {
       if (set === null) {   // Toggle
         set = !(this.countSelected === this.eintraege.data.list.length)
