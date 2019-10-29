@@ -35,11 +35,13 @@
           <tr>
             <th>#</th>
             <th v-for="(feldoption, feld) in sichtbareTabellenfelder" :key="'thtf' + feld" :title="feldoption.sortby || feld">
-              <button @click="spalteSortieren(feldoption.sortby || feld)" class="sort-btn" v-if="!feldoption.dontSort">{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === (feldoption.sortby || feld)"></span></button>
-              <template v-else>{{ feldoption.displayName || feld }}</template>
               <template v-if="feldoption.local && feld === 'Tagebenen'">
-                <label class="ml10"><input type="checkbox" v-model="showAllTagEbenen">Alle Ebenen anzeigen.</label>
+                <span v-if="!showAllTagEbenen && filterfelder.tagebene > 0 && filterfelder.tagebenenName">Tagebene: {{ filterfelder.tagebenenName }}</span>
+                <span v-else>Tagebenen</span>
+                <label class="ml10" style="margin-bottom:0"><input type="checkbox" v-model="showAllTagEbenen">Alle Ebenen.</label>
               </template>
+              <button @click="spalteSortieren(feldoption.sortby || feld)" class="sort-btn" v-else-if="!feldoption.dontSort">{{ feldoption.displayName || feld }} <span :class="'glyphicon glyphicon-sort-by-attributes' + (spaltenSortierung.asc ? '' : '-alt')" v-if="spaltenSortierung.spalte === (feldoption.sortby || feld)"></span></button>
+              <template v-else>{{ feldoption.displayName || feld }}</template>
             </th>
           </tr>
         </thead>
@@ -57,6 +59,7 @@
     <div class="text-right">Anfrage Dauer: {{ (ladeZeit / 1000).toFixed(2) }} Sekunden</div>
     <div>
       <i><b>R</b> = Reihung</i><br>
+      <i><b>aId</b> = Antworten Id</i><br>
       <i><b>Tr.</b> = Transkript</i><br>
       <i><b>aT</b> = Antworten Type:</i>&nbsp; <b>s</b> = Satz, <b>t</b> = Token, <b>b</b> = Tokenset Bereich, <b>l</b> = Tokenset Liste<br>
     </div>
@@ -123,7 +126,7 @@ export default {
         let out = ''
         eintrag[feld].forEach(aEbene => {
           if (this.showAllTagEbenen || this.filterfelder.tagebene < 1 || this.filterfelder.tagebene === aEbene.eId) {
-            out += '<b>' + aEbene.e + ':</b> ' + aEbene.t + '<br>'
+            out += (this.showAllTagEbenen || this.filterfelder.tagebene < 1 ? '<b>' + aEbene.e + ':</b> ' : '') + aEbene.t + '<br>'
           }
         })
         return out

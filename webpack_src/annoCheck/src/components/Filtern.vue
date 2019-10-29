@@ -83,6 +83,7 @@ export default {
       mvDurchschnitt: 0.0,
       mvLastUpdate: 'Unbekannt ...',
       tagebenenListe: [],
+      tagebenenObj: {},
       informantenListe: [],
       transcriptsListe: [],
       showCount: true,
@@ -106,6 +107,9 @@ export default {
         filter: JSON.stringify({ ebene: this.filterfelder.tagebene, inf: this.filterfelder.informant, trans: this.filterfelder.transkript })
       }).then((response) => {
         this.tagebenenListe = response.data['tagEbenen']
+        this.tagebenenListe.forEach(aTagebene => {
+          this.tagebenenObj[aTagebene.pk] = aTagebene
+        })
         this.informantenListe = response.data['informanten']
         this.transcriptsListe = response.data['transcripts']
         console.log('getFilterData', response.data)
@@ -118,7 +122,11 @@ export default {
     }
   },
   watch: {
-    'filterfelder.tagebene' () { this.getFilterData() },
+    'filterfelder.tagebene' () {
+      console.log(this.tagebenenListe)
+      this.filterfelder.tagebenenName = this.filterfelder.tagebene > 0 ? this.tagebenenObj[this.filterfelder.tagebene].title : null
+      this.getFilterData()
+    },
     'filterfelder.informant' () { this.getFilterData() },
     'filterfelder.transkript' () { this.getFilterData() },
     showCount () { this.getFilterData() },
