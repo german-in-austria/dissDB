@@ -1,70 +1,89 @@
 <template>
   <div class="annocheck-filtern form-horizontal">
-    <div class="form-group">
-      <label for="tagebene" class="col-sm-4 control-label">Tag Ebene</label>
-      <div class="col-sm-8">
-        <select class="form-control" v-model="filterfelder.tagebene" id="tagebene">
-          <option :value="tagebene.pk"
-            v-for="tagebene in tagebenenListe"
-            :key="'te' + tagebene.pk"
-            :disabled="tagebene.count == 0"
-          >{{ tagebene.title }}{{ tagebene.count > -1 ? ' - ' + tagebene.count.toLocaleString() : '' }}</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="informant" class="col-sm-4 control-label">Informant</label>
-      <div class="col-sm-8">
-        <select class="form-control" v-model="filterfelder.informant" id="informant">
-          <option :value="informant.pk"
-            v-for="informant in informantenListe"
-            :key="'inf' + informant.pk"
-            :disabled="informant.count == 0"
-          >{{informant.kuerzelAnonym}}{{ informant.count > -1 ? ' - ' + informant.count.toLocaleString() : '' }}</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="transkript" class="col-sm-4 control-label">Transkript</label>
-      <div class="col-sm-8">
-        <select class="form-control" v-model="filterfelder.transkript" id="transkript">
-          <option :value="transcript.pk"
-            v-for="transcript in transcriptsListe"
-            :key="'ts' + transcript.pk"
-            :disabled="transcript.count == 0"
-          >{{transcript.name}}{{ transcript.count > -1 ? ' - ' + transcript.count.toLocaleString() : '' }}</option>
-        </select>
-      </div>
-    </div>
-    <!-- <div class="form-group">
-      <label for="aufgabensets" class="col-sm-4 control-label">Aufgabensets</label>
-      <div class="col-sm-8">
-        <select class="form-control" id="aufgabensets">
-          <option value="0">Alle</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="aufgaben" class="col-sm-4 control-label">Aufgaben</label>
-      <div class="col-sm-8">
-        <select class="form-control" id="aufgaben">
-          <option value="0">Alle</option>
-        </select>
-      </div>
-    </div> -->
-    <div class="form-group">
-      <div class="col-sm-offset-4 col-sm-8">
-        <div class="form-inline">
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" v-model="showCount"> Anzahl anzeigen
-            </label>
+    <div class="row">
+      <div class="col col-md-6">
+        <div class="form-group">
+          <label for="tagebene" class="col-sm-4 control-label">Tag Ebene</label>
+          <div class="col-sm-8">
+            <select class="form-control" v-model="filterfelder.tagebene" id="tagebene">
+              <option :value="tagebene.pk"
+                v-for="tagebene in tagebenenListe"
+                :key="'te' + tagebene.pk"
+                :disabled="tagebene.count == 0"
+              >{{ tagebene.title }}{{ tagebene.count > -1 ? ' - ' + tagebene.count.toLocaleString() : '' }}</option>
+            </select>
           </div>
-          <!-- <div class="checkbox">
-            <label class="ml10">
-              <input type="checkbox" v-model="showCountTrans" :disabled="!showCount"> Transkript
-            </label>
-          </div> -->
+        </div>
+        <div class="form-group">
+          <label for="tag" class="col-sm-4 control-label">Tag</label>
+          <div class="col-sm-8">
+            <select class="form-control" v-model="filterfelder.tag" id="tag" :disabled="tagsData.data.loading || tagsData.data.loadingTags">
+              <option value="0">{{ (tagsData.data.loading || tagsData.data.loadingTags ? 'Lade Tags ...' : 'Alle') }}</option>
+              <option :value="tag.pk"
+                v-for="(tag, tKey) in tagListe"
+                :key="'t' + tKey + '-' + tag.pk"
+              >{{ tag.title }}</option>
+            </select>
+            <!-- {{ tagListe }} -->
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="informant" class="col-sm-4 control-label">Informant</label>
+          <div class="col-sm-8">
+            <select class="form-control" v-model="filterfelder.informant" id="informant">
+              <option :value="informant.pk"
+                v-for="informant in informantenListe"
+                :key="'inf' + informant.pk"
+                :disabled="informant.count == 0"
+              >{{informant.kuerzelAnonym}}{{ informant.count > -1 ? ' - ' + informant.count.toLocaleString() : '' }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="col col-md-6">
+        <div class="form-group">
+          <label for="transkript" class="col-sm-4 control-label">Transkript</label>
+          <div class="col-sm-8">
+            <select class="form-control" v-model="filterfelder.transkript" id="transkript">
+              <option :value="transcript.pk"
+                v-for="transcript in transcriptsListe"
+                :key="'ts' + transcript.pk"
+                :disabled="transcript.count == 0"
+              >{{transcript.name}}{{ transcript.count > -1 ? ' - ' + transcript.count.toLocaleString() : '' }}</option>
+            </select>
+          </div>
+        </div>
+        <!-- <div class="form-group">
+          <label for="aufgabensets" class="col-sm-4 control-label">Aufgabensets</label>
+          <div class="col-sm-8">
+            <select class="form-control" id="aufgabensets">
+              <option value="0">Alle</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="aufgaben" class="col-sm-4 control-label">Aufgaben</label>
+          <div class="col-sm-8">
+            <select class="form-control" id="aufgaben">
+              <option value="0">Alle</option>
+            </select>
+          </div>
+        </div> -->
+        <div class="form-group">
+          <div class="col-sm-offset-4 col-sm-8">
+            <div class="form-inline">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" v-model="showCount"> Anzahl anzeigen
+                </label>
+              </div>
+              <!-- <div class="checkbox">
+                <label class="ml10">
+                  <input type="checkbox" v-model="showCountTrans" :disabled="!showCount"> Transkript
+                </label>
+              </div> -->
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -91,9 +110,33 @@ export default {
     }
   },
   computed: {
+    tagListe () {
+      let aTagListe = []
+      if (!this.tagsData.data.loading && !this.tagsData.data.loadingTags) {
+        let gTag = function (aThis, sTag, deep = 0) {
+          let sTagListe = [{pk: sTag.pk, title: (deep > 0 ? '- '.repeat(deep) : '') + sTag.t + ((sTag.tl && sTag.t !== sTag.tl) ? ' (' + sTag.tl + ')' : '')}]
+          if (sTag.c) {
+            sTag.c.forEach(sTagId => {
+              sTagListe = [...sTagListe, ...gTag(aThis, aThis.tagsData.data.tagsCache.tags[sTagId], deep + 1)]
+            })
+          }
+          return sTagListe
+        }
+        this.tagsData.data.tagsCache.tagsReihung.forEach(aTagId => {
+          let aTag = this.tagsData.data.tagsCache.tags[aTagId]
+          if (!aTag.p) {
+            if (this.filterfelder.tagebene < 1 || !aTag.tezt || aTag.tezt.indexOf(this.filterfelder.tagebene) > -1) {
+              aTagListe = [...aTagListe, ...gTag(this, aTag)]
+            }
+          }
+        })
+      }
+      // console.log(aTagListe)
+      return aTagListe
+    }
   },
   mounted () {
-    console.log(this.filterfelder)
+    console.log('filterfelder', this.filterfelder)
     this.getFilterData()
   },
   methods: {
@@ -104,7 +147,7 @@ export default {
         getFilterData: true,
         showCount: this.showCount,
         showCountTrans: this.showCountTrans,
-        filter: JSON.stringify({ ebene: this.filterfelder.tagebene, inf: this.filterfelder.informant, trans: this.filterfelder.transkript })
+        filter: JSON.stringify({ ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript })
       }).then((response) => {
         this.tagebenenListe = response.data['tagEbenen']
         this.tagebenenListe.forEach(aTagebene => {
@@ -123,10 +166,10 @@ export default {
   },
   watch: {
     'filterfelder.tagebene' () {
-      console.log(this.tagebenenListe)
       this.filterfelder.tagebenenName = this.filterfelder.tagebene > 0 ? this.tagebenenObj[this.filterfelder.tagebene].title : null
       this.getFilterData()
     },
+    'filterfelder.tag' () { this.getFilterData() },
     'filterfelder.informant' () { this.getFilterData() },
     'filterfelder.transkript' () { this.getFilterData() },
     showCount () { this.getFilterData() },

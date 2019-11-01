@@ -28,6 +28,7 @@
           <button v-for="(feldoption, feld) in tabellenfelder" :key="'vthtf' + feld" @blur="spaltenAuswahlBlur" ref="zeigeSpaltenAuswahlBtns" @click="feldoption.show = !feldoption.show" :class="feldoption.show ? 'zsa-show' : ''"><span :class="'glyphicon glyphicon-eye-' + (feldoption.show ? 'open' : 'close')"></span> {{ feld }}</button>
         </div>
         <button @click="maxColWidth = !maxColWidth" class="btn btn-default" type="button" title="Maximale Spaltenbreite"><span :class="'glyphicon ' + (maxColWidth ? 'glyphicon-text-height' : 'glyphicon-text-width')"></span></button>
+        <button @click="reload()" class="btn btn-default" type="button">reload</button>
       </div>
     </div>
     <div class="table-responsive">
@@ -195,7 +196,7 @@ export default {
           getEntries: true,
           seite: this.aSeite,
           eps: this.eintraegeProSeite,
-          filter: JSON.stringify({ ebene: this.filterfelder.tagebene, inf: this.filterfelder.informant, trans: this.filterfelder.transkript }),
+          filter: JSON.stringify({ ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript }),
           sortierung: JSON.stringify(this.spaltenSortierung)
         }).then((response) => {
           console.log(response.data)
@@ -270,6 +271,7 @@ export default {
       })
     },
     'filterfelder.tagebene' () { this.reload() },
+    'filterfelder.tag' () { this.reload() },
     'filterfelder.informant' () { this.reload() },
     'filterfelder.transkript' () { this.reload() },
     eintraegeProSeite () { this.reload() },

@@ -43,7 +43,7 @@ def views_annocheck(request):
 		aShowCount = True if request.POST.get('showCount') == "true" else False
 		showCountTrans = True if aShowCount and request.POST.get('showCountTrans') == "true" else False
 		# Tag Ebenen ermitteln
-		aAntwortenElementF = filternSuchen(aAntwortenElement, 0, int(aFilter['trans']), int(aFilter['inf']))
+		aAntwortenElementF = filternSuchen(aAntwortenElement, 0, int(aFilter['tag']), int(aFilter['trans']), int(aFilter['inf']))
 		nTagEbenen = {}
 		aTagEbenen = [{'pk': 0, 'title': 'Alle', 'count': aAntwortenElementF.distinct().count() if aShowCount else -1}]
 		for aTE in dbmodels.TagEbene.objects.all():
@@ -52,14 +52,14 @@ def views_annocheck(request):
 				antwortentags__id_TagEbene_id=aTE.pk
 			).distinct().count() if aShowCount else -1})
 		# Informanten ermitteln
-		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), int(aFilter['trans']), 0)
+		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), int(aFilter['tag']), int(aFilter['trans']), 0)
 		aInformanten = [{'pk': 0, 'kuerzelAnonym': 'Alle', 'count': aAntwortenElementF.distinct().count() if aShowCount else -1}]
 		for aInf in dbmodels.Informanten.objects.all():
 			aInformanten.append({'pk': aInf.pk, 'kuerzelAnonym': aInf.Kuerzel_anonym, 'count': aAntwortenElementF.filter(
 				von_Inf_id=aInf.pk
 			).distinct().count() if aShowCount else -1})
 		# Transkripte ermitteln
-		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), 0, int(aFilter['inf']))
+		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), int(aFilter['tag']), 0, int(aFilter['inf']))
 		aTranskripte = [{'pk': 0, 'name': 'Alle', 'count': aAntwortenElementF.distinct().count() if aShowCount else -1}]
 		aTranskripte.append({'pk': -1, 'name': 'Keine Transkripte', 'count': aAntwortenElementF.filter(
 			ist_token=None,
@@ -89,7 +89,7 @@ def views_annocheck(request):
 		aSortierung = json.loads(request.POST.get('sortierung')) if request.POST.get('sortierung') else []
 		aElemente = dbmodels.Antworten.objects.distinct().all()
 		# Suchen / Filtern
-		aElemente = filternSuchen(aElemente, int(aFilter['ebene']), int(aFilter['trans']), int(aFilter['inf']))
+		aElemente = filternSuchen(aElemente, int(aFilter['ebene']), int(aFilter['tag']), int(aFilter['trans']), int(aFilter['inf']))
 		# Sortieren
 		aElemente = aElemente.order_by(('-' if not aSortierung['asc'] else '') + aSortierung['spalte'])
 		# Einträge laden
@@ -146,12 +146,14 @@ def views_annocheck(request):
 	return render_to_response('AnnotationsDB/annocheck.html', RequestContext(request))
 
 
-def filternSuchen(aElemente, fEbene, fTrans, fInf):
+def filternSuchen(aElemente, fEbene, fTag, fTrans, fInf):
 	"""Filtern und Suchen."""
 	aSucheMuss = []
 	aSucheKann = []
 	if fEbene > 0:
 		aSucheMuss.append(Q(antwortentags__id_TagEbene_id=fEbene))
+	if fTag > 0:
+		aSucheMuss.append(Q(antwortentags__id_Tag_id=fTag))
 	if fTrans == -1:
 		aSucheMuss.append(Q(ist_token=None))
 		aSucheMuss.append(Q(ist_tokenset=None))
