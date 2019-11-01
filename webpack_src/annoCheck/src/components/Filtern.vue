@@ -64,11 +64,15 @@
             </select>
           </div>
         </div>
-        <!-- <div class="form-group">
+        <div class="form-group">
           <label for="aufgabensets" class="col-sm-4 control-label">Aufgabensets</label>
           <div class="col-sm-8">
             <select class="form-control" v-model="filterfelder.aufgabenset" id="aufgabensets">
-              <option value="0">Alle</option>
+              <option :value="aufgabeset.pk"
+                v-for="aufgabeset in aufgabensetListe"
+                :key="'as' + aufgabeset.pk"
+                :disabled="aufgabeset.count == 0"
+              >{{aufgabeset.name}}{{ aufgabeset.count > -1 ? ' - ' + aufgabeset.count.toLocaleString() : '' }}</option>
             </select>
           </div>
         </div>
@@ -76,10 +80,14 @@
           <label for="aufgaben" class="col-sm-4 control-label">Aufgaben</label>
           <div class="col-sm-8">
             <select class="form-control" v-model="filterfelder.aufgabe" id="aufgaben">
-              <option value="0">Alle</option>
+              <option :value="aufgabe.pk"
+                v-for="aufgabe in aufgabenListe"
+                :key="'a' + aufgabe.pk"
+                :disabled="aufgabe.count == 0"
+              >{{aufgabe.name}}{{ aufgabe.count > -1 ? ' - ' + aufgabe.count.toLocaleString() : '' }}</option>
             </select>
           </div>
-        </div> -->
+        </div>
         <div class="form-group">
           <div class="col-sm-offset-4 col-sm-8">
             <div class="form-inline">
@@ -116,6 +124,8 @@ export default {
       tagebenenObj: {},
       informantenListe: [],
       transcriptsListe: [],
+      aufgabensetListe: [],
+      aufgabenListe: [],
       showCount: true,
       showCountTrans: false
     }
@@ -158,7 +168,7 @@ export default {
         getFilterData: true,
         showCount: this.showCount,
         showCountTrans: this.showCountTrans,
-        filter: JSON.stringify({ ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, nichttag: this.filterfelder.nichtTag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript })
+        filter: JSON.stringify({ ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, nichttag: this.filterfelder.nichtTag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript, aufgabenset: this.filterfelder.aufgabenset, aufgabe: this.filterfelder.aufgabe })
       }).then((response) => {
         this.tagebenenListe = response.data['tagEbenen']
         this.tagebenenListe.forEach(aTagebene => {
@@ -166,6 +176,8 @@ export default {
         })
         this.informantenListe = response.data['informanten']
         this.transcriptsListe = response.data['transcripts']
+        this.aufgabensetListe = response.data['aufgabensets']
+        this.aufgabenListe = response.data['aufgaben']
         console.log('getFilterData', response.data)
         this.loading = false
       }).catch((err) => {
