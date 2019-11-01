@@ -32,7 +32,10 @@ export default {
         transkript: 0,
         tagebene: 0,
         tagebenenName: null,
-        tag: 0
+        tag: 0,
+        nichtTag: 0,
+        aufgabenset: 0,
+        aufgabe: 0
       },
       tabellenfelder: {
         'Reihung': { show: true, displayName: 'R' },

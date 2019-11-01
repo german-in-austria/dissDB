@@ -24,7 +24,18 @@
                 :key="'t' + tKey + '-' + tag.pk"
               >{{ tag.title }}</option>
             </select>
-            <!-- {{ tagListe }} -->
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ntag" class="col-sm-4 control-label">Nicht Tag</label>
+          <div class="col-sm-8">
+            <select class="form-control" v-model="filterfelder.nichtTag" id="ntag" :disabled="tagsData.data.loading || tagsData.data.loadingTags">
+              <option value="0">{{ (tagsData.data.loading || tagsData.data.loadingTags ? 'Lade Tags ...' : 'Alle') }}</option>
+              <option :value="tag.pk"
+                v-for="(tag, tKey) in tagListe"
+                :key="'nt' + tKey + '-' + tag.pk"
+              >{{ tag.title }}</option>
+            </select>
           </div>
         </div>
         <div class="form-group">
@@ -56,7 +67,7 @@
         <!-- <div class="form-group">
           <label for="aufgabensets" class="col-sm-4 control-label">Aufgabensets</label>
           <div class="col-sm-8">
-            <select class="form-control" id="aufgabensets">
+            <select class="form-control" v-model="filterfelder.aufgabenset" id="aufgabensets">
               <option value="0">Alle</option>
             </select>
           </div>
@@ -64,7 +75,7 @@
         <div class="form-group">
           <label for="aufgaben" class="col-sm-4 control-label">Aufgaben</label>
           <div class="col-sm-8">
-            <select class="form-control" id="aufgaben">
+            <select class="form-control" v-model="filterfelder.aufgabe" id="aufgaben">
               <option value="0">Alle</option>
             </select>
           </div>
@@ -147,7 +158,7 @@ export default {
         getFilterData: true,
         showCount: this.showCount,
         showCountTrans: this.showCountTrans,
-        filter: JSON.stringify({ ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript })
+        filter: JSON.stringify({ ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, nichttag: this.filterfelder.nichtTag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript })
       }).then((response) => {
         this.tagebenenListe = response.data['tagEbenen']
         this.tagebenenListe.forEach(aTagebene => {
@@ -170,8 +181,16 @@ export default {
       this.getFilterData()
     },
     'filterfelder.tag' () { this.getFilterData() },
+    'filterfelder.nichtTag' () { this.getFilterData() },
     'filterfelder.informant' () { this.getFilterData() },
     'filterfelder.transkript' () { this.getFilterData() },
+    'filterfelder.aufgabenset' (nVal, oVal) {
+      if (nVal !== oVal) {
+        this.filterfelder.aufgabe = 0
+      }
+      this.getFilterData()
+    },
+    'filterfelder.aufgabe' () { this.getFilterData() },
     showCount () { this.getFilterData() },
     showCountTrans () { this.getFilterData() }
   }
