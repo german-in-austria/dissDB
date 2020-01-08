@@ -13,8 +13,13 @@ def views_auswertung(request, aTagEbene, aSeite):
 	if not request.user.is_authenticated():
 		return redirect('dissdb_login')
 	getXls = False
+	xlsSeite = None
+	xlsLaenge = None
 	if 'get' in request.GET and request.GET.get('get') == 'xls':
 		getXls = True
+		if 'xlsseite' in request.GET and 'xlslaenge' in request.GET:
+			xlsSeite = int(request.GET.get('xlsseite'))
+			xlsLaenge = int(request.GET.get('xlslaenge'))
 	maxVars = 500
 	nTagEbenen = {}
 	aTagEbene = int(aTagEbene)
@@ -49,8 +54,11 @@ def views_auswertung(request, aTagEbene, aSeite):
 		aAntTagsTitle = nTagEbenen[aTagEbene]
 		nAntTagsTitle = []
 		aNr = aSeite * maxPerPage
+		if xlsSeite and xlsLaenge:
+			aSeite = xlsSeite - 1
+			maxPerPage = xlsLaenge
 		# start = time.time()
-		for aAntwort in aAntwortenM if getXls else aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
+		for aAntwort in aAntwortenM if getXls and not (xlsSeite and xlsLaenge) else aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
 			aNr += 1
 			# Tag Ebene mit Tags
 			# tetstart = time.time()
@@ -65,11 +73,13 @@ def views_auswertung(request, aTagEbene, aSeite):
 					if xDat['e'] not in nAntTagsTitle:
 						nAntTagsTitle.append(xDat['e'])
 			# print('Tag Ebene mit Tags', time.time() - tetstart)  # 0.00 Sek
+			# tetstart = time.time()
 			[
 				aTokens, aTokensText, aTokensOrtho, aAntwortType,
 				transName, aTransId,
 				aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id
 			] = getAntwortenSatzUndTokens(aAntwort, adbmodels)
+			# print('getAntwortenSatzUndTokens', time.time() - tetstart)
 			# Datensatz
 			aAuswertungen.append({
 				'aNr': aNr,
@@ -95,7 +105,7 @@ def views_auswertung(request, aTagEbene, aSeite):
 		if getXls:
 			import xlwt
 			response = HttpResponse(content_type='text/ms-excel')
-			response['Content-Disposition'] = 'attachment; filename="tagebene_' + str(aTagEbene) + '_' + datetime.date.today().strftime('%Y%m%d') + '.xls"'
+			response['Content-Disposition'] = 'attachment; filename="tagebene_' + str(aTagEbene) + '_' + datetime.date.today().strftime('%Y%m%d') + (('_' + str(xlsSeite) + '_' + str(xlsLaenge)) if xlsSeite and xlsLaenge else '') + '.xls"'
 			wb = xlwt.Workbook(encoding='utf-8')
 			ws = wb.add_sheet(aAntTagsTitle)
 			row_num = 0

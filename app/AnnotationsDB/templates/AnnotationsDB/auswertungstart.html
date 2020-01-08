@@ -18,7 +18,14 @@
 	<br>
 	{% if aAuswertungen %}
 		<br>
-		<b>Treffer: {{ aCount }}</b> - {% if prev > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=prev %}">Zurück</a>{% else %}Zurück{% endif %} - {% if next > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=next %}">Weiter</a>{% else %}Weiter{% endif %} - <a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=0 %}?get=xls">XLS</a><br>
+		<b>Treffer: {{ aCount }}</b> - {% if prev > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=prev %}">Zurück</a>{% else %}Zurück{% endif %} - {% if next > -1 %}<a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=next %}">Weiter</a>{% else %}Weiter{% endif %}
+		- <a href="{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=0 %}?get=xls">XLS</a>
+		<button class="btn btn-xs btn-primary" style="margin-left:1.5rem;" type="button" data-toggle="collapse" data-target="#colErweitert" aria-expanded="false" aria-controls="colErweitert">Erweitert</button><br>
+		<div class="collapse" id="colErweitert">
+			<br>
+			Eintrag - Seite: <input id="xlsSeite" type="number" value="1" style="margin:0 1rem;width:10rem;"> Länge: <input id="xlsLaenge" type="number" value="1000" style="margin:0 1rem;width:10rem;">
+			<button type="button" onclick="javascript:location.href = '{% url 'AnnotationsDB:auswertung' aTagEbene=aTagEbene aSeite=0 %}?get=xls&xlsseite=' + $('#xlsSeite').val() + '&xlslaenge=' + $('#xlsLaenge').val();">XLS herunterladen</button>
+		</div>
 		<br>
 		<table class="table table-bordered" style="width: auto; max-width: inherit; min-width: 100%; white-space: nowrap;">
 			<thead>

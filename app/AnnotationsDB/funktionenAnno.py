@@ -3,6 +3,7 @@ import json
 from DB.funktionenDB import httpOutput
 from django.db import connection
 import datetime
+# import time
 
 
 def annoDelTokenSet(aTokenSetId, adbmodels):
@@ -339,6 +340,7 @@ def getSatzFromTokenList(aTokens):
 			FROM base_data bd, text_data td, prev_text_data ptd, next_text_data ntd
 		''', [aTokens[0], aTokens[len(aTokens) - 1]])
 		[a_text, a_orthotext, prev_text, prev_orthotext, next_text, next_orthotext, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = cursor.fetchone()
+	# print('getSatzFromTokenList', time.time() - start)  # 0.05 Sek
 	return [a_text, a_orthotext, prev_text, prev_orthotext, next_text, next_orthotext, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id]
 
 
