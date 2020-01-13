@@ -16,135 +16,154 @@ def views_annotool(request, ipk=0, tpk=0):
 	# Speichern:
 	if 'speichern' in request.POST:
 		sData = json.loads(request.POST.get('speichern'))
+		sData['errors'] = []
+		print(sData)
 		# dTokenSets löschen:
-		if 'dTokenSets' in sData:
-			for key, value in sData['dTokenSets'].items():
-				aId = int(key)
+		if 'deletedTokenSets' in sData and sData['deletedTokenSets']:
+			for key in sData['deletedTokenSets']:
+				aId = key
 				if aId > 0:
-					aElement = adbmodels.tbl_tokenset.objects.get(id=aId)
-					aElement.delete()
+					try:
+						adbmodels.tbl_tokenset.objects.get(id=aId).delete()
+					except Exception as e:
+						sData['errors'].append({'type': 'deletedTokenSets', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
 		# aTokens speichern:
-		if 'aTokens' in sData:
-			for key, value in sData['aTokens'].items():
-				aId = int(key)
-				if aId > 0:
+		if 'changedTokens' in sData and sData['changedTokens']:
+			for key, value in sData['changedTokens'].items():
+				try:
+					aId = int(key)
 					aElement = adbmodels.token.objects.get(id=aId)
-				else:
-					aElement = adbmodels.token()
-				setattr(aElement, 'text', (value['t'] if 't' in value else None))
-				setattr(aElement, 'token_type_id_id', (value['tt'] if 'tt' in value else None))
-				setattr(aElement, 'token_reihung', (value['tr'] if 'tr' in value else None))
-				setattr(aElement, 'event_id_id', (value['e'] if 'e' in value else None))
-				setattr(aElement, 'text_in_ortho', (value['to'] if 'to' in value else None))
-				setattr(aElement, 'ID_Inf_id', (value['i'] if 'i' in value else None))
-				setattr(aElement, 'ortho', (value['o'] if 'o' in value else None))
-				setattr(aElement, 'sentence_id_id', (value['s'] if 's' in value else None))
-				setattr(aElement, 'sequence_in_sentence', (value['sr'] if 'sr' in value else None))
-				setattr(aElement, 'fragment_of_id', (value['fo'] if 'fo' in value else None))
-				setattr(aElement, 'likely_error', (value['le'] if 'le' in value else False))
-				aElement.save()
+					setattr(aElement, 'text', (value['t'] if 't' in value else None))
+					setattr(aElement, 'token_type_id_id', (value['tt'] if 'tt' in value else None))
+					setattr(aElement, 'token_reihung', (value['tr'] if 'tr' in value else None))
+					setattr(aElement, 'event_id_id', (value['e'] if 'e' in value else None))
+					setattr(aElement, 'text_in_ortho', (value['to'] if 'to' in value else None))
+					setattr(aElement, 'ID_Inf_id', (value['i'] if 'i' in value else None))
+					setattr(aElement, 'ortho', (value['o'] if 'o' in value else None))
+					setattr(aElement, 'sentence_id_id', (value['s'] if 's' in value else None))
+					setattr(aElement, 'sequence_in_sentence', (value['sr'] if 'sr' in value else None))
+					setattr(aElement, 'fragment_of_id', (value['fo'] if 'fo' in value else None))
+					setattr(aElement, 'likely_error', (value['le'] if 'le' in value else False))
+					aElement.save()
+					value['saved'] = True
+				except Exception as e:
+					sData['errors'].append({'type': 'changedTokens', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
 		# aTokenSets speichern:
-		if 'aTokenSets' in sData:
-			for key, value in sData['aTokenSets'].items():
-				aId = int(key)
-				if aId > 0:
-					aElement = adbmodels.tbl_tokenset.objects.get(id=aId)
-				else:
-					aElement = adbmodels.tbl_tokenset()
-				setattr(aElement, 'id_von_token_id', (value['ivt'] if 'ivt' in value else None))
-				setattr(aElement, 'id_bis_token_id', (value['ibt'] if 'ibt' in value else None))
-				aElement.save()
-				sData['aTokenSets'][key]['nId'] = aElement.pk
-				if 't' in value:
-					for aTokenId in value['t']:
-						try:
-							aTokenToSet = adbmodels.tbl_tokentoset.objects.get(id_tokenset=value['nId'], id_token=aTokenId)
-						except adbmodels.tbl_tokentoset.DoesNotExist:
-							aTokenToSet = adbmodels.tbl_tokentoset()
-						setattr(aTokenToSet, 'id_tokenset_id', value['nId'])
-						setattr(aTokenToSet, 'id_token_id', aTokenId)
-						aTokenToSet.save()
-					# tbl_tokentoset löschen wenn nicht mehr vorhanden:
-					aTokenToSets = adbmodels.tbl_tokentoset.objects.filter(id_tokenset=value['nId'])
-					for aTokenToSet in aTokenToSets:
-						if aTokenToSet.id_token_id not in value['t']:
-							aTokenToSet.delete()
-		# dAntworten löschen:
-		if 'dAntworten' in sData:
-			for key, value in sData['dAntworten'].items():
-				aId = int(key)
-				if aId > 0:
-					aElement = dbmodels.Antworten.objects.get(id=aId)
-					aElement.delete()
-		# aAntworten speichern:
-		if 'aAntworten' in sData:
-			for key, value in sData['aAntworten'].items():
-				aId = int(key)
-				if aId > 0:
-					aElement = dbmodels.Antworten.objects.get(id=aId)
-				else:
-					aElement = dbmodels.Antworten()
-				setattr(aElement, 'von_Inf_id', (value['vi'] if 'vi' in value else None))
-				if 'inat' in value:
-					setattr(aElement, 'ist_nat', value['inat'])
-				if 'is' in value:
-					setattr(aElement, 'ist_Satz_id', value['is'])
-				if 'ibfl' in value:
-					setattr(aElement, 'ist_bfl', value['ibfl'])
-				if 'it' in value:
-					setattr(aElement, 'ist_token_id', value['it'])
-				if 'its' in value:
-					if ('aTokenSets' in sData and str(value['its']) in sData['aTokenSets'] and 'nId' in sData['aTokenSets'][str(value['its'])]):
-						setattr(aElement, 'ist_tokenset_id', sData['aTokenSets'][str(value['its'])]['nId'])
-						sData['aAntworten'][key]['its'] = sData['aTokenSets'][str(value['its'])]['nId']
+		if 'changedTokenSets' in sData and sData['changedTokenSets']:
+			for key, value in sData['changedTokenSets'].items():
+				error = False
+				try:
+					aId = int(key)
+					if aId > 0:
+						aElement = adbmodels.tbl_tokenset.objects.get(id=aId)
 					else:
-						setattr(aElement, 'ist_tokenset_id', value['its'])
-				if 'bds' in value:
-					setattr(aElement, 'bfl_durch_S', value['bds'])
-				setattr(aElement, 'start_Antwort', datetime.timedelta(microseconds=int(value['sa'] if 'sa' in value else 0)))
-				setattr(aElement, 'stop_Antwort', datetime.timedelta(microseconds=int(value['ea'] if 'ea' in value else 0)))
-				if 'k' in value:
-					setattr(aElement, 'Kommentar', value['k'])
-				aElement.save()
-				value['nId'] = aElement.pk
-				# AntwortenTags speichern
-				if 'tags' in value:
-					for eValue in value['tags']:
-						aEbene = eValue['e']
-						if aEbene > 0:
-							for antwortenTag in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=aEbene):
-								delIt = True
-								for tValue in eValue['t']:
-									if int(tValue['i']) == antwortenTag.pk:
-										delIt = False
-								if delIt:
-									antwortenTag.delete()
-						reihung = 0
-						if aEbene > 0:
-							for tValue in eValue['t']:
-								tagId = int(tValue['i'])
-								if tagId > 0:
-									aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
-								else:
-									aElement = dbmodels.AntwortenTags()
-								setattr(aElement, 'id_Antwort_id', value['nId'])
-								setattr(aElement, 'id_Tag_id', tValue['t'])
-								setattr(aElement, 'id_TagEbene_id', aEbene)
-								setattr(aElement, 'Reihung', reihung)
-								reihung += 1
-								aElement.save()
-						else:
-							for tValue in eValue['t']:
-								tagId = int(tValue['i'])
-								if tagId > 0:
-									aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
-									aElement.delete()
-					# Aktuelle AntwortenTags laden
-					nAntTags = []
-					for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId']).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
-						nAntTags.append({'e': xval['id_TagEbene'], 't': getTagFamilie(dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=xval['id_TagEbene']).order_by('Reihung'))})
-					del sData['aAntworten'][key]['tags']
-					sData['aAntworten'][key]['pt'] = nAntTags
+						aElement = adbmodels.tbl_tokenset()
+					setattr(aElement, 'id_von_token_id', (value['ivt'] if 'ivt' in value else None))
+					setattr(aElement, 'id_bis_token_id', (value['ibt'] if 'ibt' in value else None))
+					aElement.save()
+				except Exception as e:
+					error = True
+					sData['errors'].append({'type': 'changedTokenSets', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
+				if not error:
+					value['nId'] = aElement.pk
+					if 't' in value:
+						for aTokenId in value['t']:
+							try:
+								try:
+									aTokenToSet = adbmodels.tbl_tokentoset.objects.get(id_tokenset=value['nId'], id_token=aTokenId)
+								except adbmodels.tbl_tokentoset.DoesNotExist:
+									aTokenToSet = adbmodels.tbl_tokentoset()
+									setattr(aTokenToSet, 'id_tokenset_id', value['nId'])
+									setattr(aTokenToSet, 'id_token_id', aTokenId)
+									aTokenToSet.save()
+							except Exception as e:
+								error = True
+								sData['errors'].append({'type': 'changedTokenSets', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
+						# tbl_tokentoset löschen wenn nicht mehr vorhanden:
+						aTokenToSets = adbmodels.tbl_tokentoset.objects.filter(id_tokenset=value['nId'])
+						for aTokenToSet in aTokenToSets:
+							if aTokenToSet.id_token_id not in value['t']:
+								aTokenToSet.delete()
+					if not error:
+						value['saved'] = True
+					else:
+						aElement.delete()
+		# # dAntworten löschen:
+		# if 'dAntworten' in sData:
+		# 	for key, value in sData['dAntworten'].items():
+		# 		aId = int(key)
+		# 		if aId > 0:
+		# 			aElement = dbmodels.Antworten.objects.get(id=aId)
+		# 			aElement.delete()
+		# # aAntworten speichern:
+		# if 'aAntworten' in sData:
+		# 	for key, value in sData['aAntworten'].items():
+		# 		aId = int(key)
+		# 		if aId > 0:
+		# 			aElement = dbmodels.Antworten.objects.get(id=aId)
+		# 		else:
+		# 			aElement = dbmodels.Antworten()
+		# 		setattr(aElement, 'von_Inf_id', (value['vi'] if 'vi' in value else None))
+		# 		if 'inat' in value:
+		# 			setattr(aElement, 'ist_nat', value['inat'])
+		# 		if 'is' in value:
+		# 			setattr(aElement, 'ist_Satz_id', value['is'])
+		# 		if 'ibfl' in value:
+		# 			setattr(aElement, 'ist_bfl', value['ibfl'])
+		# 		if 'it' in value:
+		# 			setattr(aElement, 'ist_token_id', value['it'])
+		# 		if 'its' in value:
+		# 			if ('aTokenSets' in sData and str(value['its']) in sData['aTokenSets'] and 'nId' in sData['aTokenSets'][str(value['its'])]):
+		# 				setattr(aElement, 'ist_tokenset_id', sData['aTokenSets'][str(value['its'])]['nId'])
+		# 				sData['aAntworten'][key]['its'] = sData['aTokenSets'][str(value['its'])]['nId']
+		# 			else:
+		# 				setattr(aElement, 'ist_tokenset_id', value['its'])
+		# 		if 'bds' in value:
+		# 			setattr(aElement, 'bfl_durch_S', value['bds'])
+		# 		setattr(aElement, 'start_Antwort', datetime.timedelta(microseconds=int(value['sa'] if 'sa' in value else 0)))
+		# 		setattr(aElement, 'stop_Antwort', datetime.timedelta(microseconds=int(value['ea'] if 'ea' in value else 0)))
+		# 		if 'k' in value:
+		# 			setattr(aElement, 'Kommentar', value['k'])
+		# 		aElement.save()
+		# 		value['nId'] = aElement.pk
+		# 		# AntwortenTags speichern
+		# 		if 'tags' in value:
+		# 			for eValue in value['tags']:
+		# 				aEbene = eValue['e']
+		# 				if aEbene > 0:
+		# 					for antwortenTag in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=aEbene):
+		# 						delIt = True
+		# 						for tValue in eValue['t']:
+		# 							if int(tValue['i']) == antwortenTag.pk:
+		# 								delIt = False
+		# 						if delIt:
+		# 							antwortenTag.delete()
+		# 				reihung = 0
+		# 				if aEbene > 0:
+		# 					for tValue in eValue['t']:
+		# 						tagId = int(tValue['i'])
+		# 						if tagId > 0:
+		# 							aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
+		# 						else:
+		# 							aElement = dbmodels.AntwortenTags()
+		# 						setattr(aElement, 'id_Antwort_id', value['nId'])
+		# 						setattr(aElement, 'id_Tag_id', tValue['t'])
+		# 						setattr(aElement, 'id_TagEbene_id', aEbene)
+		# 						setattr(aElement, 'Reihung', reihung)
+		# 						reihung += 1
+		# 						aElement.save()
+		# 				else:
+		# 					for tValue in eValue['t']:
+		# 						tagId = int(tValue['i'])
+		# 						if tagId > 0:
+		# 							aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
+		# 							aElement.delete()
+		# 			# Aktuelle AntwortenTags laden
+		# 			nAntTags = []
+		# 			for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId']).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
+		# 				nAntTags.append({'e': xval['id_TagEbene'], 't': getTagFamilie(dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=xval['id_TagEbene']).order_by('Reihung'))})
+		# 			del sData['aAntworten'][key]['tags']
+		# 			sData['aAntworten'][key]['pt'] = nAntTags
 		return httpOutput(json.dumps({'OK': True, 'gespeichert': sData}), 'application/json')
 	# Transkript:
 	if 'getTranskript' in request.POST:
