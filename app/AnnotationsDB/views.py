@@ -18,6 +18,14 @@ def startvue(request, ipk=0, tpk=0):
 	return views_tooljson(request, ipk, tpk)
 
 
+def annotool(request, ipk=0, tpk=0):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return redirect('dissdb_login')
+	from .views_annotool import views_annotool
+	return views_annotool(request, ipk, tpk)
+
+
 def tool(request):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
