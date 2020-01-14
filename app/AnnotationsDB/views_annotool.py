@@ -119,7 +119,7 @@ def views_annotool(request, ipk=0, tpk=0):
 					if 'its' in value:
 						if ('changedTokenSets' in sData and str(value['its']) in sData['changedTokenSets'] and 'nId' in sData['changedTokenSets'][str(value['its'])]):
 							setattr(aElement, 'ist_tokenset_id', sData['changedTokenSets'][str(value['its'])]['nId'])
-							sData['aAntworten'][key]['its'] = sData['changedTokenSets'][str(value['its'])]['nId']
+							sData['changedAntworten'][key]['its'] = sData['changedTokenSets'][str(value['its'])]['nId']
 						else:
 							setattr(aElement, 'ist_tokenset_id', value['its'])
 					if 'bds' in value:
@@ -134,44 +134,49 @@ def views_annotool(request, ipk=0, tpk=0):
 				except Exception as e:
 					error = True
 					sData['errors'].append({'type': 'changedAntworten', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
-		# 		# AntwortenTags speichern
-		# 		if 'tags' in value:
-		# 			for eValue in value['tags']:
-		# 				aEbene = eValue['e']
-		# 				if aEbene > 0:
-		# 					for antwortenTag in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=aEbene):
-		# 						delIt = True
-		# 						for tValue in eValue['t']:
-		# 							if int(tValue['i']) == antwortenTag.pk:
-		# 								delIt = False
-		# 						if delIt:
-		# 							antwortenTag.delete()
-		# 				reihung = 0
-		# 				if aEbene > 0:
-		# 					for tValue in eValue['t']:
-		# 						tagId = int(tValue['i'])
-		# 						if tagId > 0:
-		# 							aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
-		# 						else:
-		# 							aElement = dbmodels.AntwortenTags()
-		# 						setattr(aElement, 'id_Antwort_id', value['nId'])
-		# 						setattr(aElement, 'id_Tag_id', tValue['t'])
-		# 						setattr(aElement, 'id_TagEbene_id', aEbene)
-		# 						setattr(aElement, 'Reihung', reihung)
-		# 						reihung += 1
-		# 						aElement.save()
-		# 				else:
-		# 					for tValue in eValue['t']:
-		# 						tagId = int(tValue['i'])
-		# 						if tagId > 0:
-		# 							aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
-		# 							aElement.delete()
-		# 			# Aktuelle AntwortenTags laden
-		# 			nAntTags = []
-		# 			for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId']).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
-		# 				nAntTags.append({'e': xval['id_TagEbene'], 't': getTagFamilie(dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=xval['id_TagEbene']).order_by('Reihung'))})
-		# 			del sData['aAntworten'][key]['tags']
-		# 			sData['aAntworten'][key]['pt'] = nAntTags
+				# AntwortenTags speichern
+				if not error and 'tags' in value:
+					try:
+						if value['tags']:
+							for eValue in value['tags']:
+								aEbene = eValue['e']
+								if aEbene > 0:
+									for antwortenTag in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=aEbene):
+										delIt = True
+										for tValue in eValue['t']:
+											if int(tValue['i']) == antwortenTag.pk:
+												delIt = False
+										if delIt:
+											antwortenTag.delete()
+								reihung = 0
+								if aEbene > 0:
+									for tValue in eValue['t']:
+										tagId = int(tValue['i'])
+										if tagId > 0:
+											aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
+										else:
+											aElement = dbmodels.AntwortenTags()
+										setattr(aElement, 'id_Antwort_id', value['nId'])
+										setattr(aElement, 'id_Tag_id', tValue['t'])
+										setattr(aElement, 'id_TagEbene_id', aEbene)
+										setattr(aElement, 'Reihung', reihung)
+										reihung += 1
+										aElement.save()
+								else:
+									for tValue in eValue['t']:
+										tagId = int(tValue['i'])
+										if tagId > 0:
+											aElement = dbmodels.AntwortenTags.objects.get(id=tagId)
+											aElement.delete()
+					except Exception as e:
+						error = True
+						sData['errors'].append({'type': 'changedAntwortenTags', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
+					# Aktuelle AntwortenTags laden
+					nAntTags = []
+					for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId']).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
+						nAntTags.append({'e': xval['id_TagEbene'], 't': getTagFamilie(dbmodels.AntwortenTags.objects.filter(id_Antwort=value['nId'], id_TagEbene=xval['id_TagEbene']).order_by('Reihung'))})
+					del sData['changedAntworten'][key]['tags']
+					sData['changedAntworten'][key]['pt'] = nAntTags
 		return httpOutput(json.dumps({'OK': True, 'gespeichert': sData}), 'application/json')
 	# Transkript:
 	if 'getTranskript' in request.POST:
