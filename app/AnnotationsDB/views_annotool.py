@@ -89,12 +89,14 @@ def views_annotool(request, ipk=0, tpk=0):
 					else:
 						aElement.delete()
 		# # dAntworten löschen:
-		# if 'dAntworten' in sData:
-		# 	for key, value in sData['dAntworten'].items():
-		# 		aId = int(key)
-		# 		if aId > 0:
-		# 			aElement = dbmodels.Antworten.objects.get(id=aId)
-		# 			aElement.delete()
+		if 'deletedAntworten' in sData and sData['deletedAntworten']:
+			for key in sData['deletedAntworten']:
+				aId = key
+				if aId > 0:
+					try:
+						dbmodels.Antworten.objects.get(id=aId).delete()
+					except Exception as e:
+						sData['errors'].append({'type': 'deletedAntworten', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
 		# # aAntworten speichern:
 		# if 'aAntworten' in sData:
 		# 	for key, value in sData['aAntworten'].items():
