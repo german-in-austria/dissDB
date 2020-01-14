@@ -18,7 +18,7 @@ def views_annotool(request, ipk=0, tpk=0):
 		sData = json.loads(request.POST.get('speichern'))
 		sData['errors'] = []
 		print(sData)
-		# dTokenSets löschen:
+		# deletedTokenSets löschen:
 		if 'deletedTokenSets' in sData and sData['deletedTokenSets']:
 			for key in sData['deletedTokenSets']:
 				aId = key
@@ -27,7 +27,7 @@ def views_annotool(request, ipk=0, tpk=0):
 						adbmodels.tbl_tokenset.objects.get(id=aId).delete()
 					except Exception as e:
 						sData['errors'].append({'type': 'deletedTokenSets', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
-		# aTokens speichern:
+		# changedTokens speichern:
 		if 'changedTokens' in sData and sData['changedTokens']:
 			for key, value in sData['changedTokens'].items():
 				try:
@@ -48,7 +48,7 @@ def views_annotool(request, ipk=0, tpk=0):
 					value['saved'] = True
 				except Exception as e:
 					sData['errors'].append({'type': 'changedTokens', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
-		# aTokenSets speichern:
+		# changedTokenSets speichern:
 		if 'changedTokenSets' in sData and sData['changedTokenSets']:
 			for key, value in sData['changedTokenSets'].items():
 				error = False
@@ -88,7 +88,7 @@ def views_annotool(request, ipk=0, tpk=0):
 						value['saved'] = True
 					else:
 						aElement.delete()
-		# # dAntworten löschen:
+		# deletedAntworten löschen:
 		if 'deletedAntworten' in sData and sData['deletedAntworten']:
 			for key in sData['deletedAntworten']:
 				aId = key
@@ -97,37 +97,43 @@ def views_annotool(request, ipk=0, tpk=0):
 						dbmodels.Antworten.objects.get(id=aId).delete()
 					except Exception as e:
 						sData['errors'].append({'type': 'deletedAntworten', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
-		# # aAntworten speichern:
-		# if 'aAntworten' in sData:
-		# 	for key, value in sData['aAntworten'].items():
-		# 		aId = int(key)
-		# 		if aId > 0:
-		# 			aElement = dbmodels.Antworten.objects.get(id=aId)
-		# 		else:
-		# 			aElement = dbmodels.Antworten()
-		# 		setattr(aElement, 'von_Inf_id', (value['vi'] if 'vi' in value else None))
-		# 		if 'inat' in value:
-		# 			setattr(aElement, 'ist_nat', value['inat'])
-		# 		if 'is' in value:
-		# 			setattr(aElement, 'ist_Satz_id', value['is'])
-		# 		if 'ibfl' in value:
-		# 			setattr(aElement, 'ist_bfl', value['ibfl'])
-		# 		if 'it' in value:
-		# 			setattr(aElement, 'ist_token_id', value['it'])
-		# 		if 'its' in value:
-		# 			if ('aTokenSets' in sData and str(value['its']) in sData['aTokenSets'] and 'nId' in sData['aTokenSets'][str(value['its'])]):
-		# 				setattr(aElement, 'ist_tokenset_id', sData['aTokenSets'][str(value['its'])]['nId'])
-		# 				sData['aAntworten'][key]['its'] = sData['aTokenSets'][str(value['its'])]['nId']
-		# 			else:
-		# 				setattr(aElement, 'ist_tokenset_id', value['its'])
-		# 		if 'bds' in value:
-		# 			setattr(aElement, 'bfl_durch_S', value['bds'])
-		# 		setattr(aElement, 'start_Antwort', datetime.timedelta(microseconds=int(value['sa'] if 'sa' in value else 0)))
-		# 		setattr(aElement, 'stop_Antwort', datetime.timedelta(microseconds=int(value['ea'] if 'ea' in value else 0)))
-		# 		if 'k' in value:
-		# 			setattr(aElement, 'Kommentar', value['k'])
-		# 		aElement.save()
-		# 		value['nId'] = aElement.pk
+		# changedAntworten speichern:
+		if 'changedAntworten' in sData and sData['changedAntworten']:
+			for key, value in sData['changedAntworten'].items():
+				error = False
+				aId = int(key)
+				try:
+					if aId > 0:
+						aElement = dbmodels.Antworten.objects.get(id=aId)
+					else:
+						aElement = dbmodels.Antworten()
+					setattr(aElement, 'von_Inf_id', (value['vi'] if 'vi' in value else None))
+					if 'inat' in value:
+						setattr(aElement, 'ist_nat', value['inat'])
+					if 'is' in value:
+						setattr(aElement, 'ist_Satz_id', value['is'])
+					if 'ibfl' in value:
+						setattr(aElement, 'ist_bfl', value['ibfl'])
+					if 'it' in value:
+						setattr(aElement, 'ist_token_id', value['it'])
+					if 'its' in value:
+						if ('changedTokenSets' in sData and str(value['its']) in sData['changedTokenSets'] and 'nId' in sData['changedTokenSets'][str(value['its'])]):
+							setattr(aElement, 'ist_tokenset_id', sData['changedTokenSets'][str(value['its'])]['nId'])
+							sData['aAntworten'][key]['its'] = sData['changedTokenSets'][str(value['its'])]['nId']
+						else:
+							setattr(aElement, 'ist_tokenset_id', value['its'])
+					if 'bds' in value:
+						setattr(aElement, 'bfl_durch_S', value['bds'])
+					setattr(aElement, 'start_Antwort', datetime.timedelta(microseconds=int(value['sa'] if 'sa' in value else 0)))
+					setattr(aElement, 'stop_Antwort', datetime.timedelta(microseconds=int(value['ea'] if 'ea' in value else 0)))
+					if 'k' in value:
+						setattr(aElement, 'Kommentar', value['k'])
+					aElement.save()
+					value['nId'] = aElement.pk
+					value['saved'] = True
+				except Exception as e:
+					error = True
+					sData['errors'].append({'type': 'changedAntworten', 'id': aId, 'error': str(type(e)) + ' - ' + str(e)})
 		# 		# AntwortenTags speichern
 		# 		if 'tags' in value:
 		# 			for eValue in value['tags']:
