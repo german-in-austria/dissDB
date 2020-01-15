@@ -52,8 +52,28 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 	if aTagEbene > 0:
 		maxPerPage = 15
 		# Tags
-		allTags = {x.pk: x for x in dbmodels.Tags.objects.all()}  # ToDo: Familienverhältnisse mit laden!
-		nTags = {allTags[x].pk: allTags[x].Tag for x in allTags}
+		with connection.cursor() as cursor:
+			cursor.execute('''
+				SELECT to_json(x.*)
+				FROM (
+					SELECT
+						array(
+							SELECT c."id_ChildTag_id"
+							FROM "TagFamilie" c
+							WHERE c."id_ParentTag_id" = "Tags"."id"
+						) as childs,
+						array(
+							SELECT p."id_ParentTag_id"
+							FROM "TagFamilie" p
+							WHERE p."id_ChildTag_id" = "Tags"."id"
+						) as parents,
+						"Tags"."id", "Tags"."Tag", "Tags"."Tag_lang", "Tags"."zu_Tag_id", "Tags"."zu_Phaenomen_id", "Tags"."Kommentar", "Tags"."AReihung", "Tags"."Generation"
+					FROM "Tags"
+					ORDER BY "Tags"."AReihung" ASC, "Tags"."Tag" ASC
+				) as x
+			''')
+			allTags = {x[0]['id']: x[0] for x in cursor.fetchall()}
+		nTags = {allTags[x]['id']: allTags[x]['Tag'] for x in allTags}
 		# Antworten
 		aAntwortenM = dbmodels.Antworten.objects.filter(
 			antwortentags__id_TagEbene_id=aTagEbene
@@ -71,11 +91,11 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 		if xlsSeite and xlsLaenge:
 			aSeite = xlsSeite - 1
 			maxPerPage = xlsLaenge
-		start = time.time()
+		# start = time.time()
 		for aAntwort in aAntwortenM if getXls and not (xlsSeite and xlsLaenge) else aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
 			aNr += 1
 			# Tag Ebene mit Tags
-			tetstart = time.time()
+			# tetstart = time.time()
 			nAntTags = {}
 			aAntTags = None
 			# aTuLs = dbmodels.AntwortenTags.objects.filter(id_Antwort=aAntwort.pk).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene')
@@ -103,7 +123,7 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 				for x in dbmodels.AntwortenTags.objects.filter(id_Antwort=aAntwort.pk, id_TagEbene=xval['id_TagEbene']).values('id_Tag_id').order_by('Reihung'):
 					xTag = allTags[x['id_Tag_id']]
 					try:
-						while not xTag.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
+						while not afam[-1]['id'] in xTag['parents']:
 							aGen -= 1
 							del afam[-1]
 					except:
@@ -127,7 +147,7 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 					nAntTags[xDat['e']['i']] = xDat
 					if xDat['e'] not in nAntTagsTitle:
 						nAntTagsTitle.append(xDat['e'])
-			print('Tag Ebene mit Tags', time.time() - tetstart)  # 0.004 Sek
+			# print('Tag Ebene mit Tags', time.time() - tetstart)  # 0.004 Sek
 			# tetstart = time.time()
 			[
 				aTokens, aTokensText, aTokensOrtho, aAntwortType,
@@ -156,7 +176,7 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 				'vSatz': vSatz,
 				'nSatz': nSatz
 			})
-		print('aAuswertungen', time.time() - start)  # 1,7 Sekunden -> 1,1 Sekunden
+		# print('aAuswertungen', time.time() - start)  # 1,7 Sekunden -> 1,1 Sekunden
 		if getXls:
 			import xlwt
 			response = HttpResponse(content_type='text/ms-excel')
