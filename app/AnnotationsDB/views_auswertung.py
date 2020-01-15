@@ -3,10 +3,11 @@ from django.http import HttpResponse
 from django.template import RequestContext
 from django.db.models import Count
 from django.conf import settings
+from django.db import connection
 import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import datetime
-# import time
+import time
 from .funktionenAnno import getAntwortenSatzUndTokens
 import subprocess
 import os
@@ -37,7 +38,7 @@ def views_auswertung(request, aTagEbene, aSeite):
 def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=False):
 	nTagEbenen = {}
 	aTagEbenen = []
-	for aTE in dbmodels.TagEbene.objects.all():
+	for aTE in dbmodels.TagEbene.objects.all().order_by('Reihung'):
 		nTagEbenen[aTE.pk] = str(aTE)
 		aTagEbenen.append({'pk': aTE.pk, 'title': str(aTE), 'count': dbmodels.Antworten.objects.filter(
 			antwortentags__id_TagEbene_id=aTE.pk).distinct().count()}
@@ -51,7 +52,8 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 	if aTagEbene > 0:
 		maxPerPage = 15
 		# Tags
-		nTags = {x.pk: x.Tag for x in dbmodels.Tags.objects.all()}
+		allTags = {x.pk: x for x in dbmodels.Tags.objects.all()}  # ToDo: Familienverhältnisse mit laden!
+		nTags = {allTags[x].pk: allTags[x].Tag for x in allTags}
 		# Antworten
 		aAntwortenM = dbmodels.Antworten.objects.filter(
 			antwortentags__id_TagEbene_id=aTagEbene
@@ -69,29 +71,70 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 		if xlsSeite and xlsLaenge:
 			aSeite = xlsSeite - 1
 			maxPerPage = xlsLaenge
-		# start = time.time()
+		start = time.time()
 		for aAntwort in aAntwortenM if getXls and not (xlsSeite and xlsLaenge) else aAntwortenM[aSeite * maxPerPage:aSeite * maxPerPage + maxPerPage]:
 			aNr += 1
 			# Tag Ebene mit Tags
-			# tetstart = time.time()
+			tetstart = time.time()
 			nAntTags = {}
 			aAntTags = None
-			for xval in dbmodels.AntwortenTags.objects.filter(id_Antwort=aAntwort.pk).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene'):
-				xDat = {'e': {'t': nTagEbenen[xval['id_TagEbene']], 'i': xval['id_TagEbene']}, 't': ', '.join([nTags[x['id_Tag_id']] for x in dbmodels.AntwortenTags.objects.filter(id_Antwort=aAntwort.pk, id_TagEbene=xval['id_TagEbene']).values('id_Tag_id').order_by('Reihung')])}
+			# aTuLs = dbmodels.AntwortenTags.objects.filter(id_Antwort=aAntwort.pk).values('id_TagEbene').annotate(total=Count('id_TagEbene')).order_by('id_TagEbene')
+			with connection.cursor() as cursor:
+				cursor.execute('''
+					SELECT "AntwortenTags"."id_TagEbene_id", COUNT("AntwortenTags"."id_TagEbene_id") AS "total"
+					FROM "AntwortenTags"
+					WHERE "AntwortenTags"."id_Antwort_id" = %s
+					GROUP BY "AntwortenTags"."id_TagEbene_id"
+				''', [aAntwort.pk])
+				aTuL = [{'id_TagEbene': x[0], 'total': x[1]} for x in cursor.fetchall()]
+			# Tagebenen sortieren
+			aTuLs = []
+			for aTE in aTagEbenen:
+				for aTuLx in aTuL:
+					if aTE['pk'] == aTuLx['id_TagEbene']:
+						aTuLs.append(aTuLx)
+			# Tags der Tagebenen auflisten
+			for xval in aTuLs:
+				xDat = {'e': {'t': nTagEbenen[xval['id_TagEbene']], 'i': xval['id_TagEbene']}}
+				xDat['t'] = ''
+				dg = 0
+				afam = []
+				aGen = 0
+				for x in dbmodels.AntwortenTags.objects.filter(id_Antwort=aAntwort.pk, id_TagEbene=xval['id_TagEbene']).values('id_Tag_id').order_by('Reihung'):
+					xTag = allTags[x['id_Tag_id']]
+					try:
+						while not xTag.id_ChildTag.filter(id_ParentTag=afam[-1].pk):
+							aGen -= 1
+							del afam[-1]
+					except:
+						pass
+					afam.append(xTag)
+					if dg > 0:
+						if aGen == 0:
+							xDat['t'] += '|'
+						elif aGen == 1:
+							xDat['t'] += ';'
+						elif aGen == 2:
+							xDat['t'] += ','
+						else:
+							xDat['t'] += ' '
+					xDat['t'] += nTags[x['id_Tag_id']]
+					aGen += 1
+					dg += 1
 				if xval['id_TagEbene'] == aTagEbene:
 					aAntTags = xDat
 				else:
 					nAntTags[xDat['e']['i']] = xDat
 					if xDat['e'] not in nAntTagsTitle:
 						nAntTagsTitle.append(xDat['e'])
-			# print('Tag Ebene mit Tags', time.time() - tetstart)  # 0.00 Sek
+			print('Tag Ebene mit Tags', time.time() - tetstart)  # 0.004 Sek
 			# tetstart = time.time()
 			[
 				aTokens, aTokensText, aTokensOrtho, aAntwortType,
 				transName, aTransId,
 				aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id
 			] = getAntwortenSatzUndTokens(aAntwort, adbmodels)
-			# print('getAntwortenSatzUndTokens', time.time() - tetstart)
+			# print('getAntwortenSatzUndTokens', time.time() - tetstart)  # 0.002 Sek
 			# Datensatz
 			aAuswertungen.append({
 				'aNr': aNr,
@@ -113,7 +156,7 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 				'vSatz': vSatz,
 				'nSatz': nSatz
 			})
-		# print('aAuswertungen', time.time() - start)  # 1,7 Sekunden -> 1,1 Sekunden
+		print('aAuswertungen', time.time() - start)  # 1,7 Sekunden -> 1,1 Sekunden
 		if getXls:
 			import xlwt
 			response = HttpResponse(content_type='text/ms-excel')
