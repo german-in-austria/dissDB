@@ -417,10 +417,13 @@ def getAntwortenSatzUndTokens(aAntwort, adbmodels):
 				WHERE ts.id = %s
 			''', [aAntwort.ist_tokenset_id])
 			[aAntwortType, ts_tokens] = cursor.fetchone()
-			for aToken in ts_tokens:
-				aTokens.append(aToken[0])
-				aTokensText.append(aToken[1])
-				aTokensOrtho.append(aToken[2])
+			if ts_tokens:
+				for aToken in ts_tokens:
+					aTokens.append(aToken[0])
+					aTokensText.append(aToken[1])
+					aTokensOrtho.append(aToken[2])
+			else:
+				print('ts_tokens is None!', aAntwort.ist_tokenset_id)
 		# print('Tokenset - Raw  ', aAntwort.ist_tokenset_id, time.time() - xStart)  # 0.015 Sek
 	[aSaetze, aOrtho, prev_text, vSatz, next_text, nSatz, o_f_token_reihung, r_f_token_reihung, o_l_token_reihung, r_l_token_reihung, o_l_token_type, transcript_id, informanten_id] = [None, None, None, None, None, None, None, None, None, None, None, None, None]
 	if aTokens:
