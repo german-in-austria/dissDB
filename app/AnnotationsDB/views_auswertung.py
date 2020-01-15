@@ -25,7 +25,8 @@ def views_auswertung(request, aTagEbene, aSeite):
 			xlsLaenge = int(request.GET.get('xlslaenge'))
 	aTagEbene = int(aTagEbene)
 	aSeite = int(aSeite)
-	# subprocess.Popen([settings.DISS_DB_PYTHON, os.path.join(settings.BASE_DIR, 'manage.py'), 'auswertung_xls', str(aTagEbene)])
+	if aTagEbene > 0 and 'get' in request.GET and request.GET.get('get') == 'xlsfile':
+		subprocess.Popen([settings.DISS_DB_PYTHON, os.path.join(settings.BASE_DIR, 'manage.py'), 'auswertung_xls', str(aTagEbene)])
 	[art, data] = views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, True)
 	if art == 'xls':
 		return data
@@ -116,7 +117,7 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 		if getXls:
 			import xlwt
 			response = HttpResponse(content_type='text/ms-excel')
-			response['Content-Disposition'] = 'attachment; filename="tagebene_' + str(aTagEbene) + '_' + datetime.date.today().strftime('%Y%m%d') + (('_' + str(xlsSeite) + '_' + str(xlsLaenge)) if xlsSeite and xlsLaenge else '') + '.xls"'
+			response['Content-Disposition'] = 'attachment; filename="tagebene_' + str(aTagEbene) + '_' + datetime.date.today().strftime('%Y%m%d_%H%M%S') + (('_' + str(xlsSeite) + '_' + str(xlsLaenge)) if xlsSeite and xlsLaenge else '') + '.xls"'
 			wb = xlwt.Workbook(encoding='utf-8')
 			ws = wb.add_sheet(aAntTagsTitle)
 			row_num = 0
@@ -170,6 +171,9 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 					if nATT['i'] in obj['nAntTags']:
 						ws.write(row_num, 17 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
 					dg += 1
-			wb.save(response)
-			return ['xls', response]
+			if html:
+				wb.save(response)
+				return ['xls', response]
+			else:
+				return ['xlsdata', wb]
 	return ['html', {'aTagEbene': aTagEbene, 'prev': prev, 'next': next, 'tagEbenen': aTagEbenen, 'aAuswertungen': aAuswertungen, 'aAntTagsTitle': aAntTagsTitle, 'nAntTagsTitle': nAntTagsTitle, 'aCount': aCount}]
