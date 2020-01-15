@@ -2,11 +2,14 @@ from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse
 from django.template import RequestContext
 from django.db.models import Count
+from django.conf import settings
 import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import datetime
-import time
+# import time
 from .funktionenAnno import getAntwortenSatzUndTokens
+import subprocess
+import os
 
 
 def views_auswertung(request, aTagEbene, aSeite):
@@ -20,10 +23,18 @@ def views_auswertung(request, aTagEbene, aSeite):
 		if 'xlsseite' in request.GET and 'xlslaenge' in request.GET:
 			xlsSeite = int(request.GET.get('xlsseite'))
 			xlsLaenge = int(request.GET.get('xlslaenge'))
-	maxVars = 500
-	nTagEbenen = {}
 	aTagEbene = int(aTagEbene)
 	aSeite = int(aSeite)
+	# subprocess.Popen([settings.DISS_DB_PYTHON, os.path.join(settings.BASE_DIR, 'manage.py'), 'auswertung_xls', str(aTagEbene)])
+	[art, data] = views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, True)
+	if art == 'xls':
+		return data
+	if art == 'html':
+		return render_to_response('AnnotationsDB/auswertungstart.html', RequestContext(request, data))
+
+
+def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=False):
+	nTagEbenen = {}
 	aTagEbenen = []
 	for aTE in dbmodels.TagEbene.objects.all():
 		nTagEbenen[aTE.pk] = str(aTE)
@@ -160,5 +171,5 @@ def views_auswertung(request, aTagEbene, aSeite):
 						ws.write(row_num, 17 + dg, obj['nAntTags'][nATT['i']]['t'], font_style)
 					dg += 1
 			wb.save(response)
-			return response
-	return render_to_response('AnnotationsDB/auswertungstart.html', RequestContext(request, {'aTagEbene': aTagEbene, 'prev': prev, 'next': next, 'tagEbenen': aTagEbenen, 'aAuswertungen': aAuswertungen, 'aAntTagsTitle': aAntTagsTitle, 'nAntTagsTitle': nAntTagsTitle, 'aCount': aCount}))
+			return ['xls', response]
+	return ['html', {'aTagEbene': aTagEbene, 'prev': prev, 'next': next, 'tagEbenen': aTagEbenen, 'aAuswertungen': aAuswertungen, 'aAntTagsTitle': aAntTagsTitle, 'nAntTagsTitle': nAntTagsTitle, 'aCount': aCount}]

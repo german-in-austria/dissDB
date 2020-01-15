@@ -210,6 +210,9 @@ USE_L10N = True
 USE_TZ = False
 USE_THOUSAND_SEPARATOR = True
 
+DISS_DB_PYTHON = 'python3.5'
+if 'DISS_DB_PYTHON' in os.environ and os.environ['DISS_DB_PYTHON']:
+	DISS_DB_PYTHON = os.environ['DISS_DB_PYTHON']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
