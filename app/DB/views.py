@@ -12,6 +12,7 @@ from DB.funktionenDB import kategorienListe, felderAuslesen, verbundeneElemente,
 from django.conf import settings
 import json
 from django.db import connection
+from django.views.decorators.csrf import csrf_exempt
 
 
 def refreshcache(request,app_name,tabelle_name):
@@ -283,6 +284,7 @@ def view_diagramm(request):
 	)
 
 
+@csrf_exempt
 def tagsystemvue(request):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
@@ -353,6 +355,7 @@ def tagsystemvue(request):
 		output['presets'] = aPresetTags
 	return httpOutput(json.dumps(output), mimetype='application/json')
 
+
 def getTagFamiliePT(Tags):
 	afam = []
 	oTags = []
@@ -367,6 +370,7 @@ def getTagFamiliePT(Tags):
 		oTags.append({'t': value.pk, 'c': pClose})
 		afam.append(value)
 	return oTags
+
 
 # Dateien
 def dateien(request):
