@@ -3,6 +3,16 @@
     <div class="row">
       <div class="col col-md-6">
         <div class="form-group">
+          <label for="antwortenfilter" class="col-sm-4 control-label">Antworten IDs</label>
+          <div class="col-sm-8">
+            <input type="text"
+              @keyup.enter="filterfelder.antwortenIds = antwortenIds; getFilterData();"
+              v-model="antwortenIds" class="form-control" id="antwortenfilter" />
+          </div>
+        </div>
+      </div>
+      <div class="col col-md-3">
+        <div class="form-group">
           <label for="tagebene" class="col-sm-4 control-label">Tag Ebene</label>
           <div class="col-sm-8">
             <select class="form-control" v-model="filterfelder.tagebene" id="tagebene">
@@ -14,11 +24,11 @@
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label for="tag" class="col-sm-4 control-label">Tag</label>
+        <div class="form-group" v-for="(ffTag, aKey) in filterfelder.tag" :key="'ffTag' + aKey">
+          <label :for="'tag-' + aKey" class="col-sm-4 control-label">Tag</label>
           <div class="col-sm-8">
-            <select class="form-control" v-model="filterfelder.tag" id="tag" :disabled="tagsData.data.loading || tagsData.data.loadingTags">
-              <option value="0">{{ (tagsData.data.loading || tagsData.data.loadingTags ? 'Lade Tags ...' : 'Alle') }}</option>
+            <select class="form-control" v-model="filterfelder.tag[aKey]" :id="'tag-' + aKey" :disabled="tagsData.data.loading || tagsData.data.loadingTags">
+              <option :value="0">{{ (tagsData.data.loading || tagsData.data.loadingTags ? 'Lade Tags ...' : 'Alle') }}</option>
               <option :value="tag.pk"
                 v-for="(tag, tKey) in tagListe"
                 :key="'t' + tKey + '-' + tag.pk"
@@ -26,11 +36,11 @@
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label for="ntag" class="col-sm-4 control-label">Nicht Tag</label>
+        <div class="form-group" v-for="(ffNTag, aKey) in filterfelder.nichtTag" :key="'ffNTag' + aKey">
+          <label :for="'ntag-' + aKey" class="col-sm-4 control-label">Nicht Tag</label>
           <div class="col-sm-8">
-            <select class="form-control" v-model="filterfelder.nichtTag" id="ntag" :disabled="tagsData.data.loading || tagsData.data.loadingTags">
-              <option value="0">{{ (tagsData.data.loading || tagsData.data.loadingTags ? 'Lade Tags ...' : 'Alle') }}</option>
+            <select class="form-control" v-model="filterfelder.nichtTag[aKey]" :id="'ntag-' + aKey" :disabled="tagsData.data.loading || tagsData.data.loadingTags">
+              <option :value="0">{{ (tagsData.data.loading || tagsData.data.loadingTags ? 'Lade Tags ...' : 'Alle') }}</option>
               <option :value="tag.pk"
                 v-for="(tag, tKey) in tagListe"
                 :key="'nt' + tKey + '-' + tag.pk"
@@ -51,7 +61,7 @@
           </div>
         </div>
       </div>
-      <div class="col col-md-6">
+      <div class="col col-md-3">
         <div class="form-group">
           <label for="transkript" class="col-sm-4 control-label">Transkript</label>
           <div class="col-sm-8">
@@ -127,7 +137,8 @@ export default {
       aufgabensetListe: [],
       aufgabenListe: [],
       showCount: true,
-      showCountTrans: false
+      showCountTrans: false,
+      antwortenIds: ''
     }
   },
   computed: {
@@ -162,13 +173,19 @@ export default {
   },
   methods: {
     getFilterData () {    // Informationen für Filter laden
+      let aIds = this.filterfelder.antwortenIds.split(',')
+      aIds.forEach((aId, aKey) => {
+        aIds[aKey] = parseInt(aId)
+      })
+      aIds = aIds.filter(function (e) { return !isNaN(e) })
+      this.filterfelder.antwortenIds = aIds.join(', ')
       this.loading = true
       this.loadInfos = 'Filter Daten'
       this.http.post('', {
         getFilterData: true,
         showCount: this.showCount,
         showCountTrans: this.showCountTrans,
-        filter: JSON.stringify({ ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, nichttag: this.filterfelder.nichtTag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript, aufgabenset: this.filterfelder.aufgabenset, aufgabe: this.filterfelder.aufgabe })
+        filter: JSON.stringify({ antwortenids: aIds, ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, nichttag: this.filterfelder.nichtTag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript, aufgabenset: this.filterfelder.aufgabenset, aufgabe: this.filterfelder.aufgabe })
       }).then((response) => {
         this.tagebenenListe = response.data['tagEbenen']
         this.tagebenenListe.forEach(aTagebene => {
@@ -192,8 +209,24 @@ export default {
       this.filterfelder.tagebenenName = this.filterfelder.tagebene > 0 ? this.tagebenenObj[this.filterfelder.tagebene].title : null
       this.getFilterData()
     },
-    'filterfelder.tag' () { this.getFilterData() },
-    'filterfelder.nichtTag' () { this.getFilterData() },
+    'filterfelder.tag' () {
+      let aNullIndex = this.filterfelder.tag.indexOf(0)
+      if (aNullIndex === -1) {
+        // this.filterfelder.tag.push(0)
+      } else if (aNullIndex < this.filterfelder.tag.length - 1) {
+        this.filterfelder.tag.splice(aNullIndex, 1)
+      }
+      this.getFilterData()
+    },
+    'filterfelder.nichtTag' () {
+      let aNullIndex = this.filterfelder.nichtTag.indexOf(0)
+      if (aNullIndex === -1) {
+        // this.filterfelder.nichtTag.push(0)
+      } else if (aNullIndex < this.filterfelder.nichtTag.length - 1) {
+        this.filterfelder.nichtTag.splice(aNullIndex, 1)
+      }
+      this.getFilterData()
+    },
     'filterfelder.informant' () { this.getFilterData() },
     'filterfelder.transkript' () { this.getFilterData() },
     'filterfelder.aufgabenset' (nVal, oVal) {

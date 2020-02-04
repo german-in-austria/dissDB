@@ -43,7 +43,7 @@ def views_annocheck(request):
 		aShowCount = True if request.POST.get('showCount') == "true" else False
 		showCountTrans = True if aShowCount and request.POST.get('showCountTrans') == "true" else False
 		# Tag Ebenen ermitteln
-		aAntwortenElementF = filternSuchen(aAntwortenElement, 0, int(aFilter['tag']), int(aFilter['nichttag']), int(aFilter['trans']), int(aFilter['inf']), int(aFilter['aufgabenset']), int(aFilter['aufgabe']))
+		aAntwortenElementF = filternSuchen(aAntwortenElement, 0, aFilter['tag'], aFilter['nichttag'], int(aFilter['trans']), int(aFilter['inf']), int(aFilter['aufgabenset']), int(aFilter['aufgabe']), aFilter['antwortenids'])
 		nTagEbenen = {}
 		aTagEbenen = [{'pk': 0, 'title': 'Alle', 'count': aAntwortenElementF.distinct().count() if aShowCount else -1}]
 		for aTE in dbmodels.TagEbene.objects.all():
@@ -52,14 +52,14 @@ def views_annocheck(request):
 				antwortentags__id_TagEbene_id=aTE.pk
 			).distinct().count() if aShowCount else -1})
 		# Informanten ermitteln
-		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), int(aFilter['tag']), int(aFilter['nichttag']), int(aFilter['trans']), 0, int(aFilter['aufgabenset']), int(aFilter['aufgabe']))
+		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), aFilter['tag'], aFilter['nichttag'], int(aFilter['trans']), 0, int(aFilter['aufgabenset']), int(aFilter['aufgabe']), aFilter['antwortenids'])
 		aInformanten = [{'pk': 0, 'kuerzelAnonym': 'Alle', 'count': aAntwortenElementF.distinct().count() if aShowCount else -1}]
 		for aInf in dbmodels.Informanten.objects.all():
 			aInformanten.append({'pk': aInf.pk, 'kuerzelAnonym': aInf.Kuerzel_anonym, 'count': aAntwortenElementF.filter(
 				von_Inf_id=aInf.pk
 			).distinct().count() if aShowCount else -1})
 		# Transkripte ermitteln
-		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), int(aFilter['tag']), int(aFilter['nichttag']), 0, int(aFilter['inf']), int(aFilter['aufgabenset']), int(aFilter['aufgabe']))
+		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), aFilter['tag'], aFilter['nichttag'], 0, int(aFilter['inf']), int(aFilter['aufgabenset']), int(aFilter['aufgabe']), aFilter['antwortenids'])
 		aTranskripte = [{'pk': 0, 'name': 'Alle', 'count': aAntwortenElementF.distinct().count() if aShowCount else -1}]
 		aTranskripte.append({'pk': -1, 'name': 'Keine Transkripte', 'count': aAntwortenElementF.filter(
 			ist_token=None,
@@ -78,14 +78,14 @@ def views_annocheck(request):
 				Q(ist_tokenset__tbl_tokentoset__id_token__transcript_id_id=aTrans.pk)
 			).distinct().count() if aShowCount and showCountTrans else -1})
 		# Aufgabensets ermitteln
-		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), int(aFilter['tag']), int(aFilter['nichttag']), int(aFilter['trans']), int(aFilter['inf']), 0, 0)
+		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), aFilter['tag'], aFilter['nichttag'], int(aFilter['trans']), int(aFilter['inf']), 0, 0, aFilter['antwortenids'])
 		aAufgabensets = [{'pk': 0, 'name': 'Alle', 'count': aAntwortenElementF.distinct().count() if aShowCount else -1}]
 		for aAufgabenset in dbmodels.Aufgabensets.objects.all():
 			aAufgabensets.append({'pk': aAufgabenset.pk, 'name': str(aAufgabenset), 'count': aAntwortenElementF.filter(
 				zu_Aufgabe__von_ASet_id=aAufgabenset.pk
 			).distinct().count() if aShowCount else -1})
 		# Aufgaben ermitteln
-		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), int(aFilter['tag']), int(aFilter['nichttag']), int(aFilter['trans']), int(aFilter['inf']), int(aFilter['aufgabenset']), 0)
+		aAntwortenElementF = filternSuchen(aAntwortenElement, int(aFilter['ebene']), aFilter['tag'], aFilter['nichttag'], int(aFilter['trans']), int(aFilter['inf']), int(aFilter['aufgabenset']), 0, aFilter['antwortenids'])
 		aAufgaben = [{'pk': 0, 'name': 'Alle', 'count': aAntwortenElementF.distinct().count() if aShowCount else -1}]
 		if int(aFilter['aufgabenset']) > 0:
 			for aAufgabe in dbmodels.Aufgaben.objects.filter(von_ASet_id=int(aFilter['aufgabenset'])):
@@ -104,7 +104,7 @@ def views_annocheck(request):
 		aSortierung = json.loads(request.POST.get('sortierung')) if request.POST.get('sortierung') else []
 		aElemente = dbmodels.Antworten.objects.distinct().all()
 		# Suchen / Filtern
-		aElemente = filternSuchen(aElemente, int(aFilter['ebene']), int(aFilter['tag']), int(aFilter['nichttag']), int(aFilter['trans']), int(aFilter['inf']), int(aFilter['aufgabenset']), int(aFilter['aufgabe']))
+		aElemente = filternSuchen(aElemente, int(aFilter['ebene']), aFilter['tag'], aFilter['nichttag'], int(aFilter['trans']), int(aFilter['inf']), int(aFilter['aufgabenset']), int(aFilter['aufgabe']), aFilter['antwortenids'])
 		# Sortieren
 		aElemente = aElemente.order_by(('-' if not aSortierung['asc'] else '') + aSortierung['spalte'])
 		# Einträge laden
@@ -161,17 +161,25 @@ def views_annocheck(request):
 	return render_to_response('AnnotationsDB/annocheck.html', RequestContext(request))
 
 
-def filternSuchen(aElemente, fEbene, fTag, fnTag, fTrans, fInf, fAufgabenset, fAufgabe):
+def filternSuchen(aElemente, fEbene, fTag, fnTag, fTrans, fInf, fAufgabenset, fAufgabe, fAntwortenids):
 	"""Filtern und Suchen."""
 	aSucheMuss = []
 	aSucheDarfNicht = []
 	aSucheKann = []
 	if fEbene > 0:
 		aSucheMuss.append(Q(antwortentags__id_TagEbene_id=fEbene))
-	if fTag > 0:
-		aSucheMuss.append(Q(antwortentags__id_Tag_id=fTag))
-	if fnTag > 0:
-		aSucheDarfNicht.append(Q(antwortentags__id_Tag_id=fnTag))
+	if fTag:
+		for afTag in fTag:
+			afTag = int(afTag)
+			if afTag > 0:
+				aSucheMuss.append(Q(antwortentags__id_Tag_id=afTag))
+	if fnTag:
+		for afnTag in fnTag:
+			afnTag = int(afnTag)
+			if afnTag > 0:
+				aSucheDarfNicht.append(Q(antwortentags__id_Tag_id=afnTag))
+	if fAntwortenids:
+		aSucheMuss.append(Q(id__in=fAntwortenids))
 	if fTrans == -1:
 		aSucheMuss.append(Q(ist_token=None))
 		aSucheMuss.append(Q(ist_tokenset=None))

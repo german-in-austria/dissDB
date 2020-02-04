@@ -1,12 +1,6 @@
 <template>
   <div class="annocheck">
-    <div class="row">
-      <div class="col col-md-6">
-      </div>
-      <div class="col col-md-6">
-        <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" />
-      </div>
-    </div>
+    <Filtern :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" />
     <Tabelle :tabellenfelder="tabellenfelder" :eintraege="eintraege" :filterfelder="filterfelder" :http="$http" :tagsData="tagsData" :infTrans="infTrans" ref="tabelle" />
   </div>
 </template>
@@ -32,10 +26,11 @@ export default {
         transkript: 0,
         tagebene: 0,
         tagebenenName: null,
-        tag: 0,
-        nichtTag: 0,
+        tag: [0],
+        nichtTag: [0],
         aufgabenset: 0,
-        aufgabe: 0
+        aufgabe: 0,
+        antwortenIds: ''
       },
       tabellenfelder: {
         'Reihung': { show: true, displayName: 'R' },

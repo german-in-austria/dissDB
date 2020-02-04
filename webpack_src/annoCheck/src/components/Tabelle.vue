@@ -189,6 +189,12 @@ export default {
     }, 300),
     reload: _.debounce(function () {  // Einträge laden
       if (!this.loading) {
+        let aIds = this.filterfelder.antwortenIds.split(',')
+        aIds.forEach((aId, aKey) => {
+          aIds[aKey] = parseInt(aId)
+        })
+        aIds = aIds.filter(function (e) { return !isNaN(e) })
+        this.filterfelder.antwortenIds = aIds.join(', ')
         this.rereload = false
         this.loading = true
         this.ladeZeitStart = performance.now()
@@ -196,7 +202,7 @@ export default {
           getEntries: true,
           seite: this.aSeite,
           eps: this.eintraegeProSeite,
-          filter: JSON.stringify({ ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, nichttag: this.filterfelder.nichtTag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript, aufgabenset: this.filterfelder.aufgabenset, aufgabe: this.filterfelder.aufgabe }),
+          filter: JSON.stringify({ antwortenids: aIds, ebene: this.filterfelder.tagebene, tag: this.filterfelder.tag, nichttag: this.filterfelder.nichtTag, inf: this.filterfelder.informant, trans: this.filterfelder.transkript, aufgabenset: this.filterfelder.aufgabenset, aufgabe: this.filterfelder.aufgabe }),
           sortierung: JSON.stringify(this.spaltenSortierung)
         }).then((response) => {
           console.log(response.data)
@@ -270,6 +276,7 @@ export default {
         }
       })
     },
+    'filterfelder.antwortenIds' () { this.reload() },
     'filterfelder.tagebene' () { this.reload() },
     'filterfelder.tag' () { this.reload() },
     'filterfelder.nichtTag' () { this.reload() },
