@@ -39,7 +39,9 @@ export default {
         { name: 'sentttpos', value: '', kannmuss: 'kann', methode: 'ci' },
         { name: 'sentsptag', value: '', kannmuss: 'kann', methode: 'ci' },
         { name: 'sentsplemma', value: '', kannmuss: 'kann', methode: 'ci' },
-        { name: 'sentttlemma', value: '', kannmuss: 'kann', methode: 'ci' }
+        { name: 'sentttlemma', value: '', kannmuss: 'kann', methode: 'ci' },
+        { name: 'sentspdep', value: '', kannmuss: 'kann', methode: 'ci' },
+        { name: 'sentspenttype', value: '', kannmuss: 'kann', methode: 'ci' }
       ],
       filterfelder: {
         informant: 0,
