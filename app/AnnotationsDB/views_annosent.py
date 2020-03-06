@@ -70,11 +70,16 @@ def views_annosent(request):
 		for aSuchFeld in aSuche:
 			if aSuchFeld['value'].strip():
 				aSuchValue = aSuchFeld['value'].strip()
-				if 'regex' in aSuchFeld['methode']:
-					aTyp = aSuchFeld['methode']
-					aSuchValue = r"{0}".format(aSuchValue)
+				# print(aSuchFeld)
+				if 'fx' in aSuchFeld and aSuchFeld['fx'] and aSuchFeld['name'] == 'adhoc_sentence':
+					aTyp = 'in'
+					aSuchValue = [int(aSV.strip()) for aSV in aSuchValue.split(',')]
 				else:
-					aTyp = 'icontains' if aSuchFeld['methode'] == 'ci' else 'contains'
+					if 'regex' in aSuchFeld['methode']:
+						aTyp = aSuchFeld['methode']
+						aSuchValue = r"{0}".format(aSuchValue)
+					else:
+						aTyp = 'icontains' if aSuchFeld['methode'] == 'ci' else 'contains'
 				print(aSuchFeld['methode'], aTyp)
 				if aSuchFeld['kannmuss'] == 'muss':
 					aSucheMuss.append(Q(**{aSuchFeld['name'] + '__' + aTyp: aSuchValue}))

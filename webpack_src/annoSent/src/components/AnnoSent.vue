@@ -41,7 +41,8 @@ export default {
         { name: 'sentsplemma', value: '', kannmuss: 'kann', methode: 'ci' },
         { name: 'sentttlemma', value: '', kannmuss: 'kann', methode: 'ci' },
         { name: 'sentspdep', value: '', kannmuss: 'kann', methode: 'ci' },
-        { name: 'sentspenttype', value: '', kannmuss: 'kann', methode: 'ci' }
+        { name: 'sentspenttype', value: '', kannmuss: 'kann', methode: 'ci' },
+        { name: 'adhoc_sentence', value: '', kannmuss: 'muss', methode: 'in', fx: true }
       ],
       filterfelder: {
         informant: 0,
