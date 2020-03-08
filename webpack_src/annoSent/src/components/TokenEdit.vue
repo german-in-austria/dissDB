@@ -62,7 +62,7 @@
             :class="'s-tok s-tok-tt' + sToken.token_type_id_id + (sToken.id === token.id ? ' s-tok-act' : '')"
           >{{
               ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
-              (sToken.ortho === null ? (!sToken.text_in_ortho ? sToken.text : sToken.text_in_ortho) : sToken.ortho)
+              (sToken.ortho === null ? sToken.text : sToken.ortho)
            }}</span>
         </div>
       </template>
@@ -100,7 +100,7 @@
                 :class="'s-tok s-tok-tt' + sToken.token_type_id_id + (sToken.tb === 1 ? ' s-tok-act' : '')"
               >{{
                   ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
-                  (sToken.ortho === null ? (!sToken.text_in_ortho ? sToken.text : sToken.text_in_ortho) : sToken.ortho)
+                  (sToken.ortho === null ? sToken.text : sToken.ortho)
               }}</span>
             </div>
           </template>
@@ -140,7 +140,7 @@
                 :class="'s-tok s-tok-tt' + sToken.token_type_id_id + ((getFirstObjectOfValueInPropertyOfArray(tokenSet.tokentoset, 'id_token_id', sToken.id, false)) ? ' s-tok-act' : '')"
               >{{
                   ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
-                  (sToken.ortho === null ? (!sToken.text_in_ortho ? sToken.text : sToken.text_in_ortho) : sToken.ortho)
+                  (sToken.ortho === null ? sToken.text : sToken.ortho)
               }}</span>
             </div>
           </template>

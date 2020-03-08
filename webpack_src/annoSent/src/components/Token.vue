@@ -43,9 +43,9 @@ export default {
       return this.token.fragment_of_id
     },
     tokenText () {
-      let aTokenText = (this.token.ortho === null ? (!this.token.text_in_ortho ? this.token.text : this.token.text_in_ortho) : this.token.ortho)
+      let aTokenText = (this.token.ortho === null ? this.token.text : this.token.ortho)
       if (this.nextToken && this.nextTokenIsFragment) {
-        let foTokenText = (this.nextToken.ortho === null ? (!this.nextToken.text_in_ortho ? this.nextToken.text : this.nextToken.text_in_ortho) : this.nextToken.ortho)
+        let foTokenText = (this.nextToken.ortho === null ? this.nextToken.text : this.nextToken.ortho)
         if (aTokenText.substr(aTokenText.length - foTokenText.length) === foTokenText) {
           aTokenText = aTokenText.substr(0, aTokenText.length - foTokenText.length)
         }

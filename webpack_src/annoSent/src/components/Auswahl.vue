@@ -32,7 +32,7 @@
               :class="'s-tok s-tok-tt' + sToken.token_type_id_id + ((getFirstObjectOfValueInPropertyOfArray(eintraege.data.tokenSets[eintraege.data.selTokenSet].tokentoset, 'id_token_id', sToken.id, false)) ? ' s-tok-act' : '')"
             >{{
                 ((!sToken.fragment_of_id && sToken.token_type_id_id !== 2) ? ' ' : '') +
-                (sToken.ortho === null ? (!sToken.text_in_ortho ? sToken.text : sToken.text_in_ortho) : sToken.ortho)
+                (sToken.ortho === null ? sToken.text : sToken.ortho)
             }}</span>
           </div>
           <button @click="satzOpen = !satzOpen"><span :class="'glyphicon glyphicon-chevron-' + (satzOpen ? 'up' : 'down')" aria-hidden="true"></span></button>
