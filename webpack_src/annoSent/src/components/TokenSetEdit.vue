@@ -87,7 +87,8 @@ export default {
         saveAntworten: true,
         antworten: JSON.stringify(sAntworten)
       }).then((response) => {
-        console.log(response.data)
+        // console.log(response.data)
+        console.log('saveTokenSetData', 'done')
         this.loading = false
         this.locked = false
         this.$nextTick(() => {
