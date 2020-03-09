@@ -121,7 +121,8 @@ class tbl_event_tier(models.Model):
 class tbl_tokenset(models.Model):
 	id_von_token		= models.ForeignKey('token', related_name='rn_id_von_token', blank=True, null=True	, on_delete=models.SET_NULL	, verbose_name="Von Token ID")
 	id_bis_token		= models.ForeignKey('token', related_name='rn_id_bis_token', blank=True, null=True	, on_delete=models.SET_NULL	, verbose_name="Bis Token ID")
-	updated				= models.DateTimeField(auto_now=True																				, verbose_name="Letztes Änderung")
+	updated				= models.DateTimeField(auto_now=True																, verbose_name="Letztes Änderung")
+	created 			= models.DateTimeField(auto_now_add=True															, verbose_name="Erstellt")
 
 	def refreshCache():
 		dg = 0
