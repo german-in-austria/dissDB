@@ -20,7 +20,7 @@ def view(request):
 		aData = json.load(file)
 	rows = ['DBresult', 'idtagebene', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 	doIt = 'doit' in request.GET
-	maxPerSite = 10
+	maxPerSite = 25
 	aSite = int(request.GET.get('site')) if 'site' in request.GET else 0
 	maxSites = math.ceil(len(aData) / maxPerSite)
 	output += '<div>' + str(aSite + 1) + '/' + str(maxSites) + '</div><div>'
@@ -32,6 +32,11 @@ def view(request):
 		output += '<a href="/annotationsdb/converter0?site=' + str(aSite + 1) + '">Weiter</a>'
 	output += '</div>'
 	# output += '<div><p><a href="/annotationsdb/converter0?site=' + str(aSite) + '&doit=1"><b>Do It</b></a></p></div>'
+	count = 0
+	for aLine in aData:
+		aTokens = adbmodels.token.objects.filter(Q(Q(splemma=aLine['DBresult']) & Q(sptag='NN')) | Q(Q(ttlemma=aLine['DBresult']) & Q(ttpos='NN')) | Q(ortho=aLine['DBresult'])).exclude(ID_Inf_id=35).order_by('token_reihung')
+		count += aTokens.count()
+	output += '<div>Anzahl: <b>' + str(count) + '</b></div>'
 	output += '<table style="white-space:nowrap;"><tr>'
 	for row in rows:
 		output += '<th align="left">' + row + '</th>'
@@ -43,14 +48,14 @@ def view(request):
 		for row in rows:
 			output += '<td valign="top" style="border-bottom: 1px solid #000;">' + str(aLine[row]) + '</td>'
 		# splemma = MATCH und ttpos = "NN" ODER ttlemma = MATCH und ttpos = "NN" ODER ortho = Match
-		aTokens = adbmodels.token.objects.filter(Q(Q(splemma=aLine['DBresult']) & Q(ttpos='NN')) | Q(Q(ttlemma=aLine['DBresult']) & Q(ttpos='NN')) | Q(ortho=aLine['DBresult'])).exclude(ID_Inf_id=35).order_by('token_reihung')
+		aTokens = adbmodels.token.objects.filter(Q(Q(splemma=aLine['DBresult']) & Q(sptag='NN')) | Q(Q(ttlemma=aLine['DBresult']) & Q(ttpos='NN')) | Q(ortho=aLine['DBresult'])).exclude(ID_Inf_id=35).order_by('token_reihung')
 		# print(aLine['DBresult'], aTokens.count())
 		output += '<td valign="top" style="border-bottom: 1px solid #000;">'
-		output += '<table style="text-align:right;width:100%;"><tr><th># ' + str(len(aTokens)) + '</th><th>Id</th><th>ttpos</th><th>splemma</th><th>ttlemma</th><th>ortho</th><th>Reihung</th><th>Tokens ermittelt</th><th>Tokens verwenden</th><th>Typ</th><th>Tokenset</th><th>Antwort</th><th>Tags</th></tr>'
+		output += '<table style="text-align:right;width:100%;"><tr><th># ' + str(len(aTokens)) + '</th><th>Id</th><th>ttpos</th><th>sptag</th><th>splemma</th><th>ttlemma</th><th>ortho</th><th>Reihung</th><th>Tokens ermittelt</th><th>Tokens verwenden</th><th>Typ</th><th>Tokenset</th><th>Antwort</th><th>Tags</th></tr>'
 		dg = 1
 		for aToken in aTokens:
 			output += '<tr>'
-			output += '<td>' + str(dg) + '</td><td>' + str(aToken.id) + '</td><td>' + str(aToken.ttpos) + '</td><td>' + str(aToken.splemma) + '</td><td>' + str(aToken.ttlemma) + '</td><td>' + str(aToken.ortho) + '</td><td>' + str(aToken.token_reihung) + '</td>'
+			output += '<td>' + str(dg) + '</td><td>' + str(aToken.id) + '</td><td>' + str(aToken.ttpos) + '</td><td>' + str(aToken.sptag) + '</td><td>' + str(aToken.splemma) + '</td><td>' + str(aToken.ttlemma) + '</td><td>' + str(aToken.ortho) + '</td><td>' + str(aToken.token_reihung) + '</td>'
 			# Die zwei Tags davor ermitteln:
 			xTokens = None
 			with connection.cursor() as cursor:
@@ -112,7 +117,7 @@ def view(request):
 							output += '<td><b style="color:#00d;">Nein</b></td>'
 							aAntwort = None
 					if aAntwort:
-						output += addTags(aAntwort, aLine['idtagebene'], [aLine[str(x)] for x in range(1, 11)], doIt)
+						output += addTags(aAntwort, aLine['idtagebene'], [(aLine[str(x)] if str(x) in aLine else None) for x in range(1, 12)], doIt)
 				else:
 					output += 'tokenset'
 					output += '</td>'
@@ -148,7 +153,7 @@ def view(request):
 								output += '<td><b style="color:#00d;">Nein</b></td>'
 								aAntwort = None
 						if aAntwort:
-							output += addTags(aAntwort, aLine['idtagebene'], [aLine[str(x)] for x in range(1, 11)], doIt)
+							output += addTags(aAntwort, aLine['idtagebene'], [(aLine[str(x)] if str(x) in aLine else None) for x in range(1, 12)], doIt)
 			output += '</tr>'
 			dg += 1
 		output += '</table>'
