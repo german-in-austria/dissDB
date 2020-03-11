@@ -31,7 +31,7 @@ def view(request):
 	if aSite < maxSites - 1:
 		output += '<a href="/annotationsdb/converter0?site=' + str(aSite + 1) + '">Weiter</a>'
 	output += '</div>'
-	# output += '<div><p><a href="/annotationsdb/converter0?site=' + str(aSite) + '&doit=1"><b>Do It</b></a></p></div>'
+	output += '<div><p><a href="/annotationsdb/converter0?site=' + str(aSite) + '&doit=1"><b>Do It</b></a></p></div>'
 	count = 0
 	for aLine in aData:
 		aTokens = adbmodels.token.objects.filter(Q(Q(splemma=aLine['DBresult']) & Q(sptag='NN')) | Q(Q(ttlemma=aLine['DBresult']) & Q(ttpos='NN')) | Q(ortho=aLine['DBresult'])).exclude(ID_Inf_id=35).order_by('token_reihung')
