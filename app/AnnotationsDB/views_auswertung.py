@@ -245,6 +245,6 @@ def views_auswertung_func(aTagEbene, aSeite, getXls, xlsSeite, xlsLaenge, html=F
 def xls_max_chars(aVal):
 	"""Bei String Länge auf maximum setzen."""
 	if type(aVal) == str and len(aVal) > 32600:
-		return 'err: too long! - ' + str[:32600] + '...'
+		return 'err: too long! - ' + aVal[:32600] + '...'
 	else:
 		return aVal
