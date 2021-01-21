@@ -23,13 +23,13 @@ def views_tagauswertung(request):
 				COUNT("id_Tag_id") as count,
 				(
 					SELECT json_object_agg(
-						subanttags."id_Antwort_id", json_build_object(
+						subanttags."id_Antwort_id", json_strip_nulls(json_build_object(
 							'r', subanttags."Reihung",
 							't', ant."ist_token_id",
 							'ts', ant."ist_tokenset_id",
 							's', ant."ist_Satz_id",
 							'tr', COALESCE (tok."transcript_id_id", tokts."transcript_id_id", toktst."transcript_id_id")
-						)
+						))
 					)
 					FROM public."AntwortenTags" as subanttags
 					LEFT JOIN public."Antworten" as ant ON ant.id = subanttags."id_Antwort_id"
