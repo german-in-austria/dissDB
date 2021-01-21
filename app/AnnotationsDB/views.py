@@ -10,6 +10,14 @@ def auswertung(request, aTagEbene, aSeite):
 	return views_auswertung(request, aTagEbene, aSeite)
 
 
+def tagauswertung(request):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return redirect('dissdb_login')
+	from .views_tagauswertung import views_tagauswertung
+	return views_tagauswertung(request)
+
+
 def startvue(request, ipk=0, tpk=0):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():
