@@ -38,5 +38,5 @@ def views_tagauswertung(request):
 				ORDER BY "count" DESC
 			''')
 			allTags = [{'id': x[0], 'count': x[1], 'data': x[2]} for x in cursor.fetchall()]
-			return httpOutput(json.dumps(allTags), 'application/json')
+			return httpOutput(json.dumps({'tagList': allTags}), 'application/json')
 	return render_to_response('AnnotationsDB/tagauswertungstart.html', RequestContext(request))
