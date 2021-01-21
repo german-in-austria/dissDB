@@ -5,26 +5,11 @@
 {% block title %} - Annotation{% endblock %}
 {% block ueberschrift %} - Annotation{% endblock %}
 {% block sitecss %}
-<style>
-	.alltags > li > span {
-		min-width: 90px;
-		display: inline-block;
-	}
-</style>
 {% endblock %}
 {% block inhalt %}
 <div>
 	<br>
-	<h2>Test:</h2>
-	<hr>
-	{{ allTags|length }} Tags
-	<hr>
-	<ul class="alltags">
-	{% for line in allTags %}
-		<li style="white-space:nowrap;"><span><b>TagId:</b> {{ line.id|stringformat:"i" }}</span> - <span><b>Count:</b> {{ line.count }}</span> - <b>Data:</b> {{ line.data }}</li>
-	{% endfor %}
-	</ul>
-	</hr>
+	<h2>Test ...</h2>
 </div>
 {% endblock %}
 {% block sitejs %}
