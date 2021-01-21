@@ -239,6 +239,7 @@ STATICFILES_DIRS = (
 	os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'tagsystemVUE', 'dist')),
 	os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annoSent', 'dist')),
 	os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annoCheck', 'dist')),
+	os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annoTagAuswertung', 'dist')),
 )
 
 # print(os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annotationsDB', 'dist')))
@@ -255,5 +256,8 @@ WEBPACK_LOADER = {
 	},
 	'annoCheck': {
 		'STATS_FILE': os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annoCheck', 'webpack-stats.json')),
+	},
+	'annoTagAuswertung': {
+		'STATS_FILE': os.path.abspath(os.path.join(BASE_DIR, os.pardir, 'webpack_src', 'annoTagAuswertung', 'webpack-stats.json')),
 	},
 }

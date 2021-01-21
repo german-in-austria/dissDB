@@ -68,6 +68,9 @@ RUN cd /home/docker/code/webpack_src/annoSent && npm install && npm run build
 # Anno-check
 COPY webpack_src/annoCheck /home/docker/code/webpack_src/annoCheck/
 RUN cd /home/docker/code/webpack_src/annoCheck && npm install && npm run build
+# Tag Auswertung
+COPY webpack_src/annoTagAuswertung /home/docker/code/webpack_src/annoTagAuswertung/
+RUN cd /home/docker/code/webpack_src/annoTagAuswertung && npm install && npm run build
 
 # ADD (THE REST OF) OUR CODE
 COPY . /home/docker/code/
