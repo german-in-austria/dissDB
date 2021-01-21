@@ -8,6 +8,7 @@ import Datenbank.models as dbmodels
 import AnnotationsDB.models as adbmodels
 import datetime
 import time
+import json
 from .funktionenAnno import getAntwortenSatzUndTokens
 import subprocess
 import os
@@ -44,7 +45,7 @@ def views_tagauswertung(request):
 			GROUP BY "id_Tag_id"
 			ORDER BY "count" DESC
 		''')
-		allTags = [{'id': x[0], 'count': x[1], 'data': x[2]} for x in cursor.fetchall()]
+		allTags = [{'id': x[0], 'count': x[1], 'data': json.dumps(x[2])} for x in cursor.fetchall()]
 	return render_to_response('AnnotationsDB/tagauswertungstart.html', RequestContext(request, {'allTags': allTags}))
 
 
