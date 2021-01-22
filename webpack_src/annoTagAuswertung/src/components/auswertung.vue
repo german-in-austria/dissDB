@@ -8,7 +8,7 @@
           <option :value="-1">Nur Sätze</option>
           <option :value="-2">Nur Transkripte</option>
         </select>
-        <select class="form-control" v-model="filter.ebene">
+        <select class="form-control" v-model="filter.ebene" :disabled="selTags.length > 0">
           <option :value="0">Alle Ebene</option>
           <option :value="tagebene.pk"
             v-for="tagebene in tagsData.data.baseCache.tagebenenList"
@@ -28,7 +28,8 @@
           <th>Ebene</th>
           <th v-if="selTags.length < 1">Tag</th>
           <template v-else>
-            <th v-for="(tData, tIdx) in [...selTags, 0]" :key="'t' + tIdx">{{ tIdx + 1 }}. Tag</th>
+            <th v-for="(tData, tIdx) in selTags" :key="'t' + tIdx">{{ tIdx + 1 }}. Tag</th>
+            <th>Nächster Tag</th>
           </template>
           <th>Count</th>
           <th>Daten</th>
@@ -40,6 +41,15 @@
           <td :title="'Id: ' + aTag.id + '\n' + tagsData.data.tagsCache.tags[aTag.id].tl + '\n' + tagsData.data.tagsCache.tags[aTag.id].k">{{ tagsData.data.tagsCache.tags[aTag.id].t }}</td>
           <td>{{ aTag.count }}</td>
           <td>{{ Object.keys(aTag.data).length }}</td>
+        </tr>
+      </tbody>
+      <tbody v-else-if="filteredSubTags">
+        <tr v-for="(aTag, aKey) in filteredSubTags.liste" :key="'ft' + aKey">
+          <td :title="'Id: ' + filteredSubTags.eId">{{ tagsData.data.baseCache.tagebenenObj[filteredSubTags.eId].t }}</td>
+          <td :title="'Id: ' + filteredSubTags.id + '\n' + tagsData.data.tagsCache.tags[filteredSubTags.id].tl + '\n' + tagsData.data.tagsCache.tags[filteredSubTags.id].k">{{ tagsData.data.tagsCache.tags[filteredSubTags.id].t }}</td>
+          <td :class="{'ohne': aKey < 1}" :title="aKey > 0 ? 'Id: ' + aKey + '\n' + tagsData.data.tagsCache.tags[aKey].tl + '\n' + tagsData.data.tagsCache.tags[aKey].k : 'ohne nachfolgenden Tag'">{{ aKey > 0 ? tagsData.data.tagsCache.tags[aKey].t : 'ohne' }}</td>
+          <td></td>
+          <td>{{ aKey > 0 ? Object.keys(aTag).length : '?' }}</td>
         </tr>
       </tbody>
     </table>
@@ -71,13 +81,46 @@ export default {
     }
   },
   computed: {
+    filteredSubTags () {
+      if (this.selTags.length) {
+        let bd = {}
+        let abt = this.selTags[0]
+        Object.keys(abt).forEach(k => {
+          if (k !== 'data') {
+            bd[k] = abt[k]
+          }
+        })
+        bd.liste = {0: {}}
+        // Nachfolgende Tags ermitteln:
+        this.filteredTagList.forEach(ftl => {
+          if (ftl.id !== abt.id) {
+            let found = {}
+            Object.keys(ftl.data).forEach(k => {
+              let aObj = ftl.data[k]
+              let oObj = abt.data[k]
+              if (oObj && oObj.r + 1 === aObj.r && ((oObj.s && oObj.s === aObj.s) || (oObj.tr && oObj.tr === aObj.tr))) {
+                found[k] = aObj
+              }
+            })
+            // console.log(ftl.id, ftl.data, 'found', Object.keys(found).length, found)
+            if (Object.keys(found).length > 0) {
+              bd.liste[ftl.id] = found
+            } else {
+              bd.liste[0][ftl.id] = 1
+            }
+          }
+        })
+        return bd
+      }
+      return null
+    },
     filteredTagList () {
-      let atl = {}
-      Object.keys(this.data.tagList).forEach(k => {
-        if (this.filter.ebene === 0 || this.data.tagList[k].eId === this.filter.ebene) {
+      let atl = []
+      this.data.tagList.forEach(tll => {
+        if ((this.selTags.length < 1 && (this.filter.ebene === 0 || tll.eId === this.filter.ebene)) || (this.selTags.length > 0 && tll.eId === this.selTags[0].eId)) {
           let ad = {}
-          Object.keys(this.data.tagList[k]).forEach(k2 => {
-            let tlo = this.data.tagList[k][k2]
+          Object.keys(tll).forEach(k2 => {
+            let tlo = tll[k2]
             if (k2 !== 'data' || this.filter.arten === 0) {
               ad[k2] = tlo
             } else {
@@ -94,7 +137,7 @@ export default {
             }
           })
           if (ad && ad.data) {
-            atl[k] = ad
+            atl.push(ad)
           }
         }
       })
@@ -112,6 +155,9 @@ export default {
 }
 .table tbody td {
   cursor: pointer;
+}
+.table tbody td.ohne {
+  font-style: italic;
 }
 .sel-line {
   display: flex;
@@ -134,18 +180,18 @@ export default {
   border: 1px solid;
   border-radius: 5px;
 }
-span.sel-tags-remove {
+.sel-tags-remove {
   font-weight: bold;
   background: #fdd;
   cursor: pointer;
 }
-span.sel-tags-remove:hover {
+.sel-tags-remove:hover {
   background: #f33;
   color: #fff;
 }
 .sel-tags-ebene {
-  border-radius: 0 15px 15px 0;
-  margin-right: 5px;
-  padding-right: 8px;
+  border-radius: 0 15px 15px 0!important;
+  margin-right: 5px!important;
+  padding-right: 8px!important;
 }
 </style>
