@@ -13,6 +13,7 @@ def views_tagauswertung(request):
 			cursor.execute('''
 				SELECT
 					anttags."id_Tag_id" as tag_id,
+					anttags."id_TagEbene_id" as tagebene_id,
 					COUNT("id_Tag_id") as count,
 					(
 						SELECT json_object_agg(
@@ -31,12 +32,12 @@ def views_tagauswertung(request):
 						LEFT JOIN public."token" as tokts ON tokts.id = tokset."id_von_token_id"
 						LEFT JOIN public."tokentoset" as toktoset ON toktoset."id_tokenset_id" = tokset.id
 						LEFT JOIN public."token" as toktst ON toktst.id = toktoset."id_token_id"
-						WHERE subanttags."id_Tag_id" = anttags."id_Tag_id"
+						WHERE subanttags."id_Tag_id" = anttags."id_Tag_id" AND subanttags."id_TagEbene_id" = anttags."id_TagEbene_id"
 					) as antworten
 				FROM public."AntwortenTags" as anttags
-				GROUP BY "id_Tag_id"
+				GROUP BY "id_Tag_id", "id_TagEbene_id"
 				ORDER BY "count" DESC
 			''')
-			allTags = [{'id': x[0], 'count': x[1], 'data': x[2]} for x in cursor.fetchall()]
+			allTags = [{'id': x[0], 'eId': x[1], 'count': x[2], 'data': x[3]} for x in cursor.fetchall()]
 			return httpOutput(json.dumps({'tagList': allTags}), 'application/json')
 	return render_to_response('AnnotationsDB/tagauswertungstart.html', RequestContext(request))
