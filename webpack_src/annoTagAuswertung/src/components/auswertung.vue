@@ -1,6 +1,6 @@
 <template>
   <div class="auswertung">
-    Auswertung:<br>
+    Tag Auswertung:<br>
     <div class="sel-line">
       <div class="sel-filter">
         <select class="form-control" v-model="filter.arten">

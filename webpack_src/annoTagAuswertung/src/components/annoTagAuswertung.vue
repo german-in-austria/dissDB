@@ -5,31 +5,20 @@
       Lade ...<br>
       <hr>
       Daten: {{ loadingData ? 'lade ...' : 'geladen!' }}<br>
-      Tag Base: {{ tagsData.data.loadingBase ? 'lade ...' : 'geladen!' }}<br>
-      Tag Presets: {{ tagsData.data.loadingPresets ? 'lade ...' : 'geladen!' }}<br>
-      Tags: {{ tagsData.data.loadingTags ? 'lade ...' : 'geladen!' }}<br>
     </div>
     <auswertung :data="data" :tagsData="tagsData" v-else />
   </div>
 </template>
 
 <script>
-/* global csrf tagsystem */
 import auswertung from './auswertung'
 
 export default {
   name: 'annoTagAuswertung',
-  http: {
-    root: '/annotationsdb/tagauswertung',
-    headers: {
-      'X-CSRFToken': csrf
-    },
-    emulateJSON: true
-  },
+  props: ['tagsData'],
   data () {
     return {
       loadingData: true,
-      tagsData: { data: new tagsystem.TagsystemObject.TagsystemBase(this.$http) },
       data: {}
     }
   },
@@ -39,7 +28,7 @@ export default {
   methods: {
     getData () {
       this.loadingData = true
-      this.$http.get('', {params: {get: 'data'}}).then((response) => {
+      this.$root.$http.get('', {params: {get: 'data'}}).then((response) => {
         this.data = response.data
         this.loadingData = false
       }).catch((err) => {
@@ -62,7 +51,7 @@ export default {
 
 <style>
 .annotagauswertung {
-  margin-top: 30px;
+  margin-top: 15px;
   margin-bottom: 50px;
 }
 .loading {
