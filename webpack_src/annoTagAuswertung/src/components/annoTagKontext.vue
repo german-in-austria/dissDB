@@ -8,6 +8,7 @@
     </div>
     <div v-else>
       <Tagsystem :tagsData="tagsData" :tags="tags" :http="$root.$http" mode="select" style="max-width: 100rem;"/>
+      {{ getFlatTags(tags[0].tags) }}
       <tagKontext :data="data" :tagsData="tagsData" />
     </div>
   </div>
@@ -47,6 +48,16 @@ export default {
       //   this.loadingData = false
       // })
       this.loadingData = false
+    },
+    getFlatTags (tags) {
+      let tagList = []
+      tags.forEach(t => {
+        tagList.push(t.tag)
+        if (t.tags && t.tags.length > 0) {
+          tagList = [...tagList, ...this.getFlatTags(t.tags)]
+        }
+      })
+      return tagList
     }
   },
   computed: {
