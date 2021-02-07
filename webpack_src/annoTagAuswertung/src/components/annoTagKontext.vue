@@ -6,11 +6,15 @@
       <hr>
       Daten: {{ loadingData ? 'lade ...' : 'geladen!' }}<br>
     </div>
-    <tagKontext :data="data" :tagsData="tagsData" v-else />
+    <div v-else>
+      <Tagsystem :tagsData="tagsData" :tags="tags" :http="$root.$http" mode="select" style="max-width: 100rem;"/>
+      <tagKontext :data="data" :tagsData="tagsData" />
+    </div>
   </div>
 </template>
 
 <script>
+/* global tagsystem */
 import tagKontext from './tagKontext'
 
 export default {
@@ -19,6 +23,12 @@ export default {
   data () {
     return {
       loadingData: true,
+      tags: [
+        {
+          e: 0,
+          tags: []
+        }
+      ],
       data: {}
     }
   },
@@ -44,8 +54,14 @@ export default {
       return this.loadingData || this.tagsData.data.loading || this.tagsData.data.loadingBase || this.tagsData.data.loadingPresets || this.tagsData.data.loadingTags
     }
   },
+  watch: {
+    tags () {
+      console.log(this.tags)
+    }
+  },
   components: {
-    tagKontext
+    tagKontext,
+    Tagsystem: tagsystem.TagsystemVue
   }
 }
 </script>
