@@ -1,15 +1,19 @@
 <template>
   <div class="annotagkontext">
-    <div v-if="loading">
+    <div v-if="tagloading">
       <br>
-      Lade ...<br>
-      <hr>
-      Daten: {{ loadingData ? 'lade ...' : 'geladen!' }}<br>
+      Warte auf Tagsystem ...
     </div>
     <div v-else>
       <Tagsystem :tagsData="tagsData" :tags="tags" :http="$root.$http" mode="select" style="max-width: 100rem;"/>
       {{ getFlatTags(tags[0].tags) }}
-      <tagKontext :data="data" :tagsData="tagsData" />
+      <div v-if="loading">
+        Lade ...<br>
+      </div>
+      <tagKontext :data="data" :tagsData="tagsData" v-else-if="data && data.antwortenListe" />
+      <div>
+        Keine Daten!
+      </div>
     </div>
   </div>
 </template>
@@ -23,7 +27,7 @@ export default {
   props: ['tagsData'],
   data () {
     return {
-      loadingData: true,
+      loadingData: false,
       tags: [
         {
           e: 0,
@@ -34,19 +38,19 @@ export default {
     }
   },
   mounted () {
-    this.getData()
   },
   methods: {
     getData () {
-      // this.loadingData = true
-      // this.$root.$http.get('', {params: {get: 'data'}}).then((response) => {
-      //   this.data = response.data
-      //   this.loadingData = false
-      // }).catch((err) => {
-      //   console.log(err)
-      //   alert('Fehler!')
-      //   this.loadingData = false
-      // })
+      this.loadingData = true
+      this.data = {}
+      this.$root.$http.get('', {params: {get: 'tagKontext', l: this.getFlatTags(this.tags[0].tags)}}).then((response) => {
+        this.data = response.data
+        this.loadingData = false
+      }).catch((err) => {
+        console.log(err)
+        alert('Fehler!')
+        this.loadingData = false
+      })
       this.loadingData = false
     },
     getFlatTags (tags) {
@@ -62,12 +66,23 @@ export default {
   },
   computed: {
     loading () {
-      return this.loadingData || this.tagsData.data.loading || this.tagsData.data.loadingBase || this.tagsData.data.loadingPresets || this.tagsData.data.loadingTags
+      return this.loadingData || this.tagloading
+    },
+    tagloading () {
+      return this.tagsData.data.loading || this.tagsData.data.loadingBase || this.tagsData.data.loadingPresets || this.tagsData.data.loadingTags
     }
   },
   watch: {
-    tags () {
-      console.log(this.tags)
+    tags: {
+      handler () {
+        console.log(this.tags)
+        if (this.tags[0] && this.tags[0].e > 0 && this.tags[0].tags && this.tags[0].tags.length > 0) {
+          this.getData()
+        } else {
+          this.data = {}
+        }
+      },
+      deep: true
     }
   },
   components: {

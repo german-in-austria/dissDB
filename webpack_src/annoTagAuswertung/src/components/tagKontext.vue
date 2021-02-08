@@ -1,6 +1,7 @@
 <template>
   <div class="auswertung">
-    Tag Kontext:<br>
+    Tag Kontext: {{ data.antwortenListe.length }}<br>
+    {{ data.antwortenListe }}
   </div>
 </template>
 
