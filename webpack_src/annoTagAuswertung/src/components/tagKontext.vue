@@ -1,7 +1,13 @@
 <template>
   <div class="auswertung">
     Tag Kontext: {{ data.antwortenListe.length }}<br>
-    {{ data.antwortenListe }}
+    <ul>
+      <li
+        v-for="(a, i) in data.antwortenListe.slice(0, 100)" :key="'a' + i"
+      >
+        {{ a }}
+      </li>
+    </ul>
   </div>
 </template>
 

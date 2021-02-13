@@ -5,13 +5,15 @@
       Warte auf Tagsystem ...
     </div>
     <div v-else>
-      <Tagsystem :tagsData="tagsData" :tags="tags" :http="$root.$http" mode="select" style="max-width: 100rem;"/>
-      {{ getFlatTags(tags[0].tags) }}
-      <div v-if="loading">
+      <div class="tagline">
+        <Tagsystem :tagsData="tagsData" :tags="tags" :http="$root.$http" mode="select" style="max-width: 100rem;"/>
+        <div class="taginfo">{{ getFlatTags(tags[0].tags) }}</div>
+      </div>
+      <div v-if="loading || loadingData">
         Lade ...<br>
       </div>
-      <tagKontext :data="data" :tagsData="tagsData" v-else-if="data && data.antwortenListe" />
-      <div>
+      <tagKontext :data="data" :tagsData="tagsData" v-else-if="data && data.antwortenListe && data.antwortenListe.length > 0" />
+      <div v-else>
         Keine Daten!
       </div>
     </div>
@@ -51,7 +53,6 @@ export default {
         alert('Fehler!')
         this.loadingData = false
       })
-      this.loadingData = false
     },
     getFlatTags (tags) {
       let tagList = []
@@ -96,5 +97,14 @@ export default {
 .annotagkontext {
   margin-top: 15px;
   margin-bottom: 50px;
+}
+.tagline {
+  display: flex;
+}
+.tagline > div {
+  flex-grow: 1;
+}
+.tagline > .taginfo {
+  flex-grow: 2;
 }
 </style>
