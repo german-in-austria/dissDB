@@ -5,9 +5,14 @@
       Warte auf Tagsystem ...
     </div>
     <div v-else>
-      <div class="tagline">
-        <Tagsystem :tagsData="tagsData" :tags="tags" :http="$root.$http" mode="select" style="max-width: 100rem;"/>
-        <div class="taginfo">{{ getFlatTags(tags[0].tags) }}</div>
+      <div :class="{'loading-data': loadingData}">
+        <div class="tagline">
+          <Tagsystem :tagsData="tagsData" :tags="tags" :http="$root.$http" mode="select" style="max-width: 100rem;"/>
+          <div class="taginfo">{{ getFlatTags(tags[0].tags) }}</div>
+        </div>
+        <div>
+          <div class="checkbox"><label><input v-model="strickt" type="checkbox"> Strickt</label></div>
+        </div>
       </div>
       <div v-if="loading || loadingData">
         Lade ...<br>
@@ -36,23 +41,26 @@ export default {
           tags: []
         }
       ],
-      data: {}
+      data: {},
+      strickt: false
     }
   },
   mounted () {
   },
   methods: {
     getData () {
-      this.loadingData = true
-      this.data = {}
-      this.$root.$http.get('', {params: {get: 'tagKontext', l: this.getFlatTags(this.tags[0].tags)}}).then((response) => {
-        this.data = response.data
-        this.loadingData = false
-      }).catch((err) => {
-        console.log(err)
-        alert('Fehler!')
-        this.loadingData = false
-      })
+      if (!this.loadingData) {
+        this.loadingData = true
+        this.data = {}
+        this.$root.$http.get('', {params: {get: 'tagKontext', l: this.getFlatTags(this.tags[0].tags), s: this.strickt}}).then((response) => {
+          this.data = response.data
+          this.loadingData = false
+        }).catch((err) => {
+          console.log(err)
+          alert('Fehler!')
+          this.loadingData = false
+        })
+      }
     },
     getFlatTags (tags) {
       let tagList = []
@@ -84,6 +92,11 @@ export default {
         }
       },
       deep: true
+    },
+    strickt () {
+      if (this.tags[0] && this.tags[0].e > 0 && this.tags[0].tags && this.tags[0].tags.length > 0) {
+        this.getData()
+      }
     }
   },
   components: {
@@ -106,5 +119,9 @@ export default {
 }
 .tagline > .taginfo {
   flex-grow: 2;
+}
+.loading-data {
+  opacity: 0.7;
+  pointer-events: none;
 }
 </style>

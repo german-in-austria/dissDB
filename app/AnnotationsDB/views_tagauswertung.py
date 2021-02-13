@@ -61,9 +61,11 @@ def views_tagauswertung(request):
 						FROM public."AntwortenTags" as at
 						WHERE "id_Tag_id" IN (''' + ','.join(rql) + ''')
 						GROUP BY "id_Antwort_id", "id_TagEbene_id"
-					) as at
+					) as at''' + ('''
 					WHERE array_to_string(at.t, ',', '*') LIKE '%''' + ','.join(rql) + '''%'
-				''')
+				''' if request.GET.get('s') == 'true' else '''
+					WHERE at.t @> ARRAY[''' + ', '.join(rql) + ''']
+				'''))
 				antwortenListe = [{'aId': x[0], 'eId': x[1], 'data': x[2]} for x in cursor.fetchall()]
 				return httpOutput(json.dumps({'antwortenListe': antwortenListe}), 'application/json')
 	return render_to_response('AnnotationsDB/tagauswertungstart.html', RequestContext(request))
