@@ -10,14 +10,17 @@
           <Tagsystem :tagsData="tagsData" :tags="tags" :http="$root.$http" mode="select" style="max-width: 100rem;"/>
           <div class="taginfo">{{ getFlatTags(tags[0].tags) }}</div>
         </div>
-        <div>
-          <div class="checkbox"><label><input v-model="strickt" type="checkbox"> Strickt</label></div>
+        <div class="options">
+          <div><div class="checkbox"><label><input v-model="strickt" type="checkbox"> Strickt</label></div></div>
+          <div><div class="checkbox"><label><input v-model="kUeb" type="checkbox"> Keine Überschneidungen</label></div></div>
+          <button @click="getData" :class="'btn btn-' + ((tags[0] && tags[0].e > 0 && tags[0].tags && tags[0].tags.length > 0) && update ? 'warning' : 'default')" :disabled="!(tags[0] && tags[0].e > 0 && tags[0].tags && tags[0].tags.length > 0)">Laden</button><br>
+          <br>
         </div>
       </div>
       <div v-if="loading || loadingData">
         Lade ...<br>
       </div>
-      <tagKontext :data="data" :tagsData="tagsData" v-else-if="data && data.antwortenListe && data.antwortenListe.length > 0" />
+      <tagKontext :data="data" :tagsData="tagsData" :kUeb="kUeb" v-else-if="data && data.antwortenListe && data.antwortenListe.length > 0" />
       <div v-else>
         Keine Daten!
       </div>
@@ -42,7 +45,9 @@ export default {
         }
       ],
       data: {},
-      strickt: false
+      update: false,
+      strickt: false,
+      kUeb: true
     }
   },
   mounted () {
@@ -51,6 +56,7 @@ export default {
     getData () {
       if (!this.loadingData) {
         this.loadingData = true
+        this.update = false
         this.data = {}
         this.$root.$http.get('', {params: {get: 'tagKontext', l: this.getFlatTags(this.tags[0].tags), s: this.strickt}}).then((response) => {
           this.data = response.data
@@ -84,19 +90,21 @@ export default {
   watch: {
     tags: {
       handler () {
-        console.log(this.tags)
-        if (this.tags[0] && this.tags[0].e > 0 && this.tags[0].tags && this.tags[0].tags.length > 0) {
-          this.getData()
-        } else {
-          this.data = {}
-        }
+        // console.log(this.tags)
+        // if (this.tags[0] && this.tags[0].e > 0 && this.tags[0].tags && this.tags[0].tags.length > 0) {
+        //   this.getData()
+        // } else {
+        //   this.data = {}
+        // }
+        this.update = true
       },
       deep: true
     },
     strickt () {
-      if (this.tags[0] && this.tags[0].e > 0 && this.tags[0].tags && this.tags[0].tags.length > 0) {
-        this.getData()
-      }
+      // if (this.tags[0] && this.tags[0].e > 0 && this.tags[0].tags && this.tags[0].tags.length > 0) {
+      //   this.getData()
+      // }
+      this.update = true
     }
   },
   components: {
@@ -123,5 +131,9 @@ export default {
 .loading-data {
   opacity: 0.7;
   pointer-events: none;
+}
+.options > div {
+  float: left;
+  margin-right: 20px;
 }
 </style>
