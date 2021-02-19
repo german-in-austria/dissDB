@@ -1,5 +1,17 @@
 SELECT
   (
+    SELECT JSON_BUILD_OBJECT(
+      'trId', tat.transcript_id_id,
+      'trTxt', (
+        SELECT tr.name
+        FROM PUBLIC."transcript" AS tr
+        WHERE tr.id = tat.transcript_id_id
+      )
+    )
+    FROM PUBLIC."token" AS tat
+    WHERE tat.id = (tokendata.data->'t'->>0)::int
+  ) AS transkript,
+  (
     SELECT JSON_AGG(ROW_TO_JSON(antw.*))
     FROM (
       SELECT

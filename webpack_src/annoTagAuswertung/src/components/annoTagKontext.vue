@@ -12,6 +12,7 @@
         </div>
         <div class="options">
           <div><div class="checkbox"><label><input v-model="strickt" type="checkbox"> Strickt</label></div></div>
+          <div><div class="checkbox"><label><input v-model="table" type="checkbox"> Tabelle</label></div></div>
           <div><div class="checkbox"><label><input v-model="kUeb" type="checkbox"> Keine Überschneidungen</label></div></div>
           <button @click="getData" :class="'btn btn-' + ((tags[0] && tags[0].e > 0 && tags[0].tags && tags[0].tags.length > 0) && update ? 'warning' : 'default')" :disabled="!(tags[0] && tags[0].e > 0 && tags[0].tags && tags[0].tags.length > 0)">Laden</button><br>
           <br>
@@ -20,7 +21,7 @@
       <div v-if="loading || loadingData">
         Lade ...<br>
       </div>
-      <tagKontext :data="data" :tagsData="tagsData" :kUeb="kUeb" v-else-if="data && data.antwortenListe && data.antwortenListe.length > 0" />
+      <tagKontext :data="data" :tagsData="tagsData" :kUeb="kUeb" :table="table" v-else-if="data && data.antwortenListe && data.antwortenListe.length > 0" />
       <div v-else>
         Keine Daten!
       </div>
@@ -47,7 +48,8 @@ export default {
       data: {},
       update: false,
       strickt: false,
-      kUeb: true
+      kUeb: true,
+      table: true
     }
   },
   mounted () {

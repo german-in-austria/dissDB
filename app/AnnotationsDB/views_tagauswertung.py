@@ -47,6 +47,18 @@ def views_tagauswertung(request):
 				cursor.execute('''
 					SELECT
 						(
+							SELECT JSON_BUILD_OBJECT(
+								'trId', tat.transcript_id_id,
+								'trTxt', (
+									SELECT tr.name
+									FROM PUBLIC."transcript" AS tr
+									WHERE tr.id = tat.transcript_id_id
+								)
+							)
+							FROM PUBLIC."token" AS tat
+							WHERE tat.id = (tokendata.data->'t'->>0)::int
+						) AS transkript,
+						(
 							SELECT JSON_AGG(ROW_TO_JSON(antw.*))
 							FROM (
 								SELECT
@@ -117,6 +129,6 @@ def views_tagauswertung(request):
 							AND at.t @> ARRAY[''' + ', '.join(rql) + ''']''') + '''
 					) AS tokendata
 					''')
-				antwortenListe = [{'antworten': x[0], 'tokens': x[1], 'data': x[2]} for x in cursor.fetchall()]
+				antwortenListe = [{'transkript': x[0], 'antworten': x[1], 'tokens': x[2], 'data': x[3]} for x in cursor.fetchall()]
 				return httpOutput(json.dumps({'antwortenListe': antwortenListe}), 'application/json')
 	return render_to_response('AnnotationsDB/tagauswertungstart.html', RequestContext(request))
