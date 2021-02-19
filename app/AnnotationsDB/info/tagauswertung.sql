@@ -9,7 +9,7 @@ SELECT
       )
     )
     FROM PUBLIC."token" AS tat
-    WHERE tat.id = (tokendata.data->'t'->>0)::int
+    WHERE tat.id = tokendata.tokens[1]
   ) AS transkript,
   (
     SELECT JSON_AGG(ROW_TO_JSON(antw.*))
@@ -71,9 +71,9 @@ FROM (
   			WHERE sat."id_Antwort_id" = at."id_Antwort_id"
   		) as t
   	FROM public."AntwortenTags" as at
-  	WHERE "id_Tag_id" IN (1167, 1168)
+  	WHERE "id_Tag_id" IN (1021)
   	GROUP BY "id_Antwort_id", "id_TagEbene_id"
   ) as at
   LEFT JOIN public."Antworten" as ant ON id = at."id_Antwort_id"
-  WHERE (ant."ist_token_id" > 0 OR ant."ist_tokenset_id" > 0) AND array_to_string(at.t, ',', '*') LIKE '%1167,1168%'
+  WHERE (ant."ist_token_id" > 0 OR ant."ist_tokenset_id" > 0) AND array_to_string(at.t, ',', '*') LIKE '%1021%'
 ) AS tokendata

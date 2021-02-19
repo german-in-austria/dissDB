@@ -56,7 +56,7 @@ def views_tagauswertung(request):
 								)
 							)
 							FROM PUBLIC."token" AS tat
-							WHERE tat.id = (tokendata.data->'t'->>0)::int
+							WHERE tat.id = tokendata.tokens[1]
 						) AS transkript,
 						(
 							SELECT JSON_AGG(ROW_TO_JSON(antw.*))
