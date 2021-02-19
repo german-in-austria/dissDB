@@ -1,6 +1,6 @@
 <template>
   <div class="auswertung">
-    Tag Kontext: {{ dataP.filter(x => x.antworten.length > 0).length }} ({{ data.antwortenListe.length }})<br>
+    Tag Kontext: {{ dataP.filter(x => x.antworten.length > 0).length }} ({{ data.antwortenListe.length }}) <button @click="excelExport" class="btn btn-default" style="margin-left: 20px;">XLSX</button><br>
     <br>
     <table class="table" v-if="table">
       <thead>
@@ -9,7 +9,7 @@
           <th colspan="3">Überschneidung</th>
         </tr>
         <tr>
-          <th>tId</th>
+          <th>trId</th>
           <th>Transkript</th>
           <th>aId</th>
           <th>Tagebene</th>
@@ -58,6 +58,8 @@
 </template>
 
 <script>
+const XLSX = require('xlsx')
+
 export default {
   name: 'tagKontext',
   props: ['data', 'tagsData', 'kUeb', 'table'],
@@ -69,6 +71,33 @@ export default {
     console.log({data: this.data, tagsData: this.tagsData, dataP: this.dataP, dataT: this.dataT})
   },
   methods: {
+    excelExport () {
+      console.log(XLSX)
+      var wb = XLSX.utils.book_new()
+      wb.Props = {
+        Title: 'dissDB',
+        Subject: 'Tag Kontext',
+        Author: 'dissDB',
+        CreatedDate: new Date()
+      }
+      wb.SheetNames.push('Daten')
+      var wsData = [['trId', 'Transkript', 'aId', 'Tagebene', 'Tags', 'aId', 'Tagebene', 'Tags'], ...this.dataT]
+      var ws = XLSX.utils.aoa_to_sheet(wsData)
+      wb.Sheets['Daten'] = ws
+      let filename = 'dissDb_tk_' + this.getDateTimeFormated(true) + '.xlsx'
+      XLSX.writeFile(wb, filename, {bookType: 'xlsx', type: 'binary', FS: ';'})
+    },
+    getDateTimeFormated (file = false) {
+      var d = new Date()
+      var dT = d.getDate()
+      var dM = d.getMonth() + 1
+      var dH = d.getHours()
+      var dMi = d.getMinutes()
+      if (file) {
+        return (dT < 10 ? '0' + dT : dT) + '-' + (dM < 10 ? '0' + dM : dM) + '-' + d.getFullYear() + '_' + (dH < 10 ? '0' + dH : dH) + '-' + (dMi < 10 ? '0' + dMi : dMi)
+      }
+      return (dT < 10 ? '0' + dT : dT) + '.' + (dM < 10 ? '0' + dM : dM) + '.' + d.getFullYear() + ', ' + (dH < 10 ? '0' + dH : dH) + ':' + (dMi < 10 ? '0' + dMi : dMi) + ' Uhr'
+    },
     getTagNames (t) {
       let tl = []
       if (t && t[0]) {
