@@ -1,11 +1,11 @@
 <template>
   <div class="auswertung">
-    Tag Kontext: {{ data.antwortenListe.length }}<br>
+    Tag Kontext: {{ dataP.filter(x => x.antworten.length > 0).length }} ({{ data.antwortenListe.length }})<br>
     <ul>
-      <template v-for="(a, i) in data.antwortenListe">
-        <li :key="'a' + i" v-if="kUeb || (a.antworten && a.antworten.length > 1)">
+      <template v-for="(a, i) in dataP">
+        <li :key="'a' + i" v-if="kUeb || (a.antworten && a.antworten.length > 0)">
           <b>aId: {{ a.data.id_Antwort_id }} - {{ (tagsData.data.baseCache.tagebenenObj[a.data.id_TagEbene_id] || {t: a.data.id_TagEbene_id}).t }}</b> - {{ getTagNames(a.data.t).join(' ') }}
-          <ul v-if="a.antworten && a.antworten.length > 1">
+          <ul v-if="a.antworten && a.antworten.length > 0">
             <li
               v-for="(f, i) in a.antworten" :key="'f' + i"
             >
@@ -41,6 +41,7 @@ export default {
   },
   mounted () {
     console.log(this.data, this.tagsData)
+    console.log(this.dataP)
   },
   methods: {
     getTagNames (t) {
@@ -70,6 +71,20 @@ export default {
     }
   },
   computed: {
+    dataP () {
+      let dp = []
+      this.data.antwortenListe.forEach(a => {
+        let x = {
+          antworten: a.antworten.filter(b => b.id !== a.data.id_Antwort_id),
+          data: a.data,
+          tokens: a.tokens
+        }
+        dp.push(x)
+      })
+      return dp
+    }
+  },
+  watch: {
   },
   components: {
   }
