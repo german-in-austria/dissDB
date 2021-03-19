@@ -8,4 +8,4 @@ xlwt==1.2
 django-cors-headers==2.1.0
 pytz==2017.2
 olefile==0.44
-Pillow==4.2.1
+Pillow==8.1.1
