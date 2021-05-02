@@ -32,7 +32,21 @@ export default {
         this.data = response.data
         this.data.tagList.forEach(tl => {
           tl.tc = {t: 0, wt: 0}
+          tl.byId = {}
+          let exist = []
+          tl.data = tl.data.filter(d => {
+            if (exist.indexOf(d.id) > -1) {
+              return false
+            } else {
+              exist.push(d.id)
+              return true
+            }
+          })
           tl.data.forEach(d => {
+            if (!tl.byId[d.aid]) {
+              tl.byId[d.aid] = []
+            }
+            tl.byId[d.aid].push(d)
             d.c = {
               t: d.tc.t + d.tsc.t + d.tstc.t,
               wt: d.tc.wt + d.tsc.wt + d.tstc.wt

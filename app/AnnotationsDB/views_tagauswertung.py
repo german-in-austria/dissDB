@@ -19,6 +19,7 @@ def views_tagauswertung(request):
 						(
 							SELECT json_agg(
 								json_strip_nulls(json_build_object(
+									'id', subanttags.id,
 									'aid', subanttags."id_Antwort_id",
 									'r', subanttags."Reihung",
 									't', ant."ist_token_id",

@@ -107,24 +107,26 @@ export default {
       if (this.selTags.length) {
         let bd = {}
         let abt = this.selTags[0]
-        console.log(abt)
+        // console.log(abt)
         Object.keys(abt).forEach(k => {
           if (k !== 'data') {
             bd[k] = abt[k]
           }
         })
         bd.liste = {0: {}}
-        console.log(bd)
+        // console.log(bd)
         // Nachfolgende Tags ermitteln:
         this.filteredTagList.forEach(ftl => {
           if (ftl.id !== abt.id) {
             let found = []
             ftl.data.forEach(aObj => {
-              abt.data.forEach(oObj => {
-                if (oObj.aid === aObj.aid && oObj && oObj.r + 1 === aObj.r && ((oObj.s && oObj.s === aObj.s) || (oObj.tr && oObj.tr === aObj.tr)) && found.indexOf(aObj) < 0) {
-                  found.push(aObj)
-                }
-              })
+              if (abt.byId[aObj.aid]) {
+                abt.byId[aObj.aid].forEach(oObj => {
+                  if (oObj && oObj.r + 1 === aObj.r && ((oObj.s && oObj.s === aObj.s) || (oObj.tr && oObj.tr === aObj.tr)) && found.indexOf(aObj) < 0) {
+                    found.push(aObj)
+                  }
+                })
+              }
             })
             // console.log(ftl.id, ftl.data, 'found', Object.keys(found).length, found)
             if (found.length > 0) {
