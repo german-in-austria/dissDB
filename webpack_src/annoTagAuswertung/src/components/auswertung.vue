@@ -33,6 +33,8 @@
           </template>
           <th>Count</th>
           <th>Daten</th>
+          <th>Tokens</th>
+          <th>Wort Tokens</th>
         </tr>
       </thead>
       <tbody v-if="selTags.length < 1">
@@ -41,6 +43,8 @@
           <td :title="'Id: ' + aTag.id + '\n' + tagsData.data.tagsCache.tags[aTag.id].tl + '\n' + tagsData.data.tagsCache.tags[aTag.id].k">{{ tagsData.data.tagsCache.tags[aTag.id].t }}</td>
           <td>{{ aTag.count }}</td>
           <td>{{ Object.keys(aTag.data).length }}</td>
+          <td>{{ aTag.tc.t }}</td>
+          <td>{{ aTag.tc.wt }}</td>
         </tr>
       </tbody>
       <tbody v-else-if="filteredSubTags">

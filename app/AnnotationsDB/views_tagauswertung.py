@@ -23,7 +23,31 @@ def views_tagauswertung(request):
 									't', ant."ist_token_id",
 									'ts', ant."ist_tokenset_id",
 									's', ant."ist_Satz_id",
-									'tr', COALESCE (tok."transcript_id_id", tokts."transcript_id_id", toktst."transcript_id_id")
+									'tr', COALESCE (tok."transcript_id_id", tokts."transcript_id_id", toktst."transcript_id_id"),
+									'tc', (
+										json_build_object(
+											't', CASE WHEN tok.id is NOT NULL THEN 1 ELSE 0 END,
+											'wt', CASE WHEN tok.token_type_id_id in (1,4,8) THEN 1 ELSE 0 END
+										)
+									),
+									'tsc', (
+										SELECT json_build_object(
+											't', COUNT(xtokts.*),
+											'wt', COUNT(xtokts.*) FILTER(WHERE xtokts.fragment_of_id is NULL AND xtokts.token_type_id_id in (1,4,8))
+										)
+										FROM public."tokentoset_cache" as xtoktosetc
+										LEFT JOIN public."token" as xtokts ON xtokts.id = xtoktosetc."id_token_id"
+										WHERE xtoktosetc."id_tokenset_id" = tokset.id
+									),
+									'tstc', (
+										SELECT json_build_object(
+											't', COUNT(xtoktst.*),
+											'wt', COUNT(xtoktst.*) FILTER(WHERE xtoktst.fragment_of_id is NULL AND xtoktst.token_type_id_id in (1,4,8))
+										)
+										FROM public."tokentoset" as xtoktoset
+										LEFT JOIN public."token" as xtoktst ON xtoktst.id = xtoktoset."id_token_id"
+										WHERE xtoktoset."id_tokenset_id" = tokset.id
+									)
 								))
 							)
 							FROM public."AntwortenTags" as subanttags

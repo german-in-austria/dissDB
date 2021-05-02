@@ -30,6 +30,18 @@ export default {
       this.loadingData = true
       this.$root.$http.get('', {params: {get: 'data'}}).then((response) => {
         this.data = response.data
+        this.data.tagList.forEach(tl => {
+          tl.tc = {t: 0, wt: 0}
+          Object.keys(tl.data).forEach(d => {
+            tl.data[d].c = {
+              t: tl.data[d].tc.t + tl.data[d].tsc.t + tl.data[d].tstc.t,
+              wt: tl.data[d].tc.wt + tl.data[d].tsc.wt + tl.data[d].tstc.wt
+            }
+            tl.tc.t += tl.data[d].c.t
+            tl.tc.wt += tl.data[d].c.wt
+          })
+        })
+        console.log(this.data)
         this.loadingData = false
       }).catch((err) => {
         console.log(err)
