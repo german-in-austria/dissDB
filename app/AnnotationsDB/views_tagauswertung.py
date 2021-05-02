@@ -17,8 +17,9 @@ def views_tagauswertung(request):
 						anttags."id_TagEbene_id" as tagebene_id,
 						COUNT("id_Tag_id") as count,
 						(
-							SELECT json_object_agg(
-								subanttags."id_Antwort_id", json_strip_nulls(json_build_object(
+							SELECT json_agg(
+								json_strip_nulls(json_build_object(
+									'aid', subanttags."id_Antwort_id",
 									'r', subanttags."Reihung",
 									't', ant."ist_token_id",
 									'ts', ant."ist_tokenset_id",

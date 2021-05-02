@@ -39,21 +39,21 @@
       </thead>
       <tbody v-if="selTags.length < 1">
         <tr v-for="aTag in filteredTagList" :key="'at' + aTag.eId + '-' + aTag.id" @click="pushTag(aTag)">
-          <td :title="'Id: ' + aTag.eId">{{ tagsData.data.baseCache.tagebenenObj[aTag.eId].t }}</td>
+          <td :title="'Id: ' + aTag.eId" @click="log(aTag)">{{ tagsData.data.baseCache.tagebenenObj[aTag.eId].t }}</td>
           <td :title="'Id: ' + aTag.id + '\n' + tagsData.data.tagsCache.tags[aTag.id].tl + '\n' + tagsData.data.tagsCache.tags[aTag.id].k">{{ tagsData.data.tagsCache.tags[aTag.id].t }}</td>
           <td>{{ aTag.count }}</td>
-          <td>{{ Object.keys(aTag.data).length }}</td>
+          <td>{{ aTag.data.length }}</td>
           <td>{{ aTag.tc.t }}</td>
           <td>{{ aTag.tc.wt }}</td>
         </tr>
       </tbody>
       <tbody v-else-if="filteredSubTags">
         <tr v-for="(aTag, aKey) in filteredSubTags.liste" :key="'ft' + aKey">
-          <td :title="'Id: ' + filteredSubTags.eId">{{ tagsData.data.baseCache.tagebenenObj[filteredSubTags.eId].t }}</td>
+          <td :title="'Id: ' + filteredSubTags.eId" @click="log({x: aTag})">{{ tagsData.data.baseCache.tagebenenObj[filteredSubTags.eId].t }}</td>
           <td :title="'Id: ' + filteredSubTags.id + '\n' + tagsData.data.tagsCache.tags[filteredSubTags.id].tl + '\n' + tagsData.data.tagsCache.tags[filteredSubTags.id].k">{{ tagsData.data.tagsCache.tags[filteredSubTags.id].t }}</td>
           <td :class="{'ohne': aKey < 1}" :title="aKey > 0 ? 'Id: ' + aKey + '\n' + tagsData.data.tagsCache.tags[aKey].tl + '\n' + tagsData.data.tagsCache.tags[aKey].k : 'ohne nachfolgenden Tag'">{{ aKey > 0 ? tagsData.data.tagsCache.tags[aKey].t : 'ohne' }}</td>
           <td></td>
-          <td>{{ aKey > 0 ? Object.keys(aTag).length : '?' }}</td>
+          <td>{{ aKey > 0 ? aTag.length : '?' }}</td>
           <td>{{ aKey > 0 ? getTC(aTag).t : '?' }}</td>
           <td>{{ aKey > 0 ? getTC(aTag).wt : '?' }}</td>
         </tr>
@@ -79,15 +79,18 @@ export default {
     console.log(this.data, this.tagsData)
   },
   methods: {
+    log (d) {
+      console.log(d)
+    },
     getTC (aTag) {
       let c = {
         t: 0,
         wt: 0
       }
-      Object.keys(aTag).forEach(t => {
-        if (aTag[t].c) {
-          c.t += aTag[t].c.t
-          c.wt += aTag[t].c.wt
+      aTag.forEach(t => {
+        if (t.c) {
+          c.t += t.c.t
+          c.wt += t.c.wt
         }
       })
       return c
@@ -104,25 +107,27 @@ export default {
       if (this.selTags.length) {
         let bd = {}
         let abt = this.selTags[0]
+        console.log(abt)
         Object.keys(abt).forEach(k => {
           if (k !== 'data') {
             bd[k] = abt[k]
           }
         })
         bd.liste = {0: {}}
+        console.log(bd)
         // Nachfolgende Tags ermitteln:
         this.filteredTagList.forEach(ftl => {
           if (ftl.id !== abt.id) {
-            let found = {}
-            Object.keys(ftl.data).forEach(k => {
-              let aObj = ftl.data[k]
-              let oObj = abt.data[k]
-              if (oObj && oObj.r + 1 === aObj.r && ((oObj.s && oObj.s === aObj.s) || (oObj.tr && oObj.tr === aObj.tr))) {
-                found[k] = aObj
-              }
+            let found = []
+            ftl.data.forEach(aObj => {
+              abt.data.forEach(oObj => {
+                if (oObj.aid === aObj.aid && oObj && oObj.r + 1 === aObj.r && ((oObj.s && oObj.s === aObj.s) || (oObj.tr && oObj.tr === aObj.tr)) && found.indexOf(aObj) < 0) {
+                  found.push(aObj)
+                }
+              })
             })
             // console.log(ftl.id, ftl.data, 'found', Object.keys(found).length, found)
-            if (Object.keys(found).length > 0) {
+            if (found.length > 0) {
               bd.liste[ftl.id] = found
             } else {
               bd.liste[0][ftl.id] = 1
