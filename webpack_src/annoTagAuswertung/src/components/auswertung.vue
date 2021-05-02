@@ -54,6 +54,8 @@
           <td :class="{'ohne': aKey < 1}" :title="aKey > 0 ? 'Id: ' + aKey + '\n' + tagsData.data.tagsCache.tags[aKey].tl + '\n' + tagsData.data.tagsCache.tags[aKey].k : 'ohne nachfolgenden Tag'">{{ aKey > 0 ? tagsData.data.tagsCache.tags[aKey].t : 'ohne' }}</td>
           <td></td>
           <td>{{ aKey > 0 ? Object.keys(aTag).length : '?' }}</td>
+          <td>{{ aKey > 0 ? getTC(aTag).t : '?' }}</td>
+          <td>{{ aKey > 0 ? getTC(aTag).wt : '?' }}</td>
         </tr>
       </tbody>
     </table>
@@ -77,6 +79,19 @@ export default {
     console.log(this.data, this.tagsData)
   },
   methods: {
+    getTC (aTag) {
+      let c = {
+        t: 0,
+        wt: 0
+      }
+      Object.keys(aTag).forEach(t => {
+        if (aTag[t].c) {
+          c.t += aTag[t].c.t
+          c.wt += aTag[t].c.wt
+        }
+      })
+      return c
+    },
     pushTag (tId) {
       this.selTags.push(tId)
     },
