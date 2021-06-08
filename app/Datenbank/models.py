@@ -200,6 +200,11 @@ class EinzelErhebung(models.Model):
 	Logfile				= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Logfile")
 	Ort					= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Ort")
 	Besonderheiten		= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Besonderheiten")
+	mikrofon			= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Mikrofon")
+	setting				= models.CharField(max_length=511,			blank=True, null=True									, verbose_name="Setting")
+	aufnhzeitpunkt		= models.DateTimeField(blank=True, null=True														, verbose_name="Aufnahmezeitpunkt")
+	audiofilesize		= models.IntegerField(blank=True, null=True															, verbose_name="audiofilesize")
+	dauer				= models.DurationField(blank=True, null=True														, verbose_name="Dauer")
 	def __str__(self):
 		return "{} {} <-> {}".format(self.Datum, self.ID_Erh, ",".join([str(ize.ID_Inf) for ize in self.inf_zu_erhebung_set.all()]))
 	class Meta:
