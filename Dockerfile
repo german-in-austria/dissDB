@@ -1,14 +1,16 @@
 # DIOE
-FROM ubuntu:14.04
+FROM ubuntu:18.04
+ENV TZ=Europe/Berlin
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # ADD SOURCES FOR BUILD DEPENDENCIES
-RUN echo "deb-src http://in.archive.ubuntu.com/ubuntu/ precise main restricted" >> /etc/apt/sources.list
-RUN echo "deb-src http://in.archive.ubuntu.com/ubuntu/ precise-updates main restricted" >> /etc/apt/sources.list
+RUN echo "deb-src http://in.archive.ubuntu.com/ubuntu/ bionic main restricted" >> /etc/apt/sources.list
+RUN echo "deb-src http://in.archive.ubuntu.com/ubuntu/ bionic-updates main restricted" >> /etc/apt/sources.list
 
 # INSTALL EVERYTHING (”-y” WITHOUT ASKING FOR PERMISSION)
 RUN apt-get update
 RUN apt-get install -y software-properties-common
-RUN add-apt-repository ppa:fkrull/deadsnakes
+RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get update -yq && apt-get install -y curl gnupg && curl -sL https://deb.nodesource.com/setup_10.x | bash && apt-get install -y --force-yes nodejs
 RUN apt-get update
 RUN apt-get install -y git
@@ -78,7 +80,7 @@ COPY . /home/docker/code/
 # COLLECT ALL STATIC FILES IN /STATIC
 ENV DISSDB_STATIC_URL=/static/
 ENV DISSDB_STATIC_ROOT=/var/www/example.com/static/
-RUN python3 /home/docker/code/app/manage.py collectstatic --noinput
+RUN python3.5 /home/docker/code/app/manage.py collectstatic --noinput
 
 EXPOSE 80
 CMD ["supervisord", "-n"]
