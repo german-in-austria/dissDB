@@ -15,7 +15,7 @@
     "popper.js": "^1.15.0",
     "vue": "^2.6.10",
     "vue-resource": "^1.5.1",
-    "xlsx": "^0.16.9"
+    "xlsx": "^0.17.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
