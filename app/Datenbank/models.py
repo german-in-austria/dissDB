@@ -1,4 +1,6 @@
 from django.db import models
+import time
+import datetime
 
 class Antworten(models.Model):
 	von_Inf				= models.ForeignKey('Informanten'									, on_delete=models.CASCADE		, verbose_name="von Informanten")
@@ -205,7 +207,34 @@ class EinzelErhebung(models.Model):
 	aufnhzeitpunkt		= models.DateTimeField(blank=True, null=True														, verbose_name="Aufnahmezeitpunkt")
 	audiofilesize		= models.IntegerField(blank=True, null=True															, verbose_name="audiofilesize")
 	dauer				= models.DurationField(blank=True, null=True														, verbose_name="Dauer")
+	dateidauer			= models.DurationField(blank=True, null=True														, verbose_name="Dauer der Datei")
 	plz					= models.IntegerField(blank=True, null=True															, verbose_name="plz")
+
+	def getDuration():
+		import mutagen
+		from django.conf import settings
+		import sys, locale, os
+		dg = 0
+		all = EinzelErhebung.objects.filter(dateidauer=None).count()
+		for aEinzelErhebung in EinzelErhebung.objects.filter(dateidauer=None):
+			start = time.time()
+			if aEinzelErhebung.Dateipfad:
+				aDir = settings.AUDIO_ROOT
+				for sDir in aEinzelErhebung.Dateipfad.strip('\\').split('\\'):
+					aDir = os.path.join(aDir, sDir)
+				aDir = os.path.join(aDir, aEinzelErhebung.Audiofile + '.ogg')
+				# print(aDir, os.path.isfile(aDir))
+				if os.path.isfile(aDir):
+					aFile = mutagen.File(aDir)
+					if aFile.info.length > 0:
+						print(aFile, aFile.info.length)
+						aEinzelErhebung.dateidauer = datetime.timedelta(seconds=aFile.info.length)
+						aEinzelErhebung.save()
+						print(dg, '/', all, 'pk:', aEinzelErhebung.pk, 'dateidauer:', aEinzelErhebung.dateidauer, 'Timer:', time.time() - start)
+			dg += 1
+			# print(dg, '/', all, 'pk:', aEinzelErhebung.pk, 'dauer:', aEinzelErhebung.dateidauer, 'Timer:', time.time() - start)
+		return dg
+
 	def __str__(self):
 		return "{} {} <-> {}".format(self.Datum, self.ID_Erh, ",".join([str(ize.ID_Inf) for ize in self.inf_zu_erhebung_set.all()]))
 	class Meta:

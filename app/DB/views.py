@@ -29,6 +29,20 @@ def refreshcache(request,app_name,tabelle_name):
 	return httpOutput(success, mimetype='application/json')
 
 
+def getDuration(request,app_name,tabelle_name):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return redirect('dissdb_login')
+	# Gibt es die Tabelle?
+	try : amodel = apps.get_model(app_name, tabelle_name)
+	except LookupError : return HttpResponseNotFound('<h1>Tabelle "' + tabelle_name + '" nicht gefunden!</h1>')
+	try:
+		success = json.dumps({'success': 'success', 'db_table': str(amodel._meta.db_table), 'refreshCache': amodel.getDuration(), })
+	except Exception as e:
+		success = json.dumps({'error':str(type(e))+' - '+str(e),'db_table':str(amodel._meta.db_table),})
+	return httpOutput(success, mimetype='application/json')
+
+
 def resetidseq(request,app_name,tabelle_name):
 	# Ist der User Angemeldet?
 	if not request.user.is_authenticated():

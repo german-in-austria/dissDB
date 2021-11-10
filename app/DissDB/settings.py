@@ -23,6 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # DISSDB_SECRET_KEY = "ggm0_dycvizp#h$ap@czcy2t!al(0@j(%j@)*v00%w+of_whul"										#
 # DISSDB_STATIC_ROOT = "/var/www/example.com/static/"		(Default: None)										#
 # DISSDB_STATIC_URL = "/static/"							(Default: "/static/")								#
+# DISSDB_AUDIO_ROOT = "D:\\Uni Wien\\DissDB\\privat-media"	(Default: "D:\\Uni Wien\\DissDB\\privat-media")		#
 # DISSDB_AUDIO_URL = "/private-media/"						(Default: "/private-media/")						#
 # django-private-storage:																						#
 # DISSDB_PRIVATE_STORAGE_ROOT = '/'							(Default: '/')										#
@@ -221,6 +222,7 @@ if 'DISS_DB_PYTHON' in os.environ and os.environ['DISS_DB_PYTHON']:
 
 STATIC_URL = '/static/'
 AUDIO_URL = '/private-media/'
+AUDIO_ROOT = 'D:\\Uni Wien\\DissDB\\privat-media'
 
 if 'DISSDB_STATIC_ROOT' in os.environ and os.environ['DISSDB_STATIC_ROOT']:
 	STATIC_ROOT = os.environ['DISSDB_STATIC_ROOT']
@@ -228,6 +230,8 @@ if 'DISSDB_STATIC_URL' in os.environ and os.environ['DISSDB_STATIC_URL']:
 	STATIC_URL = os.environ['DISSDB_STATIC_URL']
 if 'DISSDB_AUDIO_URL' in os.environ and os.environ['DISSDB_AUDIO_URL']:
 	AUDIO_URL = os.environ['DISSDB_AUDIO_URL']
+if 'DISSDB_AUDIO_ROOT' in os.environ and os.environ['DISSDB_AUDIO_ROOT']:
+	AUDIO_ROOT = os.environ['DISSDB_AUDIO_ROOT']
 
 STATICFILES_DIRS = (
 	os.path.join(BASE_DIR, 'DissDB', 'static'),

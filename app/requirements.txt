@@ -9,3 +9,4 @@ django-cors-headers==2.1.0
 pytz==2017.2
 olefile==0.44
 Pillow==4.2.1
+mutagen==1.45.1
