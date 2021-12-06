@@ -1,0 +1,93 @@
+{% extends 'main/basis.html' %}
+{% load staticfiles %}
+{% load dioeTags %}
+{% load crispy_forms_tags %}
+{% block title %} - Annotation{% endblock %}
+{% block ueberschrift %} - Annotation{% endblock %}
+{% block sitecss %}
+{% endblock %}
+{% block inhalt %}
+<div style="overflow-x: auto">
+	<br>
+	<select onchange="javascript:location.href = '/annotationsdb/transkript/' + this.value;">
+		<option value="0"{% if aTagEbene == 0 %} selected{% endif %}>Transkript auswählen</option>
+		{% for value in transkripte %}
+			<option value="{{ value.pk }}"{% if aTranskript == value.pk %} selected{% endif %}>{{ value.title }}</option>
+		{% endfor %}
+	</select>
+	<br>
+	{% if aTranskript > 0 %}
+		<br>
+		<a href="{% url 'AnnotationsDB:transkript' aTranskript=aTranskript %}?get=xls">XLS</a>
+		<br>
+		<table class="table table-bordered" style="width: auto; max-width: inherit; min-width: 100%; white-space: nowrap;">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Informant</th>
+					<th>iId</th>
+					<th>eId</th>
+					<th>eStart</th>
+					<th>eEnd</th>
+					<th>tId</th>
+					<th>tr</th>
+					<th>Token Type</th>
+					<th>ttId</th>
+					<th>t</th>
+					<th>to</th>
+					<th>o</th>
+					<th>otot</th>
+					<th>ttpos</th>
+					<th>ttlemma</th>
+					<th>ttcheckword</th>
+					<th>sppos</th>
+					<th>sptag</th>
+					<th>splemma</th>
+					<th>spdep</th>
+					<th>sphead</th>
+					<th>spenttype</th>
+					<th>Sentence Id</th>
+					<th>sr</th>
+					<th>foId</th>
+					<th>le</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for event in aEventsX %}
+				<tr>
+					<td>{{ event.aNr }}</td>
+					<td>{{ event.iT }}</td>
+					<td>{{ event.i }}</td>
+					<td>{{ event.eId }}</td>
+					<td>{{ event.eStart }}</td>
+					<td>{{ event.eEnd }}</td>
+					<td>{{ event.tId }}</td>
+					<td>{{ event.tr }}</td>
+					<td>{{ event.ttT }}</td>
+					<td>{{ event.tt }}</td>
+					<td>{{ event.t }}</td>
+					<td>{{ event.to }}</td>
+					<td>{{ event.o }}</td>
+					<td>{{ event.otot }}</td>
+					<td>{{ event.ttpos }}</td>
+					<td>{{ event.ttlemma }}</td>
+					<td>{{ event.ttcheckword }}</td>
+					<td>{{ event.sppos }}</td>
+					<td>{{ event.sptag }}</td>
+					<td>{{ event.splemma }}</td>
+					<td>{{ event.spdep }}</td>
+					<td>{{ event.sphead }}</td>
+					<td>{{ event.spenttype }}</td>
+					<td>{{ event.s }}</td>
+					<td>{{ event.sr }}</td>
+					<td>{{ event.fo }}</td>
+					<td>{{ event.le }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	{% endif %}
+</div>
+{% endblock %}
+{% block sitejs %}
+{% endblock %}

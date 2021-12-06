@@ -55,3 +55,11 @@ def annocheck(request):
 		return redirect('dissdb_login')
 	from .views_annocheck import views_annocheck
 	return views_annocheck(request)
+
+
+def transkript(request, aTranskript):
+	# Ist der User Angemeldet?
+	if not request.user.is_authenticated():
+		return redirect('dissdb_login')
+	from .views_transkript import views_transkript
+	return views_transkript(request, aTranskript)
