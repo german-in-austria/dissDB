@@ -15,7 +15,8 @@
 			<option value="{{ value.pk }}"{% if aTranskript == value.pk %} selected{% endif %}>{{ value.title }}</option>
 		{% endfor %}
 	</select>
-	<br>
+	{% if aTranskript == 0 %}<a href="/annotationsdb/transkript/0?get=xlsfiles" style="margin-left: 16px;">XLS Dateien für alle Transkripte erstellen!</a> Achtung das ausführen kann ca. {{ transkripte|length }} Minuten dauern! Mehrfaches ausführen vermeiden!{% endif %}
+	<span style="margin-left: 16px;">{{ aTranskriptName }}</span><br>
 	{% if aTranskript > 0 %}
 		<br>
 		<a href="{% url 'AnnotationsDB:transkript' aTranskript=aTranskript %}?get=xls">XLS</a>
@@ -34,9 +35,10 @@
 					<th>Token Type</th>
 					<th>ttId</th>
 					<th>t</th>
-					<th>to</th>
+					<!-- <th>to</th> -->
 					<th>o</th>
-					<th>otot</th>
+					<th>ot</th>
+					<th>otrein</th>
 					<th>ttpos</th>
 					<th>ttlemma</th>
 					<th>ttcheckword</th>
@@ -50,6 +52,10 @@
 					<th>sr</th>
 					<th>foId</th>
 					<th>le</th>
+					<th>Snippetkandidat</th>
+					<th>wordCount</th>
+					<th>incomprehensible</th>
+					<th>singulaer</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -66,9 +72,10 @@
 					<td>{{ event.ttT }}</td>
 					<td>{{ event.tt }}</td>
 					<td>{{ event.t }}</td>
-					<td>{{ event.to }}</td>
+					<!-- <td>{{ event.to }}</td> -->
 					<td>{{ event.o }}</td>
-					<td>{{ event.otot }}</td>
+					<td>{{ event.ot }}</td>
+					<td>{{ event.otrein }}</td>
 					<td>{{ event.ttpos }}</td>
 					<td>{{ event.ttlemma }}</td>
 					<td>{{ event.ttcheckword }}</td>
@@ -82,6 +89,10 @@
 					<td>{{ event.sr }}</td>
 					<td>{{ event.fo }}</td>
 					<td>{{ event.le }}</td>
+					<td>{{ event.sk }}</td>
+					<td>{{ event.wordCount }}</td>
+					<td>{{ event.incomprehensible }}</td>
+					<td>{{ event.singulaer }}</td>
 				</tr>
 			{% endfor %}
 			</tbody>
