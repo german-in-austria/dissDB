@@ -130,18 +130,18 @@ def views_transkript_data(aTranskript, aTranskriptName, getXls, justWb = False):
 				infTitles.append(aToken['iT'])
 			aEvent['t'] += ((' ' if aEvent['t'] and aToken['tt'] != 2 else '') + str(aToken['t'])) if aToken['t'] else ''
 			aEvent['to'] += ((' ' if aEvent['to'] and aToken['tt'] != 2 else '') + str(aToken['to'])) if aToken['to'] else ''
-			aEvent['o'] += ((' ' if aEvent['o'] and aToken['tt'] != 2 else '') + str(aToken['o'])) if aToken['o'] else '*'
+			aEvent['o'] += (' ' if aEvent['o'] and aToken['tt'] != 2 else '') + (str(aToken['o']) if aToken['o'] else '*')
 			aEvent['ot'] += ((' ' if aEvent['ot'] and aToken['tt'] != 2 else '') + str(aToken['ot'])) if aToken['ot'] else ''
-			aEvent['otrein'] += (((' ' if aEvent['ot'] and aToken['tt'] != 2 else '') + str(aToken['ot'])) if aToken['ot'] else '') if not aEvent['fo'] and aToken['tt'] in [1, 2, 4, 8] else ''
-			aEvent['ttpos'] += ((' ' if aEvent['ttpos'] else '') + str(aToken['ttpos'])) if aToken['ttpos'] else '*'
-			aEvent['ttlemma'] += ((' ' if aEvent['ttlemma'] and aToken['tt'] != 2 else '') + str(aToken['ttlemma'])) if aToken['ttlemma'] else '*'
-			aEvent['ttcheckword'] += ((' ' if aEvent['ttcheckword'] and aToken['tt'] != 2 else '') + str(aToken['ttcheckword'])) if aToken['ttcheckword'] else '*'
-			aEvent['sppos'] += ((' ' if aEvent['sppos'] else '') + str(aToken['sppos'])) if aToken['sppos'] else '*'
-			aEvent['sptag'] += ((' ' if aEvent['sptag'] else '') + str(aToken['sptag'])) if aToken['sptag'] else '*'
-			aEvent['splemma'] += ((' ' if aEvent['splemma'] and aToken['tt'] != 2 else '') + str(aToken['splemma'])) if aToken['splemma'] else '*'
-			aEvent['spdep'] += ((' ' if aEvent['spdep'] else '') + str(aToken['spdep'])) if aToken['spdep'] else '*'
-			aEvent['sphead'] += ((' ' if aEvent['sphead'] else '') + str(aToken['sphead'])) if aToken['sphead'] else '*'
-			aEvent['spenttype'] += ((' ' if aEvent['spenttype'] else '') + str(aToken['spenttype'])) if aToken['spenttype'] else '*'
+			aEvent['otrein'] += (((' ' if aEvent['otrein'] and aToken['tt'] != 2 else '') + str(aToken['ot'])) if aToken['ot'] else '') if not aToken['fo'] and aToken['tt'] in [1, 2, 4, 8] else ''
+			aEvent['ttpos'] += (' ' if aEvent['ttpos'] else '') + (str(aToken['ttpos']) if aToken['ttpos'] else '*')
+			aEvent['ttlemma'] += (' ' if aEvent['ttlemma'] and aToken['tt'] != 2 else '') + (str(aToken['ttlemma']) if aToken['ttlemma'] else '*')
+			aEvent['ttcheckword'] += (' ' if aEvent['ttcheckword'] and aToken['tt'] != 2 else '') + (str(aToken['ttcheckword']) if aToken['ttcheckword'] else '*')
+			aEvent['sppos'] += (' ' if aEvent['sppos'] else '') + (str(aToken['sppos']) if aToken['sppos'] else '*')
+			aEvent['sptag'] += (' ' if aEvent['sptag'] else '') + (str(aToken['sptag']) if aToken['sptag'] else '*')
+			aEvent['splemma'] += (' ' if aEvent['splemma'] and aToken['tt'] != 2 else '') + (str(aToken['splemma']) if aToken['splemma'] else '*')
+			aEvent['spdep'] += (' ' if aEvent['spdep'] else '') + (str(aToken['spdep']) if aToken['spdep'] else '*')
+			aEvent['sphead'] += (' ' if aEvent['sphead'] else '') + (str(aToken['sphead']) if aToken['sphead'] else '*')
+			aEvent['spenttype'] += (' ' if aEvent['spenttype'] else '') + (str(aToken['spenttype']) if aToken['spenttype'] else '*')
 			aEvent['s'] += ((', ' if aEvent['s'] else '') + str(aToken['s'])) if aToken['s'] else ''
 			aEvent['sr'] += ((', ' if aEvent['sr'] else '') + str(aToken['sr'])) if aToken['sr'] else ''
 			aEvent['fo'] += (', ' if aEvent['fo'] else '') + (str(aToken['fo']) if aToken['fo'] else '0')
